@@ -1,0 +1,26 @@
+{
+  "tenants": [
+    { "id": 1, "name": "Clínica Bienestar", "slug": "clinica-bienestar", "category": "Salud y bienestar", "initials": "CB", "email": "hola@bienestar.example", "phone": "6145550100", "mode": "free", "reminder": 24 },
+    { "id": 2, "name": "Espacio Mente", "slug": "espacio-mente", "category": "Psicología y terapia", "initials": "EM", "email": "hola@mente.example", "phone": "6145550200", "mode": "compact", "reminder": 12 }
+  ],
+  "branches": [
+    { "id": 1, "tenantId": 1, "name": "Sucursal Centro", "address": "Av. Universidad 1200, Centro, Chihuahua", "phone": "6145550101", "notes": "Primer piso. Acceso por la entrada principal.", "color": "orange" },
+    { "id": 2, "tenantId": 1, "name": "Sucursal Norte", "address": "Av. de las Industrias 450, Chihuahua", "phone": "6145550102", "notes": "Estacionamiento gratuito frente a la clínica.", "color": "blue" },
+    { "id": 3, "tenantId": 2, "name": "Consultorio Reforma", "address": "Paseo Reforma 80, Chihuahua", "phone": "6145550201", "notes": "Toca el timbre del consultorio 3.", "color": "purple" }
+  ],
+  "services": [
+    { "id": 1, "tenantId": 1, "name": "Consulta general", "description": "Una valoración integral para cuidar de tu salud.", "duration": 45, "price": 600, "icon": "stethoscope", "color": "blue" },
+    { "id": 2, "tenantId": 1, "name": "Sesión de psicología", "description": "Un espacio seguro para tu bienestar emocional.", "duration": 60, "price": 850, "icon": "heart", "color": "purple" },
+    { "id": 3, "tenantId": 1, "name": "Consulta nutricional", "description": "Acompañamiento personalizado para tus hábitos.", "duration": 45, "price": 700, "icon": "leaf", "color": "green" },
+    { "id": 4, "tenantId": 1, "name": "Terapia física", "description": "Recupera tu movilidad con atención especializada.", "duration": 60, "price": 750, "icon": "activity", "color": "orange" },
+    { "id": 5, "tenantId": 2, "name": "Terapia individual", "description": "Atención psicológica en un entorno de confianza.", "duration": 60, "price": 900, "icon": "heart", "color": "purple" },
+    { "id": 6, "tenantId": 2, "name": "Terapia de pareja", "description": "Construyan nuevas formas de comunicarse.", "duration": 90, "price": 1400, "icon": "users", "color": "blue" }
+  ],
+  "professionals": [
+    { "id": 1, "tenantId": 1, "name": "Dra. Ana Martínez", "specialty": "Medicina general", "initials": "AM", "color": "peach", "serviceIds": [1], "branchIds": [1,2], "email": "ana@bienestar.example" },
+    { "id": 2, "tenantId": 1, "name": "Dr. Carlos Ruiz", "specialty": "Psicología clínica", "initials": "CR", "color": "lavender", "serviceIds": [2], "branchIds": [1,2], "email": "carlos@bienestar.example" },
+    { "id": 3, "tenantId": 1, "name": "Lic. Sofía Torres", "specialty": "Nutrición", "initials": "ST", "color": "mint", "serviceIds": [3], "branchIds": [1,2], "email": "sofia@bienestar.example" },
+    { "id": 4, "tenantId": 1, "name": "Lic. Diego López", "specialty": "Fisioterapia", "initials": "DL", "color": "sky", "serviceIds": [4], "branchIds": [1,2], "email": "diego@bienestar.example" },
+    { "id": 5, "tenantId": 2, "name": "Psic. Elena Morales", "specialty": "Psicoterapia", "initials": "EM", "color": "lavender", "serviceIds": [5,6], "branchIds": [3], "email": "elena@mente.example" }
+  ]
+}
