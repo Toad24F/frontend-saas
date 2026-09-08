@@ -1,15 +1,125 @@
 // Regenera el diccionario a partir del DDL, evitando divergencias de tipos.
 import { readFile, writeFile } from 'node:fs/promises';
-const sql=await readFile(new URL('../db/schema.sql',import.meta.url),'utf8');
-const purposes={negocios:'Raíz de aislamiento, marca y configuración de agenda.',licencias:'Vigencia y estado de acceso del negocio.',usuarios:'Cuentas futuras de acceso con rol y pertenencia.',sucursales:'Ubicaciones físicas y datos de llegada.',servicios:'Catálogo y duración para calcular disponibilidad.',personal:'Profesionales; usuario de acceso opcional.',personal_servicios:'Relación muchos a muchos entre profesionales y servicios del mismo negocio.',personal_sucursales:'Relación muchos a muchos entre profesionales y sucursales del mismo negocio.',horarios_personal:'Bloques de atención recurrentes. Los descansos se representan como huecos entre bloques.',bloqueos_horario:'Excepciones por fecha; pueden afectar un profesional, una sucursal o todo el negocio.',clientes:'Directorio de pacientes/clientes separado por negocio.',citas:'Reserva, estado y precio histórico acordado.',bloqueos_temporales:'Apartamiento con token opaco y expiración en UTC.',agenda_mutex:'Fila de exclusión por negocio, profesional y día para transacciones futuras.',notificaciones_whatsapp:'Cola y bitácora de confirmación/recordatorio con deduplicación.'};
-const meanings={id:'Identificador primario autoincremental.',negocio_id:'Identificador del tenant; no confiar en un valor enviado por el cliente.',nombre:'Nombre visible.',slug:'Segmento único de la URL pública.',email_contacto:'Correo de contacto del negocio.',telefono_contacto:'Teléfono de contacto.',zona_horaria:'Zona horaria IANA para interpretar la agenda local.',modo_agenda:'Estrategia de oferta de espacios.',lock_segundos:'Vigencia configurada del apartamiento.',confirmacion_whatsapp:'Habilita la confirmación automática futura.',recordatorio_whatsapp:'Habilita el recordatorio futuro.',recordatorio_horas:'Anticipación del recordatorio en horas.',estado:'Estado del registro, limitado por el ENUM.',creado_en:'Marca técnica de creación, en UTC.',inicia_en:'Inicio de vigencia de la licencia.',vence_en:'Fin de vigencia de la licencia.',email:'Correo de contacto o de acceso según la tabla.',password_hash:'Hash de contraseña generado en servidor; jamás contraseña plana.',rol:'Rol de autorización de la futura API.',activo:'Baja lógica: conservar relaciones históricas.',direccion:'Dirección física.',telefono:'Teléfono; en clientes se exigen exactamente 10 dígitos.',notas_llegada:'Indicaciones para encontrar la sucursal.',descripcion:'Descripción pública del servicio.',costo:'Precio actual del catálogo en MXN; no representa un pago.',duracion_minutos:'Duración requerida de la atención.',usuario_id:'Vinculación opcional con una cuenta del mismo negocio.',especialidad:'Área de atención del profesional.',personal_id:'Profesional perteneciente al negocio del registro.',servicio_id:'Servicio perteneciente al negocio del registro.',sucursal_id:'Ubicación perteneciente al negocio del registro.',dia_semana:'0 domingo a 6 sábado.',hora_inicio:'Inicio inclusivo del intervalo en hora local.',hora_fin:'Fin exclusivo del intervalo en hora local.',tipo:'Tipo de bloqueo o notificación según el ENUM.',fecha_inicio:'Primer día del rango, incluido.',fecha_fin:'Último día del rango, incluido.',motivo:'Justificación del bloqueo.',nombre_completo:'Nombre y apellidos capturados en la reserva.',cliente_id:'Cliente perteneciente al negocio de la cita.',fecha:'Día local de atención o de exclusión.',precio_acordado:'Precio fijado al reservar; conserva historia aunque cambie el catálogo.',motivo_consulta:'Texto opcional; requiere protección y política de retención en producción.',folio:'Referencia de control; no autoriza consultar información privada.',origen:'Reserva del portal o captura manual.',actualizado_en:'Última modificación técnica, en UTC.',token_hash:'SHA-256 del token secreto aleatorio; no almacenar el token en claro.',expira_en:'Vencimiento UTC con milisegundos.',cita_id:'Cita del mismo negocio.',estado_envio:'Estado de procesamiento del proveedor.',programado_en:'Instante UTC programado para el envío.',enviado_en:'Instante UTC del envío confirmado.',intentos:'Cantidad de intentos efectuados.',proveedor_id:'Referencia de entrega del proveedor, sin credenciales.',ultimo_error:'Error depurado sin tokens ni información sensible.'};
-let output='# Diccionario de datos\n\nModelo de referencia para la futura API. El frontend no está conectado a esta base. Generado desde `db/schema.sql` con `node scripts/dictionary.mjs`.\n\nMySQL 8.0.16+ / MariaDB 10.6+, InnoDB, utf8mb4. No se ejecutó en un servidor de base de datos en esta entrega. Los campos `negocio_id` corresponden al `tenantId` de las entidades ficticias del frontend.\n\n## Convenciones\n\n- Importes en MXN, con dos decimales; no existe tabla de pagos.\n- Intervalos de agenda `[inicio, fin)`: dos citas contiguas pueden compartir el instante límite.\n- Fechas/horas de atención: hora local del negocio; marcas técnicas y expiración: UTC.\n- Las FKs compuestas incluyen siempre el negocio. Las FKs no sustituyen autorización ni evitan por sí mismas solapamientos.\n- `personal_id` / `sucursal_id` nulos en bloqueos: todos los profesionales / sucursales del negocio. Dos horas nulas: todo el día.\n- `usuarios.negocio_id` solo es nulo para superadministración.\n\n';
-for(const match of sql.matchAll(/CREATE TABLE (\w+) \(\n([\s\S]*?)\n\) ENGINE=InnoDB;/g)){
- const [,table,body]=match;output+=`## ${table}\n\n${purposes[table]}\n\n| Campo | Tipo | Nulo | Valor por defecto | Descripción |\n| --- | --- | --- | --- | --- |\n`;
- for(const line of body.split('\n')){const m=line.match(/^  ([a-z_]+) ((?:ENUM\([^)]*\)|[A-Z]+(?:\([^)]*\))?)(?: UNSIGNED)?)(.*)$/);if(!m)continue;const [,name,type,rest]=m;const nullable=!/NOT NULL|PRIMARY KEY/.test(rest);const def=rest.match(/DEFAULT ('[^']*'|[A-Z_]+(?:\(\))?|\d+)/)?.[1]||'—';output+=`| \`${name}\` | \`${type}\` | ${nullable?'Sí':'No'} | ${def} | ${meanings[name]||'Consultar restricciones del script SQL.'} |\n`;}
- const constraints=body.split('\n').filter(l=>/PRIMARY KEY|UNIQUE KEY|CONSTRAINT|REFERENCES|INDEX/.test(l)).map(l=>l.trim().replace(/,$/,''));
- output+='\nRelaciones e índices (definición completa en el script SQL):\n\n```sql\n'+constraints.join('\n')+'\n```\n\n';
+const sql = await readFile(
+  new URL('../db/schema.sql', import.meta.url),
+  'utf8',
+);
+const purposes = {
+  negocios: 'Raíz de aislamiento, marca y configuración de agenda.',
+  licencias: 'Vigencia y estado de acceso del negocio.',
+  usuarios: 'Cuentas futuras de acceso con rol y pertenencia.',
+  sucursales: 'Ubicaciones físicas y datos de llegada.',
+  servicios: 'Catálogo y duración para calcular disponibilidad.',
+  personal: 'Profesionales; usuario de acceso opcional.',
+  personal_servicios:
+    'Relación muchos a muchos entre profesionales y servicios del mismo negocio.',
+  personal_sucursales:
+    'Relación muchos a muchos entre profesionales y sucursales del mismo negocio.',
+  horarios_personal:
+    'Bloques de atención recurrentes. Los descansos se representan como huecos entre bloques.',
+  bloqueos_horario:
+    'Excepciones por fecha; pueden afectar un profesional, una sucursal o todo el negocio.',
+  clientes: 'Directorio de pacientes/clientes separado por negocio.',
+  citas: 'Reserva, estado y precio histórico acordado.',
+  bloqueos_temporales: 'Apartamiento con token opaco y expiración en UTC.',
+  agenda_mutex:
+    'Fila de exclusión por negocio, profesional y día para transacciones futuras.',
+  notificaciones_whatsapp:
+    'Cola y bitácora de confirmación/recordatorio con deduplicación.',
+};
+const meanings = {
+  id: 'Identificador primario autoincremental.',
+  negocio_id:
+    'Identificador del tenant; no confiar en un valor enviado por el cliente.',
+  nombre: 'Nombre visible.',
+  slug: 'Segmento único de la URL pública.',
+  email_contacto: 'Correo de contacto del negocio.',
+  telefono_contacto: 'Teléfono de contacto.',
+  zona_horaria: 'Zona horaria IANA para interpretar la agenda local.',
+  modo_agenda: 'Estrategia de oferta de espacios.',
+  lock_segundos: 'Vigencia configurada del apartamiento.',
+  confirmacion_whatsapp: 'Habilita la confirmación automática futura.',
+  recordatorio_whatsapp: 'Habilita el recordatorio futuro.',
+  recordatorio_horas: 'Anticipación del recordatorio en horas.',
+  estado: 'Estado del registro, limitado por el ENUM.',
+  creado_en: 'Marca técnica de creación, en UTC.',
+  inicia_en: 'Inicio de vigencia de la licencia.',
+  vence_en: 'Fin de vigencia de la licencia.',
+  email: 'Correo de contacto o de acceso según la tabla.',
+  password_hash:
+    'Hash de contraseña generado en servidor; jamás contraseña plana.',
+  rol: 'Rol de autorización de la futura API.',
+  activo: 'Baja lógica: conservar relaciones históricas.',
+  direccion: 'Dirección física.',
+  telefono: 'Teléfono; en clientes se exigen exactamente 10 dígitos.',
+  notas_llegada: 'Indicaciones para encontrar la sucursal.',
+  descripcion: 'Descripción pública del servicio.',
+  costo: 'Precio actual del catálogo en MXN; no representa un pago.',
+  duracion_minutos: 'Duración requerida de la atención.',
+  usuario_id: 'Vinculación opcional con una cuenta del mismo negocio.',
+  especialidad: 'Área de atención del profesional.',
+  personal_id: 'Profesional perteneciente al negocio del registro.',
+  servicio_id: 'Servicio perteneciente al negocio del registro.',
+  sucursal_id: 'Ubicación perteneciente al negocio del registro.',
+  dia_semana: '0 domingo a 6 sábado.',
+  hora_inicio: 'Inicio inclusivo del intervalo en hora local.',
+  hora_fin: 'Fin exclusivo del intervalo en hora local.',
+  tipo: 'Tipo de bloqueo o notificación según el ENUM.',
+  fecha_inicio: 'Primer día del rango, incluido.',
+  fecha_fin: 'Último día del rango, incluido.',
+  motivo: 'Justificación del bloqueo.',
+  nombre_completo: 'Nombre y apellidos capturados en la reserva.',
+  cliente_id: 'Cliente perteneciente al negocio de la cita.',
+  fecha: 'Día local de atención o de exclusión.',
+  precio_acordado:
+    'Precio fijado al reservar; conserva historia aunque cambie el catálogo.',
+  motivo_consulta:
+    'Texto opcional; requiere protección y política de retención en producción.',
+  folio: 'Referencia de control; no autoriza consultar información privada.',
+  origen: 'Reserva del portal o captura manual.',
+  actualizado_en: 'Última modificación técnica, en UTC.',
+  token_hash:
+    'SHA-256 del token secreto aleatorio; no almacenar el token en claro.',
+  expira_en: 'Vencimiento UTC con milisegundos.',
+  cita_id: 'Cita del mismo negocio.',
+  estado_envio: 'Estado de procesamiento del proveedor.',
+  programado_en: 'Instante UTC programado para el envío.',
+  enviado_en: 'Instante UTC del envío confirmado.',
+  intentos: 'Cantidad de intentos efectuados.',
+  proveedor_id: 'Referencia de entrega del proveedor, sin credenciales.',
+  ultimo_error: 'Error depurado sin tokens ni información sensible.',
+};
+let output =
+  '# Diccionario de datos\n\nModelo de referencia para la futura API. El frontend no está conectado a esta base. Generado desde `db/schema.sql` con `node scripts/dictionary.mjs`.\n\nMySQL 8.0.16+ / MariaDB 10.6+, InnoDB, utf8mb4. No se ejecutó en un servidor de base de datos en esta entrega. Los campos `negocio_id` corresponden al `tenantId` de las entidades ficticias del frontend.\n\n## Convenciones\n\n- Importes en MXN, con dos decimales; no existe tabla de pagos.\n- Intervalos de agenda `[inicio, fin)`: dos citas contiguas pueden compartir el instante límite.\n- Fechas/horas de atención: hora local del negocio; marcas técnicas y expiración: UTC.\n- Las FKs compuestas incluyen siempre el negocio. Las FKs no sustituyen autorización ni evitan por sí mismas solapamientos.\n- `personal_id` / `sucursal_id` nulos en bloqueos: todos los profesionales / sucursales del negocio. Dos horas nulas: todo el día.\n- `usuarios.negocio_id` solo es nulo para superadministración.\n\n';
+for (const match of sql.matchAll(
+  /CREATE TABLE (\w+) \(\n([\s\S]*?)\n\) ENGINE=InnoDB;/g,
+)) {
+  const [, table, body] = match;
+  output += `## ${table}\n\n${purposes[table]}\n\n| Campo | Tipo | Nulo | Valor por defecto | Descripción |\n| --- | --- | --- | --- | --- |\n`;
+  for (const line of body.split('\n')) {
+    const m = line.match(
+      /^  ([a-z_]+) ((?:ENUM\([^)]*\)|[A-Z]+(?:\([^)]*\))?)(?: UNSIGNED)?)(.*)$/,
+    );
+    if (!m) continue;
+    const [, name, type, rest] = m;
+    const nullable = !/NOT NULL|PRIMARY KEY/.test(rest);
+    const def =
+      rest.match(/DEFAULT ('[^']*'|[A-Z_]+(?:\(\))?|\d+)/)?.[1] || '—';
+    output += `| \`${name}\` | \`${type}\` | ${nullable ? 'Sí' : 'No'} | ${def} | ${meanings[name] || 'Consultar restricciones del script SQL.'} |\n`;
+  }
+  const constraints = body
+    .split('\n')
+    .filter((l) => /PRIMARY KEY|UNIQUE KEY|CONSTRAINT|REFERENCES|INDEX/.test(l))
+    .map((l) => l.trim().replace(/,$/, ''));
+  output +=
+    '\nRelaciones e índices (definición completa en el script SQL):\n\n```sql\n' +
+    constraints.join('\n') +
+    '\n```\n\n';
 }
-output+='## Normalización y diferencias frente al esquema de referencia\n\nLos catálogos, usuarios, clientes y reservas están separados. Las relaciones N:M usan tablas puente con `negocio_id` y claves compuestas. Se conserva `precio_acordado` como hecho histórico de la reserva, independiente del precio actual. Se agregan configuración de agenda y WhatsApp, licencias, vínculo opcional usuario/profesional y la fila de exclusión `agenda_mutex`. El script original del usuario permanece intacto.\n';
-await writeFile(new URL('../docs/diccionario-datos.md',import.meta.url),output);
+output +=
+  '## Normalización y diferencias frente al esquema de referencia\n\nLos catálogos, usuarios, clientes y reservas están separados. Las relaciones N:M usan tablas puente con `negocio_id` y claves compuestas. Se conserva `precio_acordado` como hecho histórico de la reserva, independiente del precio actual. Se agregan configuración de agenda y WhatsApp, licencias, vínculo opcional usuario/profesional y la fila de exclusión `agenda_mutex`. El script original del usuario permanece intacto.\n';
+await writeFile(
+  new URL('../docs/diccionario-datos.md', import.meta.url),
+  output,
+);
 console.log('Diccionario generado: docs/diccionario-datos.md');

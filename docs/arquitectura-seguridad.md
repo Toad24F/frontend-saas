@@ -8,13 +8,13 @@ Para producción, la API debe derivar `negocio_id` exclusivamente de una sesión
 
 ## Matriz propuesta
 
-| Rol | Lectura y escritura autorizada |
-| --- | --- |
-| Público | Catálogo activo, ubicaciones y disponibilidad del slug resuelto; apartar/crear una cita usando token opaco y validaciones del servidor. Nunca listados de clientes ni de citas. |
-| Recepcionista | Citas y clientes de su negocio; consulta de catálogos. |
-| Profesional | Su disponibilidad y sus citas, con pertenencia al negocio y al profesional. |
-| Administrador de negocio | Operación y configuración de su propio negocio. |
-| Superadministrador | Gestión de negocios y licencias en rutas específicas; acceso a información de pacientes solo si se define y autoriza expresamente. |
+| Rol                      | Lectura y escritura autorizada                                                                                                                                                  |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Público                  | Catálogo activo, ubicaciones y disponibilidad del slug resuelto; apartar/crear una cita usando token opaco y validaciones del servidor. Nunca listados de clientes ni de citas. |
+| Recepcionista            | Citas y clientes de su negocio; consulta de catálogos.                                                                                                                          |
+| Profesional              | Su disponibilidad y sus citas, con pertenencia al negocio y al profesional.                                                                                                     |
+| Administrador de negocio | Operación y configuración de su propio negocio.                                                                                                                                 |
+| Superadministrador       | Gestión de negocios y licencias en rutas específicas; acceso a información de pacientes solo si se define y autoriza expresamente.                                              |
 
 ## Anti-IDOR
 
@@ -50,16 +50,16 @@ Expirar locks lógicamente en cada consulta; una tarea de limpieza puede borrar 
 
 ## Contrato HTTP propuesto (no implementado)
 
-| Método/ruta | Ámbito y respuesta |
-| --- | --- |
-| `GET /api/public/reservas/:slug/catalogo` | Resolver negocio activo, devolver servicios/sucursales públicos. |
-| `GET /api/public/reservas/:slug/disponibilidad` | Validar IDs del slug; devolver solo slots disponibles y zona horaria. |
-| `POST /api/public/reservas/:slug/locks` | Apartamiento transaccional, token opaco, expiración; limitar solicitudes. |
-| `POST /api/public/reservas/:slug/citas` | Consumir lock válido, validar nombre/teléfono, devolver folio y resumen mínimo. |
-| `GET /api/citas` | Sesión, rol y tenant; filtros de rango y paginación. |
-| `PATCH /api/citas/:id` | Sesión, rol, pertenencia y transición válida; transacción cuando libere/ocupe horario. |
-| `GET /api/reportes/citas.pdf` | Sesión, tenant y rango limitado; ingresos con `precio_acordado`. |
-| `POST /api/plataforma/negocios` | Solo superadministración con auditoría. |
+| Método/ruta                                     | Ámbito y respuesta                                                                     |
+| ----------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `GET /api/public/reservas/:slug/catalogo`       | Resolver negocio activo, devolver servicios/sucursales públicos.                       |
+| `GET /api/public/reservas/:slug/disponibilidad` | Validar IDs del slug; devolver solo slots disponibles y zona horaria.                  |
+| `POST /api/public/reservas/:slug/locks`         | Apartamiento transaccional, token opaco, expiración; limitar solicitudes.              |
+| `POST /api/public/reservas/:slug/citas`         | Consumir lock válido, validar nombre/teléfono, devolver folio y resumen mínimo.        |
+| `GET /api/citas`                                | Sesión, rol y tenant; filtros de rango y paginación.                                   |
+| `PATCH /api/citas/:id`                          | Sesión, rol, pertenencia y transición válida; transacción cuando libere/ocupe horario. |
+| `GET /api/reportes/citas.pdf`                   | Sesión, tenant y rango limitado; ingresos con `precio_acordado`.                       |
+| `POST /api/plataforma/negocios`                 | Solo superadministración con auditoría.                                                |
 
 ## Medidas a implementar con la API
 

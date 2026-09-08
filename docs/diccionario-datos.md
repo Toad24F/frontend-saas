@@ -17,21 +17,21 @@ MySQL 8.0.16+ / MariaDB 10.6+, InnoDB, utf8mb4. No se ejecutó en un servidor de
 
 Raíz de aislamiento, marca y configuración de agenda.
 
-| Campo | Tipo | Nulo | Valor por defecto | Descripción |
-| --- | --- | --- | --- | --- |
-| `id` | `INT UNSIGNED` | No | — | Identificador primario autoincremental. |
-| `nombre` | `VARCHAR(150)` | No | — | Nombre visible. |
-| `slug` | `VARCHAR(100)` | No | — | Segmento único de la URL pública. |
-| `email_contacto` | `VARCHAR(150)` | No | — | Correo de contacto del negocio. |
-| `telefono_contacto` | `VARCHAR(20)` | Sí | — | Teléfono de contacto. |
-| `zona_horaria` | `VARCHAR(64)` | No | 'America/Chihuahua' | Zona horaria IANA para interpretar la agenda local. |
-| `modo_agenda` | `ENUM('ventana_libre','llenado_secuencial')` | No | 'ventana_libre' | Estrategia de oferta de espacios. |
-| `lock_segundos` | `SMALLINT UNSIGNED` | No | 300 | Vigencia configurada del apartamiento. |
-| `confirmacion_whatsapp` | `BOOLEAN` | No | TRUE | Habilita la confirmación automática futura. |
-| `recordatorio_whatsapp` | `BOOLEAN` | No | TRUE | Habilita el recordatorio futuro. |
-| `recordatorio_horas` | `SMALLINT UNSIGNED` | No | 24 | Anticipación del recordatorio en horas. |
-| `estado` | `ENUM('activo','suspendido')` | No | 'activo' | Estado del registro, limitado por el ENUM. |
-| `creado_en` | `TIMESTAMP` | No | CURRENT_TIMESTAMP | Marca técnica de creación, en UTC. |
+| Campo                   | Tipo                                         | Nulo | Valor por defecto   | Descripción                                         |
+| ----------------------- | -------------------------------------------- | ---- | ------------------- | --------------------------------------------------- |
+| `id`                    | `INT UNSIGNED`                               | No   | —                   | Identificador primario autoincremental.             |
+| `nombre`                | `VARCHAR(150)`                               | No   | —                   | Nombre visible.                                     |
+| `slug`                  | `VARCHAR(100)`                               | No   | —                   | Segmento único de la URL pública.                   |
+| `email_contacto`        | `VARCHAR(150)`                               | No   | —                   | Correo de contacto del negocio.                     |
+| `telefono_contacto`     | `VARCHAR(20)`                                | Sí   | —                   | Teléfono de contacto.                               |
+| `zona_horaria`          | `VARCHAR(64)`                                | No   | 'America/Chihuahua' | Zona horaria IANA para interpretar la agenda local. |
+| `modo_agenda`           | `ENUM('ventana_libre','llenado_secuencial')` | No   | 'ventana_libre'     | Estrategia de oferta de espacios.                   |
+| `lock_segundos`         | `SMALLINT UNSIGNED`                          | No   | 300                 | Vigencia configurada del apartamiento.              |
+| `confirmacion_whatsapp` | `BOOLEAN`                                    | No   | TRUE                | Habilita la confirmación automática futura.         |
+| `recordatorio_whatsapp` | `BOOLEAN`                                    | No   | TRUE                | Habilita el recordatorio futuro.                    |
+| `recordatorio_horas`    | `SMALLINT UNSIGNED`                          | No   | 24                  | Anticipación del recordatorio en horas.             |
+| `estado`                | `ENUM('activo','suspendido')`                | No   | 'activo'            | Estado del registro, limitado por el ENUM.          |
+| `creado_en`             | `TIMESTAMP`                                  | No   | CURRENT_TIMESTAMP   | Marca técnica de creación, en UTC.                  |
 
 Relaciones e índices (definición completa en el script SQL):
 
@@ -45,13 +45,13 @@ CONSTRAINT ck_negocio_recordatorio CHECK (recordatorio_horas BETWEEN 1 AND 168)
 
 Vigencia y estado de acceso del negocio.
 
-| Campo | Tipo | Nulo | Valor por defecto | Descripción |
-| --- | --- | --- | --- | --- |
-| `id` | `INT UNSIGNED` | No | — | Identificador primario autoincremental. |
-| `negocio_id` | `INT UNSIGNED` | No | — | Identificador del tenant; no confiar en un valor enviado por el cliente. |
-| `inicia_en` | `DATE` | No | — | Inicio de vigencia de la licencia. |
-| `vence_en` | `DATE` | No | — | Fin de vigencia de la licencia. |
-| `estado` | `ENUM('activa','vencida','revocada')` | No | 'activa' | Estado del registro, limitado por el ENUM. |
+| Campo        | Tipo                                  | Nulo | Valor por defecto | Descripción                                                              |
+| ------------ | ------------------------------------- | ---- | ----------------- | ------------------------------------------------------------------------ |
+| `id`         | `INT UNSIGNED`                        | No   | —                 | Identificador primario autoincremental.                                  |
+| `negocio_id` | `INT UNSIGNED`                        | No   | —                 | Identificador del tenant; no confiar en un valor enviado por el cliente. |
+| `inicia_en`  | `DATE`                                | No   | —                 | Inicio de vigencia de la licencia.                                       |
+| `vence_en`   | `DATE`                                | No   | —                 | Fin de vigencia de la licencia.                                          |
+| `estado`     | `ENUM('activa','vencida','revocada')` | No   | 'activa'          | Estado del registro, limitado por el ENUM.                               |
 
 Relaciones e índices (definición completa en el script SQL):
 
@@ -66,16 +66,16 @@ INDEX ix_licencia_vigencia (negocio_id, estado, vence_en)
 
 Cuentas futuras de acceso con rol y pertenencia.
 
-| Campo | Tipo | Nulo | Valor por defecto | Descripción |
-| --- | --- | --- | --- | --- |
-| `id` | `INT UNSIGNED` | No | — | Identificador primario autoincremental. |
-| `negocio_id` | `INT UNSIGNED` | Sí | — | Identificador del tenant; no confiar en un valor enviado por el cliente. |
-| `nombre` | `VARCHAR(150)` | No | — | Nombre visible. |
-| `email` | `VARCHAR(150)` | No | — | Correo de contacto o de acceso según la tabla. |
-| `password_hash` | `VARCHAR(255)` | No | — | Hash de contraseña generado en servidor; jamás contraseña plana. |
-| `rol` | `ENUM('superadmin','admin_negocio','recepcionista','profesional')` | No | — | Rol de autorización de la futura API. |
-| `activo` | `BOOLEAN` | No | TRUE | Baja lógica: conservar relaciones históricas. |
-| `creado_en` | `TIMESTAMP` | No | CURRENT_TIMESTAMP | Marca técnica de creación, en UTC. |
+| Campo           | Tipo                                                               | Nulo | Valor por defecto | Descripción                                                              |
+| --------------- | ------------------------------------------------------------------ | ---- | ----------------- | ------------------------------------------------------------------------ |
+| `id`            | `INT UNSIGNED`                                                     | No   | —                 | Identificador primario autoincremental.                                  |
+| `negocio_id`    | `INT UNSIGNED`                                                     | Sí   | —                 | Identificador del tenant; no confiar en un valor enviado por el cliente. |
+| `nombre`        | `VARCHAR(150)`                                                     | No   | —                 | Nombre visible.                                                          |
+| `email`         | `VARCHAR(150)`                                                     | No   | —                 | Correo de contacto o de acceso según la tabla.                           |
+| `password_hash` | `VARCHAR(255)`                                                     | No   | —                 | Hash de contraseña generado en servidor; jamás contraseña plana.         |
+| `rol`           | `ENUM('superadmin','admin_negocio','recepcionista','profesional')` | No   | —                 | Rol de autorización de la futura API.                                    |
+| `activo`        | `BOOLEAN`                                                          | No   | TRUE              | Baja lógica: conservar relaciones históricas.                            |
+| `creado_en`     | `TIMESTAMP`                                                        | No   | CURRENT_TIMESTAMP | Marca técnica de creación, en UTC.                                       |
 
 Relaciones e índices (definición completa en el script SQL):
 
@@ -90,15 +90,15 @@ CONSTRAINT ck_usuario_ambito CHECK (
 
 Ubicaciones físicas y datos de llegada.
 
-| Campo | Tipo | Nulo | Valor por defecto | Descripción |
-| --- | --- | --- | --- | --- |
-| `id` | `INT UNSIGNED` | No | — | Identificador primario autoincremental. |
-| `negocio_id` | `INT UNSIGNED` | No | — | Identificador del tenant; no confiar en un valor enviado por el cliente. |
-| `nombre` | `VARCHAR(150)` | No | — | Nombre visible. |
-| `direccion` | `VARCHAR(255)` | No | — | Dirección física. |
-| `telefono` | `VARCHAR(20)` | Sí | — | Teléfono; en clientes se exigen exactamente 10 dígitos. |
-| `notas_llegada` | `TEXT` | Sí | — | Indicaciones para encontrar la sucursal. |
-| `activo` | `BOOLEAN` | No | TRUE | Baja lógica: conservar relaciones históricas. |
+| Campo           | Tipo           | Nulo | Valor por defecto | Descripción                                                              |
+| --------------- | -------------- | ---- | ----------------- | ------------------------------------------------------------------------ |
+| `id`            | `INT UNSIGNED` | No   | —                 | Identificador primario autoincremental.                                  |
+| `negocio_id`    | `INT UNSIGNED` | No   | —                 | Identificador del tenant; no confiar en un valor enviado por el cliente. |
+| `nombre`        | `VARCHAR(150)` | No   | —                 | Nombre visible.                                                          |
+| `direccion`     | `VARCHAR(255)` | No   | —                 | Dirección física.                                                        |
+| `telefono`      | `VARCHAR(20)`  | Sí   | —                 | Teléfono; en clientes se exigen exactamente 10 dígitos.                  |
+| `notas_llegada` | `TEXT`         | Sí   | —                 | Indicaciones para encontrar la sucursal.                                 |
+| `activo`        | `BOOLEAN`      | No   | TRUE              | Baja lógica: conservar relaciones históricas.                            |
 
 Relaciones e índices (definición completa en el script SQL):
 
@@ -112,15 +112,15 @@ CONSTRAINT fk_sucursal_negocio FOREIGN KEY (negocio_id) REFERENCES negocios(id)
 
 Catálogo y duración para calcular disponibilidad.
 
-| Campo | Tipo | Nulo | Valor por defecto | Descripción |
-| --- | --- | --- | --- | --- |
-| `id` | `INT UNSIGNED` | No | — | Identificador primario autoincremental. |
-| `negocio_id` | `INT UNSIGNED` | No | — | Identificador del tenant; no confiar en un valor enviado por el cliente. |
-| `nombre` | `VARCHAR(150)` | No | — | Nombre visible. |
-| `descripcion` | `VARCHAR(255)` | Sí | — | Descripción pública del servicio. |
-| `costo` | `DECIMAL(10,2)` | No | 0 | Precio actual del catálogo en MXN; no representa un pago. |
-| `duracion_minutos` | `SMALLINT UNSIGNED` | No | — | Duración requerida de la atención. |
-| `activo` | `BOOLEAN` | No | TRUE | Baja lógica: conservar relaciones históricas. |
+| Campo              | Tipo                | Nulo | Valor por defecto | Descripción                                                              |
+| ------------------ | ------------------- | ---- | ----------------- | ------------------------------------------------------------------------ |
+| `id`               | `INT UNSIGNED`      | No   | —                 | Identificador primario autoincremental.                                  |
+| `negocio_id`       | `INT UNSIGNED`      | No   | —                 | Identificador del tenant; no confiar en un valor enviado por el cliente. |
+| `nombre`           | `VARCHAR(150)`      | No   | —                 | Nombre visible.                                                          |
+| `descripcion`      | `VARCHAR(255)`      | Sí   | —                 | Descripción pública del servicio.                                        |
+| `costo`            | `DECIMAL(10,2)`     | No   | 0                 | Precio actual del catálogo en MXN; no representa un pago.                |
+| `duracion_minutos` | `SMALLINT UNSIGNED` | No   | —                 | Duración requerida de la atención.                                       |
+| `activo`           | `BOOLEAN`           | No   | TRUE              | Baja lógica: conservar relaciones históricas.                            |
 
 Relaciones e índices (definición completa en el script SQL):
 
@@ -136,16 +136,16 @@ CONSTRAINT ck_servicio_duracion CHECK (duracion_minutos BETWEEN 1 AND 1440)
 
 Profesionales; usuario de acceso opcional.
 
-| Campo | Tipo | Nulo | Valor por defecto | Descripción |
-| --- | --- | --- | --- | --- |
-| `id` | `INT UNSIGNED` | No | — | Identificador primario autoincremental. |
-| `negocio_id` | `INT UNSIGNED` | No | — | Identificador del tenant; no confiar en un valor enviado por el cliente. |
-| `usuario_id` | `INT UNSIGNED` | Sí | — | Vinculación opcional con una cuenta del mismo negocio. |
-| `nombre` | `VARCHAR(150)` | No | — | Nombre visible. |
-| `especialidad` | `VARCHAR(150)` | Sí | — | Área de atención del profesional. |
-| `email` | `VARCHAR(150)` | Sí | — | Correo de contacto o de acceso según la tabla. |
-| `telefono` | `VARCHAR(20)` | Sí | — | Teléfono; en clientes se exigen exactamente 10 dígitos. |
-| `activo` | `BOOLEAN` | No | TRUE | Baja lógica: conservar relaciones históricas. |
+| Campo          | Tipo           | Nulo | Valor por defecto | Descripción                                                              |
+| -------------- | -------------- | ---- | ----------------- | ------------------------------------------------------------------------ |
+| `id`           | `INT UNSIGNED` | No   | —                 | Identificador primario autoincremental.                                  |
+| `negocio_id`   | `INT UNSIGNED` | No   | —                 | Identificador del tenant; no confiar en un valor enviado por el cliente. |
+| `usuario_id`   | `INT UNSIGNED` | Sí   | —                 | Vinculación opcional con una cuenta del mismo negocio.                   |
+| `nombre`       | `VARCHAR(150)` | No   | —                 | Nombre visible.                                                          |
+| `especialidad` | `VARCHAR(150)` | Sí   | —                 | Área de atención del profesional.                                        |
+| `email`        | `VARCHAR(150)` | Sí   | —                 | Correo de contacto o de acceso según la tabla.                           |
+| `telefono`     | `VARCHAR(20)`  | Sí   | —                 | Teléfono; en clientes se exigen exactamente 10 dígitos.                  |
+| `activo`       | `BOOLEAN`      | No   | TRUE              | Baja lógica: conservar relaciones históricas.                            |
 
 Relaciones e índices (definición completa en el script SQL):
 
@@ -161,11 +161,11 @@ CONSTRAINT fk_personal_usuario FOREIGN KEY (negocio_id,usuario_id) REFERENCES us
 
 Relación muchos a muchos entre profesionales y servicios del mismo negocio.
 
-| Campo | Tipo | Nulo | Valor por defecto | Descripción |
-| --- | --- | --- | --- | --- |
-| `negocio_id` | `INT UNSIGNED` | No | — | Identificador del tenant; no confiar en un valor enviado por el cliente. |
-| `personal_id` | `INT UNSIGNED` | No | — | Profesional perteneciente al negocio del registro. |
-| `servicio_id` | `INT UNSIGNED` | No | — | Servicio perteneciente al negocio del registro. |
+| Campo         | Tipo           | Nulo | Valor por defecto | Descripción                                                              |
+| ------------- | -------------- | ---- | ----------------- | ------------------------------------------------------------------------ |
+| `negocio_id`  | `INT UNSIGNED` | No   | —                 | Identificador del tenant; no confiar en un valor enviado por el cliente. |
+| `personal_id` | `INT UNSIGNED` | No   | —                 | Profesional perteneciente al negocio del registro.                       |
+| `servicio_id` | `INT UNSIGNED` | No   | —                 | Servicio perteneciente al negocio del registro.                          |
 
 Relaciones e índices (definición completa en el script SQL):
 
@@ -179,11 +179,11 @@ CONSTRAINT fk_ps_servicio FOREIGN KEY (negocio_id,servicio_id) REFERENCES servic
 
 Relación muchos a muchos entre profesionales y sucursales del mismo negocio.
 
-| Campo | Tipo | Nulo | Valor por defecto | Descripción |
-| --- | --- | --- | --- | --- |
-| `negocio_id` | `INT UNSIGNED` | No | — | Identificador del tenant; no confiar en un valor enviado por el cliente. |
-| `personal_id` | `INT UNSIGNED` | No | — | Profesional perteneciente al negocio del registro. |
-| `sucursal_id` | `INT UNSIGNED` | No | — | Ubicación perteneciente al negocio del registro. |
+| Campo         | Tipo           | Nulo | Valor por defecto | Descripción                                                              |
+| ------------- | -------------- | ---- | ----------------- | ------------------------------------------------------------------------ |
+| `negocio_id`  | `INT UNSIGNED` | No   | —                 | Identificador del tenant; no confiar en un valor enviado por el cliente. |
+| `personal_id` | `INT UNSIGNED` | No   | —                 | Profesional perteneciente al negocio del registro.                       |
+| `sucursal_id` | `INT UNSIGNED` | No   | —                 | Ubicación perteneciente al negocio del registro.                         |
 
 Relaciones e índices (definición completa en el script SQL):
 
@@ -197,15 +197,15 @@ CONSTRAINT fk_psu_sucursal FOREIGN KEY (negocio_id,sucursal_id) REFERENCES sucur
 
 Bloques de atención recurrentes. Los descansos se representan como huecos entre bloques.
 
-| Campo | Tipo | Nulo | Valor por defecto | Descripción |
-| --- | --- | --- | --- | --- |
-| `id` | `INT UNSIGNED` | No | — | Identificador primario autoincremental. |
-| `negocio_id` | `INT UNSIGNED` | No | — | Identificador del tenant; no confiar en un valor enviado por el cliente. |
-| `personal_id` | `INT UNSIGNED` | No | — | Profesional perteneciente al negocio del registro. |
-| `sucursal_id` | `INT UNSIGNED` | No | — | Ubicación perteneciente al negocio del registro. |
-| `dia_semana` | `TINYINT UNSIGNED` | No | — | 0 domingo a 6 sábado. |
-| `hora_inicio` | `TIME` | No | — | Inicio inclusivo del intervalo en hora local. |
-| `hora_fin` | `TIME` | No | — | Fin exclusivo del intervalo en hora local. |
+| Campo         | Tipo               | Nulo | Valor por defecto | Descripción                                                              |
+| ------------- | ------------------ | ---- | ----------------- | ------------------------------------------------------------------------ |
+| `id`          | `INT UNSIGNED`     | No   | —                 | Identificador primario autoincremental.                                  |
+| `negocio_id`  | `INT UNSIGNED`     | No   | —                 | Identificador del tenant; no confiar en un valor enviado por el cliente. |
+| `personal_id` | `INT UNSIGNED`     | No   | —                 | Profesional perteneciente al negocio del registro.                       |
+| `sucursal_id` | `INT UNSIGNED`     | No   | —                 | Ubicación perteneciente al negocio del registro.                         |
+| `dia_semana`  | `TINYINT UNSIGNED` | No   | —                 | 0 domingo a 6 sábado.                                                    |
+| `hora_inicio` | `TIME`             | No   | —                 | Inicio inclusivo del intervalo en hora local.                            |
+| `hora_fin`    | `TIME`             | No   | —                 | Fin exclusivo del intervalo en hora local.                               |
 
 Relaciones e índices (definición completa en el script SQL):
 
@@ -222,18 +222,18 @@ INDEX ix_horario_disponibilidad (negocio_id,personal_id,dia_semana)
 
 Excepciones por fecha; pueden afectar un profesional, una sucursal o todo el negocio.
 
-| Campo | Tipo | Nulo | Valor por defecto | Descripción |
-| --- | --- | --- | --- | --- |
-| `id` | `INT UNSIGNED` | No | — | Identificador primario autoincremental. |
-| `negocio_id` | `INT UNSIGNED` | No | — | Identificador del tenant; no confiar en un valor enviado por el cliente. |
-| `personal_id` | `INT UNSIGNED` | Sí | — | Profesional perteneciente al negocio del registro. |
-| `sucursal_id` | `INT UNSIGNED` | Sí | — | Ubicación perteneciente al negocio del registro. |
-| `tipo` | `ENUM('vacaciones','feriado','emergencia')` | No | — | Tipo de bloqueo o notificación según el ENUM. |
-| `fecha_inicio` | `DATE` | No | — | Primer día del rango, incluido. |
-| `fecha_fin` | `DATE` | No | — | Último día del rango, incluido. |
-| `hora_inicio` | `TIME` | Sí | — | Inicio inclusivo del intervalo en hora local. |
-| `hora_fin` | `TIME` | Sí | — | Fin exclusivo del intervalo en hora local. |
-| `motivo` | `VARCHAR(255)` | No | — | Justificación del bloqueo. |
+| Campo          | Tipo                                        | Nulo | Valor por defecto | Descripción                                                              |
+| -------------- | ------------------------------------------- | ---- | ----------------- | ------------------------------------------------------------------------ |
+| `id`           | `INT UNSIGNED`                              | No   | —                 | Identificador primario autoincremental.                                  |
+| `negocio_id`   | `INT UNSIGNED`                              | No   | —                 | Identificador del tenant; no confiar en un valor enviado por el cliente. |
+| `personal_id`  | `INT UNSIGNED`                              | Sí   | —                 | Profesional perteneciente al negocio del registro.                       |
+| `sucursal_id`  | `INT UNSIGNED`                              | Sí   | —                 | Ubicación perteneciente al negocio del registro.                         |
+| `tipo`         | `ENUM('vacaciones','feriado','emergencia')` | No   | —                 | Tipo de bloqueo o notificación según el ENUM.                            |
+| `fecha_inicio` | `DATE`                                      | No   | —                 | Primer día del rango, incluido.                                          |
+| `fecha_fin`    | `DATE`                                      | No   | —                 | Último día del rango, incluido.                                          |
+| `hora_inicio`  | `TIME`                                      | Sí   | —                 | Inicio inclusivo del intervalo en hora local.                            |
+| `hora_fin`     | `TIME`                                      | Sí   | —                 | Fin exclusivo del intervalo en hora local.                               |
+| `motivo`       | `VARCHAR(255)`                              | No   | —                 | Justificación del bloqueo.                                               |
 
 Relaciones e índices (definición completa en el script SQL):
 
@@ -251,14 +251,14 @@ INDEX ix_bloqueo_fecha (negocio_id,fecha_inicio,fecha_fin)
 
 Directorio de pacientes/clientes separado por negocio.
 
-| Campo | Tipo | Nulo | Valor por defecto | Descripción |
-| --- | --- | --- | --- | --- |
-| `id` | `INT UNSIGNED` | No | — | Identificador primario autoincremental. |
-| `negocio_id` | `INT UNSIGNED` | No | — | Identificador del tenant; no confiar en un valor enviado por el cliente. |
-| `nombre_completo` | `VARCHAR(150)` | No | — | Nombre y apellidos capturados en la reserva. |
-| `telefono` | `VARCHAR(10)` | No | — | Teléfono; en clientes se exigen exactamente 10 dígitos. |
-| `email` | `VARCHAR(150)` | Sí | — | Correo de contacto o de acceso según la tabla. |
-| `creado_en` | `TIMESTAMP` | No | CURRENT_TIMESTAMP | Marca técnica de creación, en UTC. |
+| Campo             | Tipo           | Nulo | Valor por defecto | Descripción                                                              |
+| ----------------- | -------------- | ---- | ----------------- | ------------------------------------------------------------------------ |
+| `id`              | `INT UNSIGNED` | No   | —                 | Identificador primario autoincremental.                                  |
+| `negocio_id`      | `INT UNSIGNED` | No   | —                 | Identificador del tenant; no confiar en un valor enviado por el cliente. |
+| `nombre_completo` | `VARCHAR(150)` | No   | —                 | Nombre y apellidos capturados en la reserva.                             |
+| `telefono`        | `VARCHAR(10)`  | No   | —                 | Teléfono; en clientes se exigen exactamente 10 dígitos.                  |
+| `email`           | `VARCHAR(150)` | Sí   | —                 | Correo de contacto o de acceso según la tabla.                           |
+| `creado_en`       | `TIMESTAMP`    | No   | CURRENT_TIMESTAMP | Marca técnica de creación, en UTC.                                       |
 
 Relaciones e índices (definición completa en el script SQL):
 
@@ -274,24 +274,24 @@ CONSTRAINT ck_cliente_telefono CHECK (telefono REGEXP '^[0-9]{10}$')
 
 Reserva, estado y precio histórico acordado.
 
-| Campo | Tipo | Nulo | Valor por defecto | Descripción |
-| --- | --- | --- | --- | --- |
-| `id` | `BIGINT UNSIGNED` | No | — | Identificador primario autoincremental. |
-| `negocio_id` | `INT UNSIGNED` | No | — | Identificador del tenant; no confiar en un valor enviado por el cliente. |
-| `sucursal_id` | `INT UNSIGNED` | No | — | Ubicación perteneciente al negocio del registro. |
-| `personal_id` | `INT UNSIGNED` | No | — | Profesional perteneciente al negocio del registro. |
-| `servicio_id` | `INT UNSIGNED` | No | — | Servicio perteneciente al negocio del registro. |
-| `cliente_id` | `INT UNSIGNED` | No | — | Cliente perteneciente al negocio de la cita. |
-| `fecha` | `DATE` | No | — | Día local de atención o de exclusión. |
-| `hora_inicio` | `TIME` | No | — | Inicio inclusivo del intervalo en hora local. |
-| `hora_fin` | `TIME` | No | — | Fin exclusivo del intervalo en hora local. |
-| `precio_acordado` | `DECIMAL(10,2)` | No | — | Precio fijado al reservar; conserva historia aunque cambie el catálogo. |
-| `estado` | `ENUM('pendiente','confirmada','completada','cancelada','no_asistio')` | No | 'pendiente' | Estado del registro, limitado por el ENUM. |
-| `motivo_consulta` | `TEXT` | Sí | — | Texto opcional; requiere protección y política de retención en producción. |
-| `folio` | `VARCHAR(40)` | No | — | Referencia de control; no autoriza consultar información privada. |
-| `origen` | `ENUM('portal_publico','manual')` | No | — | Reserva del portal o captura manual. |
-| `creado_en` | `TIMESTAMP` | No | CURRENT_TIMESTAMP | Marca técnica de creación, en UTC. |
-| `actualizado_en` | `TIMESTAMP` | No | CURRENT_TIMESTAMP | Última modificación técnica, en UTC. |
+| Campo             | Tipo                                                                   | Nulo | Valor por defecto | Descripción                                                                |
+| ----------------- | ---------------------------------------------------------------------- | ---- | ----------------- | -------------------------------------------------------------------------- |
+| `id`              | `BIGINT UNSIGNED`                                                      | No   | —                 | Identificador primario autoincremental.                                    |
+| `negocio_id`      | `INT UNSIGNED`                                                         | No   | —                 | Identificador del tenant; no confiar en un valor enviado por el cliente.   |
+| `sucursal_id`     | `INT UNSIGNED`                                                         | No   | —                 | Ubicación perteneciente al negocio del registro.                           |
+| `personal_id`     | `INT UNSIGNED`                                                         | No   | —                 | Profesional perteneciente al negocio del registro.                         |
+| `servicio_id`     | `INT UNSIGNED`                                                         | No   | —                 | Servicio perteneciente al negocio del registro.                            |
+| `cliente_id`      | `INT UNSIGNED`                                                         | No   | —                 | Cliente perteneciente al negocio de la cita.                               |
+| `fecha`           | `DATE`                                                                 | No   | —                 | Día local de atención o de exclusión.                                      |
+| `hora_inicio`     | `TIME`                                                                 | No   | —                 | Inicio inclusivo del intervalo en hora local.                              |
+| `hora_fin`        | `TIME`                                                                 | No   | —                 | Fin exclusivo del intervalo en hora local.                                 |
+| `precio_acordado` | `DECIMAL(10,2)`                                                        | No   | —                 | Precio fijado al reservar; conserva historia aunque cambie el catálogo.    |
+| `estado`          | `ENUM('pendiente','confirmada','completada','cancelada','no_asistio')` | No   | 'pendiente'       | Estado del registro, limitado por el ENUM.                                 |
+| `motivo_consulta` | `TEXT`                                                                 | Sí   | —                 | Texto opcional; requiere protección y política de retención en producción. |
+| `folio`           | `VARCHAR(40)`                                                          | No   | —                 | Referencia de control; no autoriza consultar información privada.          |
+| `origen`          | `ENUM('portal_publico','manual')`                                      | No   | —                 | Reserva del portal o captura manual.                                       |
+| `creado_en`       | `TIMESTAMP`                                                            | No   | CURRENT_TIMESTAMP | Marca técnica de creación, en UTC.                                         |
+| `actualizado_en`  | `TIMESTAMP`                                                            | No   | CURRENT_TIMESTAMP | Última modificación técnica, en UTC.                                       |
 
 Relaciones e índices (definición completa en el script SQL):
 
@@ -313,18 +313,18 @@ INDEX ix_cita_reporte (negocio_id,fecha,estado,sucursal_id,servicio_id)
 
 Apartamiento con token opaco y expiración en UTC.
 
-| Campo | Tipo | Nulo | Valor por defecto | Descripción |
-| --- | --- | --- | --- | --- |
-| `id` | `BIGINT UNSIGNED` | No | — | Identificador primario autoincremental. |
-| `negocio_id` | `INT UNSIGNED` | No | — | Identificador del tenant; no confiar en un valor enviado por el cliente. |
-| `personal_id` | `INT UNSIGNED` | No | — | Profesional perteneciente al negocio del registro. |
-| `sucursal_id` | `INT UNSIGNED` | No | — | Ubicación perteneciente al negocio del registro. |
-| `servicio_id` | `INT UNSIGNED` | No | — | Servicio perteneciente al negocio del registro. |
-| `fecha` | `DATE` | No | — | Día local de atención o de exclusión. |
-| `hora_inicio` | `TIME` | No | — | Inicio inclusivo del intervalo en hora local. |
-| `hora_fin` | `TIME` | No | — | Fin exclusivo del intervalo en hora local. |
-| `token_hash` | `CHAR(64)` | No | — | SHA-256 del token secreto aleatorio; no almacenar el token en claro. |
-| `expira_en` | `DATETIME(3)` | No | — | Vencimiento UTC con milisegundos. |
+| Campo         | Tipo              | Nulo | Valor por defecto | Descripción                                                              |
+| ------------- | ----------------- | ---- | ----------------- | ------------------------------------------------------------------------ |
+| `id`          | `BIGINT UNSIGNED` | No   | —                 | Identificador primario autoincremental.                                  |
+| `negocio_id`  | `INT UNSIGNED`    | No   | —                 | Identificador del tenant; no confiar en un valor enviado por el cliente. |
+| `personal_id` | `INT UNSIGNED`    | No   | —                 | Profesional perteneciente al negocio del registro.                       |
+| `sucursal_id` | `INT UNSIGNED`    | No   | —                 | Ubicación perteneciente al negocio del registro.                         |
+| `servicio_id` | `INT UNSIGNED`    | No   | —                 | Servicio perteneciente al negocio del registro.                          |
+| `fecha`       | `DATE`            | No   | —                 | Día local de atención o de exclusión.                                    |
+| `hora_inicio` | `TIME`            | No   | —                 | Inicio inclusivo del intervalo en hora local.                            |
+| `hora_fin`    | `TIME`            | No   | —                 | Fin exclusivo del intervalo en hora local.                               |
+| `token_hash`  | `CHAR(64)`        | No   | —                 | SHA-256 del token secreto aleatorio; no almacenar el token en claro.     |
+| `expira_en`   | `DATETIME(3)`     | No   | —                 | Vencimiento UTC con milisegundos.                                        |
 
 Relaciones e índices (definición completa en el script SQL):
 
@@ -342,11 +342,11 @@ INDEX ix_lock_vigencia (negocio_id,personal_id,fecha,expira_en)
 
 Fila de exclusión por negocio, profesional y día para transacciones futuras.
 
-| Campo | Tipo | Nulo | Valor por defecto | Descripción |
-| --- | --- | --- | --- | --- |
-| `negocio_id` | `INT UNSIGNED` | No | — | Identificador del tenant; no confiar en un valor enviado por el cliente. |
-| `personal_id` | `INT UNSIGNED` | No | — | Profesional perteneciente al negocio del registro. |
-| `fecha` | `DATE` | No | — | Día local de atención o de exclusión. |
+| Campo         | Tipo           | Nulo | Valor por defecto | Descripción                                                              |
+| ------------- | -------------- | ---- | ----------------- | ------------------------------------------------------------------------ |
+| `negocio_id`  | `INT UNSIGNED` | No   | —                 | Identificador del tenant; no confiar en un valor enviado por el cliente. |
+| `personal_id` | `INT UNSIGNED` | No   | —                 | Profesional perteneciente al negocio del registro.                       |
+| `fecha`       | `DATE`         | No   | —                 | Día local de atención o de exclusión.                                    |
 
 Relaciones e índices (definición completa en el script SQL):
 
@@ -359,18 +359,18 @@ CONSTRAINT fk_mutex_personal FOREIGN KEY (negocio_id,personal_id) REFERENCES per
 
 Cola y bitácora de confirmación/recordatorio con deduplicación.
 
-| Campo | Tipo | Nulo | Valor por defecto | Descripción |
-| --- | --- | --- | --- | --- |
-| `id` | `BIGINT UNSIGNED` | No | — | Identificador primario autoincremental. |
-| `negocio_id` | `INT UNSIGNED` | No | — | Identificador del tenant; no confiar en un valor enviado por el cliente. |
-| `cita_id` | `BIGINT UNSIGNED` | No | — | Cita del mismo negocio. |
-| `tipo` | `ENUM('confirmacion','recordatorio')` | No | — | Tipo de bloqueo o notificación según el ENUM. |
-| `estado_envio` | `ENUM('pendiente','enviado','fallido')` | No | 'pendiente' | Estado de procesamiento del proveedor. |
-| `programado_en` | `DATETIME(3)` | No | — | Instante UTC programado para el envío. |
-| `enviado_en` | `DATETIME(3)` | Sí | — | Instante UTC del envío confirmado. |
-| `intentos` | `SMALLINT UNSIGNED` | No | 0 | Cantidad de intentos efectuados. |
-| `proveedor_id` | `VARCHAR(150)` | Sí | — | Referencia de entrega del proveedor, sin credenciales. |
-| `ultimo_error` | `VARCHAR(255)` | Sí | — | Error depurado sin tokens ni información sensible. |
+| Campo           | Tipo                                    | Nulo | Valor por defecto | Descripción                                                              |
+| --------------- | --------------------------------------- | ---- | ----------------- | ------------------------------------------------------------------------ |
+| `id`            | `BIGINT UNSIGNED`                       | No   | —                 | Identificador primario autoincremental.                                  |
+| `negocio_id`    | `INT UNSIGNED`                          | No   | —                 | Identificador del tenant; no confiar en un valor enviado por el cliente. |
+| `cita_id`       | `BIGINT UNSIGNED`                       | No   | —                 | Cita del mismo negocio.                                                  |
+| `tipo`          | `ENUM('confirmacion','recordatorio')`   | No   | —                 | Tipo de bloqueo o notificación según el ENUM.                            |
+| `estado_envio`  | `ENUM('pendiente','enviado','fallido')` | No   | 'pendiente'       | Estado de procesamiento del proveedor.                                   |
+| `programado_en` | `DATETIME(3)`                           | No   | —                 | Instante UTC programado para el envío.                                   |
+| `enviado_en`    | `DATETIME(3)`                           | Sí   | —                 | Instante UTC del envío confirmado.                                       |
+| `intentos`      | `SMALLINT UNSIGNED`                     | No   | 0                 | Cantidad de intentos efectuados.                                         |
+| `proveedor_id`  | `VARCHAR(150)`                          | Sí   | —                 | Referencia de entrega del proveedor, sin credenciales.                   |
+| `ultimo_error`  | `VARCHAR(255)`                          | Sí   | —                 | Error depurado sin tokens ni información sensible.                       |
 
 Relaciones e índices (definición completa en el script SQL):
 
