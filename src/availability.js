@@ -30,14 +30,14 @@ export function slots({
     day < TODAY
   )
     return [];
-  const schedule = list('schedules', tenantId).find(
+  const schedules = list('schedules', tenantId).filter(
     (s) =>
       s.professionalId === professional.id &&
       s.branchId === Number(branchId) &&
       s.day === date(day).getDay() &&
       s.enabled,
   );
-  if (!schedule) return [];
+  if (!schedules.length) return [];
   const appointments = list('appointments', tenantId).filter(
     (a) =>
       a.professionalId === professional.id &&
@@ -59,13 +59,13 @@ export function slots({
       day <= b.endDate,
   );
   const result = [];
-  for (
+  for (const schedule of schedules) for (
     let start = minutes(schedule.start);
     start + service.duration <= minutes(schedule.end);
     start += 15
   ) {
     const end = start + service.duration;
-    if (
+    if (schedule.breakStart &&
       overlaps(
         start,
         end,
@@ -89,17 +89,18 @@ export function slots({
       continue;
     result.push(time(start));
   }
-  if ((mode || tenantById(tenantId).mode) === 'compact' && result.length) {
-    const adjacent = result.filter((t) =>
+  const unique = [...new Set(result)].sort();
+  if ((mode || tenantById(tenantId).mode) === 'compact' && unique.length) {
+    const adjacent = unique.filter((t) =>
       appointments.some(
         (a) =>
           minutes(a.end) === minutes(t) ||
           minutes(t) + service.duration === minutes(a.start),
       ),
     );
-    return adjacent.length ? adjacent : [result[0]];
+    return adjacent.length ? adjacent : [unique[0]];
   }
-  return result;
+  return unique;
 }
 export function nextDates(options, count = 14) {
   return Array.from({ length: count }, (_, i) =>

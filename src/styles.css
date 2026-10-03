@@ -49,6 +49,23 @@ a:focus-visible {
   outline: 3px solid #ed8d66;
   outline-offset: 3px;
 }
+.glass-effect {
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(7px);
+  -webkit-backdrop-filter: blur(7px);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 0 30px 0px rgba(0, 0, 0, 0.3);
+}
+.glass-effect--dark {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.16);
+  box-shadow: 0 10px 24px rgba(9, 23, 15, 0.18);
+}
+@supports not ((backdrop-filter: blur(10px)) or (-webkit-backdrop-filter: blur(10px))) {
+  .glass-effect { background: #f5f8f3; }
+  .glass-effect--dark { background: #303a32; }
+}
 input:focus,
 select:focus,
 textarea:focus {
@@ -159,7 +176,7 @@ p {
   position: fixed;
   inset: 0 auto 0 0;
   width: 242px;
-  background: var(--sidebar);
+  background: radial-gradient(circle at 18% 10%, #33443a 0, transparent 43%), var(--sidebar);
   color: #c2cac4;
   padding: 33px 18px 14px;
   display: flex;
@@ -198,6 +215,14 @@ p {
   color: #fff;
   margin-bottom: 25px;
   width: 100%;
+}
+.workspace-switch.glass-effect {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.17);
+  border-radius: 12px;
+}
+.workspace-switch.glass-effect:hover {
+  background: rgba(255, 255, 255, 0.13);
 }
 .workspace-switch > span:nth-child(2) {
   display: flex;
@@ -1127,26 +1152,26 @@ p {
 }
 .app-dialog {
   padding: 0;
-  border: 1px solid #e6e8ec;
-  border-radius: 16px;
   width: min(560px, calc(100% - 32px));
   max-height: 90vh;
   color: var(--ink);
-  box-shadow: 0 30px 100px #14241f30;
 }
 .app-dialog.wide {
   width: min(780px, calc(100% - 32px));
 }
 .app-dialog::backdrop {
-  background: #19292255;
-  backdrop-filter: blur(3px);
+  background:
+    radial-gradient(circle at 15% 18%, rgba(199, 226, 208, 0), transparent 42%),
+    radial-gradient(circle at 85% 82%, rgba(241, 193, 163, 0), transparent 45%),
+    rgba(219, 231, 222, 0);
 }
 .dialog-header {
   padding: 24px 26px 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid var(--border);
+  background: rgba(230, 244, 234, 0.15);
+  border-bottom: 1px solid rgba(103, 143, 116, 0.18);
 }
 .dialog-header h2 {
   font-size: 22px;
@@ -1166,7 +1191,8 @@ p {
   justify-content: flex-end;
   gap: 10px;
   padding: 18px 26px;
-  border-top: 1px solid var(--border);
+  background: rgba(240, 248, 241, 0.15);
+  border-top: 1px solid rgba(103, 143, 116, 0.18);
 }
 .toast-region {
   position: fixed;
@@ -1178,11 +1204,8 @@ p {
   max-width: 90vw;
 }
 .app-toast {
-  background: #263c30;
-  color: #fff;
+  color: var(--ink);
   padding: 14px 22px;
-  border-radius: 10px;
-  box-shadow: 0 8px 30px #17271d25;
   font-size: 14px;
   margin-top: 8px;
   animation: toast-in 0.2s ease-out;
@@ -1933,10 +1956,26 @@ p {
 }
 .daily-insight {
   padding: 28px;
-  background: #eaf0e9;
-  border: 1px solid #dde5da;
-  border-radius: 11px;
+  background:
+    radial-gradient(circle at 85% 18%, #c9e1d4 0, transparent 42%),
+    radial-gradient(circle at 12% 88%, #f7dfcc 0, transparent 46%),
+    #dfece4;
+  border: 1px solid #d4e5d9;
+  border-radius: 16px;
   position: relative;
+  isolation: isolate;
+}
+.daily-insight::before {
+  content: '';
+  position: absolute;
+  inset: 12px;
+  z-index: -1;
+  background: rgba(255, 255, 255, 0.52);
+  -webkit-backdrop-filter: blur(10px) saturate(1.15);
+  backdrop-filter: blur(10px) saturate(1.15);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: 12px;
+  box-shadow: 0 12px 30px rgba(39, 55, 45, 0.08);
 }
 .insight-icon {
   position: absolute;
@@ -1950,7 +1989,7 @@ p {
 }
 .daily-insight h2 {
   font-size: 24px;
-  color: #4f644f;
+  color: #344f3c;
   line-height: 1.5;
   margin: 17px 0 12px;
   letter-spacing: -0.7px;
@@ -1958,7 +1997,7 @@ p {
 .daily-insight p {
   font-size: 12px;
   max-width: 320px;
-  color: #899786;
+  color: #536b5a;
 }
 .daily-insight .btn {
   font-size: 12px;
@@ -2040,10 +2079,44 @@ p {
   font-size: 13px;
 }
 .schedule-table {
-  min-width: 790px;
+  min-width: 1030px;
 }
+.schedule-table select { min-width: 145px; }
+.schedule-table .time-pair { min-width: 215px; }
+.schedule-table th:last-child,
+.schedule-table td:last-child {
+  position: sticky;
+  right: 0;
+  background: #fff;
+  box-shadow: -8px 0 14px -14px #344054;
+}
+.schedule-table .schedule-disabled td:last-child { background: #fafbfc; }
+.schedule-table .schedule-day-0 { --schedule-accent: #57925b; --schedule-tint: #f0f8ee; }
+.schedule-table .schedule-day-1 { --schedule-accent: #467fc2; --schedule-tint: #eef5fd; }
+.schedule-table .schedule-day-2 { --schedule-accent: #278c80; --schedule-tint: #ebf8f5; }
+.schedule-table .schedule-day-3 { --schedule-accent: #8664bf; --schedule-tint: #f3effa; }
+.schedule-table .schedule-day-4 { --schedule-accent: #bd782c; --schedule-tint: #fff5e9; }
+.schedule-table .schedule-day-5 { --schedule-accent: #b95883; --schedule-tint: #fdf0f5; }
+.schedule-table .schedule-day-6 { --schedule-accent: #626db9; --schedule-tint: #f0f1fd; }
+.schedule-table tbody tr:not(.schedule-disabled) > td {
+  background: var(--schedule-tint);
+}
+.schedule-table tbody tr.schedule-repeat:not(.schedule-disabled) > td {
+  background: color-mix(in srgb, var(--schedule-tint), var(--schedule-accent) 7%);
+}
+.schedule-table tbody tr > td:first-child {
+  border-left: 4px solid var(--schedule-accent);
+}
+.schedule-day-label {
+  color: var(--schedule-accent);
+  font-weight: 700;
+}
+.schedule-table .schedule-disabled .schedule-day-label { color: inherit; }
+.schedule-actions { display: flex; align-items: center; gap: 6px; }
+.schedule-add { min-width: 34px; padding: 4px 10px; font-size: 18px; line-height: 1.2; }
+.schedule-help { margin: 12px 20px 0; color: #667085; font-size: 13px; }
 .schedule-table td {
-  padding: 17px 20px;
+  padding: 12px;
 }
 .schedule-table .form-check {
   display: flex;
@@ -2656,6 +2729,14 @@ p {
   gap: 28px;
   align-items: start;
 }
+.booking-aside {
+  padding: 10px;
+  border-radius: 20px;
+  background:
+    radial-gradient(circle at 87% 14%, #d8e9da 0, transparent 42%),
+    radial-gradient(circle at 8% 80%, #f7e6d6 0, transparent 52%),
+    #eaf1e9;
+}
 .booking-surface {
   background: #fff;
   border: 1px solid #e5eae1;
@@ -2782,6 +2863,22 @@ p {
   padding: 26px;
   position: relative;
   overflow: hidden;
+}
+.booking-summary.glass-effect {
+  background: rgba(255, 255, 255, 0.76);
+  border-color: rgba(255, 255, 255, 0.8);
+  border-radius: 16px;
+}
+.booking-summary.glass-effect .summary-top h3 { color: #405d48; }
+.booking-summary.glass-effect > p { color: #617362; }
+.booking-summary.glass-effect .summary-items > div { color: #718273; }
+.booking-summary.glass-effect .summary-items > div.filled { color: #506453; }
+.booking-summary.glass-effect .summary-price > strong { color: #4a6047; }
+.booking-aside .booking-trust p { color: #627465; }
+@supports not ((backdrop-filter: blur(10px)) or (-webkit-backdrop-filter: blur(10px))) {
+  .workspace-switch.glass-effect { background: #303a32; }
+  .booking-summary.glass-effect { background: #f5f8f3; }
+  .daily-insight::before { background: #f4f8f2; }
 }
 .summary-top {
   display: flex;

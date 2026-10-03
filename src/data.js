@@ -83,12 +83,24 @@ export async function loadData() {
       day: i + 1,
       branchId: p.branchIds[i % p.branchIds.length],
       start: '09:00',
-      breakStart: '13:00',
-      breakEnd: '14:00',
-      end: i === 5 ? '14:00' : '18:00',
-      enabled: i < 5,
+      breakStart: p.id === 1 && i === 5 ? '' : '13:00',
+      breakEnd: p.id === 1 && i === 5 ? '' : '14:00',
+      end: i === 5 ? (p.id === 1 ? '13:00' : '14:00') : '18:00',
+      enabled: i < 5 || (p.id === 1 && i === 5),
     })),
   );
+  db.schedules.push({
+    id: Math.max(...db.schedules.map((s) => s.id)) + 1,
+    tenantId: 1,
+    professionalId: 1,
+    day: 6,
+    branchId: 1,
+    start: '14:00',
+    breakStart: '',
+    breakEnd: '',
+    end: '18:00',
+    enabled: true,
+  });
   const monday = addDays(TODAY, 1 - (date(TODAY).getDay() || 7));
   const seeds = [
     [0, '09:00', 1, 1, 'completada'],

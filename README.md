@@ -23,7 +23,7 @@ El proyecto lee sus datos ficticios mediante `fetch('/data/demo.json')` y navega
 | `/admin/profesionales`        | Equipo, especialidades, servicios y sucursales asignados; alta y edición.                                                           |
 | `/admin/servicios`            | Catálogo, duración y precio informativo; alta y edición.                                                                            |
 | `/admin/sucursales`           | Ubicaciones, teléfonos y notas de llegada; alta y edición.                                                                          |
-| `/admin/disponibilidad`       | Horario semanal, descansos, sucursal por día, bloqueos y modo de agenda.                                                            |
+| `/admin/disponibilidad`       | Varias franjas semanales por día y sucursal, días diferenciados por color, descansos, bloqueos y modo de agenda.                   |
 | `/admin/reportes`             | Rango de fechas, atendidas, canceladas, no asistencias e ingresos estimados por servicio/sucursal.                                  |
 | `/admin/notificaciones`       | Configuración y vista previa de WhatsApp; bitácora ilustrativa.                                                                     |
 | `/admin/configuracion`        | Datos del negocio, enlace público y cambio de negocio de demostración.                                                              |
@@ -37,9 +37,10 @@ El proyecto lee sus datos ficticios mediante `fetch('/data/demo.json')` y navega
 2. Usa **Nueva cita** para probar agendamiento manual. El profesional cambia de sucursal según el día: en los ejemplos, Centro lunes/miércoles/viernes y Norte martes/jueves.
 3. Abre **Portal de reservas** y completa Servicio → Sucursal → Profesional → Fecha/hora → Datos → Confirmación con nombre ficticio y teléfono inventado de 10 dígitos.
 4. Verifica el folio y usa **Ver cita en el panel**. La cita aparece en el mismo estado en memoria.
-5. En **Disponibilidad**, cambia a Agenda compacta y vuelve al portal.
-6. Cambia de espacio de trabajo con el selector lateral para explorar Espacio Mente.
-7. En **Reportes**, aplica un rango y usa **Guardar como PDF**; selecciona ese destino en la impresión del navegador.
+5. En **Disponibilidad**, selecciona a la Dra. Ana Martínez y revisa las dos franjas del sábado, agrupadas por color: trabaja en Norte de 09:00 a 13:00 y en Centro de 14:00 a 18:00. Usa **+** para agregar otra franja. Prueba un empalme: el formulario señala el conflicto y conserva el horario guardado.
+6. Abre el portal, elige Consulta general y a la Dra. Ana. El sábado 12 de septiembre de 2026 ofrece horas de la mañana en Norte y de la tarde en Centro.
+7. Cambia de espacio de trabajo con el selector lateral para explorar Espacio Mente.
+8. En **Reportes**, aplica un rango y usa **Guardar como PDF**; selecciona ese destino en la impresión del navegador.
 
 ## Alcance exacto
 
@@ -47,7 +48,7 @@ La última nota del usuario limita el trabajo a un **prototipo de pantallas**. E
 
 - Todos los datos y cambios son ficticios y permanecen **solo en la memoria de esta pestaña**. Recargar restablece la demostración. No se usa almacenamiento del navegador para datos de pacientes.
 - Fecha de ejemplo: **8 de septiembre de 2026**. La línea horaria de la agenda es una referencia visual a las 11:20, no un reloj en vivo. Se pueden explorar otros días.
-- El motor local considera duración, cierre, descanso, profesional, sucursal por día, citas y bloqueos. El formulario ofrece fechas hasta 45 días en el futuro y horas en incrementos de 15 minutos.
+- El motor local considera duración, cierre, varias franjas por día y sucursal, descanso, citas y bloqueos. El formulario ofrece fechas hasta 45 días en el futuro y horas en incrementos de 15 minutos.
 - La agenda compacta ofrece horarios contiguos; si aún no hay un borde libre, comienza con el primer horario disponible. El portal ofrece solo el primer día disponible. Cuando se llena, avanza al siguiente día hábil de la sucursal seleccionada.
 - El apartamiento de 5 minutos funciona **en esta pestaña**. Se valida de nuevo al confirmar y caduca si se abandona. No hay exclusión mutua entre navegadores, usuarios o servidores.
 - El selector de negocios y la vista de superadministración son controles de demostración, **no permisos**. El JSON público contiene todos los datos ficticios. Los filtros locales **no garantizan seguridad multi-tenant ni protección anti-IDOR**.
@@ -75,7 +76,12 @@ docs/                # Diccionario, alcance y contrato futuro de seguridad
 tests/               # Verificaciones del motor en memoria
 ```
 
+## Estilo de cristal
+
+La clase reutilizable `.glass-effect` está en `src/styles.css` y usa blanco al 20 %, desenfoque de 7 px, borde blanco al 30 % y sombra de 30 px. Se aplica a todos los diálogos y avisos del prototipo; el fondo claro con gradientes detrás de los diálogos mantiene legible el contenido. El selector de negocio y el resumen del portal usan variantes adaptadas a sus fondos.
+
 ## Configuración
+
 
 Copia `.env.example` a `.env` si deseas cambiar el nombre o fecha de referencia. Las variables `VITE_*` son públicas: **nunca deben contener secretos**. Los cambios requieren reiniciar Vite. No se integró ninguna credencial ni se accedió al backend existente.
 

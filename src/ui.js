@@ -16,7 +16,7 @@ export const empty = (title, detail, action = '') =>
   `<div class="empty-state">${icon('calendar')}<h3>${title}</h3><p>${detail}</p>${action}</div>`;
 export function toast(message) {
   const el = document.createElement('div');
-  el.className = 'app-toast';
+  el.className = 'app-toast glass-effect';
   el.textContent = message;
   document.querySelector('#toast-region').append(el);
   setTimeout(() => el.remove(), 4500);
@@ -25,7 +25,7 @@ let returnFocus;
 export function modal(title, body, wide = false) {
   const el = document.querySelector('#app-dialog');
   returnFocus = document.activeElement;
-  el.className = wide ? 'app-dialog wide' : 'app-dialog';
+  el.className = wide ? 'app-dialog glass-effect wide' : 'app-dialog glass-effect';
   el.innerHTML = `<header class="dialog-header"><div><span class="eyebrow">CLÍNICA · DEMOSTRACIÓN</span><h2 id="dialog-title">${title}</h2></div><button class="icon-btn" data-close aria-label="Cerrar">${icon('x')}</button></header>${body}`;
   if (!el.open) el.showModal();
   el.querySelector('[data-close]').onclick = () => el.close();

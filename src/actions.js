@@ -20,7 +20,9 @@ import {
   validateContact,
   overlaps,
 } from './availability.js';
-import { reportState, appointmentTable } from './views.js';
+import { reportState, appointmentTable, scheduleRow } from './views.js';
+import { validateSchedules, appointmentCovered } from './schedule.js';
+let draftScheduleId = -1;
 
 const field = (label, name, value = '', type = 'text', extra = '') =>
   `<div class="form-field"><label class="form-label" for="f-${name}">${label}</label><input class="form-control" id="f-${name}" name="${name}" value="${esc(value)}" type="${type}" ${extra}/></div>`;
@@ -456,6 +458,23 @@ function newTenant() {
 }
 export function handleClick(e) {
   try {
+    const addSchedule = e.target.closest('[data-add-schedule]');
+    if (addSchedule) {
+      const day = Number(addSchedule.dataset.addSchedule);
+      const current = [...document.querySelectorAll(`[data-schedule-row][data-schedule-day="${day}"]`)];
+      const selected = resource('professionals', document.querySelector('#schedule-professional').value, state.tenantId);
+      const row = current.at(-1);
+      const id = draftScheduleId--;
+      row.insertAdjacentHTML('afterend', scheduleRow({ id, day, enabled: true, branchId: Number(row.querySelector('select').value), start: '', end: '', breakStart: '', breakEnd: '' }, selected, state.tenantId, true, current.length));
+      document.querySelector(`[data-schedule-row][data-id="${id}"] input[type="time"]`).focus();
+      return;
+    }
+    const removeSchedule = e.target.closest('[data-remove-schedule]');
+    if (removeSchedule) {
+      const row = removeSchedule.closest('[data-schedule-row]');
+      if (document.querySelectorAll(`[data-schedule-row][data-schedule-day="${row.dataset.scheduleDay}"]`).length > 1) row.remove();
+      return;
+    }
     const action = e.target.closest('[data-action]')?.dataset.action;
     const actionMap = {
       'new-appointment': () => manualAppointment(),
@@ -630,62 +649,36 @@ document.addEventListener('submit', (e) => {
     }
     if (form.id === 'schedule-form') {
       const p = Number(document.querySelector('#schedule-professional').value);
-      const updates = list('schedules', state.tenantId)
-        .filter((s) => s.professionalId === p)
-        .map((s) => ({
-          ...s,
-          enabled: f.has(`enabled-${s.id}`),
-          branchId: Number(f.get(`branch-${s.id}`)),
-          ...Object.fromEntries(
-            ['start', 'end', 'breakStart', 'breakEnd'].map((k) => [
-              k,
-              f.get(`${k}-${s.id}`),
-            ]),
-          ),
-        }));
-      for (const s of updates) {
-        resource('branches', s.branchId, state.tenantId);
-        if (
-          !(
-            s.start < s.end &&
-            s.breakStart >= s.start &&
-            s.breakStart < s.breakEnd &&
-            s.breakEnd <= s.end
-          )
-        )
-          throw new Error(
-            'Cada día debe tener entrada, descanso y salida en orden.',
-          );
-        if (s.enabled && (s.start < '09:00' || s.end > '18:00'))
-          throw new Error('Este prototipo admite atención de 09:00 a 18:00.');
-        const active = list('appointments', state.tenantId).filter(
-          (a) =>
-            a.professionalId === p &&
-            date(a.date).getDay() === s.day &&
-            a.date >= TODAY &&
-            !['cancelada', 'no_asistio', 'completada'].includes(a.status),
-        );
-        if (
-          active.some(
-            (a) =>
-              !s.enabled ||
-              a.branchId !== s.branchId ||
-              a.start < s.start ||
-              a.end > s.end ||
-              overlaps(a.start, a.end, s.breakStart, s.breakEnd),
-          )
-        )
-          throw new Error(
-            'El cambio dejaría citas activas fuera del horario. Reprograma esas citas primero.',
-          );
-      }
-      updates.forEach((u) =>
-        Object.assign(resource('schedules', u.id, state.tenantId), u),
-      );
+      const professional = resource('professionals', p, state.tenantId);
+      const updates = [...form.querySelectorAll('[data-schedule-row]')].map((row) => {
+        const id = Number(row.dataset.id);
+        return {
+          id, tenantId: state.tenantId, professionalId: p, day: Number(row.dataset.scheduleDay),
+          enabled: f.has(`enabled-${id}`), branchId: Number(f.get(`branch-${id}`)),
+          start: f.get(`start-${id}`), end: f.get(`end-${id}`),
+          breakStart: f.get(`breakStart-${id}`), breakEnd: f.get(`breakEnd-${id}`),
+        };
+      });
+      validateSchedules(updates, professional.branchIds);
+      if (updates.some((s) => s.enabled && (s.start < '09:00' || s.end > '18:00')))
+        throw new Error('Este prototipo admite atención de 09:00 a 18:00.');
+      const active = list('appointments', state.tenantId).filter((a) =>
+        a.professionalId === p && a.date >= TODAY &&
+        !['cancelada', 'no_asistio', 'completada'].includes(a.status));
+      if (active.some((a) => !appointmentCovered(a, updates)))
+        throw new Error('El cambio dejaría citas activas fuera del horario. Reprograma esas citas primero.');
+      let nextId = Math.max(0, ...db.schedules.map((s) => s.id)) + 1;
+      db.schedules = db.schedules.filter((s) => !(s.tenantId === state.tenantId && s.professionalId === p))
+        .concat(updates.map((s) => ({ ...s, id: s.id < 0 ? nextId++ : s.id })));
     }
     render();
     toast('Configuración guardada en esta demostración.');
   } catch (error) {
-    toast(error.message);
+    if (form.id === 'schedule-form') {
+      const target = form.querySelector('#schedule-error');
+      target.textContent = error.message;
+      target.hidden = false;
+      target.focus();
+    } else toast(error.message);
   }
 });

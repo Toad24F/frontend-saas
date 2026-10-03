@@ -147,6 +147,18 @@ function branches() {
     )
     .join('')}</div>`;
 }
+export function scheduleRow(s, selected, tenantId, removable = false, blockIndex = 0) {
+  const day = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'][s.day];
+  const branches = list('branches', tenantId).filter((b) => selected.branchIds.includes(b.id));
+  return `<tr data-schedule-row data-schedule-day="${s.day}" data-id="${s.id}" class="schedule-day-${s.day} ${blockIndex > 0 ? 'schedule-repeat' : ''} ${s.enabled ? '' : 'schedule-disabled'}">
+    <td><label class="form-check form-switch"><input class="form-check-input" type="checkbox" name="enabled-${s.id}" ${s.enabled ? 'checked' : ''} aria-label="Activar ${day}"/><span class="schedule-day-label">${day}</span></label></td>
+    <td><select class="form-select form-select-sm" name="branch-${s.id}" aria-label="Sucursal del ${day}">${branches.map((b) => `<option value="${b.id}" ${s.branchId === b.id ? 'selected' : ''}>${esc(b.name)}</option>`).join('')}</select></td>
+    <td><input class="form-control form-control-sm" type="time" name="start-${s.id}" value="${s.start}" aria-label="Entrada del ${day}"/></td>
+    <td><div class="time-pair"><input class="form-control form-control-sm" type="time" name="breakStart-${s.id}" value="${s.breakStart || ''}" aria-label="Inicio de descanso del ${day}"/><span>–</span><input class="form-control form-control-sm" type="time" name="breakEnd-${s.id}" value="${s.breakEnd || ''}" aria-label="Fin de descanso del ${day}"/></div></td>
+    <td><input class="form-control form-control-sm" type="time" name="end-${s.id}" value="${s.end}" aria-label="Salida del ${day}"/></td>
+    <td><div class="schedule-actions"><button type="button" class="btn btn-light schedule-add" data-add-schedule="${s.day}" aria-label="Agregar franja al ${day}" title="Agregar franja">+</button>${removable ? `<button type="button" class="icon-btn" data-remove-schedule="${s.id}" aria-label="Quitar franja del ${day}">${icon('x')}</button>` : ''}</div></td>
+  </tr>`;
+}
 function availability() {
   const tenant = tenantById(state.tenantId),
     p = list('professionals', state.tenantId);
@@ -157,41 +169,12 @@ function availability() {
       'Agrega a tu primer profesional',
       'Después podrás configurar sus horarios.',
     );
-  const schedules = list('schedules', state.tenantId).filter(
-    (s) => s.professionalId === selected.id,
-  );
-  return `${pageHead('Disponibilidad', 'Un horario bien pensado deja espacio para todo.', button('Agregar bloqueo', 'new-block', 'plus', 'btn-light'))}<section class="surface mode-section"><div><h2>Cómo se llena tu agenda</h2><p>Elige qué horarios podrán reservar tus pacientes.</p></div><div class="mode-options"><button data-mode="free" class="mode-card ${tenant.mode === 'free' ? 'selected' : ''}">${icon('grid')}<span><strong>Ventana libre</strong><small>Muestra todos los espacios disponibles.</small></span><i>${tenant.mode === 'free' ? icon('check') : ''}</i></button><button data-mode="compact" class="mode-card ${tenant.mode === 'compact' ? 'selected' : ''}">${icon('calendar')}<span><strong>Agenda compacta</strong><small>Prioriza citas consecutivas, día por día.</small></span><i>${tenant.mode === 'compact' ? icon('check') : ''}</i></button></div></section><section class="surface"><div class="section-heading"><div><h2>Horario semanal</h2><p>Sucursal y bloques de atención por profesional.</p></div><select class="form-select professional-select" id="schedule-professional" aria-label="Profesional del horario">${p.map((person) => `<option value="${person.id}" ${person.id === selected.id ? 'selected' : ''}>${esc(person.name)}</option>`).join('')}</select></div><form id="schedule-form"><div class="table-responsive"><table class="table app-table schedule-table align-middle"><thead><tr><th>Día</th><th>Sucursal</th><th>Entrada</th><th>Descanso</th><th>Salida</th></tr></thead><tbody>${schedules
-    .map(
-      (s) =>
-        `<tr class="${!s.enabled ? 'schedule-disabled' : ''}"><td><label class="form-check form-switch"><input class="form-check-input" type="checkbox" name="enabled-${s.id}" ${s.enabled ? 'checked' : ''} aria-label="Activar ${['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'][s.day]}"/><span>${['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'][s.day]}</span></label></td><td><select class="form-select form-select-sm" name="branch-${s.id}" aria-label="Sucursal del día ${s.day}">${list(
-          'branches',
-          state.tenantId,
-        )
-          .filter((b) => selected.branchIds.includes(b.id))
-          .map(
-            (b) =>
-              `<option value="${b.id}" ${s.branchId === b.id ? 'selected' : ''}>${esc(b.name)}</option>`,
-          )
-          .join(
-            '',
-          )}</select></td><td><input class="form-control form-control-sm" type="time" name="start-${s.id}" value="${s.start}" aria-label="Entrada del día ${s.day}" required/></td><td><div class="time-pair"><input class="form-control form-control-sm" type="time" name="breakStart-${s.id}" value="${s.breakStart}" aria-label="Inicio de descanso del día ${s.day}" required/><span>–</span><input class="form-control form-control-sm" type="time" name="breakEnd-${s.id}" value="${s.breakEnd}" aria-label="Fin de descanso del día ${s.day}" required/></div></td><td><input class="form-control form-control-sm" type="time" name="end-${s.id}" value="${s.end}" aria-label="Salida del día ${s.day}" required/></td></tr>`,
-    )
-    .join(
-      '',
-    )}</tbody></table></div><div class="section-form-footer"><span>${icon('coffee')} El descanso se bloquea automáticamente.</span><button class="btn btn-primary" type="submit">${icon('check')}Guardar horario</button></div></form></section><section class="surface mt-4"><div class="section-heading"><div><h2>Bloqueos excepcionales</h2><p>Vacaciones, festivos o cambios de último momento.</p></div></div>${
-    list('blocks', state.tenantId).length
-      ? `<div class="blocks-list">${list('blocks', state.tenantId)
-          .map(
-            (b) =>
-              `<div class="block-item"><span class="stat-icon amber">${icon('lock')}</span><div><strong>${esc(b.reason)}</strong><small>${formatDate(b.date, { day: 'numeric', month: 'short' })}${b.endDate !== b.date ? ` – ${formatDate(b.endDate, { day: 'numeric', month: 'short' })}` : ''} · ${b.start ? b.start + ' – ' + b.end : 'Todo el día'} · ${b.professionalId ? esc(resource('professionals', b.professionalId, state.tenantId).name) : 'Todo el equipo'}</small></div><button class="icon-btn" data-remove-block="${b.id}" aria-label="Eliminar bloqueo ${esc(b.reason)}">${icon('x')}</button></div>`,
-          )
-          .join('')}</div>`
-      : empty(
-          'Sin bloqueos programados',
-          'Tu equipo mantiene su horario habitual.',
-        )
-  }</section>`;
+  const schedules = list('schedules', state.tenantId).filter((s) => s.professionalId === selected.id);
+  const rows = schedules.sort((a, b) => a.day - b.day || a.start.localeCompare(b.start))
+    .map((s) => scheduleRow(s, selected, state.tenantId, schedules.filter((x) => x.day === s.day).length > 1, schedules.filter((x) => x.day === s.day && x.start < s.start).length)).join('');
+  return `${pageHead('Disponibilidad', 'Un horario bien pensado deja espacio para todo.', button('Agregar bloqueo', 'new-block', 'plus', 'btn-light'))}<section class="surface mode-section"><div><h2>Cómo se llena tu agenda</h2><p>Elige qué horarios podrán reservar tus pacientes.</p></div><div class="mode-options"><button data-mode="free" class="mode-card ${tenant.mode === 'free' ? 'selected' : ''}">${icon('grid')}<span><strong>Ventana libre</strong><small>Muestra todos los espacios disponibles.</small></span><i>${tenant.mode === 'free' ? icon('check') : ''}</i></button><button data-mode="compact" class="mode-card ${tenant.mode === 'compact' ? 'selected' : ''}">${icon('calendar')}<span><strong>Agenda compacta</strong><small>Prioriza citas consecutivas, día por día.</small></span><i>${tenant.mode === 'compact' ? icon('check') : ''}</i></button></div></section><section class="surface"><div class="section-heading"><div><h2>Horario semanal</h2><p>Agrega varias franjas por día; cada una puede tener otra sucursal.</p></div><select class="form-select professional-select" id="schedule-professional" aria-label="Profesional del horario">${p.map((person) => `<option value="${person.id}" ${person.id === selected.id ? 'selected' : ''}>${esc(person.name)}</option>`).join('')}</select></div><form id="schedule-form"><div class="table-responsive"><table class="table app-table schedule-table align-middle"><thead><tr><th>Día</th><th>Sucursal</th><th>Entrada</th><th>Descanso opcional</th><th>Salida</th><th>Franjas</th></tr></thead><tbody>${rows}</tbody></table></div><p class="schedule-help">Para comer y volver en otra sucursal, termina una franja antes de comer y agrega otra después. Las franjas pueden ser consecutivas si no se empalman.</p><p id="schedule-error" class="form-error" role="alert" tabindex="-1" hidden></p><div class="section-form-footer"><span>${icon('coffee')} Los descansos y huecos entre franjas quedan fuera de las citas disponibles.</span><button class="btn btn-primary" type="submit">${icon('check')}Guardar horario</button></div></form></section><section class="surface mt-4"><div class="section-heading"><div><h2>Bloqueos excepcionales</h2><p>Vacaciones, festivos o cambios de último momento.</p></div></div>${list('blocks', state.tenantId).length ? `<div class="blocks-list">${list('blocks', state.tenantId).map((b) => `<div class="block-item"><span class="stat-icon amber">${icon('lock')}</span><div><strong>${esc(b.reason)}</strong><small>${formatDate(b.date, { day: 'numeric', month: 'short' })}${b.endDate !== b.date ? ` – ${formatDate(b.endDate, { day: 'numeric', month: 'short' })}` : ''} · ${b.start ? b.start + ' – ' + b.end : 'Todo el día'} · ${b.professionalId ? esc(resource('professionals', b.professionalId, state.tenantId).name) : 'Todo el equipo'}</small></div><button class="icon-btn" data-remove-block="${b.id}" aria-label="Eliminar bloqueo ${esc(b.reason)}">${icon('x')}</button></div>`).join('')}</div>` : empty('Sin bloqueos programados', 'Tu equipo mantiene su horario habitual.')}</section>`;
 }
+
 export function reportData() {
   return list('appointments', state.tenantId).filter(
     (a) =>

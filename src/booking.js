@@ -184,7 +184,7 @@ function summary(t) {
     p = booking.professionalId
       ? resource('professionals', booking.professionalId, t.id)
       : null;
-  return `<div class="booking-summary"><div class="summary-top">${icon('calendar')}<h3>Tu próxima visita</h3></div><p>Un espacio reservado para ti.</p><div class="summary-items">${[
+  return `<div class="booking-summary glass-effect"><div class="summary-top">${icon('calendar')}<h3>Tu próxima visita</h3></div><p>Un espacio reservado para ti.</p><div class="summary-items">${[
     [s?.name, 'Selecciona un servicio', 'briefcase'],
     [b?.name, 'Elige tu sucursal', 'pin'],
     [p?.name, 'Elige un profesional', 'stethoscope'],
@@ -205,7 +205,7 @@ function summary(t) {
     )}</div>${s ? `<div class="summary-price"><span>${s.duration} minutos</span><strong>${money(s.price)} <small>MXN</small></strong></div><p class="summary-payment">Pago directamente en sucursal.</p>` : ''}<div class="summary-flower" aria-hidden="true">${icon('leaf')}</div></div>`;
 }
 function visitNote(t) {
-  return `<div class="booking-summary"><div class="summary-top">${icon('heart')}<h3>Antes de tu visita</h3></div><p>Te recomendamos llegar 10 minutos antes de tu cita.</p><div class="summary-items"><div class="filled">${icon('pin')}<span>${esc(resource('branches', booking.branchId, t.id).notes)}</span></div><div class="filled">${icon('message')}<span>${esc(t.phone)}</span></div></div></div>`;
+  return `<div class="booking-summary glass-effect"><div class="summary-top">${icon('heart')}<h3>Antes de tu visita</h3></div><p>Te recomendamos llegar 10 minutos antes de tu cita.</p><div class="summary-items"><div class="filled">${icon('pin')}<span>${esc(resource('branches', booking.branchId, t.id).notes)}</span></div><div class="filled">${icon('message')}<span>${esc(t.phone)}</span></div></div></div>`;
 }
 const redraw = () => renderPortal(tenantById(booking.tenantId).slug);
 document.addEventListener('click', (e) => {
