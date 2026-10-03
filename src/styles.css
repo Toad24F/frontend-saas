@@ -1154,8 +1154,19 @@ p {
   padding: 0;
   width: min(560px, calc(100% - 32px));
   max-height: 90vh;
-  color: var(--ink);
+  color: #1f2b24;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.95), 0 0 7px rgba(255, 255, 255, 0.85);
 }
+.app-dialog :is(.eyebrow, .form-label, .field-hint, .optional, .form-separator > span, .detail-list small, .detail-list strong) {
+  color: #34473b;
+}
+.app-dialog :is(input, select, textarea, button, .status-badge, .tenant-option) {
+  text-shadow: none;
+}
+.app-dialog .app-table thead th { color: #405348; }
+.app-dialog .app-table td,
+.app-dialog .app-table td strong { color: #26382e; }
+.app-dialog .app-table td small { color: #45584b; }
 .app-dialog.wide {
   width: min(780px, calc(100% - 32px));
 }
