@@ -1,0 +1,190 @@
+:root {
+  --motion-press: 120ms;
+  --motion-snap: 280ms;
+  --motion-reveal: 580ms;
+  --motion-spring: cubic-bezier(0.18, 1.35, 0.32, 1);
+  --motion-glide: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* A screen or booking step arrives with an intentional, spring-like landing. */
+.motion-enter {
+  animation: screen-arrive var(--motion-reveal) var(--motion-glide) backwards;
+}
+
+@keyframes screen-arrive {
+  0% { opacity: 0; transform: translateY(30px) scale(0.965); }
+  68% { opacity: 1; transform: translateY(-5px) scale(1.008); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+body[data-motion-direction='forward'] .booking-surface.motion-enter {
+  animation-name: step-forward;
+}
+body[data-motion-direction='back'] .booking-surface.motion-enter {
+  animation-name: step-back;
+}
+@keyframes step-forward {
+  0% { opacity: 0; transform: translateX(68px) scale(0.9); }
+  68% { opacity: 1; transform: translateX(-12px) scale(1.025); }
+  100% { opacity: 1; transform: translateX(0) scale(1); }
+}
+@keyframes step-back {
+  0% { opacity: 0; transform: translateX(-68px) scale(0.9); }
+  68% { opacity: 1; transform: translateX(12px) scale(1.025); }
+  100% { opacity: 1; transform: translateX(0) scale(1); }
+}
+
+/* Small groups follow the screen instead of appearing as one solid block. */
+.motion-enter .entity-grid > :nth-child(-n + 6),
+.motion-enter .stats-grid > :nth-child(-n + 6),
+.booking-surface.motion-enter .booking-choices > :nth-child(-n + 6) {
+  animation: tile-arrive 620ms var(--motion-glide) backwards;
+}
+.motion-enter .entity-grid > :nth-child(2),
+.motion-enter .stats-grid > :nth-child(2),
+.booking-surface.motion-enter .booking-choices > :nth-child(2) { animation-delay: 65ms; }
+.motion-enter .entity-grid > :nth-child(3),
+.motion-enter .stats-grid > :nth-child(3),
+.booking-surface.motion-enter .booking-choices > :nth-child(3) { animation-delay: 130ms; }
+.motion-enter .entity-grid > :nth-child(4),
+.motion-enter .stats-grid > :nth-child(4),
+.booking-surface.motion-enter .booking-choices > :nth-child(4) { animation-delay: 195ms; }
+.motion-enter .entity-grid > :nth-child(5),
+.motion-enter .stats-grid > :nth-child(5),
+.booking-surface.motion-enter .booking-choices > :nth-child(5) { animation-delay: 260ms; }
+.motion-enter .entity-grid > :nth-child(6),
+.motion-enter .stats-grid > :nth-child(6),
+.booking-surface.motion-enter .booking-choices > :nth-child(6) { animation-delay: 325ms; }
+
+@keyframes tile-arrive {
+  0% { opacity: 0; transform: translateY(32px) scale(0.88) rotate(-1.5deg); }
+  70% { opacity: 1; transform: translateY(-6px) scale(1.025) rotate(0.3deg); }
+  100% { opacity: 1; transform: translateY(0) scale(1) rotate(0); }
+}
+
+/* Keep the form readable while its glass surface pops forward. */
+.app-dialog[open] {
+  transform-origin: center 70%;
+  animation: dialog-pop 610ms var(--motion-glide) backwards;
+}
+.app-dialog[open]::backdrop {
+  animation: backdrop-arrive 360ms ease-out both;
+}
+@keyframes dialog-pop {
+  0% { opacity: 0; transform: translateY(54px) scale(0.82); }
+  64% { opacity: 1; transform: translateY(-10px) scale(1.035); }
+  82% { transform: translateY(3px) scale(0.99); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes backdrop-arrive {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.app-toast { animation: toast-pop 520ms var(--motion-glide) backwards; }
+.app-toast.is-leaving { animation: toast-out 180ms ease-in both; }
+@keyframes toast-pop {
+  0% { opacity: 0; transform: translateY(42px) scale(0.76); }
+  65% { opacity: 1; transform: translateY(-7px) scale(1.045); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes toast-out {
+  to { opacity: 0; transform: translateY(12px) scale(0.94); }
+}
+
+/* Color changes retain the existing contrast and glass surfaces. */
+body,
+.topbar,
+.portal-topbar,
+.sidebar,
+.stat-card,
+.calendar-panel,
+.surface,
+.booking-layout,
+.booking-surface,
+.booking-summary,
+.app-dialog {
+  transition: background-color var(--motion-snap) ease,
+    border-color var(--motion-snap) ease,
+    color var(--motion-snap) ease;
+}
+.theme-toggle .icon { animation: icon-flip 490ms var(--motion-glide) backwards; }
+@keyframes icon-flip {
+  0% { opacity: 0.2; transform: rotate(-110deg) scale(0.35); }
+  65% { opacity: 1; transform: rotate(18deg) scale(1.22); }
+  100% { opacity: 1; transform: rotate(0) scale(1); }
+}
+
+.btn,
+.icon-btn,
+.theme-toggle,
+.nav-item,
+.workspace-switch,
+.segmented button,
+.booking-choice,
+.booking-date,
+.booking-slot,
+.mode-card,
+.calendar-event,
+.entity-grid > .surface {
+  transition: color var(--motion-snap) ease,
+    background-color var(--motion-snap) ease,
+    border-color var(--motion-snap) ease,
+    box-shadow var(--motion-snap) ease,
+    filter var(--motion-snap) ease,
+    transform 390ms var(--motion-spring);
+}
+
+@media (hover: hover) {
+  :is(.btn, .icon-btn, .theme-toggle, .booking-choice, .booking-date,
+    .booking-slot, .mode-card):not(:disabled):hover {
+    transform: translateY(-4px) scale(1.035);
+  }
+  .entity-grid > .surface:hover {
+    transform: translateY(-7px) scale(1.012);
+    box-shadow: 0 20px 36px rgba(17, 36, 23, 0.14);
+  }
+  .nav-item:not(.active):hover { transform: translateX(6px); }
+  .calendar-event:hover { transform: translateY(-3px) scale(1.035); }
+  :is(.booking-choice, .booking-date, .booking-slot, .mode-card):not(:disabled):hover {
+    box-shadow: 0 13px 25px rgba(27, 52, 36, 0.14);
+  }
+}
+
+:is(.btn, .icon-btn, .theme-toggle, .booking-choice, .booking-date,
+  .booking-slot, .mode-card):not(:disabled):active {
+  transform: translateY(2px) scale(0.91);
+  transition-duration: var(--motion-press);
+}
+.nav-item:active,
+.calendar-event:active { transform: scale(0.96); }
+
+:is(.booking-choice, .booking-date, .booking-slot, .mode-card).selected {
+  animation: selection-pop 430ms var(--motion-glide) backwards;
+}
+@keyframes selection-pop {
+  0% { transform: scale(0.94); }
+  55% { transform: scale(1.045); }
+  100% { transform: scale(1); }
+}
+
+@media (max-width: 767px) {
+  .sidebar { transition: transform 540ms var(--motion-spring); }
+  .menu-open .sidebar-overlay { animation: backdrop-arrive 320ms ease-out both; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .motion-enter,
+  .motion-enter .entity-grid > *,
+  .motion-enter .stats-grid > *,
+  .booking-surface.motion-enter .booking-choices > *,
+  .app-dialog[open],
+  .app-dialog[open]::backdrop,
+  .app-toast,
+  .app-toast.is-leaving,
+  .theme-toggle .icon,
+  .menu-open .sidebar-overlay,
+  :is(.booking-choice, .booking-date, .booking-slot, .mode-card).selected {
+    animation: none !important;
+  }
+}

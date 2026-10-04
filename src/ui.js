@@ -19,7 +19,10 @@ export function toast(message) {
   el.className = 'app-toast glass-effect';
   el.textContent = message;
   document.querySelector('#toast-region').append(el);
-  setTimeout(() => el.remove(), 4500);
+  setTimeout(() => {
+    el.classList.add('is-leaving');
+    setTimeout(() => el.remove(), 180);
+  }, 4320);
 }
 let returnFocus;
 export function modal(title, body, wide = false) {
