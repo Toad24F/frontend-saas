@@ -3,6 +3,7 @@ import './styles.css';
 import './theme.css';
 import './motion.css';
 import './mobile.css';
+import './calendar.css';
 import { icon } from './icons.js';
 import { calendarColumns } from './calendar-layout.js';
 import {
@@ -220,8 +221,8 @@ export function agendaView() {
     )}</div><span class="timezone">GMT-6 · Chihuahua</span></div></section><div class="agenda-note">${icon('info')} Los horarios se muestran en la zona horaria de tu negocio.<span>Datos ficticios · 8 de septiembre de 2026</span></div>`;
 }
 function weekGrid(days, apps) {
-  const hourHeight = 76;
-  return `<div class="calendar-scroll"><div class="week-calendar ${days.length === 1 ? 'single-day' : ''}" style="--days:${days.length};--hour-height:${hourHeight}px"><div class="week-header"><span class="time-header">GMT-6</span>${days.map((day) => `<button class="day-header ${day === TODAY ? 'is-today' : ''} ${date(day).getDay() === 0 || date(day).getDay() === 6 ? 'weekend' : ''}" data-day="${day}"><span>${formatDate(day, { weekday: 'short' }).replace('.', '')}</span><strong>${date(day).getDate()}</strong>${day === TODAY ? '<i></i>' : ''}</button>`).join('')}</div><div class="week-body"><div class="time-gutter">${Array.from({ length: 10 }, (_, i) => `<span style="top:${i * hourHeight}px">${String(i + 9).padStart(2, '0')}:00</span>`).join('')}</div>${days
+  const hourHeight = 96;
+  return `${days.length > 1 ? '<p class="calendar-scroll-hint">Desplázate horizontalmente para ver los siete días.</p>' : ''}<div class="calendar-scroll"><div class="week-calendar ${days.length === 1 ? 'single-day' : ''}" style="--days:${days.length};--hour-height:${hourHeight}px"><div class="week-header"><span class="time-header">GMT-6</span>${days.map((day) => `<button class="day-header ${day === TODAY ? 'is-today' : ''} ${date(day).getDay() === 0 || date(day).getDay() === 6 ? 'weekend' : ''}" data-day="${day}"><span>${formatDate(day, { weekday: 'short' }).replace('.', '')}</span><strong>${date(day).getDate()}</strong>${day === TODAY ? '<i></i>' : ''}</button>`).join('')}</div><div class="week-body"><div class="time-gutter">${Array.from({ length: 10 }, (_, i) => `<span style="top:${i * hourHeight}px">${String(i + 9).padStart(2, '0')}:00</span>`).join('')}</div>${days
     .map((day) => {
       const dayApps = apps.filter((a) => a.date === day);
       const columns = calendarColumns(dayApps);
@@ -232,7 +233,8 @@ function weekGrid(days, apps) {
             Number(a.start.slice(0, 2)) * 60 + Number(a.start.slice(3));
           const end = Number(a.end.slice(0, 2)) * 60 + Number(a.end.slice(3));
           const { lane, width } = columns.get(a.id);
-          return `<button class="calendar-event ${a.status}" data-appointment="${a.id}" style="top:${((start - 540) / 60) * hourHeight + 3}px;height:${Math.max(((end - start) / 60) * hourHeight - 6, 48)}px;left:calc(${lane * width}% + 5px);width:calc(${width}% - 10px)" aria-label="${escape(e.client.name)}, ${a.start}, ${statuses[a.status]}"><span class="event-time">${a.start} – ${a.end}${a.status === 'completada' ? icon('check') : ''}</span><strong>${escape(e.client.name)}</strong><span class="event-service">${escape(e.service.name)}</span><span class="event-professional">${escape(e.professional.name)}</span></button>`;
+          const details = `${e.client.name}, ${a.start} a ${a.end}, ${e.service.name}, ${statuses[a.status]}`;
+          return `<button class="calendar-event ${a.status} ${end - start <= 30 ? 'is-short' : ''}" data-appointment="${a.id}" style="top:${((start - 540) / 60) * hourHeight + 3}px;height:${Math.max(((end - start) / 60) * hourHeight - 6, 48)}px;left:calc(${lane * width}% + 5px);width:calc(${width}% - 10px)" aria-label="${escape(details)}" title="${escape(details)}"><span class="event-time"><span>${a.start}<span class="event-range-end"> – ${a.end}</span></span>${a.status === 'completada' ? icon('check') : ''}</span><strong>${escape(e.client.name)}</strong><span class="event-service">${escape(e.service.name)}</span><span class="event-professional">${escape(e.professional.name)}</span></button>`;
         })
         .join(
           '',

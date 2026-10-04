@@ -1,0 +1,84 @@
+/* Give the weekly calendar room for readable appointment labels at every zoom level. */
+.week-calendar:not(.single-day) {
+  width: max(100%, 1178px);
+  min-width: 1178px;
+}
+
+.week-calendar.single-day {
+  width: 100%;
+  min-width: 0;
+}
+
+.calendar-scroll {
+  scrollbar-color: var(--border) transparent;
+}
+
+.calendar-scroll-hint {
+  margin: 0;
+  padding: 8px 14px;
+  background: var(--surface-soft);
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+@media (min-width: 1500px) {
+  .calendar-scroll-hint { display: none; }
+}
+
+.calendar-event {
+  container-type: inline-size;
+  gap: 1px;
+  padding: 6px 8px 5px;
+}
+
+.calendar-event > :is(.event-time, strong, .event-service, .event-professional) {
+  flex-shrink: 0;
+}
+
+.calendar-event strong {
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.event-time {
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.25;
+  margin-bottom: 1px;
+  opacity: 1;
+}
+
+.event-time > span { min-width: 0; }
+
+.event-service {
+  font-size: 12px;
+  line-height: 1.2;
+  opacity: 0.94;
+}
+
+.calendar-event.is-short .event-service,
+.calendar-event.is-short .event-professional {
+  display: none;
+}
+
+.single-day .calendar-event strong { font-size: 15px; }
+.single-day .event-time,
+.single-day .event-service { font-size: 13px; }
+
+/* A narrow overlap keeps its time and name; the full details open on tap. */
+@container (max-width: 120px) {
+  .event-range-end,
+  .event-service,
+  .event-professional { display: none; }
+
+  .calendar-event strong {
+    white-space: normal;
+    overflow-wrap: anywhere;
+    text-overflow: clip;
+  }
+}

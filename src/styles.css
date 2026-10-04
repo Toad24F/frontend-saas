@@ -57,8 +57,8 @@ a:focus-visible {
 }
 .glass-effect {
   background: var(--glass-surface);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   border-radius: 16px;
   border: 1px solid var(--glass-border);
   box-shadow: var(--glass-shadow);
