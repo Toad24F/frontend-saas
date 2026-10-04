@@ -24,8 +24,8 @@
     padding: 6px;
     border-radius: 24px;
     background: color-mix(in srgb, var(--surface) 84%, transparent);
-    backdrop-filter: blur(24px) saturate(1.2);
-    -webkit-backdrop-filter: blur(24px) saturate(1.2);
+    backdrop-filter: blur(10px) saturate(1.2);
+    -webkit-backdrop-filter: blur(10px) saturate(1.2);
     box-shadow: 0 16px 40px rgba(20, 43, 28, 0.2);
   }
   .mobile-tabbar-inner {
