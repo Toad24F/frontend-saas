@@ -101,6 +101,14 @@ export function renderPortal(slug) {
   lastRenderedStepKey = stepKey;
   document.querySelector('#app').innerHTML =
     `<div class="booking-layout"><header class="portal-topbar"><a class="brand portal-brand" href="/reservas/${tenant.slug}" data-book-reset><img src="/favicon.svg" alt=""/>cita<span class="brand-dot">.</span></a><span class="portal-topbar-caption">Un momento para tu bienestar</span><a class="text-button" href="/admin/agenda" data-nav="agenda">${icon('left')} Volver al panel <span class="demo-pill">Demo</span></a></header><main class="booking-main"><div class="booking-business">${avatar(tenant.initials, 'mint', 'avatar-large')}<div><h1>${esc(tenant.name)}</h1><p>${esc(tenant.category)} <span>·</span> Chihuahua, México</p></div><span class="soft-tag">Reservas en línea</span></div><nav class="booking-steps" aria-label="Pasos de reserva">${stepNames.map((name, i) => `<div class="booking-step ${booking.step === i + 1 ? 'current' : ''} ${booking.step > i + 1 ? 'done' : ''}" ${booking.step === i + 1 ? 'aria-current="step"' : ''}><span>${booking.step > i + 1 ? icon('check') : i + 1}</span><strong>${name}</strong></div>`).join('')}</nav><div class="booking-columns"><section class="booking-surface ${booking.step === 6 ? 'confirmation-surface' : ''} ${animateStep ? 'motion-enter' : ''}"><div class="booking-title"><span class="eyebrow">${booking.step === 6 ? 'NOS VEMOS PRONTO' : `PASO ${String(booking.step).padStart(2, '0')} DE 06`}</span><h2>${stepTitles[booking.step - 1]}</h2><p>${stepDescriptions[booking.step - 1]}</p></div>${stepContent()}${booking.step < 5 ? `<div class="booking-controls"><button class="btn btn-subtle" data-book-back ${booking.step === 1 ? 'disabled' : ''}>${icon('left')}Atrás</button><button class="btn btn-primary" data-book-next ${canContinue() ? '' : 'disabled'}>Continuar ${icon('arrow')}</button></div>` : ''}</section><aside class="booking-aside">${booking.step === 6 ? visitNote(tenant) : summary(tenant)}<div class="booking-trust">${icon('shield')}<p>Este es un prototipo. Usa datos ficticios; no se realiza una reserva real ni se envían mensajes.</p></div></aside></div></main><footer class="portal-footer"><span>Tu tiempo importa. Tu bienestar, también.</span><span>Reservas con <strong>cita.</strong></span></footer></div>`;
+  const stepStrip = document.querySelector('.booking-steps');
+  const activeStep = stepStrip?.querySelector('.booking-step.current');
+  if (activeStep && stepStrip.scrollWidth > stepStrip.clientWidth) {
+    const stripBox = stepStrip.getBoundingClientRect();
+    const activeBox = activeStep.getBoundingClientRect();
+    stepStrip.scrollLeft += activeBox.left - stripBox.left
+      - (stepStrip.clientWidth - activeBox.width) / 2;
+  }
 }
 function canContinue() {
   return Boolean(

@@ -186,7 +186,7 @@ html[data-theme='dark'] .app-toast.glass-effect { background: var(--glass-surfac
 }
 .app-dialog.glass-effect {
   background: var(--dialog-glass);
-  backdrop-filter: blur(35px);
+  backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(35px);
 }
 .app-dialog .dialog-header,

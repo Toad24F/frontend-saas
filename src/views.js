@@ -72,7 +72,7 @@ function overview() {
     },
   ).join(
     '',
-  )}</div></section><section class="daily-insight"><span class="insight-icon">${icon('heart')}</span><span class="eyebrow">CADA ENCUENTRO CUENTA</span><h2>El cuidado empieza<br>con una buena agenda.</h2><p>Tienes ${today.filter((a) => a.status === 'confirmada').length} citas confirmadas para hoy. Prepara tu jornada y dedica tiempo a lo que más importa.</p><a href="/admin/agenda" class="btn btn-light" data-nav="agenda">Ver mi agenda ${icon('arrow')}</a></section></div><section class="surface"><div class="section-heading"><div><h2>Citas de hoy</h2><p>${formatDate(TODAY, { weekday: 'long', day: 'numeric', month: 'long' })}</p></div><span class="soft-tag">${today.length} citas</span></div>${appointmentTable(today)}</section>`;
+  )}</div></section><section class="daily-insight"><span class="insight-icon">${icon('heart')}</span><span class="eyebrow">CADA ENCUENTRO CUENTA</span><h2>El cuidado empieza<br>con una buena agenda.</h2><p>Tienes ${today.filter((a) => a.status === 'confirmada').length} citas confirmadas para hoy. Prepara tu jornada y dedica tiempo a lo que más importa.</p><a href="/admin/agenda" class="btn btn-light" data-nav="agenda">Ver mi agenda ${icon('arrow')}</a></section></div><section class="surface overview-today"><div class="section-heading"><div><h2>Citas de hoy</h2><p>${formatDate(TODAY, { weekday: 'long', day: 'numeric', month: 'long' })}</p></div><span class="soft-tag">${today.length} citas</span></div>${appointmentTable(today)}</section>`;
 }
 function clients() {
   const data = list('clients', state.tenantId).filter((c) =>
