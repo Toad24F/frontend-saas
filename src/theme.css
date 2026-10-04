@@ -1,0 +1,357 @@
+/* Tema oscuro y ajustes finales para pantallas táctiles. */
+:root { --dialog-glass: rgba(255, 255, 255, 0.5); }
+.theme-toggle {
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--ink);
+  cursor: pointer;
+}
+.theme-toggle .icon { width: 19px; height: 19px; }
+.theme-toggle:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.portal-topbar .theme-toggle { margin-left: 4px; }
+
+html[data-theme='dark'] {
+  color-scheme: dark;
+  --dialog-glass: rgba(28, 44, 34, 0.5);
+  --accent: #b9482b;
+  --accent-dark: #d76143;
+  --ink: #e9f0ec;
+  --muted: #b6c9ba;
+  --border: #41584a;
+  --canvas: #0e1915;
+  --surface: #1b2921;
+  --surface-soft: #24362b;
+  --sidebar: #0c1511;
+  --sidebar-muted: #c0d2c5;
+  --glass-surface: rgba(28, 44, 34, 0.94);
+  --glass-border: rgba(210, 236, 216, 0.22);
+  --glass-shadow: 0 18px 42px rgba(2, 12, 7, 0.34);
+  --bs-primary: var(--accent);
+  --bs-body-bg: #0e1915;
+  --bs-body-color: #e9f0ec;
+  --bs-border-color: #35483e;
+  --bs-secondary-color: #a9b9af;
+}
+html[data-theme='dark'] body { color: var(--ink); }
+html[data-theme='dark'] :is(.topbar, .portal-topbar) { background: #19261f; border-color: var(--border); }
+html[data-theme='dark'] :is(.breadcrumbs, .breadcrumbs strong, .topbar-date, .profile-button, .profile-button small, .profile-button > .icon, .page-heading p, .app-footer, .portal-footer) { color: #afbeb3; }
+html[data-theme='dark'] :is(.icon-btn, .btn-subtle, .text-button) { color: #cad7ce; }
+html[data-theme='dark'] .icon-btn:hover { background: #304237; color: #fff; }
+html[data-theme='dark'] .theme-toggle { background: #25362b; border-color: #47604e; color: #f3d995; }
+html[data-theme='dark'] .demo-pill { background: #324033; border-color: #485944; color: #d8cca8; }
+html[data-theme='dark'] .btn-light,
+html[data-theme='dark'] .btn-today { background: #27382e; border-color: #476052; color: #e7efe9; }
+html[data-theme='dark'] .btn-light:hover,
+html[data-theme='dark'] .btn-today:hover { background: #354b3d; color: #fff; }
+html[data-theme='dark'] .btn-danger-soft { background: #4a2a2d; border-color: #7b4245; color: #ffd6d2; }
+
+html[data-theme='dark'] :is(
+  .stat-card, .calendar-panel, .surface, .empty-state, .professional-card,
+  .service-card, .branch-card, .settings-card, .mode-card, .block-item,
+  .notification-card, .message-preview, .report-card, .report-filters,
+  .booking-surface, .booking-choice, .booking-date, .booking-slot,
+  .tenant-option, .section-card
+) {
+  background: #1b2921;
+  border-color: var(--border);
+  color: var(--ink);
+}
+html[data-theme='dark'] :is(.stat-top, .stat-caption, .section-heading p, .subtle-text, .field-hint, .optional, .form-label, .booking-title p, .choice-content p, .booking-business p, .booking-trust p, .summary-items > div, .summary-items > div.filled) { color: #adbdaf; }
+html[data-theme='dark'] :is(.segmented, .month-label, .muted-day, .app-table thead th, .form-separator, .calendar-toolbar, .information-note, .compact-note) { background: #223229; border-color: var(--border); color: #bdd0c1; }
+html[data-theme='dark'] .segmented button { color: #bdcabe; }
+html[data-theme='dark'] .segmented button.selected { background: #45644e; color: #fff; }
+html[data-theme='dark'] :is(.filter-select, .search-field, .table-search, .phone-input) { background: #223229; border-color: #476052; color: #d8e4da; }
+html[data-theme='dark'] :is(.filter-select select, .search-field input, .table-search input) { color: var(--ink); }
+html[data-theme='dark'] :is(input, select, textarea, .form-control, .form-select) {
+  background-color: #24352b;
+  border-color: #4a6252;
+  color: #f0f5f0;
+}
+html[data-theme='dark'] :is(input, textarea)::placeholder { color: #a4b5a8; opacity: 1; }
+html[data-theme='dark'] :is(input, select, textarea):focus { background-color: #2a3e31; color: #fff; }
+html[data-theme='dark'] option { background: #24352b; color: #f0f5f0; }
+
+html[data-theme='dark'] :is(.app-table, .app-table td, .app-table td strong, .app-table thead th, .detail-list strong, .detail-list small) { color: #d2e0d4; border-color: var(--border); }
+html[data-theme='dark'] .app-table td small { color: #a9baad; }
+html[data-theme='dark'] :is(.app-table tbody tr:hover, .app-table .table-active) { background: #2a3b30; }
+html[data-theme='dark'] :is(.day-header, .day-column, .calendar-cell, .month-day) { background: #1b2921; color: #c5d5c8; border-color: var(--border); }
+html[data-theme='dark'] :is(.day-column.is-today, .weekend, .muted-day) { background: #223229 !important; }
+html[data-theme='dark'] .calendar-cell::after { border-color: #34473b; }
+html[data-theme='dark'] .lunch-block { background: repeating-linear-gradient(135deg, #26362b, #26362b 4px, #304336 4px, #304336 5px); color: #b9c7bb; }
+html[data-theme='dark'] :is(.time-gutter > span, .time-header, .day-off, .legend > span, .timezone, .agenda-note, .month-date) { color: #a9b9ac; }
+html[data-theme='dark'] .calendar-event.confirmada,
+html[data-theme='dark'] .month-event.confirmada,
+html[data-theme='dark'] .status-badge.confirmada { background: #213c59; color: #c4deff; border-color: #4b82b6; }
+html[data-theme='dark'] .calendar-event.pendiente,
+html[data-theme='dark'] .month-event.pendiente,
+html[data-theme='dark'] .status-badge.pendiente { background: #493b22; color: #f5dda6; border-color: #a78347; }
+html[data-theme='dark'] .calendar-event.completada,
+html[data-theme='dark'] .month-event.completada,
+html[data-theme='dark'] .status-badge.completada { background: #244737; color: #c3f0d4; border-color: #579773; }
+html[data-theme='dark'] .calendar-event.cancelada,
+html[data-theme='dark'] .month-event.cancelada,
+html[data-theme='dark'] .status-badge.cancelada { background: #4b2d32; color: #ffced0; border-color: #a86770; }
+html[data-theme='dark'] .calendar-event.no_asistio,
+html[data-theme='dark'] .month-event.no_asistio,
+html[data-theme='dark'] .status-badge.no_asistio { background: #3c304d; color: #e0cff6; border-color: #8d72aa; }
+html[data-theme='dark'] .schedule-table tbody tr:not(.schedule-disabled) > td,
+html[data-theme='dark'] .schedule-table tbody tr.schedule-repeat:not(.schedule-disabled) > td {
+  background: color-mix(in srgb, var(--schedule-accent) 15%, #1b2921);
+}
+html[data-theme='dark'] .schedule-table th:last-child,
+html[data-theme='dark'] .schedule-table td:last-child,
+html[data-theme='dark'] .schedule-table .schedule-disabled td:last-child { background: #1b2921; }
+html[data-theme='dark'] .schedule-table .schedule-day-label { color: color-mix(in srgb, var(--schedule-accent) 60%, white); }
+
+html[data-theme='dark'] .daily-insight { background: radial-gradient(circle at 85% 18%, #345841, transparent 42%), radial-gradient(circle at 12% 88%, #594135, transparent 46%), #203629; border-color: #47604e; }
+html[data-theme='dark'] .daily-insight::before { background: rgba(17, 30, 21, .48); border-color: rgba(200, 229, 205, .16); }
+html[data-theme='dark'] .daily-insight :is(h2, p) { color: #e4f2e6; }
+html[data-theme='dark'] .booking-layout { background: #111a16; }
+html[data-theme='dark'] .portal-brand { color: #e6f0e8; }
+html[data-theme='dark'] .booking-layout :is(h1, h2, h3, h4, .choice-content > strong, .summary-top h3, .date-picker-heading h3) { color: #edf5ee; }
+html[data-theme='dark'] .booking-layout :is(.choice-meta, .booking-title .eyebrow, .slot-heading, .date-picker-heading > span) { color: #c0d1c3; }
+html[data-theme='dark'] .booking-business > .soft-tag { background: #284031; border-color: #4c6a54; color: #d4ead9; }
+html[data-theme='dark'] .booking-step > span { background: #2b3e30; border-color: #58725d; color: #e1eae1; }
+html[data-theme='dark'] .booking-step.current > span { background: var(--accent); border-color: var(--accent); color: #fff; }
+html[data-theme='dark'] .booking-aside { background: radial-gradient(circle at 87% 14%, #34513b, transparent 42%), radial-gradient(circle at 8% 80%, #503d32, transparent 52%), #1b2a20; }
+html[data-theme='dark'] .booking-summary.glass-effect { background: rgba(31, 48, 36, .83); border-color: rgba(203, 232, 207, .18); }
+html[data-theme='dark'] .booking-summary.glass-effect :is(h3, p, .summary-items > div, .summary-items > div.filled, .summary-price > strong) { color: #dcecdf; }
+html[data-theme='dark'] :is(.booking-choice:hover, .booking-date:hover, .booking-slot:hover) { background: #2a3d30; }
+html[data-theme='dark'] :is(.booking-choice.selected, .booking-date.selected, .booking-slot.selected) { background: #523729; border-color: #e08b60; color: #fff1e5; }
+html[data-theme='dark'] :is(.booking-step, .portal-topbar-caption, .portal-topbar > .text-button) { color: #b6c5b8; }
+
+html[data-theme='dark'] .app-dialog.glass-effect { background: var(--dialog-glass); border-color: var(--glass-border); color: var(--ink); text-shadow: none; }
+html[data-theme='dark'] .app-dialog :is(.eyebrow, .form-label, .field-hint, .optional, .form-separator > span, .detail-list small, .detail-list strong, .app-table td, .app-table td strong, .app-table td small, .app-table thead th) { color: #c8d9cb; }
+html[data-theme='dark'] .dialog-header,
+html[data-theme='dark'] .dialog-footer { background: rgba(53, 80, 58, .28); border-color: #49604c; }
+html[data-theme='dark'] .app-toast.glass-effect { background: var(--glass-surface); color: var(--ink); border-color: var(--glass-border); }
+
+/* Shared color roles keep labels readable when the theme changes. */
+.main-layout :is(.breadcrumbs, .breadcrumbs strong, .topbar-date, .profile-button small,
+  .page-heading p, .stat-top, .stat-caption, .app-footer, .agenda-note, .timezone,
+  .legend > span, .month-date, .month-label, .time-gutter > span) {
+  color: var(--muted);
+}
+.booking-layout :is(.portal-topbar-caption, .portal-topbar > .text-button,
+  .booking-business p, .booking-title p, .choice-content > p,
+  .choice-content > small, .choice-meta, .booking-summary > p,
+  .summary-items > div, .booking-trust p, .privacy-note, .portal-footer) {
+  color: var(--muted);
+}
+.main-layout :is(.stat-card, .calendar-panel, .surface, .empty-state,
+  .professional-card, .service-card, .branch-card, .settings-card,
+  .mode-card, .block-item, .notification-card, .message-preview,
+  .report-card, .report-filters, .section-card),
+.booking-layout :is(.booking-surface, .booking-choice, .booking-date, .booking-slot) {
+  background-color: var(--surface);
+  border-color: var(--border);
+  color: var(--ink);
+}
+.main-layout :is(.segmented, .month-label, .calendar-toolbar),
+.booking-layout .phone-input > span {
+  background-color: var(--surface-soft);
+  border-color: var(--border);
+}
+.main-layout :is(.icon-btn, .btn-subtle, .text-button, .filter-select select,
+  .search-field input, .table-search input),
+.booking-layout :is(.text-button, .booking-date, .booking-slot) {
+  color: var(--ink);
+}
+.main-layout :is(.stat-caption, .legend > span, .timezone, .agenda-note),
+.booking-layout :is(.choice-content > small, .choice-meta, .privacy-note,
+  .summary-items > div, .portal-footer) {
+  font-size: 12px;
+}
+.main-layout .topbar,
+.booking-layout .portal-topbar {
+  background-color: var(--surface);
+  border-color: var(--border);
+}
+.booking-layout { background-color: var(--canvas); }
+.main-layout .stat-card { box-shadow: 0 5px 20px rgba(23, 43, 29, 0.04); }
+.booking-summary.glass-effect {
+  background: var(--glass-surface);
+  border-color: var(--glass-border);
+  box-shadow: var(--glass-shadow);
+}
+.app-dialog.glass-effect,
+.app-toast.glass-effect {
+  background: var(--glass-surface);
+  border-color: var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  color: var(--ink);
+}
+.app-dialog.glass-effect {
+  background: var(--dialog-glass);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(35px);
+}
+.app-dialog .dialog-header,
+.app-dialog .dialog-footer {
+  background: color-mix(in srgb, var(--surface-soft) 18%, transparent);
+  border-color: var(--border);
+}
+.app-dialog :is(.eyebrow, .form-label, .field-hint, .optional,
+  .form-separator > span, .detail-list small, .app-table td small) {
+  color: var(--muted);
+}
+.app-dialog :is(.detail-list strong, .app-table td, .app-table td strong),
+.app-dialog h2 { color: var(--ink); }
+.app-dialog .checkbox-list label { color: var(--ink); }
+.app-dialog::backdrop { background: rgba(18, 34, 25, 0.4); }
+.workspace-switch.glass-effect {
+  background: rgba(216, 240, 220, 0.13);
+  border-color: rgba(223, 244, 227, 0.24);
+  box-shadow: 0 12px 28px rgba(5, 18, 11, 0.16);
+}
+.workspace-switch.glass-effect:hover { background: rgba(216, 240, 220, 0.2); }
+.sidebar :is(.workspace-switch small, .nav-section, .portal-card p, .sidebar-foot) {
+  color: var(--sidebar-muted);
+}
+.sidebar .nav-item.active { background: var(--accent); color: #fff; }
+.sidebar .nav-item.active > .icon { color: #fff; }
+.btn-primary { color: #fff; }
+.btn-primary:hover, .btn-primary:focus-visible { color: #fff; }
+.booking-step.current { color: var(--accent); }
+.booking-step:not(.current) { color: var(--muted); }
+.booking-step:not(.current) > span { color: var(--muted); }
+.booking-layout :is(.booking-title .eyebrow, .booking-business > .soft-tag,
+  .date-picker-heading > span, .slot-heading) { color: var(--muted); }
+.booking-title .eyebrow { font-size: 11px; }
+.booking-summary.glass-effect > p,
+.booking-summary.glass-effect .summary-items > div,
+.booking-summary.glass-effect .summary-items > div.filled { color: var(--muted); }
+.booking-layout .booking-trust p { font-size: 12px; }
+.booking-step.current > span,
+.selected > .choice-radio { color: #fff; }
+
+html[data-theme='dark'] .glass-effect { color: var(--ink); }
+html[data-theme='dark'] .workspace-switch.glass-effect { color: #eff8f0; }
+html[data-theme='dark'] .sidebar { background: radial-gradient(circle at 18% 10%, #294b39 0, transparent 43%), var(--sidebar); }
+html[data-theme='dark'] .app-dialog::backdrop { background: rgba(2, 9, 5, 0.68); }
+html[data-theme='dark'] .booking-summary.glass-effect { background: var(--glass-surface); border-color: var(--glass-border); }
+html[data-theme='dark'] .booking-summary.glass-effect :is(h3, p, .summary-items > div,
+  .summary-items > div.filled, .summary-price > strong) { color: var(--ink); }
+html[data-theme='dark'] .booking-step.current { color: #f1a287; }
+html[data-theme='dark'] .booking-layout :is(.booking-business p, .booking-title p,
+  .choice-content > p, .choice-content > small, .choice-meta, .booking-trust p,
+  .privacy-note, .portal-footer) { color: var(--muted); }
+html[data-theme='dark'] :is(.booking-choice.selected, .booking-date.selected, .booking-slot.selected) {
+  background: #523729;
+  border-color: #e08b60;
+  color: #fff1e5;
+}
+html[data-theme='dark'] .app-dialog :is(.eyebrow, .form-label, .field-hint,
+  .optional, .form-separator > span, .detail-list small, .app-table td small) {
+  color: var(--muted);
+}
+html[data-theme='dark'] .app-dialog :is(.detail-list strong, .app-table td,
+  .app-table td strong, .app-table thead th) { color: var(--ink); }
+html[data-theme='dark'] .app-dialog.glass-effect,
+html[data-theme='dark'] .app-toast.glass-effect {
+  border-color: var(--glass-border);
+  color: var(--ink);
+}
+html[data-theme='dark'] .app-dialog.glass-effect { background: var(--dialog-glass); }
+html[data-theme='dark'] .app-toast.glass-effect { background: var(--glass-surface); }
+@supports not ((backdrop-filter: blur(10px)) or (-webkit-backdrop-filter: blur(10px))) {
+  .app-dialog.glass-effect { background: var(--surface); }
+  html[data-theme='dark'] .glass-effect { background: var(--surface); }
+  html[data-theme='dark'] .workspace-switch.glass-effect { background: #263c31; }
+}
+
+@media (max-width: 767px) {
+  #schedule-form > .table-responsive { overflow: visible; }
+  .schedule-table,
+  .schedule-table tbody { display: block; width: 100%; min-width: 0; }
+  .schedule-table thead { display: none; }
+  .schedule-table tbody { padding: 12px; }
+  .schedule-table tbody tr {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    margin-bottom: 12px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .schedule-table tbody td {
+    display: block;
+    min-width: 0;
+    width: 100%;
+    border: 0;
+    padding: 8px 12px;
+  }
+  .schedule-table tbody td::before {
+    content: attr(data-label);
+    display: block;
+    margin-bottom: 5px;
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .schedule-table tbody td:first-child { grid-column: 1 / -1; padding: 12px; border-left: 4px solid var(--schedule-accent); border-bottom: 1px solid var(--border); }
+  .schedule-table tbody td:first-child::before { display: none; }
+  .schedule-table tbody td:nth-child(2),
+  .schedule-table tbody td:nth-child(4),
+  .schedule-table tbody td:last-child { grid-column: 1 / -1; }
+  .schedule-table tbody td:last-child { position: static; box-shadow: none; }
+  .schedule-table select,
+  .schedule-table input[type='time'] { width: 100%; max-width: none; min-width: 0; }
+  .schedule-table .time-pair { min-width: 0; }
+  .schedule-table .time-pair input { flex: 1 1 0; }
+  .schedule-table .schedule-actions { justify-content: flex-end; }
+  .schedule-table .schedule-add { min-height: 42px; min-width: 42px; }
+  html[data-theme='dark'] .schedule-table tbody td:last-child { background: color-mix(in srgb, var(--schedule-accent) 15%, #1b2921); }
+}
+
+@media (max-width: 480px) {
+  html, body, #app { max-width: 100%; overflow-x: clip; }
+  .topbar { height: 60px; padding: 0 12px; }
+  .topbar-right { gap: 4px; }
+  .breadcrumbs { min-width: 0; gap: 6px; }
+  .breadcrumbs > span, .breadcrumbs > .icon { display: none; }
+  .breadcrumbs strong { max-width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
+  .topbar .icon-btn, .portal-topbar .theme-toggle { min-width: 40px; min-height: 40px; }
+  .main-content { padding: 18px 12px 28px; }
+  .page-heading { gap: 12px; }
+  .page-heading h1 { font-size: 24px; }
+  .heading-actions { flex-wrap: wrap; }
+  .heading-actions > :is(.btn, a) { flex: 1 1 auto; justify-content: center; }
+  .stat-card { padding: 12px; }
+  .stat-caption { line-height: 1.3; }
+  .calendar-toolbar { padding: 12px; }
+  .calendar-date { flex-wrap: wrap; }
+  .calendar-date h2 { flex-basis: 100%; }
+  .segmented { width: 100%; justify-content: space-between; }
+  .segmented button { flex: 1; min-height: 40px; }
+  .calendar-filters { padding: 0 12px 12px; }
+  .filter-select { min-width: 0; flex-basis: 100%; min-height: 42px; }
+  .calendar-panel, .surface, .booking-surface { min-width: 0; }
+  .calendar-scroll, .table-responsive, .month-scroll { max-width: 100%; overflow-x: auto; }
+  .week-calendar { min-width: 760px; }
+  .single-day { min-width: 0; }
+  .app-dialog { width: calc(100% - 20px); max-height: 94dvh; }
+  .app-dialog.wide { width: calc(100% - 20px); }
+  .dialog-header, .dialog-body { padding: 16px; }
+  .dialog-footer { padding: 12px 16px; flex-wrap: wrap; }
+  .dialog-footer .btn { min-height: 42px; }
+  .portal-topbar { height: 60px; padding: 0 12px; gap: 8px; }
+  .portal-brand { font-size: 25px; }
+  .portal-brand img { width: 26px; height: 26px; }
+  .portal-topbar > .text-button { margin-left: auto; font-size: 0; gap: 0; }
+  .portal-topbar > .text-button .icon { width: 21px; height: 21px; }
+  .portal-topbar .demo-pill { display: none; }
+  .booking-main { padding: 20px 12px 28px; }
+  .booking-surface { padding: 20px 15px; }
+  .booking-steps { gap: 14px; justify-content: flex-start; }
+  .booking-steps { scrollbar-width: none; }
+  .booking-steps::-webkit-scrollbar { display: none; }
+  .booking-step { flex: 0 0 auto; min-width: 62px; }
+  .booking-step > strong { font-size: 11px; }
+  .booking-slot-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .booking-controls { gap: 8px; }
+  .booking-controls .btn { min-height: 44px; }
+}

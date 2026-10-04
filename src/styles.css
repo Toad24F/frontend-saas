@@ -1,20 +1,26 @@
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;450;500;550;600;650;700&family=Manrope:wght@400;500;600;650;700;750;800&display=swap');
 :root {
-  --accent: #ec6843;
-  --accent-dark: #d8522e;
-  --ink: #252932;
-  --muted: #858a95;
-  --border: #eaecf0;
-  --canvas: #f8f9fb;
-  --sidebar: #202622;
-  --sidebar-muted: #8f9c94;
-  --blue: #3d77c8;
-  --green: #378466;
+  color-scheme: light;
+  --accent: #b9482b;
+  --accent-dark: #98371f;
+  --ink: #1d2924;
+  --muted: #526359;
+  --border: #d9e3da;
+  --canvas: #f5f7f4;
+  --surface: #ffffff;
+  --surface-soft: #eef3ee;
+  --sidebar: #1b2d28;
+  --sidebar-muted: #c0d2c5;
+  --glass-surface: rgba(255, 255, 255, 0.9);
+  --glass-border: rgba(255, 255, 255, 0.86);
+  --glass-shadow: 0 18px 42px rgba(26, 49, 33, 0.12);
+  --blue: #2e619e;
+  --green: #2d6d4d;
   --radius: 12px;
-  --bs-primary: #ec6843;
+  --bs-primary: var(--accent);
   --bs-body-font-family: 'DM Sans', sans-serif;
   --bs-body-color: var(--ink);
-  font-size: 14px;
+  font-size: 15px;
 }
 * {
   box-sizing: border-box;
@@ -46,31 +52,31 @@ button {
 }
 button:focus-visible,
 a:focus-visible {
-  outline: 3px solid #ed8d66;
+  outline: 3px solid var(--accent);
   outline-offset: 3px;
 }
 .glass-effect {
-  background: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(7px);
-  -webkit-backdrop-filter: blur(7px);
+  background: var(--glass-surface);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 0 0 30px 0px rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
 }
 .glass-effect--dark {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.16);
-  box-shadow: 0 10px 24px rgba(9, 23, 15, 0.18);
+  background: rgba(35, 57, 47, 0.76);
+  border-color: rgba(223, 244, 227, 0.22);
+  box-shadow: 0 12px 28px rgba(5, 18, 11, 0.2);
 }
 @supports not ((backdrop-filter: blur(10px)) or (-webkit-backdrop-filter: blur(10px))) {
-  .glass-effect { background: #f5f8f3; }
-  .glass-effect--dark { background: #303a32; }
+  .glass-effect { background: var(--surface); }
+  .glass-effect--dark { background: #263c31; }
 }
 input:focus,
 select:focus,
 textarea:focus {
-  border-color: #e98b6e !important;
-  box-shadow: 0 0 0 3px #ed684315 !important;
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 24%, transparent) !important;
 }
 .icon {
   width: 20px;
@@ -133,7 +139,7 @@ p {
   --bs-btn-active-bg: var(--accent-dark);
   background: var(--accent);
   color: #fff;
-  box-shadow: 0 3px 5px #cc573314;
+  box-shadow: 0 5px 13px rgba(112, 39, 20, 0.18);
 }
 .btn-light {
   background: #fff;
@@ -176,7 +182,7 @@ p {
   position: fixed;
   inset: 0 auto 0 0;
   width: 242px;
-  background: radial-gradient(circle at 18% 10%, #33443a 0, transparent 43%), var(--sidebar);
+  background: radial-gradient(circle at 18% 10%, #355a49 0, transparent 43%), var(--sidebar);
   color: #c2cac4;
   padding: 33px 18px 14px;
   display: flex;
@@ -309,7 +315,7 @@ p {
   background: #2b332e;
 }
 .nav-item.active {
-  background: #ed6946;
+  background: var(--accent);
   color: white;
   box-shadow: 0 3px 10px #13191320;
 }
@@ -910,28 +916,28 @@ p {
   text-overflow: ellipsis;
 }
 .confirmada {
-  background: #edf3fe;
-  color: #4979bb;
-  border-color: #759dde;
+  background: #eaf3fe;
+  color: #24558a;
+  border-color: #7ca5d3;
 }
 .pendiente {
-  background: #fff7e5;
-  color: #ad8740;
-  border-color: #dfbc71;
+  background: #fff4d9;
+  color: #765108;
+  border-color: #d6b568;
 }
 .completada {
-  background: #eaf5ef;
-  color: #4c8770;
+  background: #e5f5eb;
+  color: #1f6545;
   border-color: #77af93;
 }
 .cancelada {
-  background: #fcedee;
-  color: #ba787e;
+  background: #fcecef;
+  color: #983a45;
   border-color: #d6999e;
 }
 .no_asistio {
-  background: #f0edf7;
-  color: #8a769e;
+  background: #f3ecfa;
+  color: #604887;
   border-color: #af9ac5;
 }
 .current-time {
@@ -1154,27 +1160,27 @@ p {
   padding: 0;
   width: min(560px, calc(100% - 32px));
   max-height: 90vh;
-  color: #1f2b24;
-  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.95), 0 0 7px rgba(255, 255, 255, 0.85);
+  color: var(--ink);
+  text-shadow: none;
 }
 .app-dialog :is(.eyebrow, .form-label, .field-hint, .optional, .form-separator > span, .detail-list small, .detail-list strong) {
-  color: #34473b;
+  color: var(--muted);
 }
 .app-dialog :is(input, select, textarea, button, .status-badge, .tenant-option) {
   text-shadow: none;
 }
-.app-dialog .app-table thead th { color: #405348; }
+.app-dialog .app-table thead th { color: var(--muted); }
 .app-dialog .app-table td,
-.app-dialog .app-table td strong { color: #26382e; }
-.app-dialog .app-table td small { color: #45584b; }
+.app-dialog .app-table td strong { color: var(--ink); }
+.app-dialog .app-table td small { color: var(--muted); }
 .app-dialog.wide {
   width: min(780px, calc(100% - 32px));
 }
 .app-dialog::backdrop {
   background:
-    radial-gradient(circle at 15% 18%, rgba(199, 226, 208, 0), transparent 42%),
-    radial-gradient(circle at 85% 82%, rgba(241, 193, 163, 0), transparent 45%),
-    rgba(219, 231, 222, 0);
+    radial-gradient(circle at 15% 18%, rgba(199, 226, 208, 0.18), transparent 42%),
+    radial-gradient(circle at 85% 82%, rgba(241, 193, 163, 0.12), transparent 45%),
+    rgba(18, 34, 25, 0.4);
 }
 .dialog-header {
   padding: 24px 26px 20px;
@@ -2286,7 +2292,7 @@ p {
   align-items: center;
   gap: 8px;
   font-size: 12px;
-  color: #7b858e;
+  color: #ffffff;
 }
 .checkbox-list input {
   margin: 0;
@@ -2876,8 +2882,8 @@ p {
   overflow: hidden;
 }
 .booking-summary.glass-effect {
-  background: rgba(255, 255, 255, 0.76);
-  border-color: rgba(255, 255, 255, 0.8);
+  background: var(--glass-surface);
+  border-color: var(--glass-border);
   border-radius: 16px;
 }
 .booking-summary.glass-effect .summary-top h3 { color: #405d48; }

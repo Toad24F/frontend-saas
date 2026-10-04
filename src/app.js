@@ -1,5 +1,6 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './styles.css';
+import './theme.css';
 import { icon } from './icons.js';
 import { calendarColumns } from './calendar-layout.js';
 import {
@@ -17,10 +18,47 @@ import {
 } from './data.js';
 import { escape, avatar, badge, pageHead, button, toast, empty } from './ui.js';
 
+const themeKey = 'cita-theme';
+let theme = (() => {
+  try {
+    const saved = localStorage.getItem(themeKey);
+    if (saved === 'light' || saved === 'dark') return saved;
+  } catch {
+    // El prototipo sigue funcionando si el navegador bloquea el almacenamiento.
+  }
+  return matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+})();
+function applyTheme() {
+  document.documentElement.dataset.theme = theme;
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'dark' ? '#0e1915' : '#f5f7f4');
+}
+applyTheme();
+function mountThemeToggle() {
+  const host = document.querySelector('.topbar-right, .portal-topbar');
+  if (!host) return;
+  const dark = theme === 'dark';
+  host.insertAdjacentHTML(
+    'beforeend',
+    `<button type="button" class="theme-toggle icon-btn" data-action="theme" aria-label="Activar modo ${dark ? 'claro' : 'oscuro'}" title="Modo ${dark ? 'claro' : 'oscuro'}" aria-pressed="${dark}">${icon(dark ? 'sun' : 'moon')}</button>`,
+  );
+}
+function toggleTheme() {
+  theme = theme === 'dark' ? 'light' : 'dark';
+  applyTheme();
+  try { localStorage.setItem(themeKey, theme); } catch { /* preferencia temporal */ }
+  document.querySelectorAll('.theme-toggle').forEach((button) => {
+    const dark = theme === 'dark';
+    button.innerHTML = icon(dark ? 'sun' : 'moon');
+    button.setAttribute('aria-label', `Activar modo ${dark ? 'claro' : 'oscuro'}`);
+    button.setAttribute('title', `Modo ${dark ? 'claro' : 'oscuro'}`);
+    button.setAttribute('aria-pressed', String(dark));
+  });
+}
+
 export const state = {
   tenantId: 1,
   page: 'agenda',
-  calendarView: 'week',
+  calendarView: matchMedia('(max-width: 767px)').matches ? 'day' : 'week',
   date: TODAY,
   branch: 'all',
   professional: 'all',
@@ -56,6 +94,7 @@ export function renderShell(content) {
   const tenant = tenantById(state.tenantId);
   document.querySelector('#app').innerHTML =
     `<div class="admin-layout"><div class="sidebar-overlay" data-action="menu"></div><aside class="sidebar"><a class="brand" href="/admin/agenda" data-nav="agenda"><img src="/favicon.svg" alt=""/>cita<span class="brand-dot">.</span></a><button class="workspace-switch glass-effect glass-effect--dark" data-action="switch-tenant">${avatar(tenant.initials, 'workspace-avatar')}<span><strong>${escape(tenant.name)}</strong><small>Espacio de trabajo</small></span>${icon('down')}</button><nav aria-label="Navegación principal">${nav.map((n) => (n.length === 2 ? `<div class="nav-section">${n[1]}</div>` : `<a href="/admin/${n[0]}" data-nav="${n[0]}" class="nav-item ${state.page === n[0] ? 'active' : ''}" ${state.page === n[0] ? 'aria-current="page"' : ''}>${icon(n[1])}<span>${n[2]}</span>${n[0] === 'agenda' ? `<span class="nav-count">${list('appointments', state.tenantId).filter((a) => a.date === TODAY).length}</span>` : ''}</a>`)).join('')}</nav><div class="sidebar-bottom"><a href="/admin/configuracion" data-nav="configuracion" class="nav-item ${state.page === 'configuracion' ? 'active' : ''}">${icon('settings')}<span>Configuración</span></a><div class="portal-card"><div class="portal-icon">${icon('link')}</div><strong>Tu agenda, a un enlace</strong><p>Comparte tu portal y recibe reservas en línea.</p><a href="/reservas/${tenant.slug}" data-portal>Ver portal de reservas ${icon('external')}</a></div><div class="sidebar-foot"><span class="green-dot"></span> Entorno de demostración <span>v1.0</span></div></div></aside><div class="main-layout"><header class="topbar"><div class="breadcrumbs"><button class="icon-btn mobile-menu" data-action="menu" aria-label="Abrir menú">${icon('menu')}</button><span>Mi espacio</span>${icon('chevron')}<strong>${labels[state.page] || 'Agenda'}</strong></div><div class="topbar-right"><span class="demo-pill">Prototipo</span><span class="topbar-date">${icon('calendar')} ${formatDate(TODAY, { day: 'numeric', month: 'short', year: 'numeric' })}</span><button class="notification-button icon-btn" data-nav="notificaciones" aria-label="Ver notificaciones">${icon('bell')}<i></i></button><span class="topbar-divider"></span><button class="profile-button" data-nav="configuracion">${avatar('AV', 'peach')}<span><strong>Adriana Vega</strong><small>Administradora</small></span>${icon('down')}</button></div></header><main id="main-content" class="main-content">${content}</main><footer class="app-footer"><span>Un poco más de orden. Más tiempo para cuidar.</span><span>Hecho para tu día a día <span class="footer-logo">cita.</span></span></footer></div></div>`;
+  mountThemeToggle();
 }
 export function filteredAppointments() {
   return list('appointments', state.tenantId).filter(
@@ -200,6 +239,7 @@ export function render() {
   const path = location.pathname;
   if (path.startsWith('/reservas/')) {
     if (booking) booking.renderPortal(path.split('/')[2]);
+    mountThemeToggle();
     return;
   }
   renderShell(
@@ -240,6 +280,10 @@ document.addEventListener('click', async (e) => {
   const el = e.target.closest('[data-action]');
   if (el) {
     const action = el.dataset.action;
+    if (action === 'theme') {
+      toggleTheme();
+      return;
+    }
     if (action === 'menu') {
       document.querySelector('.admin-layout')?.classList.toggle('menu-open');
       return;

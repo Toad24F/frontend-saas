@@ -152,11 +152,11 @@ export function scheduleRow(s, selected, tenantId, removable = false, blockIndex
   const branches = list('branches', tenantId).filter((b) => selected.branchIds.includes(b.id));
   return `<tr data-schedule-row data-schedule-day="${s.day}" data-id="${s.id}" class="schedule-day-${s.day} ${blockIndex > 0 ? 'schedule-repeat' : ''} ${s.enabled ? '' : 'schedule-disabled'}">
     <td><label class="form-check form-switch"><input class="form-check-input" type="checkbox" name="enabled-${s.id}" ${s.enabled ? 'checked' : ''} aria-label="Activar ${day}"/><span class="schedule-day-label">${day}</span></label></td>
-    <td><select class="form-select form-select-sm" name="branch-${s.id}" aria-label="Sucursal del ${day}">${branches.map((b) => `<option value="${b.id}" ${s.branchId === b.id ? 'selected' : ''}>${esc(b.name)}</option>`).join('')}</select></td>
-    <td><input class="form-control form-control-sm" type="time" name="start-${s.id}" value="${s.start}" aria-label="Entrada del ${day}"/></td>
-    <td><div class="time-pair"><input class="form-control form-control-sm" type="time" name="breakStart-${s.id}" value="${s.breakStart || ''}" aria-label="Inicio de descanso del ${day}"/><span>–</span><input class="form-control form-control-sm" type="time" name="breakEnd-${s.id}" value="${s.breakEnd || ''}" aria-label="Fin de descanso del ${day}"/></div></td>
-    <td><input class="form-control form-control-sm" type="time" name="end-${s.id}" value="${s.end}" aria-label="Salida del ${day}"/></td>
-    <td><div class="schedule-actions"><button type="button" class="btn btn-light schedule-add" data-add-schedule="${s.day}" aria-label="Agregar franja al ${day}" title="Agregar franja">+</button>${removable ? `<button type="button" class="icon-btn" data-remove-schedule="${s.id}" aria-label="Quitar franja del ${day}">${icon('x')}</button>` : ''}</div></td>
+    <td data-label="Sucursal"><select class="form-select form-select-sm" name="branch-${s.id}" aria-label="Sucursal del ${day}">${branches.map((b) => `<option value="${b.id}" ${s.branchId === b.id ? 'selected' : ''}>${esc(b.name)}</option>`).join('')}</select></td>
+    <td data-label="Entrada"><input class="form-control form-control-sm" type="time" name="start-${s.id}" value="${s.start}" aria-label="Entrada del ${day}"/></td>
+    <td data-label="Descanso opcional"><div class="time-pair"><input class="form-control form-control-sm" type="time" name="breakStart-${s.id}" value="${s.breakStart || ''}" aria-label="Inicio de descanso del ${day}"/><span>–</span><input class="form-control form-control-sm" type="time" name="breakEnd-${s.id}" value="${s.breakEnd || ''}" aria-label="Fin de descanso del ${day}"/></div></td>
+    <td data-label="Salida"><input class="form-control form-control-sm" type="time" name="end-${s.id}" value="${s.end}" aria-label="Salida del ${day}"/></td>
+    <td data-label="Franjas"><div class="schedule-actions"><button type="button" class="btn btn-light schedule-add" data-add-schedule="${s.day}" aria-label="Agregar franja al ${day}" title="Agregar franja">+</button>${removable ? `<button type="button" class="icon-btn" data-remove-schedule="${s.id}" aria-label="Quitar franja del ${day}">${icon('x')}</button>` : ''}</div></td>
   </tr>`;
 }
 function availability() {

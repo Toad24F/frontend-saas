@@ -11,6 +11,12 @@ npm run dev
 
 Abre la dirección que imprima Vite. Para compilar: `npm run build`. Para revisar la compilación local: `npm run preview`. Las verificaciones del motor de demostración se ejecutan con `npm test`.
 
+### Verlo desde un Android
+
+Conecta el teléfono y esta computadora a la misma red Wi-Fi y ejecuta `npm run dev`. Vite muestra una dirección **Network** como `http://192.168.x.x:5173/`; abre esa dirección en el navegador del teléfono. Se usa la IP de la computadora, no la del teléfono. Si cambia la red o la IP, usa la nueva dirección que imprima Vite. El servidor debe permanecer abierto mientras pruebas el prototipo.
+
+El botón de luna o sol del encabezado cambia entre modo claro y oscuro; la elección se recuerda en ese navegador. En pantallas estrechas, la agenda inicia en vista diaria y las franjas del horario semanal se presentan como tarjetas.
+
 El proyecto lee sus datos ficticios mediante `fetch('/data/demo.json')` y navega con History API, sin recargar las páginas. No requiere API, base de datos, credenciales ni cuenta de WhatsApp. El servidor que publique `dist/` debe resolver rutas desconocidas a `index.html` (fallback de SPA).
 
 ## Pantallas
@@ -69,7 +75,8 @@ src/
   booking.js         # Portal público y flujo de seis pasos
   ui.js              # Escape de texto, modales, estados y mensajes
   icons.js           # Iconos SVG de interfaz
-  styles.css         # Tema compartido, responsive e impresión
+  styles.css         # Estilos base e impresión
+  theme.css          # Modo oscuro y adaptación móvil
 public/data/demo.json # Catálogos ficticios de dos negocios
 db/schema.sql        # Propuesta SQL para una base NUEVA, no ejecutada por la app
 docs/                # Diccionario, alcance y contrato futuro de seguridad
@@ -78,7 +85,7 @@ tests/               # Verificaciones del motor en memoria
 
 ## Estilo de cristal
 
-La clase reutilizable `.glass-effect` está en `src/styles.css` y usa blanco al 20 %, desenfoque de 7 px, borde blanco al 30 % y sombra de 30 px. Se aplica a todos los diálogos y avisos del prototipo; el fondo claro con gradientes detrás de los diálogos mantiene legible el contenido. El selector de negocio y el resumen del portal usan variantes adaptadas a sus fondos.
+La clase reutilizable `.glass-effect` está en `src/styles.css` y usa blanco al 20 %, desenfoque de 7 px, borde blanco al 30 % y sombra de 30 px. Se aplica a los diálogos y avisos del prototipo. El exterior del diálogo permanece nítido y transparente; el modo oscuro adapta el vidrio y el texto. El selector de negocio y el resumen del portal usan variantes adecuadas a sus fondos.
 
 ## Configuración
 
