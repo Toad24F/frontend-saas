@@ -79,7 +79,7 @@ export async function loadBackendData() {
     next.services = services.map((s) => ({ id: s.id, tenantId, name: s.nombre, duration: s.duracionMinutos, price: Number(s.costo), active: s.activo, description: pending, icon: 'briefcase', color: 'blue' }));
     next.professionals = [{ id: user.id, tenantId, name: user.nombre, email: user.email, active: true, specialty: pending, initials: initials(user.nombre), color: 'peach', branchIds, serviceIds: services.filter((s) => s.seleccionado).map((s) => s.id) }];
     // La API de sucursales es administrativa: conservar los IDs reales del horario.
-    next.branches = branchIds.map((id) => ({ id, tenantId, name: `Sucursal ${id}` }));
+    next.branches = branchIds.map((id) => ({ id, tenantId, name: `Sucursal ${id}`, active: schedules.some((s) => s.sucursalId === id && s.activo) }));
     next.schedules = schedules.map((s) => ({ id: s.id, tenantId, professionalId: user.id, day: s.diaSemana, branchId: s.sucursalId, start: clock(s.inicioMinutos), end: clock(s.finMinutos), breakStart: clock(s.descansoInicioMinutos), breakEnd: clock(s.descansoFinMinutos), enabled: s.activo }));
     next.blocks = blocks.map((b) => ({ id: b.id, tenantId, professionalId: b.personalId, branchId: b.sucursalId, date: b.fechaInicio.slice(0, 10), endDate: b.fechaFin.slice(0, 10), start: clock(b.inicioMinutos), end: clock(b.finMinutos), type: b.tipo, reason: b.motivo }));
   } else if (user.rol === 'admin_negocio') {
@@ -98,5 +98,5 @@ export async function loadBackendData() {
   return next.tenants[0].id;
 }
 export function availablePage(page) {
-  return user?.rol === 'admin_negocio' && ['profesionales', 'servicios', 'sucursales', 'disponibilidad'].includes(page) || user?.rol === 'profesional' && ['profesionales', 'disponibilidad'].includes(page) || user?.rol === 'superadmin' && page === 'plataforma';
+  return user?.rol === 'admin_negocio' && ['profesionales', 'servicios', 'sucursales', 'disponibilidad'].includes(page) || user?.rol === 'profesional' && ['servicios', 'sucursales', 'disponibilidad'].includes(page) || user?.rol === 'superadmin' && page === 'plataforma';
 }

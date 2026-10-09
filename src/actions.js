@@ -485,6 +485,44 @@ function newTenant() {
 }
 export async function handleClick(e) {
   try {
+    const serviceToggle = e.target.closest('[data-toggle-service]');
+    if (serviceToggle) {
+      const service = resource('services', Number(serviceToggle.dataset.toggleService), state.tenantId);
+      serviceToggle.disabled = true;
+      try {
+        if (isDemo) service.active = service.active === false;
+        else if (user.rol === 'profesional') {
+          const professional = list('professionals', state.tenantId)[0];
+          const serviceIds = professional.serviceIds.includes(service.id)
+            ? professional.serviceIds.filter((id) => id !== service.id)
+            : [...professional.serviceIds, service.id];
+          await api(`/profesionales/${user.id}/servicios`, 'PUT', { servicioIds });
+        } else await api(`/servicios/${service.id}/${service.active === false ? 'reactivar' : 'desactivar'}`, 'POST', {});
+        if (!isDemo) await loadBackendData();
+        render();
+        toast('Servicio actualizado.');
+      } catch (error) { toast(error.message); serviceToggle.disabled = false; }
+      return;
+    }
+    const branchToggle = e.target.closest('[data-toggle-branch]');
+    if (branchToggle) {
+      const branch = resource('branches', Number(branchToggle.dataset.toggleBranch), state.tenantId);
+      branchToggle.disabled = true;
+      try {
+        if (isDemo) branch.active = branch.active === false;
+        else if (user.rol === 'profesional') {
+          const rows = list('schedules', state.tenantId).filter((s) => s.professionalId === user.id);
+          const target = rows.filter((s) => s.branchId === branch.id);
+          if (!target.length) throw new Error('Esta sucursal no tiene franjas de horario para activar.');
+          const active = target.some((s) => s.enabled);
+          await api(`/profesionales/${user.id}/horario`, 'PUT', schedulePayload(rows.map((s) => s.branchId === branch.id ? { ...s, enabled: !active } : s)));
+        } else await api(`/sucursales/${branch.id}/${branch.active === false ? 'reactivar' : 'desactivar'}`, 'POST', {});
+        if (!isDemo) await loadBackendData();
+        render();
+        toast(user?.rol === 'profesional' && !isDemo ? 'Disponibilidad en sucursal actualizada.' : 'Sucursal actualizada.');
+      } catch (error) { toast(error.message); branchToggle.disabled = false; }
+      return;
+    }
     const addSchedule = e.target.closest('[data-add-schedule]');
     if (addSchedule) {
       const day = Number(addSchedule.dataset.addSchedule);

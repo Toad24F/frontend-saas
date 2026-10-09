@@ -1765,6 +1765,17 @@ p {
   padding-top: 18px;
   margin-top: 18px;
 }
+.card-assignees,
+.branch-title,
+.branch-actions {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.card-assignees { min-width: 0; }
+.branch-title h2 { margin: 0; }
+.entity-toggle { flex-shrink: 0; font-size: 12px; }
+.branch-actions { flex-wrap: wrap; justify-content: flex-end; }
 .service-icon {
   width: 46px;
   height: 46px;

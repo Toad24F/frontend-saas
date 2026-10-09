@@ -105,6 +105,12 @@ html[data-theme='dark'] .schedule-table th:last-child,
 html[data-theme='dark'] .schedule-table td:last-child,
 html[data-theme='dark'] .schedule-table .schedule-disabled td:last-child { background: #1b2921; }
 html[data-theme='dark'] .schedule-table .schedule-day-label { color: color-mix(in srgb, var(--schedule-accent) 60%, white); }
+html[data-theme='dark'] .schedule-table .schedule-disabled,
+html[data-theme='dark'] .schedule-table .schedule-disabled > td,
+html[data-theme='dark'] .schedule-table .schedule-disabled td:last-child {
+  background: #223027 !important;
+  color: #a9b9ac !important;
+}
 
 html[data-theme='dark'] .daily-insight { background: radial-gradient(circle at 85% 18%, #345841, transparent 42%), radial-gradient(circle at 12% 88%, #594135, transparent 46%), #203629; border-color: #47604e; }
 html[data-theme='dark'] .daily-insight::before { background: rgba(17, 30, 21, .48); border-color: rgba(200, 229, 205, .16); }
