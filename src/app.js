@@ -1,3 +1,4 @@
+import { isDemo, pending, modeUrl, user, roleLabel, availablePage, login, logout, restoreSession, loadBackendData } from './backend.js';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './styles.css';
 import './theme.css';
@@ -19,7 +20,7 @@ import {
   tenantById,
   statuses,
 } from './data.js';
-import { escape, avatar, badge, pageHead, button, toast, empty } from './ui.js';
+import { escape, avatar, badge, pageHead, button, toast, empty, modal } from './ui.js';
 
 const themeKey = 'cita-theme';
 let theme = (() => {
@@ -99,13 +100,14 @@ function setMobileMenuOpen(isOpen) {
   else layout.querySelector('.mobile-tabbar [data-action="menu"]')?.focus();
 }
 export function navigate(page) {
-  history.pushState({}, '', `/admin/${page}`);
+  history.pushState({}, '', modeUrl(`/admin/${page}`));
   state.page = page;
   state.search = '';
   animateNextRoute = true;
   render();
 }
 export function renderShell(content) {
+  if (!tenantById(state.tenantId)) state.tenantId = db.tenants[0].id;
   const tenant = tenantById(state.tenantId);
   document.querySelector('#app').innerHTML =
     `<div class="admin-layout"><div class="sidebar-overlay" data-action="menu"></div><aside class="sidebar"><a class="brand" href="/admin/agenda" data-nav="agenda"><img src="/favicon.svg" alt=""/>cita<span class="brand-dot">.</span></a><button class="workspace-switch glass-effect glass-effect--dark" data-action="switch-tenant">${avatar(tenant.initials, 'workspace-avatar')}<span><strong>${escape(tenant.name)}</strong><small>Espacio de trabajo</small></span>${icon('down')}</button><nav aria-label="Navegación principal">${nav.map((n) => (n.length === 2 ? `<div class="nav-section">${n[1]}</div>` : `<a href="/admin/${n[0]}" data-nav="${n[0]}" class="nav-item ${state.page === n[0] ? 'active' : ''}" ${state.page === n[0] ? 'aria-current="page"' : ''}>${icon(n[1])}<span>${n[2]}</span>${n[0] === 'agenda' ? `<span class="nav-count">${list('appointments', state.tenantId).filter((a) => a.date === TODAY).length}</span>` : ''}</a>`)).join('')}</nav><div class="sidebar-bottom"><a href="/admin/configuracion" data-nav="configuracion" class="nav-item ${state.page === 'configuracion' ? 'active' : ''}">${icon('settings')}<span>Configuración</span></a><div class="portal-card"><div class="portal-icon">${icon('link')}</div><strong>Tu agenda, a un enlace</strong><p>Comparte tu portal y recibe reservas en línea.</p><a href="/reservas/${tenant.slug}" data-portal>Ver portal de reservas ${icon('external')}</a></div><div class="sidebar-foot"><span class="green-dot"></span> Entorno de demostración <span>v1.0</span></div></div></aside><div class="main-layout"><header class="topbar"><div class="breadcrumbs"><button class="icon-btn mobile-menu" data-action="menu" aria-label="Abrir menú">${icon('menu')}</button><span>Mi espacio</span>${icon('chevron')}<strong>${labels[state.page] || 'Agenda'}</strong></div><div class="topbar-right"><span class="demo-pill">Prototipo</span><span class="topbar-date">${icon('calendar')} ${formatDate(TODAY, { day: 'numeric', month: 'short', year: 'numeric' })}</span><button class="notification-button icon-btn" data-nav="notificaciones" aria-label="Ver notificaciones">${icon('bell')}<i></i></button><span class="topbar-divider"></span><button class="profile-button" data-nav="configuracion">${avatar('AV', 'peach')}<span><strong>Adriana Vega</strong><small>Administradora</small></span>${icon('down')}</button></div></header><main id="main-content" class="main-content${animateNextRoute ? ' motion-enter' : ''}">${content}</main><footer class="app-footer"><span>Un poco más de orden. Más tiempo para cuidar.</span><span>Hecho para tu día a día <span class="footer-logo">cita.</span></span></footer></div></div>`;
@@ -123,6 +125,14 @@ export function renderShell(content) {
   sidebar.insertAdjacentHTML('afterend',
     `<nav class="mobile-tabbar glass-effect" aria-label="Navegación inferior"><div class="mobile-tabbar-inner">${mobileTabs}<button type="button" class="mobile-tab ${moreIsCurrent ? 'is-current' : ''}" data-action="menu" aria-label="Más secciones" aria-controls="mobile-navigation-drawer" aria-expanded="false"><span class="mobile-tab-icon">${icon('menu')}</span><span>Más</span></button></div></nav>`,
   );
+  document.querySelectorAll('a[href^="/admin/"], a[href^="/reservas/"]').forEach((link) => link.href = modeUrl(link.getAttribute('href')));
+  const pill = document.querySelector('.demo-pill');
+  pill.outerHTML = `<a class="demo-pill" href="${modeUrl(location.pathname, !isDemo)}" title="${isDemo ? 'Ver versión conectada' : 'Comparar con la demo'}">${isDemo ? 'Prototipo' : 'Ver demo'}</a>`;
+  if (!isDemo) {
+    document.querySelector('.sidebar-foot').innerHTML = '<span class="green-dot"></span> Backend conectado <span>v1.0</span>';
+    document.querySelector('.profile-button').innerHTML = avatar(user.nombre.split(' ').slice(0, 2).map((x) => x[0]).join(''), 'peach') + `<span><strong>${escape(user.nombre)}</strong><small>${escape(roleLabel(user.rol))}</small></span>${icon('down')}`;
+    if (user.rol === 'superadmin') document.querySelector('.sidebar nav').insertAdjacentHTML('beforeend', '<a class="nav-item" href="/admin/plataforma" data-nav="plataforma">Negocios</a>');
+  }
   mountThemeToggle();
   animateNextRoute = false;
 }
@@ -266,15 +276,20 @@ let extraViews = null,
   booking = null,
   actions = null;
 export function render() {
+  if (!db) return;
+  if (!isDemo && location.pathname.startsWith('/reservas/')) { renderShell(empty('Portal de reservas', pending)); return; }
   document.title = `${import.meta.env.VITE_APP_NAME || 'Cita'} · ${location.pathname.startsWith('/reservas/') ? 'Reserva tu cita' : labels[state.page] || 'Agenda'}`;
   const path = location.pathname;
   if (path.startsWith('/reservas/')) {
     if (booking) booking.renderPortal(path.split('/')[2]);
+    document.querySelectorAll('a[href^="/admin/"], a[href^="/reservas/"]').forEach((link) => link.href = modeUrl(link.getAttribute('href')));
     mountThemeToggle();
     return;
   }
   renderShell(
-    state.page === 'agenda'
+    !isDemo && !availablePage(state.page)
+      ? pageHead(labels[state.page] || 'Agenda', '') + empty(pending, 'Puedes comparar esta pantalla con la demo.', `<a class="btn btn-light" href="${modeUrl(location.pathname, true)}">Ver demo</a>`)
+      : state.page === 'agenda'
       ? agendaView()
       : extraViews
         ? extraViews.renderView(state.page)
@@ -285,13 +300,14 @@ document.addEventListener('click', async (e) => {
   const navEl = e.target.closest('[data-nav]');
   if (navEl) {
     e.preventDefault();
+    if (navEl.dataset.navProfessional) state.scheduleProfessional = Number(navEl.dataset.navProfessional);
     navigate(navEl.dataset.nav);
     return;
   }
   const portal = e.target.closest('[data-portal]');
   if (portal) {
     e.preventDefault();
-    history.pushState({}, '', portal.getAttribute('href'));
+    history.pushState({}, '', modeUrl(portal.getAttribute('href').split('?')[0]));
     render();
     return;
   }
@@ -372,9 +388,31 @@ document.addEventListener('keydown', (event) => {
     setMobileMenuOpen(false);
   }
 });
+function showLogin(message = '') {
+  document.querySelector('#app').innerHTML = `<div class="startup-error"><img src="/favicon.svg" alt=""/><h1>Tu espacio en cita.</h1><p>Inicia sesión para trabajar con tu negocio.</p><button class="btn btn-primary" id="open-login">Iniciar sesión</button><a class="btn btn-light" href="${modeUrl(location.pathname, true)}">Ver demo</a></div>`;
+  document.querySelector('#open-login').onclick = () => {
+    const el = modal('Iniciar sesión', `<form id="login-form"><div class="dialog-body"><div class="form-field"><label class="form-label" for="login-email">Correo</label><input class="form-control" id="login-email" name="email" type="email" autocomplete="username" required/></div><div class="form-field"><label class="form-label" for="login-password">Contraseña</label><input class="form-control" id="login-password" name="password" type="password" autocomplete="current-password" required/></div><p class="form-error" role="alert" id="login-error">${escape(message)}</p></div><div class="dialog-footer"><button class="btn btn-primary" type="submit">Entrar</button></div></form>`);
+    el.querySelector('form').onsubmit = async (event) => {
+      event.preventDefault();
+      const submit = event.target.querySelector('[type="submit"]'); submit.disabled = true;
+      try {
+        const f = new FormData(event.target); await login(f.get('email'), f.get('password'));
+        el.close(); await start();
+      } catch (error) { el.querySelector('#login-error').textContent = error.message; }
+      finally { submit.disabled = false; }
+    };
+  };
+  document.querySelector('#open-login').click();
+}
+window.addEventListener('cita-session-expired', () => { document.querySelector('#app-dialog')?.close(); showLogin('Tu sesión expiró. Inicia sesión nuevamente.'); });
 async function start() {
   try {
-    await loadData();
+    document.documentElement.dataset.appMode = isDemo ? 'demo' : 'connected';
+    if (isDemo) await loadData();
+    else {
+      if (!await restoreSession()) { showLogin(); return; }
+      state.tenantId = await loadBackendData();
+    }
     state.page = location.pathname.startsWith('/admin/')
       ? location.pathname.split('/')[2]
       : 'agenda';
@@ -386,8 +424,9 @@ async function start() {
     render();
     registerCalendarTool();
   } catch (error) {
+    if (!isDemo && !user) { showLogin(error.message); return; }
     document.querySelector('#app').innerHTML =
-      `<div class="startup-error"><img src="/favicon.svg" alt=""/><h1>No pudimos abrir tu agenda</h1><p>${escape(error.message)}</p><button class="btn btn-primary" onclick="location.reload()">Volver a intentar</button></div>`;
+      `<div class="startup-error"><img src="/favicon.svg" alt=""/><h1>No pudimos abrir tu agenda</h1><p>${escape(error.message)}</p><button class="btn btn-primary" onclick="location.reload()">Volver a intentar</button><a class="btn btn-light" href="${modeUrl(location.pathname, true)}">Ver demo</a></div>`;
   }
 }
 // Mejora progresiva: los navegadores sin WebMCP siguen usando la misma interfaz.

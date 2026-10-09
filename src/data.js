@@ -1,6 +1,8 @@
 /** Datos ficticios volátiles. El filtrado local solo demuestra el alcance visual;
  * la autorización real debe vivir en una API autenticada. */
-export const TODAY = import.meta.env?.VITE_DEMO_TODAY || '2026-09-08';
+export const TODAY = typeof location !== 'undefined' && new URLSearchParams(location.search).get('demo') !== '1'
+  ? new Date().toLocaleDateString('en-CA', { timeZone: 'America/Chihuahua' })
+  : import.meta.env?.VITE_DEMO_TODAY || '2026-09-08';
 export const date = (iso) => new Date(`${iso}T12:00:00`);
 export const iso = (d) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -33,6 +35,7 @@ export const statuses = {
   no_asistio: 'No asistió',
 };
 export let db;
+export function replaceData(data) { db = data; }
 const names = [
   'María González',
   'Juan Pérez',

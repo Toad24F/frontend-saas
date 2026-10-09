@@ -29,7 +29,7 @@ export function modal(title, body, wide = false) {
   const el = document.querySelector('#app-dialog');
   returnFocus = document.activeElement;
   el.className = wide ? 'app-dialog glass-effect wide' : 'app-dialog glass-effect';
-  el.innerHTML = `<header class="dialog-header"><div><span class="eyebrow">CLÍNICA · DEMOSTRACIÓN</span><h2 id="dialog-title">${title}</h2></div><button class="icon-btn" data-close aria-label="Cerrar">${icon('x')}</button></header>${body}`;
+  el.innerHTML = `<header class="dialog-header"><div><span class="eyebrow">${document.documentElement.dataset.appMode === 'connected' ? 'MI NEGOCIO' : 'CLÍNICA · DEMOSTRACIÓN'}</span><h2 id="dialog-title">${title}</h2></div><button class="icon-btn" data-close aria-label="Cerrar">${icon('x')}</button></header>${body}`;
   if (!el.open) el.showModal();
   el.querySelector('[data-close]').onclick = () => el.close();
   el.onclose = () => returnFocus?.focus();

@@ -17,9 +17,21 @@ Conecta el teléfono y esta computadora a la misma red Wi-Fi y ejecuta `npm run 
 
 El botón de luna o sol del encabezado cambia entre modo claro y oscuro; la elección se recuerda en ese navegador. En pantallas estrechas, la agenda inicia en vista diaria y las franjas del horario semanal se presentan como tarjetas.
 
-El proyecto lee sus datos ficticios mediante `fetch('/data/demo.json')` y navega con History API, sin recargar las páginas. No requiere API, base de datos, credenciales ni cuenta de WhatsApp. El servidor que publique `dist/` debe resolver rutas desconocidas a `index.html` (fallback de SPA).
+La versión conectada requiere la API del backend y una cuenta activa. La demo (`?demo=1`) lee datos ficticios mediante `fetch('/data/demo.json')`, sin credenciales ni API. Ambas versiones navegan con History API y comparten componentes, estilos y animaciones. El servidor que publique `dist/` debe resolver rutas desconocidas a `index.html` (fallback de SPA).
 
-## Pantallas
+## Integración con el backend actual
+
+- La ruta sin parámetros abre la versión conectada. Inicia sesión con una cuenta del backend.
+- Configura `VITE_API_URL` en `.env` si la API no está en `http://localhost:3000`. No agregues `/api`: el backend actual no utiliza ese prefijo. Reinicia Vite al cambiar esta variable.
+- Para comparar, usa **Ver demo** en el encabezado o agrega `?demo=1` a cualquier ruta. El enlace **Prototipo** vuelve a la versión conectada. El modo se conserva al navegar y recargar.
+- Administración: profesionales (identidad, contraseña y asignaciones), servicios, sucursales, semana completa con múltiples franjas y descansos, y creación/eliminación de bloqueos.
+- Profesional: sus servicios, horarios y bloqueos. La API restringe el catálogo de sucursales a administración; en este rol se muestran los IDs de las sucursales presentes en su horario.
+- Superadministración: negocios, registro con RFC y límite de sucursales, suspensión/reactivación y renovación de licencias según el servidor.
+- Agenda/citas, clientes, reportes, WhatsApp, portal público, datos generales del negocio, especialidad, descripción de servicios y modos libre/compacto muestran **Aún no forma parte de esta entrega** en la versión conectada. Permanecen disponibles en la demo.
+- El selector del espacio permite cerrar sesión. El token se guarda solo en la sesión de esta pestaña; los errores de la API se muestran en los formularios.
+- La carpeta del backend se conserva como fuente de consulta: esta integración solo modifica el frontend.
+
+## Pantallas de la demo
 
 | Ruta                          | Contenido                                                                                                                           |
 | ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
@@ -37,7 +49,7 @@ El proyecto lee sus datos ficticios mediante `fetch('/data/demo.json')` y navega
 | `/reservas/clinica-bienestar` | Reserva pública de Clínica Bienestar en seis pasos.                                                                                 |
 | `/reservas/espacio-mente`     | Segundo negocio, catálogo propio y modo de agenda compacta.                                                                         |
 
-## Recorrido sugerido
+## Recorrido sugerido de la demo
 
 1. Abre una cita del calendario y cambia su estado.
 2. Usa **Nueva cita** para probar agendamiento manual. El profesional cambia de sucursal según el día: en los ejemplos, Centro lunes/miércoles/viernes y Norte martes/jueves.

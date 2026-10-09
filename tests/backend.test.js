@@ -1,0 +1,70 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { api, login, loadBackendData, catalogPayload, schedulePayload, modeUrl } from '../src/backend.js';
+import { db } from '../src/data.js';
+
+test('semana completa: conserva IDs, descansos y orden por día; excluye borradores vacíos', () => {
+  const row = { id: 12, day: 1, branchId: 3, start: '07:00', end: '12:00', breakStart: '09:00', breakEnd: '09:30', enabled: true };
+  const result = schedulePayload([row, { ...row, id: -2, branchId: 4, start: '12:00', end: '00:00', breakStart: '', breakEnd: '' }, { ...row, id: 13, day: 2, enabled: false }, { id: -104, day: 4, enabled: false, start: '', end: '' }]);
+  assert.equal(result.franjas.length, 3);
+  assert.deepEqual(result.franjas[0], { id: 12, diaSemana: 1, orden: 0, sucursalId: 3, inicioMinutos: 420, finMinutos: 720, descansoInicioMinutos: 540, descansoFinMinutos: 570, activo: true });
+  assert.equal(result.franjas[1].id, undefined);
+  assert.equal(result.franjas[1].orden, 1);
+  assert.equal(result.franjas[1].finMinutos, 1440);
+  assert.equal(result.franjas[2].orden, 0);
+  assert.equal(result.franjas[2].activo, false);
+  assert.deepEqual(schedulePayload([]), { franjas: [] });
+});
+
+test('catálogos solo envían los campos admitidos por el backend', () => {
+  assert.deepEqual(catalogPayload('services', { name: 'Consulta', price: 350.5, duration: 20, description: 'demo', tenantId: 9 }), { nombre: 'Consulta', costo: '350.5', duracionMinutos: 20 });
+  assert.deepEqual(catalogPayload('branches', { name: 'Centro', address: 'Calle 1', phone: '+52 614 1234567', timezone: 'America/Chihuahua', notes: '', maps: '' }), { nombre: 'Centro', direccion: 'Calle 1', telefono: '+52 614 1234567', zonaHoraria: 'America/Chihuahua', notasLlegada: null, urlGoogleMaps: null });
+  assert.equal(modeUrl('/admin/profesionales', true), '/admin/profesionales?demo=1');
+  assert.equal(modeUrl('/admin/profesionales', false), '/admin/profesionales');
+});
+
+test('API interpreta 204 y errores de validación sin ocultarlos', async () => {
+  const original = global.fetch;
+  try {
+    global.fetch = async () => new Response(null, { status: 204 });
+    assert.equal(await api('/bloqueos/1', 'DELETE'), null);
+    global.fetch = async () => Response.json({ message: ['Horario solapado', 'Sucursal no asignada'] }, { status: 400 });
+    await assert.rejects(api('/profesionales/2/horario', 'PUT', { franjas: [] }), /Horario solapado · Sucursal no asignada/);
+  } finally { global.fetch = original; }
+});
+
+test('carga datos reales aislados del negocio, sin inventar citas, y envía autorización', async () => {
+  const original = global.fetch;
+  const storage = global.sessionStorage;
+  const requests = [];
+  global.sessionStorage = { setItem() {}, removeItem() {} };
+  const responses = {
+    '/auth/login': { accessToken: 'test-token', usuario: { id: 2, nombre: 'Admin', rol: 'admin_negocio', negocioId: 7 } },
+    '/servicios': [{ id: 10, nombre: 'Consulta', costo: '500.00', duracionMinutos: 45, activo: true }],
+    '/sucursales': [{ id: 20, nombre: 'Centro', direccion: 'Calle 1', telefono: '6141234567', zonaHoraria: 'America/Chihuahua', activo: true }],
+    '/profesionales': [{ id: 30, nombre: 'Profesional', correo: 'test@example.com', activo: false }],
+    '/bloqueos': [{ id: 40, personalId: 30, sucursalId: 20, tipo: 'vacaciones', motivo: 'Vacaciones', fechaInicio: '2026-10-10', fechaFin: '2026-10-11', inicioMinutos: null, finMinutos: null }],
+    '/profesionales/30/sucursales': [20],
+    '/profesionales/30/servicios': [{ id: 10, seleccionado: true }],
+    '/profesionales/30/horario': [{ id: 50, diaSemana: 6, sucursalId: 20, inicioMinutos: 720, finMinutos: 1440, descansoInicioMinutos: null, descansoFinMinutos: null, activo: true }],
+  };
+  try {
+    global.fetch = async (url, options) => {
+      const path = new URL(url).pathname;
+      requests.push({ path, options });
+      assert.ok(path in responses, `Ruta inesperada: ${path}`);
+      return Response.json(responses[path]);
+    };
+    await login('test@example.com', 'test-password');
+    assert.equal(await loadBackendData(), 7);
+    assert.deepEqual(db.professionals[0].branchIds, [20]);
+    assert.deepEqual(db.professionals[0].serviceIds, [10]);
+    assert.equal(db.professionals[0].active, false);
+    assert.equal(db.schedules[0].end, '00:00');
+    assert.equal(db.blocks[0].professionalId, 30);
+    assert.deepEqual(db.appointments, []);
+    assert.deepEqual(db.clients, []);
+    assert.equal(db.professionals[0].tenantId, 7);
+    assert.ok(requests.slice(1).every(({ options }) => options.headers.Authorization === 'Bearer test-token'));
+  } finally { global.fetch = original; global.sessionStorage = storage; }
+});

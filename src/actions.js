@@ -1,3 +1,4 @@
+import { isDemo, pending, api, user, roleLabel, logout, loadBackendData, schedulePayload, catalogPayload, modeUrl } from './backend.js';
 import { state, render, navigate } from './app.js';
 import {
   db,
@@ -45,16 +46,21 @@ function basicForm(title, content, onSubmit, wide = false) {
     wide,
   );
   el.querySelector('[data-dismiss]').onclick = () => el.close();
-  el.querySelector('form').onsubmit = (e) => {
+  el.querySelector('form').onsubmit = async (e) => {
     e.preventDefault();
+    const submit = e.target.querySelector('[type="submit"]');
+    submit.disabled = true;
     try {
-      onSubmit(new FormData(e.target));
+      await onSubmit(new FormData(e.target));
       el.close();
       render();
-      toast('Cambios guardados en esta demostración.');
+      if (!isDemo) {
+        try { await loadBackendData(); render(); } catch (error) { toast('Guardado completado. No se pudo actualizar la vista: ' + error.message); return; }
+      }
+      toast(isDemo ? 'Cambios guardados en esta demostración.' : 'Cambios guardados.');
     } catch (error) {
       formError(error);
-    }
+    } finally { submit.disabled = false; }
   };
   return el;
 }
@@ -215,7 +221,7 @@ function catalog(type, id) {
   if (type === 'services') {
     basicForm(
       existing ? 'Editar servicio' : 'Nuevo servicio',
-      `${field('Nombre del servicio', 'name', existing?.name, 'text', 'required maxlength="150"')}${field('Descripción', 'description', existing?.description, 'text', 'required maxlength="200"')}<div class="form-row-two">${field('Duración en minutos', 'duration', existing?.duration || 45, 'number', 'required min="15" max="240" step="15"')}${field('Precio informativo (MXN)', 'price', existing?.price ?? 600, 'number', 'required min="0" max="99999" step="0.01"')}</div>`,
+      `${field('Nombre del servicio', 'name', existing?.name, 'text', 'required maxlength="150"')}${field('Descripción', 'description', isDemo ? existing?.description : pending, 'text', isDemo ? 'required maxlength="200"' : 'readonly')}<div class="form-row-two">${field('Duración en minutos', 'duration', existing?.duration || 45, 'number', isDemo ? 'required min="15" max="240" step="15"' : 'required min="1" step="1"')}${field('Precio informativo (MXN)', 'price', existing?.price ?? 600, 'number', 'required min="0" max="99999" step="0.01"')}</div>`,
       (f) =>
         save('services', existing, {
           name: f.get('name').trim(),
@@ -230,34 +236,36 @@ function catalog(type, id) {
   if (type === 'branches') {
     basicForm(
       existing ? 'Editar sucursal' : 'Nueva sucursal',
-      `${field('Nombre', 'name', existing?.name, 'text', 'required maxlength="150"')}${field('Dirección', 'address', existing?.address, 'text', 'required maxlength="255"')}${field('Teléfono', 'phone', existing?.phone, 'tel', 'required pattern="[0-9]{10}" maxlength="10" inputmode="numeric"')}${field('Indicaciones de llegada', 'notes', existing?.notes, 'text', 'maxlength="255"')}`,
+      `${field('Nombre', 'name', existing?.name, 'text', 'required maxlength="150"')}${field('Dirección', 'address', existing?.address, 'text', 'required maxlength="255"')}${field('Teléfono', 'phone', existing?.phone, 'tel', isDemo ? 'required pattern="[0-9]{10}" maxlength="10" inputmode="numeric"' : 'required minlength="7" maxlength="20"')}${field('Indicaciones de llegada', 'notes', existing?.notes, 'text', 'maxlength="255"')}${isDemo ? '' : field('Zona horaria', 'timezone', existing?.timezone || 'America/Chihuahua', 'text', 'required') + field('Enlace de Google Maps', 'maps', existing?.maps || '', 'url')}`,
       (f) =>
         save('branches', existing, {
           name: f.get('name').trim(),
           address: f.get('address'),
           phone: f.get('phone'),
-          notes: f.get('notes'),
+          notes: f.get('notes'), timezone: f.get('timezone'), maps: f.get('maps'),
           color: existing?.color || 'orange',
         }),
     );
   }
   if (type === 'professionals') {
-    if (
+    if (isDemo && (
       !list('services', state.tenantId).length ||
       !list('branches', state.tenantId).length
-    ) {
+    )) {
       toast('Crea al menos un servicio y una sucursal primero.');
       return;
     }
+    const own = !isDemo && user.rol === 'profesional';
+    let liveId = existing?.id;
     basicForm(
       existing ? 'Editar profesional' : 'Nuevo profesional',
-      `${field('Nombre completo', 'name', existing?.name, 'text', 'required maxlength="150"')}${field('Especialidad', 'specialty', existing?.specialty, 'text', 'required maxlength="150"')}${field('Correo', 'email', existing?.email, 'email', 'required')}<div class="form-field"><label class="form-label">Servicios que ofrece</label><div class="checkbox-list">${list(
+      `${field('Nombre completo', 'name', existing?.name, 'text', own ? 'readonly' : 'required maxlength="150"')}${field('Especialidad', 'specialty', isDemo ? existing?.specialty : pending, 'text', isDemo ? 'required maxlength="150"' : 'readonly')}${field('Correo', 'email', existing?.email, 'email', own ? 'readonly' : 'required')}${isDemo || own ? '' : field(existing ? 'Nueva contraseña (opcional)' : 'Contraseña', 'password', '', 'password', existing ? 'autocomplete="new-password"' : 'required autocomplete="new-password"')}<div class="form-field"><label class="form-label">Servicios que ofrece</label><div class="checkbox-list">${list(
         'services',
         state.tenantId,
       )
         .map(
           (s) =>
-            `<label><input type="checkbox" class="form-check-input" name="services" value="${s.id}" ${existing?.serviceIds.includes(s.id) ? 'checked' : ''}/> ${esc(s.name)}</label>`,
+            `<label><input type="checkbox" class="form-check-input" name="services" value="${s.id}" ${!isDemo && s.active === false && !existing?.serviceIds.includes(s.id) ? 'disabled' : ''} ${existing?.serviceIds.includes(s.id) ? 'checked' : ''}/> ${esc(s.name)}</label>`,
         )
         .join(
           '',
@@ -267,12 +275,23 @@ function catalog(type, id) {
       )
         .map(
           (b) =>
-            `<label><input type="checkbox" class="form-check-input" name="branches" value="${b.id}" ${existing?.branchIds.includes(b.id) ? 'checked' : ''}/> ${esc(b.name)}</label>`,
+            `<label><input type="checkbox" class="form-check-input" name="branches" value="${b.id}" ${own ? 'disabled' : ''} ${existing?.branchIds.includes(b.id) ? 'checked' : ''}/> ${esc(b.name)}</label>`,
         )
         .join('')}</div></div>`,
-      (f) => {
+      async (f) => {
         const serviceIds = f.getAll('services').map(Number),
           branchIds = f.getAll('branches').map(Number);
+        if (!isDemo) {
+          if (user.rol === 'profesional') { await api(`/profesionales/${liveId}/servicios`, 'PUT', { servicioIds: serviceIds }); return; }
+          const identity = { nombre: f.get('name').trim(), correo: f.get('email').trim(), ...(f.get('password') ? { password: f.get('password') } : {}) };
+          const saved = await api(liveId ? `/profesionales/${liveId}` : '/profesionales', liveId ? 'PATCH' : 'POST', identity);
+          liveId = saved.id;
+          try {
+            await api(`/profesionales/${liveId}/sucursales`, 'PUT', { sucursalIds: branchIds });
+            await api(`/profesionales/${liveId}/servicios`, 'PUT', { servicioIds: serviceIds });
+          } catch (error) { throw new Error('Cuenta guardada. Falta completar las asignaciones; puedes reintentar: ' + error.message); }
+          return;
+        }
         if (!serviceIds.length || !branchIds.length)
           throw new Error('Selecciona al menos un servicio y una sucursal.');
         serviceIds.forEach((id) => resource('services', id, state.tenantId));
@@ -336,6 +355,11 @@ function catalog(type, id) {
   }
 }
 function save(table, existing, values) {
+  if (!isDemo) {
+    const route = table === 'services' ? '/servicios' : '/sucursales';
+    const body = catalogPayload(table, values);
+    return api(existing ? `${route}/${existing.id}` : route, existing ? 'PATCH' : 'POST', body);
+  }
   if (!values.name?.trim()) throw new Error('El nombre es obligatorio.');
   if (existing) {
     Object.assign(resource(table, existing.id, state.tenantId), values);
@@ -379,7 +403,7 @@ function newBlock() {
         { id: 'feriado', name: 'Día festivo' },
         { id: 'emergencia', name: 'Emergencia' },
       ],
-    )}${select('Profesional', 'professionalId', [{ id: '', name: 'Todo el equipo' }, ...list('professionals', state.tenantId)])}</div>${select('Sucursal', 'branchId', [{ id: '', name: 'Todas las sucursales' }, ...list('branches', state.tenantId)])}<div class="form-row-two">${field('Desde', 'date', TODAY, 'date', 'required')}${field('Hasta', 'endDate', TODAY, 'date', 'required')}</div><div class="form-row-two">${field('Hora inicial (opcional)', 'start', '', 'time')}${field('Hora final (opcional)', 'end', '', 'time')}</div><p class="field-hint">Deja ambas horas vacías para bloquear el día completo. Las citas existentes se conservan.</p>`,
+    )}${select('Profesional', 'professionalId', [...(!isDemo && user.rol === 'profesional' ? [] : [{ id: '', name: 'Todo el equipo' }]), ...list('professionals', state.tenantId)])}</div>${select('Sucursal', 'branchId', [{ id: '', name: 'Todas las sucursales' }, ...list('branches', state.tenantId)])}<div class="form-row-two">${field('Desde', 'date', TODAY, 'date', 'required')}${field('Hasta', 'endDate', TODAY, 'date', 'required')}</div><div class="form-row-two">${field('Hora inicial (opcional)', 'start', '', 'time')}${field('Hora final (opcional)', 'end', '', 'time')}</div><p class="field-hint">Deja ambas horas vacías para bloquear el día completo. Las citas existentes se conservan.</p>`,
     (f) => {
       const b = {
         id: Math.max(0, ...db.blocks.map((x) => x.id)) + 1,
@@ -396,7 +420,7 @@ function newBlock() {
       if (
         b.date > b.endDate ||
         Boolean(b.start) !== Boolean(b.end) ||
-        (b.start && b.start >= b.end)
+        (isDemo && b.start && b.start >= b.end)
       )
         throw new Error(
           'Verifica el rango de fechas y las dos horas del bloqueo.',
@@ -404,6 +428,7 @@ function newBlock() {
       if (b.professionalId)
         resource('professionals', b.professionalId, state.tenantId);
       if (b.branchId) resource('branches', b.branchId, state.tenantId);
+      if (!isDemo) return api('/bloqueos', 'POST', { personalId: b.professionalId, sucursalId: b.branchId, tipo: b.type === 'feriado' ? 'dia_festivo' : b.type, motivo: b.reason, fechaInicio: b.date, fechaFin: b.endDate, inicioMinutos: b.start ? minutes(b.start) : null, finMinutos: b.end ? minutes(b.end) : null });
       db.blocks.push(b);
     },
     true,
@@ -412,6 +437,7 @@ function newBlock() {
   document.querySelector('#f-branchId').required = false;
 }
 function switchTenant() {
+  if (!isDemo) { modal('Tu espacio de trabajo', `<div class="dialog-body"><p>${esc(user.nombre)} · ${esc(roleLabel(user.rol))}</p><a class="btn btn-light" href="${modeUrl(location.pathname, true)}">Ver demo para comparar</a><button class="btn btn-light" id="logout-session">Cerrar sesión</button></div>`); document.querySelector('#logout-session').onclick = async () => { try { await logout(); location.reload(); } catch (error) { toast(error.message); } }; return; }
   const el = modal(
     'Cambiar espacio de trabajo',
     `<div class="dialog-body"><p class="mb-4">Explora dos negocios independientes con datos ficticios. Este selector solo existe en el prototipo.</p><div class="tenant-options">${db.tenants.map((t) => `<button class="tenant-option ${t.id === state.tenantId ? 'selected' : ''}" data-choose-tenant="${t.id}" ${t.suspended ? 'disabled' : ''}>${avatar(t.initials, 'mint')}<span><strong>${esc(t.name)}</strong><small>${t.suspended ? 'Suspendido' : esc(t.category)}</small></span>${t.id === state.tenantId ? icon('check') : icon('chevron')}</button>`).join('')}</div></div>`,
@@ -431,9 +457,10 @@ function switchTenant() {
 }
 function newTenant() {
   basicForm(
-    'Registrar negocio de ejemplo',
-    `${field('Nombre del negocio', 'name', '', 'text', 'required maxlength="150"')}${field('Slug del portal', 'slug', '', 'text', 'required pattern="[a-z0-9]+(-[a-z0-9]+)*" maxlength="80" placeholder="mi-consultorio"')}${field('Correo de contacto', 'email', '', 'email', 'required')}`,
+    isDemo ? 'Registrar negocio de ejemplo' : 'Registrar negocio',
+    `${field('Nombre del negocio', 'name', '', 'text', 'required maxlength="150"')}${field('Slug del portal', 'slug', '', 'text', 'required pattern="[a-z0-9]+(-[a-z0-9]+)*" maxlength="80" placeholder="mi-consultorio"')}${field('Correo de contacto', 'email', '', 'email', 'required')}${isDemo ? '' : field('RFC', 'rfc', '', 'text', 'required maxlength="13"') + field('Límite de sucursales', 'limit', 1, 'number', 'required min="1" step="1"')}`,
     (f) => {
+      if (!isDemo) return api('/negocios', 'POST', { nombre: f.get('name').trim(), identificadorPublico: f.get('slug'), emailAdministrador: f.get('email'), rfc: f.get('rfc'), limiteSucursales: Number(f.get('limit')) });
       if (db.tenants.some((t) => t.slug === f.get('slug')))
         throw new Error('Ese enlace ya está asignado a otro negocio.');
       const name = f.get('name').trim();
@@ -456,7 +483,7 @@ function newTenant() {
     },
   );
 }
-export function handleClick(e) {
+export async function handleClick(e) {
   try {
     const addSchedule = e.target.closest('[data-add-schedule]');
     if (addSchedule) {
@@ -476,6 +503,8 @@ export function handleClick(e) {
       return;
     }
     const action = e.target.closest('[data-action]')?.dataset.action;
+    if (!isDemo && user.rol === 'profesional' && action === 'new-professional') { toast('Tu cuenta puede editar sus servicios desde Editar profesional.'); return; }
+    if (!isDemo && (['new-appointment', 'new-client', 'copy-link', 'filter-reports', 'export-report'].includes(action) || e.target.closest('[data-slot-date], button[data-mode]'))) { toast(pending); return; }
     const actionMap = {
       'new-appointment': () => manualAppointment(),
       'go-agenda': () => navigate('agenda'),
@@ -517,7 +546,7 @@ export function handleClick(e) {
       },
     };
     if (actionMap[action]) {
-      actionMap[action]();
+      await actionMap[action]();
       return;
     }
     const app = e.target.closest('[data-appointment]');
@@ -576,7 +605,12 @@ export function handleClick(e) {
         `<div class="dialog-body"><p>Se volverá a ofrecer disponibilidad durante “${esc(b.reason)}”.</p></div><div class="dialog-footer"><button id="keep-block" class="btn btn-light">Conservar</button><button id="confirm-remove-block" class="btn btn-danger-soft">Eliminar bloqueo</button></div>`,
       );
       el.querySelector('#keep-block').onclick = () => el.close();
-      el.querySelector('#confirm-remove-block').onclick = () => {
+      el.querySelector('#confirm-remove-block').onclick = async () => {
+        if (!isDemo) {
+          const submit = el.querySelector('#confirm-remove-block'); submit.disabled = true;
+          try { await api(`/bloqueos/${b.id}`, 'DELETE'); el.close(); await loadBackendData(); render(); toast('Bloqueo eliminado.'); } catch (error) { toast(error.message); } finally { submit.disabled = false; }
+          return;
+        }
         db.blocks = db.blocks.filter(
           (x) => !(x.id === b.id && x.tenantId === state.tenantId),
         );
@@ -591,10 +625,15 @@ export function handleClick(e) {
       const t = tenantById(toggle.dataset.toggleTenant);
       const el = modal(
         t.suspended ? 'Reactivar negocio' : 'Suspender negocio',
-        `<div class="dialog-body"><p>${esc(t.name)} ${t.suspended ? 'volverá a mostrar' : 'dejará de mostrar'} su portal público en esta simulación.</p></div><div class="dialog-footer"><button class="btn btn-light" id="dismiss-tenant">Volver</button><button class="btn btn-primary" id="confirm-tenant">${t.suspended ? 'Reactivar' : 'Suspender'}</button></div>`,
+        `<div class="dialog-body"><p>${esc(t.name)} ${isDemo ? (t.suspended ? 'volverá a mostrar' : 'dejará de mostrar') + ' su portal público en esta simulación.' : (t.suspended ? 'reactivará su licencia.' : 'solicitará la suspensión de su licencia según el plazo del servidor.')}</p></div><div class="dialog-footer"><button class="btn btn-light" id="dismiss-tenant">Volver</button><button class="btn btn-primary" id="confirm-tenant">${t.suspended ? 'Reactivar' : 'Suspender'}</button></div>`,
       );
       el.querySelector('#dismiss-tenant').onclick = () => el.close();
-      el.querySelector('#confirm-tenant').onclick = () => {
+      el.querySelector('#confirm-tenant').onclick = async () => {
+        if (!isDemo) {
+          const submit = el.querySelector('#confirm-tenant'); submit.disabled = true;
+          try { if (!t.licenseId) throw new Error('Este negocio aún no tiene una licencia disponible.'); const result = await api(`/licencias/${t.licenseId}/${t.suspended ? 'reactivar' : 'suspender'}`, 'POST', {}); el.close(); await loadBackendData(); render(); toast('Licencia: ' + result.estado); } catch (error) { toast(error.message); } finally { submit.disabled = false; }
+          return;
+        }
         t.suspended = !t.suspended;
         el.close();
         render();
@@ -604,6 +643,17 @@ export function handleClick(e) {
     }
     const license = e.target.closest('[data-license-tenant]');
     if (license) {
+      if (!isDemo) {
+        const t = tenantById(license.dataset.licenseTenant);
+        if (!t.licenseId) throw new Error('Este negocio aún no tiene una licencia disponible.');
+        const el = modal('Renovar licencia', `<div class="dialog-body"><p>Se agregará un año calendario a la licencia de ${esc(t.name)}.</p></div><div class="dialog-footer"><button class="btn btn-light" data-dismiss>Cancelar</button><button class="btn btn-primary" id="confirm-renew">Renovar licencia</button></div>`);
+        el.querySelector('[data-dismiss]').onclick = () => el.close();
+        el.querySelector('#confirm-renew').onclick = async () => {
+          const submit = el.querySelector('#confirm-renew'); submit.disabled = true;
+          try { await api(`/licencias/${t.licenseId}/renovar`, 'POST', {}); el.close(); await loadBackendData(); render(); toast('Licencia renovada.'); } catch (error) { toast(error.message); } finally { submit.disabled = false; }
+        };
+        return;
+      }
       tenantById(license.dataset.licenseTenant).license = '90 días';
       render();
       toast('Licencia de demostración renovada por 90 días.');
@@ -625,13 +675,17 @@ document.addEventListener('change', (e) => {
     render();
   }
 });
-document.addEventListener('submit', (e) => {
+document.addEventListener('submit', async (e) => {
   const form = e.target;
   if (
     !['schedule-form', 'business-form', 'notification-form'].includes(form.id)
   )
     return;
   e.preventDefault();
+  if (!isDemo && form.id !== 'schedule-form') { toast(pending); return; }
+  const submit = form.querySelector('[type="submit"]');
+  if (submit.disabled) return;
+  submit.disabled = true;
   try {
     const f = new FormData(form),
       t = tenantById(state.tenantId);
@@ -659,6 +713,11 @@ document.addEventListener('submit', (e) => {
           breakStart: f.get(`breakStart-${id}`), breakEnd: f.get(`breakEnd-${id}`),
         };
       });
+      if (!isDemo) {
+        await api(`/profesionales/${p}/horario`, 'PUT', schedulePayload(updates));
+        try { await loadBackendData(); render(); toast('Horario guardado.'); } catch (error) { toast('Horario guardado. No se pudo actualizar la vista: ' + error.message); }
+        return;
+      }
       validateSchedules(updates, professional.branchIds);
       if (updates.some((s) => s.enabled && (s.start < '09:00' || s.end > '18:00')))
         throw new Error('Este prototipo admite atención de 09:00 a 18:00.');
@@ -680,5 +739,5 @@ document.addEventListener('submit', (e) => {
       target.hidden = false;
       target.focus();
     } else toast(error.message);
-  }
+  } finally { submit.disabled = false; }
 });
