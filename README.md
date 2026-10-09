@@ -15,6 +15,21 @@ Abre la dirección que imprima Vite. Para compilar: `npm run build`. Para revisa
 
 Conecta el teléfono y esta computadora a la misma red Wi-Fi y ejecuta `npm run dev`. Vite muestra una dirección **Network** como `http://192.168.x.x:5173/`; abre esa dirección en el navegador del teléfono. Se usa la IP de la computadora, no la del teléfono. Si cambia la red o la IP, usa la nueva dirección que imprima Vite. El servidor debe permanecer abierto mientras pruebas el prototipo.
 
+### APK para Android
+
+El proyecto incluye un contenedor Android con Capacitor. Para incorporar cambios de la web y crear una APK de prueba, instala Node.js, Android SDK y JDK 21; configura `JAVA_HOME` y `ANDROID_HOME`, y ejecuta:
+
+```sh
+npm install
+npm run android:sync
+cd android
+./gradlew assembleDebug
+```
+
+En Windows, usa `gradlew.bat assembleDebug` en el último paso. La APK queda en `android/app/build/outputs/apk/debug/app-debug.apk`. Está firmada para depuración y puede instalarse directamente en un Android compatible (API 24 o superior), permitiendo la instalación desde el origen del archivo. Para publicar en Google Play se requiere una compilación de lanzamiento firmada con una clave propia.
+
+El icono y la pantalla de inicio Android se generan desde la marca de `public/favicon.svg` con `scripts/generate_android_icons.py` (requiere Pillow). La aplicación incorpora los archivos de `dist/` y los datos ficticios del prototipo, así que su interfaz básica puede abrirse sin el servidor Vite. Los cambios que hagas dentro de la app se reinician al volver a cargarla.
+
 El botón de luna o sol del encabezado cambia entre modo claro y oscuro; la elección se recuerda en ese navegador. En pantallas estrechas, la agenda inicia en vista diaria y las franjas del horario semanal se presentan como tarjetas.
 
 El proyecto lee sus datos ficticios mediante `fetch('/data/demo.json')` y navega con History API, sin recargar las páginas. No requiere API, base de datos, credenciales ni cuenta de WhatsApp. El servidor que publique `dist/` debe resolver rutas desconocidas a `index.html` (fallback de SPA).
