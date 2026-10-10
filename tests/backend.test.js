@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { api, login, loadBackendData, catalogPayload, schedulePayload, modeUrl } from '../src/connected/backend.js';
+import { api, login, loadBackendData, catalogPayload, schedulePayload, modeUrl, availablePage, defaultPage } from '../src/connected/backend.js';
 import { db } from '../src/shared/data.js';
 
 test('semana completa: conserva IDs, descansos y orden por día; excluye borradores vacíos', () => {
@@ -17,7 +17,7 @@ test('semana completa: conserva IDs, descansos y orden por día; excluye borrado
 });
 
 test('catálogos solo envían los campos admitidos por el backend', () => {
-  assert.deepEqual(catalogPayload('services', { name: 'Consulta', price: 350.5, duration: 20, description: 'demo', tenantId: 9 }), { nombre: 'Consulta', costo: '350.5', duracionMinutos: 20 });
+  assert.deepEqual(catalogPayload('services', { name: 'Consulta', price: 350.5, duration: 20, description: 'demo', tenantId: 9 }), { nombre: 'Consulta', descripcion: 'demo', costo: '350.5', duracionMinutos: 20 });
   assert.deepEqual(catalogPayload('branches', { name: 'Centro', address: 'Calle 1', phone: '+52 614 1234567', timezone: 'America/Chihuahua', notes: '', maps: '' }), { nombre: 'Centro', direccion: 'Calle 1', telefono: '+52 614 1234567', zonaHoraria: 'America/Chihuahua', notasLlegada: null, urlGoogleMaps: null });
   assert.equal(modeUrl('/admin/profesionales', true), '/admin/profesionales?demo=1');
   assert.equal(modeUrl('/admin/profesionales', false), '/admin/profesionales');
@@ -56,6 +56,9 @@ test('carga datos reales aislados del negocio, sin inventar citas, y envía auto
       return Response.json(responses[path]);
     };
     await login('test@example.com', 'test-password');
+    assert.equal(defaultPage(), 'profesionales');
+    assert.equal(availablePage('servicios'), true);
+    assert.equal(availablePage('agenda'), false);
     assert.equal(await loadBackendData(), 7);
     assert.deepEqual(db.professionals[0].branchIds, [20]);
     assert.deepEqual(db.professionals[0].serviceIds, [10]);
@@ -66,5 +69,31 @@ test('carga datos reales aislados del negocio, sin inventar citas, y envía auto
     assert.deepEqual(db.clients, []);
     assert.equal(db.professionals[0].tenantId, 7);
     assert.ok(requests.slice(1).every(({ options }) => options.headers.Authorization === 'Bearer test-token'));
+  } finally { global.fetch = original; global.sessionStorage = storage; }
+});
+
+test('el profesional ve sus sucursales asignadas y la autoría real de servicios', async () => {
+  const original = global.fetch;
+  const storage = global.sessionStorage;
+  global.sessionStorage = { setItem() {}, removeItem() {} };
+  const responses = {
+    '/auth/login': { accessToken: 'professional-token', usuario: { id: 5, nombre: 'Ana Ruiz', email: 'ana@example.com', rol: 'profesional', negocioId: 7 } },
+    '/profesionales/5/servicios': [{ id: 11, nombre: 'Consulta', costo: '300.00', duracionMinutos: 30, descripcion: 'Inicial', creadorPersonalId: 5, activo: true, seleccionado: true }],
+    '/profesionales/5/horario': [],
+    '/profesionales/5/oferta': { cuentaActiva: true, sucursales: [{ id: 20, nombre: 'Centro', sucursalActiva: true, atencionActiva: false, servicios: [] }] },
+    '/bloqueos': [],
+  };
+  try {
+    global.fetch = async (url) => Response.json(responses[new URL(url).pathname]);
+    await login('ana@example.com', 'test-password');
+    assert.equal(defaultPage(), 'servicios');
+    assert.equal(availablePage('profesionales'), false);
+    assert.equal(availablePage('cuenta'), true);
+    await loadBackendData();
+    assert.deepEqual(db.professionals[0].branchIds, [20]);
+    assert.equal(db.branches[0].name, 'Centro');
+    assert.equal(db.branches[0].active, false);
+    assert.equal(db.services[0].description, 'Inicial');
+    assert.equal(db.services[0].creatorId, 5);
   } finally { global.fetch = original; global.sessionStorage = storage; }
 });

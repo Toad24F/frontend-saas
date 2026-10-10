@@ -4,4 +4,4 @@ export { api, user, roleLabel, login, logout, restoreSession } from './modules/a
 export { catalogPayload } from './modules/catalogos/payload.js';
 export { schedulePayload } from './modules/disponibilidad/payload.js';
 export { loadBackendData } from './modules/datos/load.js';
-export { availablePage } from './modules/permisos/pages.js';
+export { availablePage, defaultPage } from './modules/permisos/pages.js';

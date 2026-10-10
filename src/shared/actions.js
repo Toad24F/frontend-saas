@@ -1,7 +1,7 @@
 import { catalog } from './screens/catalogos/actions.js';
 import { newBlock } from './screens/disponibilidad/actions.js';
 import { switchTenant, newTenant } from './screens/plataforma/actions.js';
-import { isDemo, pending, api, user, loadBackendData, schedulePayload } from '../connected/backend.js';
+import { isDemo, pending, api, user, loadBackendData } from '../connected/backend.js';
 import { state, render, navigate } from './app.js';
 import {
   db,
@@ -48,11 +48,7 @@ export async function handleClick(e) {
       try {
         if (isDemo) branch.active = branch.active === false;
         else if (user.rol === 'profesional') {
-          const rows = list('schedules', state.tenantId).filter((s) => s.professionalId === user.id);
-          const target = rows.filter((s) => s.branchId === branch.id);
-          if (!target.length) throw new Error('Esta sucursal no tiene franjas de horario para activar.');
-          const active = target.some((s) => s.enabled);
-          await api(`/profesionales/${user.id}/horario`, 'PUT', schedulePayload(rows.map((s) => s.branchId === branch.id ? { ...s, enabled: !active } : s)));
+          await api(`/profesionales/${user.id}/sucursales/${branch.id}/atencion`, 'PUT', { activo: !branch.active });
         } else await api(`/sucursales/${branch.id}/${branch.active === false ? 'reactivar' : 'desactivar'}`, 'POST', {});
         if (!isDemo) await loadBackendData();
         render();

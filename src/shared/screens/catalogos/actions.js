@@ -1,4 +1,4 @@
-import { isDemo, pending, api, user, catalogPayload } from '../../../connected/backend.js';
+import { isDemo, api, user, catalogPayload } from '../../../connected/backend.js';
 import { state } from '../../app.js';
 import { db, list, resource } from '../../data.js';
 import { icon } from '../../icons.js';
@@ -7,9 +7,13 @@ import { field, basicForm } from '../../forms.js';
 export function catalog(type, id) {
   const existing = id ? resource(type, id, state.tenantId) : null;
   if (type === 'services') {
+    if (!isDemo && user.rol === 'profesional' && existing && existing.creatorId !== user.id) {
+      toast('Solo puedes editar los servicios que creaste.');
+      return;
+    }
     basicForm(
       existing ? 'Editar servicio' : 'Nuevo servicio',
-      `${field('Nombre del servicio', 'name', existing?.name, 'text', 'required maxlength="150"')}${field('Descripción', 'description', isDemo ? existing?.description : pending, 'text', isDemo ? 'required maxlength="200"' : 'readonly')}<div class="form-row-two">${field('Duración en minutos', 'duration', existing?.duration || 45, 'number', isDemo ? 'required min="15" max="240" step="15"' : 'required min="1" step="1"')}${field('Precio informativo (MXN)', 'price', existing?.price ?? 600, 'number', 'required min="0" max="99999" step="0.01"')}</div>`,
+      `${field('Nombre del servicio', 'name', existing?.name, 'text', 'required maxlength="150"')}${field('Descripción', 'description', existing?.description, 'text', isDemo ? 'required maxlength="200"' : 'maxlength="500"')}<div class="form-row-two">${field('Duración en minutos', 'duration', existing?.duration || 45, 'number', isDemo ? 'required min="15" max="240" step="15"' : 'required min="1" step="1"')}${field('Precio informativo (MXN)', 'price', existing?.price ?? 600, 'number', 'required min="0" max="99999" step="0.01"')}</div>`,
       (f) =>
         save('services', existing, {
           name: f.get('name').trim(),
@@ -47,7 +51,7 @@ export function catalog(type, id) {
     let liveId = existing?.id;
     basicForm(
       existing ? 'Editar profesional' : 'Nuevo profesional',
-      `${field('Nombre completo', 'name', existing?.name, 'text', own ? 'readonly' : 'required maxlength="150"')}${field('Especialidad', 'specialty', isDemo ? existing?.specialty : pending, 'text', isDemo ? 'required maxlength="150"' : 'readonly')}${field('Correo', 'email', existing?.email, 'email', own ? 'readonly' : 'required')}${isDemo || own ? '' : field(existing ? 'Nueva contraseña (opcional)' : 'Contraseña', 'password', '', 'password', existing ? 'autocomplete="new-password"' : 'required autocomplete="new-password"')}<div class="form-field"><label class="form-label">Servicios que ofrece</label><div class="checkbox-list">${list(
+      `${field('Nombre completo', 'name', existing?.name, 'text', own ? 'readonly' : 'required maxlength="150"')}${own ? '' : field('Especialidad', 'specialty', existing?.specialty, 'text', 'required maxlength="150"')}${field('Correo', 'email', existing?.email, 'email', own ? 'readonly' : 'required')}${isDemo || own ? '' : field(existing ? 'Nueva contraseña (opcional)' : 'Contraseña', 'password', '', 'password', existing ? 'autocomplete="new-password" minlength="12"' : 'required autocomplete="new-password" minlength="12"')}<div class="form-field"><label class="form-label">Servicios que ofrece</label><div class="checkbox-list">${list(
         'services',
         state.tenantId,
       )
@@ -71,7 +75,7 @@ export function catalog(type, id) {
           branchIds = f.getAll('branches').map(Number);
         if (!isDemo) {
           if (user.rol === 'profesional') { await api(`/profesionales/${liveId}/servicios`, 'PUT', { servicioIds: serviceIds }); return; }
-          const identity = { nombre: f.get('name').trim(), correo: f.get('email').trim(), ...(f.get('password') ? { password: f.get('password') } : {}) };
+          const identity = { nombre: f.get('name').trim(), correo: f.get('email').trim(), especialidad: f.get('specialty').trim(), ...(f.get('password') ? { password: f.get('password') } : {}) };
           const saved = await api(liveId ? `/profesionales/${liveId}` : '/profesionales', liveId ? 'PATCH' : 'POST', identity);
           liveId = saved.id;
           try {

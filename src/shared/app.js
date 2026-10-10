@@ -1,4 +1,4 @@
-import { isDemo, pending, modeUrl, user, roleLabel, availablePage, login, logout, restoreSession, loadBackendData } from '../connected/backend.js';
+import { isDemo, pending, modeUrl, user, roleLabel, availablePage, defaultPage, login, logout, restoreSession, loadBackendData } from '../connected/backend.js';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './styles.css';
 import './theme.css';
@@ -87,6 +87,7 @@ const labels = Object.fromEntries(
 );
 labels.configuracion = 'Configuración';
 labels.plataforma = 'Negocios';
+labels.cuenta = 'Mi cuenta';
 let animateNextRoute = true;
 function setMobileMenuOpen(isOpen) {
   const layout = document.querySelector('.admin-layout');
@@ -99,6 +100,7 @@ function setMobileMenuOpen(isOpen) {
   else layout.querySelector('.mobile-tabbar [data-action="menu"]')?.focus();
 }
 export function navigate(page) {
+  if (!isDemo && !availablePage(page)) page = defaultPage();
   history.pushState({}, '', modeUrl(`/admin/${page}`));
   state.page = page;
   state.search = '';
@@ -109,14 +111,27 @@ export function renderShell(content) {
   if (!tenantById(state.tenantId)) state.tenantId = db.tenants[0].id;
   const tenant = tenantById(state.tenantId);
   const sidebarScrollTop = document.querySelector('.sidebar')?.scrollTop ?? 0;
-  const visibleNav = !isDemo && user?.rol === 'profesional' ? nav.filter((item) => item[0] !== 'profesionales') : nav;
+  const home = isDemo ? 'agenda' : defaultPage();
+  const visibleNav = isDemo ? nav : [
+    ['connected', user.rol === 'superadmin' ? 'PLATAFORMA' : user.rol === 'recepcionista' ? 'MI CUENTA' : 'MI NEGOCIO'],
+    ...(user.rol === 'superadmin' ? [['plataforma', 'grid', 'Negocios']] : nav.filter((item) => item.length === 3 && availablePage(item[0]))),
+  ];
+  const workspaceName = !isDemo && user.rol === 'superadmin' ? 'Plataforma' : tenant.name;
+  const workspaceInitials = !isDemo && user.rol === 'superadmin' ? 'PL' : tenant.initials;
   document.querySelector('#app').innerHTML =
     `<div class="admin-layout"><div class="sidebar-overlay" data-action="menu"></div><aside class="sidebar"><a class="brand" href="/admin/agenda" data-nav="agenda"><img src="/favicon.svg" alt=""/>cita<span class="brand-dot">.</span></a><button class="workspace-switch glass-effect glass-effect--dark" data-action="switch-tenant">${avatar(tenant.initials, 'workspace-avatar')}<span><strong>${escape(tenant.name)}</strong><small>Espacio de trabajo</small></span>${icon('down')}</button><nav aria-label="Navegación principal">${visibleNav.map((n) => (n.length === 2 ? `<div class="nav-section">${n[1]}</div>` : `<a href="/admin/${n[0]}" data-nav="${n[0]}" class="nav-item ${state.page === n[0] ? 'active' : ''}" ${state.page === n[0] ? 'aria-current="page"' : ''}>${icon(n[1])}<span>${n[2]}</span>${n[0] === 'agenda' ? `<span class="nav-count">${list('appointments', state.tenantId).filter((a) => a.date === TODAY).length}</span>` : ''}</a>`)).join('')}</nav><div class="sidebar-bottom"><a href="/admin/configuracion" data-nav="configuracion" class="nav-item ${state.page === 'configuracion' ? 'active' : ''}">${icon('settings')}<span>Configuración</span></a><div class="portal-card"><div class="portal-icon">${icon('link')}</div><strong>Tu agenda, a un enlace</strong><p>Comparte tu portal y recibe reservas en línea.</p><a href="/reservas/${tenant.slug}" data-portal>Ver portal de reservas ${icon('external')}</a></div><div class="sidebar-foot"><span class="green-dot"></span> Entorno de demostración <span>v1.0</span></div></div></aside><div class="main-layout"><header class="topbar"><div class="breadcrumbs"><button class="icon-btn mobile-menu" data-action="menu" aria-label="Abrir menú">${icon('menu')}</button><span>Mi espacio</span>${icon('chevron')}<strong>${labels[state.page] || 'Agenda'}</strong></div><div class="topbar-right"><span class="demo-pill">Prototipo</span><span class="topbar-date">${icon('calendar')} ${formatDate(TODAY, { day: 'numeric', month: 'short', year: 'numeric' })}</span><button class="notification-button icon-btn" data-nav="notificaciones" aria-label="Ver notificaciones">${icon('bell')}<i></i></button><span class="topbar-divider"></span><button class="profile-button" data-nav="configuracion">${avatar('AV', 'peach')}<span><strong>Adriana Vega</strong><small>Administradora</small></span>${icon('down')}</button></div></header><main id="main-content" class="main-content${animateNextRoute ? ' motion-enter' : ''}">${content}</main><footer class="app-footer"><span>Un poco más de orden. Más tiempo para cuidar.</span><span>Hecho para tu día a día <span class="footer-logo">cita.</span></span></footer></div></div>`;
-  const primaryTabs = [
+  const demoTabs = [
     ['resumen', 'grid', 'Inicio'],
     ['agenda', 'calendar', 'Agenda'],
     ['clientes', 'users', 'Clientes'],
   ];
+  const roleTabs = {
+    superadmin: [['plataforma', 'grid', 'Negocios']],
+    admin_negocio: [['profesionales', 'stethoscope', 'Equipo'], ['servicios', 'briefcase', 'Servicios'], ['sucursales', 'pin', 'Sucursales']],
+    profesional: [['servicios', 'briefcase', 'Servicios'], ['sucursales', 'pin', 'Sucursales'], ['disponibilidad', 'clock', 'Horario']],
+    recepcionista: [['cuenta', 'settings', 'Mi cuenta']],
+  };
+  const primaryTabs = isDemo ? demoTabs : roleTabs[user.rol] || [['cuenta', 'settings', 'Mi cuenta']];
   const moreIsCurrent = !primaryTabs.some(([page]) => page === state.page);
   const mobileTabs = primaryTabs.map(([page, symbol, label]) =>
     `<a class="mobile-tab ${state.page === page ? 'is-current' : ''}" href="/admin/${page}" data-nav="${page}" ${state.page === page ? 'aria-current="page"' : ''}><span class="mobile-tab-icon">${icon(symbol)}</span><span>${label}</span></a>`,
@@ -125,15 +140,29 @@ export function renderShell(content) {
   sidebar.id = 'mobile-navigation-drawer';
   sidebar.scrollTop = sidebarScrollTop;
   sidebar.insertAdjacentHTML('afterend',
-    `<nav class="mobile-tabbar glass-effect" aria-label="Navegación inferior"><div class="mobile-tabbar-inner">${mobileTabs}<button type="button" class="mobile-tab ${moreIsCurrent ? 'is-current' : ''}" data-action="menu" aria-label="Más secciones" aria-controls="mobile-navigation-drawer" aria-expanded="false"><span class="mobile-tab-icon">${icon('menu')}</span><span>Más</span></button></div></nav>`,
+    `<nav class="mobile-tabbar glass-effect" aria-label="Navegación inferior"><div class="mobile-tabbar-inner" style="--tab-count:${primaryTabs.length + (isDemo || user.rol !== 'recepcionista' ? 1 : 0)}">${mobileTabs}${isDemo || user.rol !== 'recepcionista' ? `<button type="button" class="mobile-tab ${moreIsCurrent ? 'is-current' : ''}" data-action="menu" aria-label="Más secciones" aria-controls="mobile-navigation-drawer" aria-expanded="false"><span class="mobile-tab-icon">${icon('menu')}</span><span>Más</span></button>` : ''}</div></nav>`,
   );
   document.querySelectorAll('a[href^="/admin/"], a[href^="/reservas/"]').forEach((link) => link.href = modeUrl(link.getAttribute('href')));
   const pill = document.querySelector('.demo-pill');
-  pill.outerHTML = `<a class="demo-pill" href="${modeUrl(location.pathname, !isDemo)}" title="${isDemo ? 'Ver versión conectada' : 'Comparar con la demo'}">${isDemo ? 'Prototipo' : 'Ver demo'}</a>`;
+  pill.outerHTML = `<a class="demo-pill" href="${modeUrl(!isDemo && state.page === 'cuenta' ? '/admin/agenda' : location.pathname, !isDemo)}" title="${isDemo ? 'Ver versión conectada' : 'Comparar con la demo'}">${isDemo ? 'Prototipo' : 'Ver demo'}</a>`;
   if (!isDemo) {
+    const brand = document.querySelector('.brand');
+    brand.href = modeUrl(`/admin/${home}`);
+    brand.dataset.nav = home;
+    document.querySelector('.workspace-switch strong').textContent = workspaceName;
+    document.querySelector('.workspace-switch .avatar').textContent = workspaceInitials;
+    const accountLink = document.querySelector('.sidebar-bottom [data-nav="configuracion"]');
+    accountLink.href = modeUrl('/admin/cuenta');
+    accountLink.dataset.nav = 'cuenta';
+    accountLink.querySelector('span').textContent = 'Mi cuenta';
+    accountLink.classList.toggle('active', state.page === 'cuenta');
+    document.querySelector('.portal-card').remove();
+    document.querySelector('.notification-button').remove();
+    document.querySelector('.topbar-divider').remove();
+    document.querySelector('.profile-button').dataset.nav = 'cuenta';
+    document.querySelector('.breadcrumbs strong').textContent = labels[state.page] || labels[home];
     document.querySelector('.sidebar-foot').innerHTML = '<span class="green-dot"></span> Backend conectado <span>v1.0</span>';
     document.querySelector('.profile-button').innerHTML = avatar(user.nombre.split(' ').slice(0, 2).map((x) => x[0]).join(''), 'peach') + `<span><strong>${escape(user.nombre)}</strong><small>${escape(roleLabel(user.rol))}</small></span>${icon('down')}`;
-    if (user.rol === 'superadmin') document.querySelector('.sidebar nav').insertAdjacentHTML('beforeend', '<a class="nav-item" href="/admin/plataforma" data-nav="plataforma">Negocios</a>');
   }
   mountThemeToggle();
   animateNextRoute = false;
@@ -143,6 +172,10 @@ let extraViews = null,
   actions = null;
 export function render() {
   if (!db) return;
+  if (!isDemo && location.pathname.startsWith('/admin/') && !availablePage(state.page)) {
+    state.page = defaultPage();
+    history.replaceState({}, '', modeUrl(`/admin/${state.page}`));
+  }
   if (!isDemo && location.pathname.startsWith('/reservas/')) { renderShell(empty('Portal de reservas', pending)); return; }
   document.title = `${import.meta.env.VITE_APP_NAME || 'Cita'} · ${location.pathname.startsWith('/reservas/') ? 'Reserva tu cita' : labels[state.page] || 'Agenda'}`;
   const path = location.pathname;
@@ -245,7 +278,7 @@ document.addEventListener('input', (e) => {
   }
 });
 window.addEventListener('popstate', () => {
-  state.page = location.pathname.split('/')[2] || 'agenda';
+  state.page = location.pathname.split('/')[2] || (isDemo ? 'agenda' : defaultPage());
   animateNextRoute = true;
   render();
 });
@@ -333,7 +366,7 @@ export async function start() {
     }
     state.page = location.pathname.startsWith('/admin/')
       ? location.pathname.split('/')[2]
-      : 'agenda';
+      : isDemo ? 'agenda' : defaultPage();
     [extraViews, booking, actions] = await Promise.all([
       isDemo ? import('../demo/screens/index.js') : import('../connected/screens/index.js'),
       isDemo ? import('../demo/screens/reservas/booking.js') : Promise.resolve(null),
