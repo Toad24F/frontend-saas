@@ -6,7 +6,7 @@ import { modal, toast, escape as esc, avatar } from '../../ui.js';
 import { field, basicForm } from '../../forms.js';
 import { reportState } from '../../../demo/screens/reportes/state.js';
 export function switchTenant() {
-  if (!isDemo) { modal('Tu espacio de trabajo', `<div class="dialog-body"><p>${esc(user.nombre)} · ${esc(roleLabel(user.rol))}</p><a class="btn btn-light" href="${modeUrl(location.pathname.includes('/cuenta') ? '/admin/agenda' : location.pathname, true)}">Ver demo para comparar</a><button class="btn btn-light" id="logout-session">Cerrar sesión</button></div>`); document.querySelector('#logout-session').onclick = async () => { try { await logout(); location.reload(); } catch (error) { toast(error.message); } }; return; }
+  if (!isDemo) { modal('Tu espacio de trabajo', `<div class="dialog-body"><p>${esc(user.nombre)} · ${esc(roleLabel(user.rol))}</p><a class="btn btn-light" href="${modeUrl(location.pathname.includes('/cuenta') ? '/admin/agenda' : location.pathname.includes('/negocio/') ? '/admin/plataforma' : location.pathname, true)}">Ver demo para comparar</a><button class="btn btn-light" id="logout-session">Cerrar sesión</button></div>`); document.querySelector('#logout-session').onclick = async () => { try { await logout(); location.reload(); } catch (error) { toast(error.message); } }; return; }
   const el = modal(
     'Cambiar espacio de trabajo',
     `<div class="dialog-body"><p class="mb-4">Explora dos negocios independientes con datos ficticios. Este selector solo existe en el prototipo.</p><div class="tenant-options">${db.tenants.map((t) => `<button class="tenant-option ${t.id === state.tenantId ? 'selected' : ''}" data-choose-tenant="${t.id}" ${t.suspended ? 'disabled' : ''}>${avatar(t.initials, 'mint')}<span><strong>${esc(t.name)}</strong><small>${t.suspended ? 'Suspendido' : esc(t.category)}</small></span>${t.id === state.tenantId ? icon('check') : icon('chevron')}</button>`).join('')}</div></div>`,
@@ -27,7 +27,7 @@ export function switchTenant() {
 export function newTenant() {
   basicForm(
     isDemo ? 'Registrar negocio de ejemplo' : 'Registrar negocio',
-    `${field('Nombre del negocio', 'name', '', 'text', 'required maxlength="150"')}${field('Slug del portal', 'slug', '', 'text', 'required pattern="[a-z0-9]+(-[a-z0-9]+)*" maxlength="80" placeholder="mi-consultorio"')}${field('Correo de contacto', 'email', '', 'email', 'required')}${isDemo ? '' : field('RFC', 'rfc', '', 'text', 'required maxlength="13"') + field('Límite de sucursales', 'limit', 1, 'number', 'required min="1" step="1"')}`,
+    `${field('Nombre del negocio', 'name', '', 'text', 'required maxlength="150"')}${field('Slug del portal', 'slug', '', 'text', 'required pattern="[a-z0-9]+(-[a-z0-9]+)*" maxlength="80" placeholder="mi-consultorio"')}${field(isDemo ? 'Correo de contacto' : 'Correo del administrador', 'email', '', 'email', 'required')}${isDemo ? '' : field('RFC', 'rfc', '', 'text', 'required maxlength="13"') + field('Límite de sucursales', 'limit', 1, 'number', 'required min="1" step="1"')}`,
     (f) => {
       if (!isDemo) return api('/negocios', 'POST', { nombre: f.get('name').trim(), identificadorPublico: f.get('slug'), emailAdministrador: f.get('email'), rfc: f.get('rfc'), limiteSucursales: Number(f.get('limit')) });
       if (db.tenants.some((t) => t.slug === f.get('slug')))

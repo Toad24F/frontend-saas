@@ -14,7 +14,7 @@ export async function api(path, method = 'GET', body) {
   } catch { throw new Error('No se pudo conectar con el backend. Comprueba que esté iniciado y revisa VITE_API_URL.'); }
   const data = response.status === 204 ? null : await response.json().catch(() => null);
   if (!response.ok) {
-    if (response.status === 401 && path !== '/auth/login') {
+    if (response.status === 401 && !['/auth/login', '/auth/activar-administrador', '/auth/recuperar-contrasena'].includes(path)) {
       clearSession();
       if (typeof window !== 'undefined') window.dispatchEvent(new Event('cita-session-expired'));
     }
@@ -26,6 +26,7 @@ function clearSession() {
   token = null; user = null; replaceData(undefined);
   if (typeof sessionStorage !== 'undefined') sessionStorage.removeItem('cita-session');
 }
+export function forgetSession() { clearSession(); }
 export async function login(email, password) {
   const result = await api('/auth/login', 'POST', { email, password });
   token = result.accessToken;

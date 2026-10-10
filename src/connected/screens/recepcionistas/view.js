@@ -1,0 +1,11 @@
+import { state } from '../../../shared/app.js';
+import { list } from '../../../shared/data.js';
+import { icon } from '../../../shared/icons.js';
+import { avatar, escape, pageHead, button, empty } from '../../../shared/ui.js';
+import './style.css';
+
+export function receptionists() {
+  const people = list('receptionists', state.tenantId);
+  const active = people.filter((person) => person.active).length;
+  return `${pageHead('Recepcionistas', 'Gestiona las cuentas de recepción de tu negocio.', button('Nueva recepcionista', 'new-receptionist'))}<div class="stats-grid"><div class="stat-card"><div class="stat-top">Cuentas registradas<span class="stat-icon green">${icon('users')}</span></div><div class="stat-number">${people.length}</div><span class="stat-caption">Tu negocio</span></div><div class="stat-card"><div class="stat-top">Cuentas activas<span class="stat-icon blue">${icon('user')}</span></div><div class="stat-number">${active}</div><span class="stat-caption">Con acceso habilitado</span></div></div><section class="surface reception-section"><div class="section-heading"><div><h2>Equipo de recepción</h2><p>La agenda y los clientes se habilitarán cuando exista su API.</p></div></div>${people.length ? `<div class="table-responsive"><table class="table app-table align-middle"><thead><tr><th>Recepcionista</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>${people.map((person) => `<tr><td><div class="person-cell">${avatar(person.initials, 'mint')}<span><strong>${escape(person.name)}</strong><small>${escape(person.email)}</small></span></div></td><td><span class="soft-tag">${person.active ? 'Activa' : 'Inactiva'}</span></td><td><div class="reception-actions"><button class="text-button" data-reception-detail="${person.id}">Ver detalle</button><button class="text-button" data-reception-action="reset" data-reception-id="${person.id}">Restablecer clave</button><button class="text-button" data-reception-action="${person.active ? 'deactivate' : 'reactivate'}" data-reception-id="${person.id}">${person.active ? 'Desactivar' : 'Reactivar'}</button></div></td></tr>`).join('')}</tbody></table></div>` : empty('Sin recepcionistas', 'Crea una cuenta para tu equipo de recepción.')}</section>`;
+}

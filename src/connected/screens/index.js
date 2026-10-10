@@ -4,6 +4,8 @@ import { branches } from '../../shared/screens/sucursales/view.js';
 import { availability } from '../../shared/screens/disponibilidad/view.js';
 import { platform } from '../../shared/screens/plataforma/view.js';
 import { account } from './cuenta/view.js';
+import { businessDetail } from './negocio/view.js';
+import { receptionists } from './recepcionistas/view.js';
 import { empty } from '../../shared/ui.js';
 
 const views = {
@@ -13,6 +15,8 @@ const views = {
   disponibilidad: availability,
   plataforma: platform,
   cuenta: account,
+  negocio: businessDetail,
+  recepcionistas: receptionists,
 };
 
 export function renderView(page) {

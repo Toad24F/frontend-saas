@@ -1,0 +1,4 @@
+.account-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.account-section { padding: 22px; min-width: 0; }
+@media (max-width: 900px) { .account-grid { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 767px) { .account-section { padding: 18px; } .account-section .btn { min-height: 44px; } }

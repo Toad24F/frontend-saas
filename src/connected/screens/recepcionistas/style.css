@@ -1,0 +1,8 @@
+.reception-section { padding: 22px; }
+.reception-actions { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; }
+.reception-actions .text-button { min-height: 36px; }
+@media (max-width: 767px) {
+  .reception-section { padding: 18px; }
+  .reception-actions { gap: 6px 12px; }
+  .reception-actions .text-button { min-height: 44px; }
+}

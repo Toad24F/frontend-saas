@@ -22,6 +22,25 @@ let draftScheduleId = -1;
 
 export async function handleClick(e) {
   try {
+    if (!isDemo && user.rol === 'superadmin' && state.page === 'negocio') {
+      const businessAction = e.target.closest('[data-business-action]');
+      const retryDelivery = e.target.closest('[data-retry-delivery]');
+      if (businessAction || retryDelivery) {
+        const { businessAction: run } = await import('../connected/screens/negocio/actions.js');
+        run(businessAction?.dataset.businessAction || 'retry', retryDelivery?.dataset.retryDelivery);
+        return;
+      }
+    }
+    if (!isDemo && user.rol === 'admin_negocio' && state.page === 'recepcionistas') {
+      const detail = e.target.closest('[data-reception-detail]');
+      const accountAction = e.target.closest('[data-reception-action]');
+      if (detail || accountAction) {
+        const reception = await import('../connected/screens/recepcionistas/actions.js');
+        if (detail) await reception.receptionistDetail(Number(detail.dataset.receptionDetail));
+        else reception.receptionistAction(accountAction.dataset.receptionAction, Number(accountAction.dataset.receptionId));
+        return;
+      }
+    }
     const serviceToggle = e.target.closest('[data-toggle-service]');
     if (serviceToggle) {
       const service = resource('services', Number(serviceToggle.dataset.toggleService), state.tenantId);
@@ -77,6 +96,12 @@ export async function handleClick(e) {
     if (!isDemo && user.rol === 'profesional' && action === 'new-professional') { toast('Tu cuenta puede editar sus servicios desde Editar profesional.'); return; }
     if (!isDemo && (['new-appointment', 'new-client', 'copy-link', 'filter-reports', 'export-report'].includes(action) || e.target.closest('[data-slot-date], button[data-mode]'))) { toast(pending); return; }
     const actionMap = {
+      'new-receptionist': async () => (await import('../connected/screens/recepcionistas/actions.js')).newReceptionist(),
+      'change-password': async () => (await import('../connected/screens/cuenta/actions.js')).changePassword(),
+      'logout-account': async () => (await import('../connected/screens/cuenta/actions.js')).closeAccountSession(),
+      'refresh-license': async () => (await import('../connected/screens/cuenta/view.js')).refreshOwnLicense(),
+      'back-platform': () => navigate('plataforma'),
+      'retry-business-detail': async () => (await import('../connected/screens/negocio/view.js')).refreshBusinessDetail(),
       'new-appointment': async () => (await import('./screens/agenda/actions.js')).manualAppointment(),
       'go-agenda': () => navigate('agenda'),
       'new-client': async () => (await import('../demo/screens/clientes/actions.js')).newClient(),

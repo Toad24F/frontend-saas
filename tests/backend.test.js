@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { api, login, loadBackendData, catalogPayload, schedulePayload, modeUrl, availablePage, defaultPage } from '../src/connected/backend.js';
 import { db } from '../src/shared/data.js';
+import { validateNewPassword } from '../src/connected/modules/auth/password-policy.js';
 
 test('semana completa: conserva IDs, descansos y orden por día; excluye borradores vacíos', () => {
   const row = { id: 12, day: 1, branchId: 3, start: '07:00', end: '12:00', breakStart: '09:00', breakEnd: '09:30', enabled: true };
@@ -21,6 +22,13 @@ test('catálogos solo envían los campos admitidos por el backend', () => {
   assert.deepEqual(catalogPayload('branches', { name: 'Centro', address: 'Calle 1', phone: '+52 614 1234567', timezone: 'America/Chihuahua', notes: '', maps: '' }), { nombre: 'Centro', direccion: 'Calle 1', telefono: '+52 614 1234567', zonaHoraria: 'America/Chihuahua', notasLlegada: null, urlGoogleMaps: null });
   assert.equal(modeUrl('/admin/profesionales', true), '/admin/profesionales?demo=1');
   assert.equal(modeUrl('/admin/profesionales', false), '/admin/profesionales');
+});
+
+test('las contraseñas nuevas respetan longitud, bytes y confirmación', () => {
+  assert.doesNotThrow(() => validateNewPassword('clave-segura-123', 'clave-segura-123'));
+  assert.throws(() => validateNewPassword('corta'), /al menos 12/);
+  assert.throws(() => validateNewPassword('á'.repeat(40)), /72 bytes/);
+  assert.throws(() => validateNewPassword('clave-segura-123', 'otra-clave-123'), /no coinciden/);
 });
 
 test('API interpreta 204 y errores de validación sin ocultarlos', async () => {
@@ -43,6 +51,7 @@ test('carga datos reales aislados del negocio, sin inventar citas, y envía auto
     '/servicios': [{ id: 10, nombre: 'Consulta', costo: '500.00', duracionMinutos: 45, activo: true }],
     '/sucursales': [{ id: 20, nombre: 'Centro', direccion: 'Calle 1', telefono: '6141234567', zonaHoraria: 'America/Chihuahua', activo: true }],
     '/profesionales': [{ id: 30, nombre: 'Profesional', correo: 'test@example.com', activo: false }],
+    '/recepcionistas': [{ id: 31, nombre: 'Recepción', email: 'recepcion@example.com', activo: true, activadoEn: '2026-10-10T12:00:00.000Z' }],
     '/bloqueos': [{ id: 40, personalId: 30, sucursalId: 20, tipo: 'vacaciones', motivo: 'Vacaciones', fechaInicio: '2026-10-10', fechaFin: '2026-10-11', inicioMinutos: null, finMinutos: null }],
     '/profesionales/30/sucursales': [20],
     '/profesionales/30/servicios': [{ id: 10, seleccionado: true }],
@@ -65,6 +74,7 @@ test('carga datos reales aislados del negocio, sin inventar citas, y envía auto
     assert.equal(db.professionals[0].active, false);
     assert.equal(db.schedules[0].end, '00:00');
     assert.equal(db.blocks[0].professionalId, 30);
+    assert.equal(db.receptionists[0].email, 'recepcion@example.com');
     assert.deepEqual(db.appointments, []);
     assert.deepEqual(db.clients, []);
     assert.equal(db.professionals[0].tenantId, 7);
@@ -95,5 +105,29 @@ test('el profesional ve sus sucursales asignadas y la autoría real de servicios
     assert.equal(db.branches[0].active, false);
     assert.equal(db.services[0].description, 'Inicial');
     assert.equal(db.services[0].creatorId, 5);
+  } finally { global.fetch = original; global.sessionStorage = storage; }
+});
+
+test('el panel SA resume licencias y envíos reales sin datos de citas', async () => {
+  const original = global.fetch;
+  const storage = global.sessionStorage;
+  global.sessionStorage = { setItem() {}, removeItem() {} };
+  const responses = {
+    '/auth/login': { accessToken: 'sa-token', usuario: { id: 1, nombre: 'Superadmin', email: 'sa@example.com', rol: 'superadmin', negocioId: null } },
+    '/negocios': [{ id: 7, nombre: 'Clínica', identificadorPublico: 'clinica', emailContacto: null, administrador: { id: 9, email: 'admin@example.com', activadoEn: null }, licencia: { id: 11 } }],
+    '/licencias/11/vigencia': { estado: 'suspension_pendiente', condicionAcceso: true, tiempoRestante: { dias: 5, horas: 0, minutos: 0 } },
+    '/negocios/7/envios': [{ id: '123', estado: 'fallido' }],
+  };
+  try {
+    global.fetch = async (url) => Response.json(responses[new URL(url).pathname]);
+    await login('sa@example.com', 'test-password');
+    assert.equal(defaultPage(), 'plataforma');
+    assert.equal(availablePage('negocio'), true);
+    assert.equal(availablePage('recepcionistas'), false);
+    await loadBackendData();
+    assert.equal(db.tenants[0].license, 'suspension_pendiente');
+    assert.equal(db.tenants[0].failedDeliveries, 1);
+    assert.equal(db.tenants[0].category, 'Pendiente de activación');
+    assert.deepEqual(db.appointments, []);
   } finally { global.fetch = original; global.sessionStorage = storage; }
 });

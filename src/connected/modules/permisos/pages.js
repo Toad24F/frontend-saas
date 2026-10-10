@@ -1,8 +1,8 @@
 import { user } from '../auth/session.js';
 
 const pagesByRole = {
-  superadmin: ['plataforma', 'cuenta'],
-  admin_negocio: ['profesionales', 'servicios', 'sucursales', 'disponibilidad', 'cuenta'],
+  superadmin: ['plataforma', 'negocio', 'cuenta'],
+  admin_negocio: ['profesionales', 'recepcionistas', 'servicios', 'sucursales', 'disponibilidad', 'cuenta'],
   profesional: ['servicios', 'sucursales', 'disponibilidad', 'cuenta'],
   recepcionista: ['cuenta'],
 };
