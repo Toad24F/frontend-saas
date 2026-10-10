@@ -390,7 +390,7 @@ document.addEventListener('keydown', (event) => {
   }
 });
 function showLogin(message = '') {
-  document.querySelector('#app').innerHTML = `<div class="startup-error"><img src="/favicon.svg" alt=""/><h1>Tu espacio en cita.</h1><p>Inicia sesión para trabajar con tu negocio.</p><button class="btn btn-primary" id="open-login">Iniciar sesión</button><a class="btn btn-light" href="${modeUrl(location.pathname, true)}">Ver demo</a></div>`;
+  document.querySelector('#app').innerHTML = `<div class="startup-error"><img src="/favicon.svg" alt=""/><h1>Tu espacio en cita.</h1><p>Inicia sesión para trabajar con tu negocio.</p><div class="startup-actions"><button class="btn btn-primary" id="open-login">Iniciar sesión</button><a class="btn btn-light" href="${modeUrl(location.pathname, true)}">Ver demo</a></div></div>`;
   const showRecoveryDialog = (email = '') => {
     const el = modal('Recuperar contraseña', `<form id="recovery-email-form"><div class="dialog-body"><p class="form-intro">Ingresa tu correo y simularemos el envío de un código de verificación.</p><div class="form-field"><label class="form-label" for="recovery-email">Correo</label><input class="form-control" id="recovery-email" name="email" type="email" autocomplete="email" value="${escape(email)}" required/></div><div class="login-actions"><button type="button" data-recovery-action="back">Volver a iniciar sesión</button></div></div><div class="dialog-footer login-footer"><button class="btn btn-primary" type="submit">Enviar código de verificación</button></div></form>`);
     el.classList.add('auth-screen-transition');
@@ -479,7 +479,7 @@ async function start() {
   } catch (error) {
     if (!isDemo && !user) { showLogin(error.message); return; }
     document.querySelector('#app').innerHTML =
-      `<div class="startup-error"><img src="/favicon.svg" alt=""/><h1>No pudimos abrir tu agenda</h1><p>${escape(error.message)}</p><button class="btn btn-primary" onclick="location.reload()">Volver a intentar</button><a class="btn btn-light" href="${modeUrl(location.pathname, true)}">Ver demo</a></div>`;
+      `<div class="startup-error"><img src="/favicon.svg" alt=""/><h1>No pudimos abrir tu agenda</h1><p>${escape(error.message)}</p><div class="startup-actions"><button class="btn btn-primary" onclick="location.reload()">Volver a intentar</button><a class="btn btn-light" href="${modeUrl(location.pathname, true)}">Ver demo</a></div></div>`;
   }
 }
 // Mejora progresiva: los navegadores sin WebMCP siguen usando la misma interfaz.

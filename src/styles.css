@@ -1156,6 +1156,13 @@ p {
 .startup-error p {
   margin: 18px 0;
 }
+.startup-actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+}
 .app-dialog {
   padding: 0;
   width: min(560px, calc(100% - 32px));
