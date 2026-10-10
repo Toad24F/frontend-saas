@@ -1,4 +1,4 @@
-import { isDemo, pending, user } from './backend.js';
+import { isDemo, pending, user } from '../connected/backend.js';
 import { state, stats } from './app.js';
 import {
   db,

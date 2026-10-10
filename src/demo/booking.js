@@ -8,10 +8,10 @@ import {
   date,
   money,
   appointmentInfo,
-} from './data.js';
-import { state, navigate } from './app.js';
-import { icon } from './icons.js';
-import { escape as esc, avatar, empty, toast } from './ui.js';
+} from '../shared/data.js';
+import { state, navigate } from '../shared/app.js';
+import { icon } from '../shared/icons.js';
+import { escape as esc, avatar, empty, toast } from '../shared/ui.js';
 import {
   slots,
   nextDates,

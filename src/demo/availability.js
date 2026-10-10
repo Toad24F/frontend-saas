@@ -8,7 +8,7 @@ import {
   addDays,
   TODAY,
   tenantById,
-} from './data.js';
+} from '../shared/data.js';
 export const overlaps = (start, end, otherStart, otherEnd) =>
   start < otherEnd && end > otherStart;
 /** Motor de demostración en memoria. No implementa una exclusión distribuida. */

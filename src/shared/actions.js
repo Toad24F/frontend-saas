@@ -1,4 +1,4 @@
-import { isDemo, pending, api, user, roleLabel, logout, loadBackendData, schedulePayload, catalogPayload, modeUrl } from './backend.js';
+import { isDemo, pending, api, user, roleLabel, logout, loadBackendData, schedulePayload, catalogPayload, modeUrl } from '../connected/backend.js';
 import { state, render, navigate } from './app.js';
 import {
   db,
@@ -20,9 +20,9 @@ import {
   createAppointment,
   validateContact,
   overlaps,
-} from './availability.js';
+} from '../demo/availability.js';
 import { reportState, appointmentTable, scheduleRow } from './views.js';
-import { validateSchedules, appointmentCovered } from './schedule.js';
+import { validateSchedules, appointmentCovered } from '../demo/schedule.js';
 let draftScheduleId = -1;
 
 const field = (label, name, value = '', type = 'text', extra = '') =>

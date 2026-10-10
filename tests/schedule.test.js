@@ -1,9 +1,10 @@
 import test, { beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { db, loadData, TODAY } from '../src/data.js';
-import { slots } from '../src/availability.js';
-import { validateSchedules, appointmentCovered } from '../src/schedule.js';
+import { db, TODAY } from '../src/shared/data.js';
+import { loadData } from '../src/demo/data.js';
+import { slots } from '../src/demo/availability.js';
+import { validateSchedules, appointmentCovered } from '../src/demo/schedule.js';
 
 const fixture = JSON.parse(await readFile(new URL('../public/data/demo.json', import.meta.url), 'utf8'));
 beforeEach(async () => {

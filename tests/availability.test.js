@@ -3,13 +3,12 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import {
   db,
-  loadData,
   resource,
   list,
   TODAY,
   addDays,
   minutes,
-} from '../src/data.js';
+} from '../src/shared/data.js';
 import {
   slots,
   holdSlot,
@@ -18,8 +17,9 @@ import {
   validateContact,
   overlaps,
   nextDates,
-} from '../src/availability.js';
-import { escape } from '../src/ui.js';
+} from '../src/demo/availability.js';
+import { loadData } from '../src/demo/data.js';
+import { escape } from '../src/shared/ui.js';
 const fixture = JSON.parse(
   await readFile(new URL('../public/data/demo.json', import.meta.url), 'utf8'),
 );

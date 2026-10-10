@@ -1,67 +1,9 @@
-import { replaceData, time } from './data.js';
+import { replaceData, time } from '../../../shared/data.js';
+import { api, user } from '../auth/session.js';
+import { pending } from '../../mode.js';
 
-export const isDemo = typeof location !== 'undefined' && new URLSearchParams(location.search).get('demo') === '1';
-export const pending = 'Aún no forma parte de esta entrega';
-export const modeUrl = (path, demo = isDemo) => `${path}${demo ? '?demo=1' : ''}`;
-const base = (import.meta.env?.VITE_API_URL || 'http://localhost:3000').replace(/\/$/, '');
-let token = typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('cita-session') : null;
-export let user = null;
-export const roleLabel = (role) => ({ admin_negocio: 'Administración', superadmin: 'Superadministración', profesional: 'Profesional', recepcionista: 'Recepción' })[role] || '';
-export async function api(path, method = 'GET', body) {
-  let response;
-  try {
-    response = await fetch(`${base}${path}`, {
-      method, headers: { ...(body === undefined ? {} : { 'Content-Type': 'application/json' }), ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-      ...(body === undefined ? {} : { body: JSON.stringify(body) }),
-    });
-  } catch { throw new Error('No se pudo conectar con el backend. Comprueba que esté iniciado y revisa VITE_API_URL.'); }
-  const data = response.status === 204 ? null : await response.json().catch(() => null);
-  if (!response.ok) {
-    if (response.status === 401 && path !== '/auth/login') {
-      clearSession();
-      if (typeof window !== 'undefined') window.dispatchEvent(new Event('cita-session-expired'));
-    }
-    throw new Error(Array.isArray(data?.message) ? data.message.join(' · ') : data?.message || `Error del servidor (${response.status}).`);
-  }
-  return data;
-}
-function clearSession() {
-  token = null; user = null; replaceData(undefined);
-  if (typeof sessionStorage !== 'undefined') sessionStorage.removeItem('cita-session');
-}
-export async function login(email, password) {
-  const result = await api('/auth/login', 'POST', { email, password });
-  token = result.accessToken;
-  sessionStorage.setItem('cita-session', token);
-  user = result.usuario;
-}
-export async function logout() {
-  await api('/auth/logout', 'POST');
-  clearSession();
-}
-export async function restoreSession() {
-  if (!token) return false;
-  const result = await api('/auth/profile');
-  user = { ...result.user, id: result.user.sub };
-  return true;
-}
 const initials = (name) => name.split(/\s+/).slice(0, 2).map((part) => part[0]).join('');
 const clock = (value) => value == null ? '' : time(value % 1440);
-export function catalogPayload(table, values) {
-  return table === 'services'
-    ? { nombre: values.name, costo: String(values.price), duracionMinutos: values.duration }
-    : { nombre: values.name, direccion: values.address, telefono: values.phone, notasLlegada: values.notes || null, zonaHoraria: values.timezone, urlGoogleMaps: values.maps || null };
-}
-export function schedulePayload(rows) {
-  const order = new Map();
-  return { franjas: rows.filter((row) => row.id > 0 || row.enabled || row.start || row.end || row.breakStart || row.breakEnd).map((row) => {
-    const orden = order.get(row.day) || 0;
-    order.set(row.day, orden + 1);
-    const min = (value) => value ? Number(value.slice(0, 2)) * 60 + Number(value.slice(3)) : null;
-    return { ...(row.id > 0 ? { id: row.id } : {}), diaSemana: row.day, orden, sucursalId: row.branchId || null,
-      inicioMinutos: min(row.start), finMinutos: row.end === '00:00' ? 1440 : min(row.end), descansoInicioMinutos: min(row.breakStart), descansoFinMinutos: row.breakEnd === '00:00' ? 1440 : min(row.breakEnd), activo: row.enabled };
-  }) };
-}
 export async function loadBackendData() {
   const tenantId = user.negocioId || 1;
   const next = { tenants: [], professionals: [], branches: [], services: [], schedules: [], blocks: [], appointments: [], clients: [], holds: [] };
@@ -96,7 +38,4 @@ export async function loadBackendData() {
   }
   replaceData(next);
   return next.tenants[0].id;
-}
-export function availablePage(page) {
-  return user?.rol === 'admin_negocio' && ['profesionales', 'servicios', 'sucursales', 'disponibilidad'].includes(page) || user?.rol === 'profesional' && ['servicios', 'sucursales', 'disponibilidad'].includes(page) || user?.rol === 'superadmin' && page === 'plataforma';
 }

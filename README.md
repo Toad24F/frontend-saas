@@ -17,7 +17,7 @@ Conecta el teléfono y esta computadora a la misma red Wi-Fi y ejecuta `npm run 
 
 El botón de luna o sol del encabezado cambia entre modo claro y oscuro; la elección se recuerda en ese navegador. En pantallas estrechas, la agenda inicia en vista diaria y las franjas del horario semanal se presentan como tarjetas.
 
-La versión conectada requiere la API del backend y una cuenta activa. La demo (`?demo=1`) lee datos ficticios mediante `fetch('/data/demo.json')`, sin credenciales ni API. Ambas versiones navegan con History API y comparten componentes, estilos y animaciones. El servidor que publique `dist/` debe resolver rutas desconocidas a `index.html` (fallback de SPA).
+La versión conectada requiere la API del backend y una cuenta activa. La demo (`?demo=1`) lee datos ficticios mediante `fetch('/data/demo.json')`, sin credenciales ni API. Cada modo tiene su propia entrada en `src/connected/` o `src/demo/`; las pantallas y estilos comunes viven en `src/shared/`. Ambas versiones navegan con History API. El servidor que publique `dist/` debe resolver rutas desconocidas a `index.html` (fallback de SPA).
 
 ## Integración con el backend actual
 
@@ -78,17 +78,24 @@ La última nota del usuario limita el trabajo a un **prototipo de pantallas**. E
 
 ```text
 src/
-  app.js             # Router, estado de pantalla, shell y calendario
-  calendar-layout.js # Columnas para citas simultáneas
-  data.js            # Carga Fetch, datos ficticios y selectores por negocio
-  availability.js    # Slots, apartamientos y reserva en memoria
-  views.js           # Pantallas administrativas y reportes
-  actions.js         # Formularios, cambios de estado y catálogos
-  booking.js         # Portal público y flujo de seis pasos
-  ui.js              # Escape de texto, modales, estados y mensajes
-  icons.js           # Iconos SVG de interfaz
-  styles.css         # Estilos base e impresión
-  theme.css          # Modo oscuro y adaptación móvil
+  main.js              # Selecciona la entrada según ?demo=1
+  demo/                # Datos ficticios, reservas y horarios en memoria
+    entry.js
+    data.js
+    availability.js
+    schedule.js
+    booking.js
+  connected/           # Integración con el backend
+    entry.js
+    backend.js         # Fachada para las vistas comunes
+    mode.js
+    modules/
+      auth/             # Sesión y cliente HTTP
+      catalogos/        # Datos de servicios y sucursales
+      datos/            # Carga real según el rol
+      disponibilidad/   # Horarios enviados a la API
+      permisos/         # Pantallas disponibles según el rol
+  shared/              # Router, pantallas, acciones, estado, UI y estilos
 public/data/demo.json # Catálogos ficticios de dos negocios
 db/schema.sql        # Propuesta SQL para una base NUEVA, no ejecutada por la app
 docs/                # Diccionario, alcance y contrato futuro de seguridad
@@ -97,12 +104,12 @@ tests/               # Verificaciones del motor en memoria
 
 ## Estilo de cristal
 
-La clase reutilizable `.glass-effect` está en `src/styles.css` y usa blanco al 20 %, desenfoque de 7 px, borde blanco al 30 % y sombra de 30 px. Se aplica a los diálogos y avisos del prototipo. El exterior del diálogo permanece nítido y transparente; el modo oscuro adapta el vidrio y el texto. El selector de negocio y el resumen del portal usan variantes adecuadas a sus fondos.
+La clase reutilizable `.glass-effect` está en `src/shared/styles.css` y usa blanco al 20 %, desenfoque de 7 px, borde blanco al 30 % y sombra de 30 px. Se aplica a los diálogos y avisos del prototipo. El exterior del diálogo permanece nítido y transparente; el modo oscuro adapta el vidrio y el texto. El selector de negocio y el resumen del portal usan variantes adecuadas a sus fondos.
 
 ## Configuración
 
 
-Copia `.env.example` a `.env` si deseas cambiar el nombre o fecha de referencia. Las variables `VITE_*` son públicas: **nunca deben contener secretos**. Los cambios requieren reiniciar Vite. No se integró ninguna credencial ni se accedió al backend existente.
+Copia `.env.example` a `.env` si deseas cambiar el nombre, fecha de referencia o URL de la API. Las variables `VITE_*` son públicas: **nunca deben contener secretos**. Los cambios requieren reiniciar Vite. El frontend usa la API configurada; ninguna credencial está incluida en el repositorio.
 
 ## Modelo SQL de referencia
 

@@ -2,7 +2,7 @@
 
 ## Separación de responsabilidades
 
-El prototipo no autentica usuarios ni atiende peticiones de negocio en el servidor. `data.js` carga un fixture público con `fetch`. Todos los identificadores y filtros del cliente son manipulables. El selector `resource(tabla,id,tenantId)` verifica la pertenencia para mantener coherencia visual, sin constituir un límite de seguridad.
+La demo no autentica usuarios ni atiende peticiones de negocio en el servidor. `src/demo/data.js` carga un fixture público con `fetch`. Todos los identificadores y filtros del cliente son manipulables. El selector `resource(tabla,id,tenantId)` verifica la pertenencia para mantener coherencia visual, sin constituir un límite de seguridad. La versión conectada usa la API del backend y su autenticación.
 
 Para producción, la API debe derivar `negocio_id` exclusivamente de una sesión autenticada, validar cuenta/licencia activa y aplicar permisos en **cada** lectura o escritura. Debe rechazar o ignorar `tenant_id` suministrado por el cliente, dependiendo del contrato de la ruta. La cuenta de superadministración necesita rutas y permisos explícitos y auditoría independiente.
 

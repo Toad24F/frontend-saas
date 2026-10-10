@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { calendarColumns } from '../src/calendar-layout.js';
+import { calendarColumns } from '../src/shared/calendar-layout.js';
 test('las citas solapadas en cadena conservan columnas sin taparse', () => {
   const positions = calendarColumns([
     { id: 1, start: '09:00', end: '10:00' },

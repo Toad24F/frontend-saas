@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { api, login, loadBackendData, catalogPayload, schedulePayload, modeUrl } from '../src/backend.js';
-import { db } from '../src/data.js';
+import { api, login, loadBackendData, catalogPayload, schedulePayload, modeUrl } from '../src/connected/backend.js';
+import { db } from '../src/shared/data.js';
 
 test('semana completa: conserva IDs, descansos y orden por día; excluye borradores vacíos', () => {
   const row = { id: 12, day: 1, branchId: 3, start: '07:00', end: '12:00', breakStart: '09:00', breakEnd: '09:30', enabled: true };

@@ -1,4 +1,4 @@
-import { isDemo, pending, modeUrl, user, roleLabel, availablePage, login, logout, restoreSession, loadBackendData } from './backend.js';
+import { isDemo, pending, modeUrl, user, roleLabel, availablePage, login, logout, restoreSession, loadBackendData } from '../connected/backend.js';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './styles.css';
 import './theme.css';
@@ -8,7 +8,6 @@ import './calendar.css';
 import { icon } from './icons.js';
 import { calendarColumns } from './calendar-layout.js';
 import {
-  loadData,
   db,
   TODAY,
   addDays,
@@ -460,10 +459,10 @@ function showLogin(message = '') {
   document.querySelector('#open-login').click();
 }
 window.addEventListener('cita-session-expired', () => { document.querySelector('#app-dialog')?.close(); showLogin('Tu sesión expiró. Inicia sesión nuevamente.'); });
-async function start() {
+export async function start() {
   try {
     document.documentElement.dataset.appMode = isDemo ? 'demo' : 'connected';
-    if (isDemo) await loadData();
+    if (isDemo) await (await import('../demo/data.js')).loadData();
     else {
       if (!await restoreSession()) { showLogin(); return; }
       state.tenantId = await loadBackendData();
@@ -473,7 +472,7 @@ async function start() {
       : 'agenda';
     [extraViews, booking, actions] = await Promise.all([
       import('./views.js'),
-      import('./booking.js'),
+      isDemo ? import('../demo/booking.js') : Promise.resolve(null),
       import('./actions.js'),
     ]);
     render();
@@ -538,4 +537,3 @@ function registerCalendarTool() {
     /* Registro opcional. */
   }
 }
-start();
