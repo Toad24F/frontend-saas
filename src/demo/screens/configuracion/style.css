@@ -1,0 +1,59 @@
+.settings-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 23px;
+  align-items: start;
+}
+.settings-form {
+  padding: 5px 25px 25px;
+}
+.business-identity {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding-bottom: 26px;
+  margin-bottom: 22px;
+  border-bottom: 1px solid var(--border);
+}
+.business-identity strong {
+  font-size: 15px;
+  font-weight: 600;
+}
+.business-identity p {
+  font-size: 12px;
+  margin-top: 6px;
+}
+.public-link-card {
+  padding: 25px;
+}
+.public-link-card h2 {
+  margin-top: 22px;
+  margin-bottom: 12px;
+}
+.public-link-card p {
+  font-size: 13px;
+}
+.public-url {
+  background: #f6f7f8;
+  border: 1px dashed #dee2e5;
+  border-radius: 6px;
+  margin: 20px 0;
+  padding: 13px 11px;
+  font-size: 12px;
+  color: #87928b;
+  word-break: break-all;
+}
+.demo-settings {
+  margin-top: 22px;
+  padding: 25px;
+}
+.demo-settings h2 {
+  font-size: 16px;
+}
+.demo-settings p {
+  font-size: 12px;
+  margin: 12px 0 20px;
+}
+.demo-settings .text-button {
+  display: flex;
+}

@@ -1,0 +1,16 @@
+.table-search {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px 12px;
+}
+.table-search input {
+  width: 210px;
+  max-width: 100%;
+  font-size: 12px;
+}
+.table-footer {
+  border-top: 1px solid var(--border);
+  padding: 16px 23px;
+  font-size: 11px;
+  color: #9ba3ad;
+}

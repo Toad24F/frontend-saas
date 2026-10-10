@@ -1,0 +1,137 @@
+.whatsapp-banner {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  background: #eaf3ec;
+  border: 1px solid #dce9de;
+  border-radius: 10px;
+  padding: 25px;
+  margin-bottom: 24px;
+}
+.whatsapp-symbol {
+  width: 47px;
+  height: 47px;
+  border-radius: 13px;
+  background: #d9eadc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6f9679;
+}
+.whatsapp-symbol > .icon {
+  width: 25px;
+  height: 25px;
+}
+.whatsapp-banner > div {
+  flex: 1;
+}
+.whatsapp-banner h2 {
+  font-size: 18px;
+  color: #5b765e;
+}
+.whatsapp-banner p {
+  font-size: 12px;
+  margin-top: 7px;
+  color: #93a491;
+}
+.whatsapp-banner > .soft-tag {
+  background: #ffffff66;
+  color: #90a18d;
+  border-color: #dce7d9;
+}
+.notification-grid {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 23px;
+}
+.automation-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 24px;
+  border-top: 1px solid var(--border);
+}
+.automation-row > div {
+  flex: 1;
+}
+.automation-row strong {
+  font-size: 13px;
+  font-weight: 500;
+}
+.automation-row p {
+  font-size: 11px;
+  margin-top: 5px;
+}
+.automation-row .form-switch {
+  padding-left: 30px;
+}
+.reminder-setting {
+  padding: 10px 24px 25px;
+}
+.reminder-setting select {
+  max-width: 225px;
+}
+.message-preview {
+  background: #e9ede7;
+  border: 1px solid #dce3da;
+  border-radius: 10px;
+  overflow: hidden;
+}
+.message-preview-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 22px;
+  background: #f5f8f3;
+  border-bottom: 1px solid #dfe5dc;
+}
+.message-preview-header strong {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+}
+.message-preview-header small {
+  display: block;
+  font-size: 10px;
+  color: #98a48f;
+  margin-top: 4px;
+}
+.message-bubble {
+  background: white;
+  border-radius: 0 10px 10px 10px;
+  margin: 25px 35px 17px;
+  padding: 20px;
+  box-shadow: 0 2px 5px #25351c09;
+  max-width: 360px;
+}
+.message-bubble p {
+  font-size: 12px;
+  color: #788373;
+  margin-bottom: 13px;
+  line-height: 1.8;
+}
+.message-bubble strong {
+  font-weight: 600;
+}
+.message-bubble > small {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  font-size: 9px;
+  color: #b0b8aa;
+}
+.message-bubble > small .icon {
+  width: 11px;
+  height: 11px;
+  color: #99b8c5;
+  margin-left: -5px;
+}
+.message-bubble > small .icon:first-child {
+  margin-left: 5px;
+}
+.preview-caption {
+  font-size: 10px;
+  text-align: center;
+  color: #a1ad9a;
+  margin-bottom: 18px;
+}

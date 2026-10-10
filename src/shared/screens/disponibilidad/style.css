@@ -1,0 +1,195 @@
+.mode-section {
+  padding: 24px;
+  margin-bottom: 24px;
+}
+.mode-section > div > p {
+  font-size: 13px;
+  margin-top: 7px;
+}
+.mode-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 23px;
+}
+.mode-card {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  border: 1px solid var(--border);
+  padding: 19px;
+  border-radius: 8px;
+  background: #fff;
+  text-align: left;
+}
+.mode-card > .icon {
+  color: #9da89f;
+  width: 25px;
+  height: 25px;
+}
+.mode-card > span {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  flex: 1;
+}
+.mode-card strong {
+  font-size: 14px;
+  font-weight: 600;
+}
+.mode-card small {
+  font-size: 12px;
+  color: #9a9fa7;
+}
+.mode-card > i,
+.choice-radio {
+  height: 19px;
+  width: 19px;
+  border: 1px solid #dce1dd;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.mode-card.selected {
+  border-color: #e6957a;
+  background: #fff9f6;
+  box-shadow: 0 0 0 1px #ed68430a;
+}
+.mode-card.selected > i {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: white;
+}
+.mode-card > i > .icon {
+  width: 12px;
+  height: 12px;
+}
+.professional-select {
+  width: auto;
+  max-width: 240px;
+  font-size: 13px;
+}
+.schedule-table {
+  min-width: 1030px;
+}
+.schedule-table select { min-width: 145px; }
+.schedule-table .time-pair { min-width: 215px; }
+.schedule-table th:last-child,
+.schedule-table td:last-child {
+  position: sticky;
+  right: 0;
+  background: #fff;
+  box-shadow: -8px 0 14px -14px #344054;
+}
+.schedule-table .schedule-disabled td:last-child { background: #fafbfc; }
+.schedule-table .schedule-day-0 { --schedule-accent: #57925b; --schedule-tint: #f0f8ee; }
+.schedule-table .schedule-day-1 { --schedule-accent: #467fc2; --schedule-tint: #eef5fd; }
+.schedule-table .schedule-day-2 { --schedule-accent: #278c80; --schedule-tint: #ebf8f5; }
+.schedule-table .schedule-day-3 { --schedule-accent: #8664bf; --schedule-tint: #f3effa; }
+.schedule-table .schedule-day-4 { --schedule-accent: #bd782c; --schedule-tint: #fff5e9; }
+.schedule-table .schedule-day-5 { --schedule-accent: #b95883; --schedule-tint: #fdf0f5; }
+.schedule-table .schedule-day-6 { --schedule-accent: #626db9; --schedule-tint: #f0f1fd; }
+.schedule-table tbody tr:not(.schedule-disabled) > td {
+  background: var(--schedule-tint);
+}
+.schedule-table tbody tr.schedule-repeat:not(.schedule-disabled) > td {
+  background: color-mix(in srgb, var(--schedule-tint), var(--schedule-accent) 7%);
+}
+.schedule-table tbody tr > td:first-child {
+  border-left: 4px solid var(--schedule-accent);
+}
+.schedule-day-label {
+  color: var(--schedule-accent);
+  font-weight: 700;
+}
+.schedule-table .schedule-disabled .schedule-day-label { color: inherit; }
+.schedule-actions { display: flex; align-items: center; gap: 6px; }
+.schedule-add { min-width: 34px; padding: 4px 10px; font-size: 18px; line-height: 1.2; }
+.schedule-help { margin: 12px 20px 0; color: #667085; font-size: 13px; }
+.schedule-table td {
+  padding: 12px;
+}
+.schedule-table .form-check {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin: 0;
+  min-width: 100px;
+}
+.schedule-table .form-check-input {
+  margin-top: 0;
+}
+.schedule-table .form-control,
+.schedule-table .form-select {
+  font-size: 12px;
+  min-height: 34px;
+}
+.schedule-table input[type='time'] {
+  min-width: 95px;
+  max-width: 120px;
+}
+.schedule-disabled {
+  background: #fafbfc !important;
+  color: #aaa !important;
+}
+.schedule-disabled input:not([type='checkbox']),
+.schedule-disabled select {
+  opacity: 0.6;
+}
+.time-pair {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.form-check-input:checked {
+  background-color: var(--accent);
+  border-color: var(--accent);
+}
+.form-switch .form-check-input {
+  width: 2.5em;
+  height: 1.3em;
+}
+.form-check-input {
+  cursor: pointer;
+}
+.section-form-footer {
+  border-top: 1px solid var(--border);
+  padding: 19px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+.section-form-footer > span {
+  font-size: 11px;
+  color: #98a098;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.section-form-footer > span > .icon {
+  width: 15px;
+  height: 15px;
+}
+.block-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 24px;
+  border-top: 1px solid var(--border);
+}
+.block-item > div {
+  flex: 1;
+}
+.block-item strong {
+  font-size: 13px;
+  font-weight: 500;
+}
+.block-item small {
+  display: block;
+  font-size: 11px;
+  color: #9a9fa8;
+  margin-top: 5px;
+}

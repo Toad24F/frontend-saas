@@ -84,18 +84,38 @@ src/
     data.js
     availability.js
     schedule.js
-    booking.js
+    screens/
+      index.js        # Registro de pantallas de la demo
+      resumen/         # view.js y style.css
+      clientes/        # view.js, actions.js y style.css
+      reportes/        # view.js, state.js y style.css
+      notificaciones/  # view.js y style.css
+      configuracion/   # view.js y style.css
+      reservas/        # booking.js y style.css
   connected/           # Integración con el backend
     entry.js
     backend.js         # Fachada para las vistas comunes
     mode.js
+    screens/index.js   # Registro de pantallas conectadas
     modules/
       auth/             # Sesión y cliente HTTP
       catalogos/        # Datos de servicios y sucursales
       datos/            # Carga real según el rol
       disponibilidad/   # Horarios enviados a la API
       permisos/         # Pantallas disponibles según el rol
-  shared/              # Router, pantallas, acciones, estado, UI y estilos
+  shared/              # Router, estado, UI y estilos generales
+    app.js
+    actions.js         # Distribuye eventos a acciones por pantalla
+    forms.js           # Formularios comunes
+    styles.css         # Shell y componentes comunes
+    screens/
+      agenda/          # view.js, table.js, actions.js y CSS
+      profesionales/   # view.js y style.css
+      servicios/       # view.js y style.css
+      sucursales/      # view.js y style.css
+      disponibilidad/  # view.js, actions.js y style.css
+      plataforma/      # view.js y actions.js
+      catalogos/       # Acciones comunes de los tres catálogos
 public/data/demo.json # Catálogos ficticios de dos negocios
 db/schema.sql        # Propuesta SQL para una base NUEVA, no ejecutada por la app
 docs/                # Diccionario, alcance y contrato futuro de seguridad

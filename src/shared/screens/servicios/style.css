@@ -1,0 +1,40 @@
+.service-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.service-icon > .icon {
+  width: 23px;
+  height: 23px;
+}
+.service-facts {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 25px;
+}
+.service-facts > span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #929aa3;
+}
+.service-facts .icon {
+  width: 16px;
+  height: 16px;
+}
+.service-facts > strong {
+  font-size: 21px;
+  font-family: Manrope, sans-serif;
+}
+.service-facts small {
+  font-size: 10px;
+  color: #a6acb4;
+  font-weight: 400;
+}
