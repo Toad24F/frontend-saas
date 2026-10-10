@@ -1,5 +1,5 @@
 import { catalog } from './screens/catalogos/actions.js';
-import { newBlock } from './screens/disponibilidad/actions.js';
+import { newBlock, editBlock } from './screens/disponibilidad/actions.js';
 import { switchTenant, newTenant } from './screens/plataforma/actions.js';
 import { isDemo, pending, api, user, loadBackendData } from '../connected/backend.js';
 import { state, render, navigate } from './app.js';
@@ -22,6 +22,10 @@ let draftScheduleId = -1;
 
 export async function handleClick(e) {
   try {
+    if (!isDemo && state.page === 'disponibilidad') {
+      const availability = await import('../connected/screens/disponibilidad/actions.js');
+      if (await availability.handleAvailabilityClick(e)) return;
+    }
     if (!isDemo && user.rol === 'superadmin' && state.page === 'negocio') {
       const businessAction = e.target.closest('[data-business-action]');
       const retryDelivery = e.target.closest('[data-retry-delivery]');
@@ -204,7 +208,7 @@ export async function handleClick(e) {
       el.querySelector('#confirm-remove-block').onclick = async () => {
         if (!isDemo) {
           const submit = el.querySelector('#confirm-remove-block'); submit.disabled = true;
-          try { await api(`/bloqueos/${b.id}`, 'DELETE'); el.close(); await loadBackendData(); render(); toast('Bloqueo eliminado.'); } catch (error) { toast(error.message); } finally { submit.disabled = false; }
+          try { await api(`/bloqueos/${b.id}`, 'DELETE'); (await import('../connected/screens/disponibilidad/view.js')).invalidateProjection(); el.close(); await loadBackendData(); render(); toast('Bloqueo eliminado.'); } catch (error) { toast(error.message); } finally { submit.disabled = false; }
           return;
         }
         db.blocks = db.blocks.filter(
@@ -214,6 +218,13 @@ export async function handleClick(e) {
         render();
         toast('Bloqueo eliminado.');
       };
+      return;
+    }
+    const edit = e.target.closest('[data-edit-block]');
+    if (edit) {
+      const block = resource('blocks', Number(edit.dataset.editBlock), state.tenantId);
+      if (!isDemo && user.rol === 'profesional' && block.professionalId !== user.id) throw new Error('Solo puedes editar tus propios bloqueos.');
+      editBlock(block);
       return;
     }
     const toggle = e.target.closest('[data-toggle-tenant]');
@@ -311,6 +322,7 @@ document.addEventListener('submit', async (e) => {
       });
       if (!isDemo) {
         await api(`/profesionales/${p}/horario`, 'PUT', schedulePayload(updates));
+        (await import('../connected/screens/disponibilidad/view.js')).invalidateProjection();
         try { await loadBackendData(); render(); toast('Horario guardado.'); } catch (error) { toast('Horario guardado. No se pudo actualizar la vista: ' + error.message); }
         return;
       }

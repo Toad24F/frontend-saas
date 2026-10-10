@@ -1,0 +1,27 @@
+.availability-extra { margin-top: 24px; padding: 24px; }
+.availability-extra .section-heading { margin-bottom: 18px; }
+.availability-extra .section-heading p, .availability-note { color: var(--muted, #667085); font-size: 13px; }
+.availability-note { margin: 16px 0 0; line-height: 1.5; }
+.offering-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.offering-branch { border: 1px solid var(--border); border-radius: 10px; padding: 18px; min-width: 0; }
+.offering-branch-head, .offering-service, .availability-row-actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.offering-branch-head { align-items: flex-start; }
+.offering-branch h3, .projection-results h3 { font-size: 15px; margin: 0 0 6px; }
+.offering-branch p { font-size: 12px; color: var(--muted, #667085); margin: 0; }
+.offering-branch > .btn { margin-top: 16px; }
+.offering-service-list { margin-top: 14px; border-top: 1px solid var(--border); }
+.offering-checks { display: grid; gap: 12px; margin-top: 16px; }
+.offering-checks .form-check { display: flex; align-items: center; gap: 10px; }
+.offering-service { border-bottom: 1px solid var(--border); padding: 10px 0; font-size: 12px; }
+.offering-service span { text-align: right; max-width: 55%; line-height: 1.4; }
+.offering-ok { color: var(--success, #278c80); }
+.offering-off { color: var(--muted, #667085); }
+.availability-row-actions { justify-content: flex-end; flex: 0 0 auto; }
+.projection-filter { display: flex; align-items: end; flex-wrap: wrap; gap: 12px; }
+.projection-filter label { display: grid; gap: 6px; font-size: 13px; font-weight: 600; }
+.projection-results { margin-top: 24px; }
+.projection-results h3:not(:first-child) { margin-top: 24px; }
+.exception-row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)) auto; gap: 10px; align-items: end; margin: 12px 0; }
+.exception-row label { display: grid; gap: 5px; font-size: 12px; }
+@media (max-width: 900px) { .offering-grid { grid-template-columns: 1fr; } }
+@media (max-width: 767px) { .availability-extra { padding: 18px; } .offering-branch-head { flex-wrap: wrap; } .availability-extra .block-item { padding: 16px 0; flex-wrap: wrap; } .exception-row { grid-template-columns: repeat(2, minmax(0, 1fr)); } .exception-row .icon-btn { min-height: 44px; } }

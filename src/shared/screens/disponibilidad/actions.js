@@ -2,47 +2,54 @@ import { isDemo, api, user } from '../../../connected/backend.js';
 import { state } from '../../app.js';
 import { db, list, resource, TODAY, minutes } from '../../data.js';
 import { field, select, basicForm } from '../../forms.js';
-export function newBlock() {
-  basicForm(
-    'Bloquear disponibilidad',
-    `${field('Motivo del bloqueo', 'reason', '', 'text', 'required maxlength="255"')}<div class="form-row-two">${select(
-      'Tipo',
-      'type',
-      [
-        { id: 'vacaciones', name: 'Vacaciones' },
-        { id: 'feriado', name: 'Día festivo' },
-        { id: 'emergencia', name: 'Emergencia' },
-      ],
-    )}${select('Profesional', 'professionalId', [...(!isDemo && user.rol === 'profesional' ? [] : [{ id: '', name: 'Todo el equipo' }]), ...list('professionals', state.tenantId)])}</div>${select('Sucursal', 'branchId', [{ id: '', name: 'Todas las sucursales' }, ...list('branches', state.tenantId)])}<div class="form-row-two">${field('Desde', 'date', TODAY, 'date', 'required')}${field('Hasta', 'endDate', TODAY, 'date', 'required')}</div><div class="form-row-two">${field('Hora inicial (opcional)', 'start', '', 'time')}${field('Hora final (opcional)', 'end', '', 'time')}</div><p class="field-hint">Deja ambas horas vacías para bloquear el día completo. Las citas existentes se conservan.</p>`,
-    (f) => {
-      const b = {
-        id: Math.max(0, ...db.blocks.map((x) => x.id)) + 1,
-        tenantId: state.tenantId,
-        professionalId: Number(f.get('professionalId')) || null,
-        branchId: Number(f.get('branchId')) || null,
-        date: f.get('date'),
-        endDate: f.get('endDate'),
-        start: f.get('start') || null,
-        end: f.get('end') || null,
-        type: f.get('type'),
-        reason: f.get('reason'),
+
+function blockForm(existing = null) {
+  const editing = Boolean(existing);
+  const canTargetTeam = isDemo || user.rol === 'admin_negocio';
+  const professionals = list('professionals', state.tenantId);
+  const professionalOptions = [...(canTargetTeam ? [{ id: '', name: 'Todo el equipo' }] : []), ...professionals];
+  const branches = [{ id: '', name: 'Todas las sucursales' }, ...list('branches', state.tenantId)];
+  const dialog = basicForm(
+    editing ? 'Editar bloqueo' : 'Bloquear disponibilidad',
+    `${field('Motivo del bloqueo', 'reason', existing?.reason || '', 'text', 'required maxlength="500"')}
+    <div class="form-row-two">${select('Tipo', 'type', [
+      { id: 'vacaciones', name: 'Vacaciones' },
+      { id: 'dia_festivo', name: 'Día festivo' },
+      { id: 'emergencia', name: 'Emergencia' },
+    ], existing?.type === 'feriado' ? 'dia_festivo' : existing?.type || 'vacaciones')}
+    ${select('Profesional', 'professionalId', professionalOptions, existing?.professionalId ?? (canTargetTeam ? '' : user.id))}</div>
+    ${select('Sucursal', 'branchId', branches, existing?.branchId ?? '')}
+    <div class="form-row-two">${field('Desde', 'date', existing?.date || TODAY, 'date', 'required')}${field('Hasta', 'endDate', existing?.endDate || TODAY, 'date', 'required')}</div>
+    <div class="form-row-two">${field('Hora inicial (opcional)', 'start', existing?.start || '', 'time')}${field('Hora final (opcional)', 'end', existing?.end || '', 'time')}</div>
+    <p class="field-hint">Deja ambas horas vacías para bloquear días completos. Las citas existentes se conservan.</p>`,
+    async (form) => {
+      const block = {
+        professionalId: !isDemo && user.rol === 'profesional' ? user.id : Number(form.get('professionalId')) || null,
+        branchId: Number(form.get('branchId')) || null,
+        date: form.get('date'), endDate: form.get('endDate'),
+        start: form.get('start') || null, end: form.get('end') || null,
+        type: form.get('type'), reason: form.get('reason').trim(),
       };
-      if (
-        b.date > b.endDate ||
-        Boolean(b.start) !== Boolean(b.end) ||
-        (isDemo && b.start && b.start >= b.end)
-      )
-        throw new Error(
-          'Verifica el rango de fechas y las dos horas del bloqueo.',
-        );
-      if (b.professionalId)
-        resource('professionals', b.professionalId, state.tenantId);
-      if (b.branchId) resource('branches', b.branchId, state.tenantId);
-      if (!isDemo) return api('/bloqueos', 'POST', { personalId: b.professionalId, sucursalId: b.branchId, tipo: b.type === 'feriado' ? 'dia_festivo' : b.type, motivo: b.reason, fechaInicio: b.date, fechaFin: b.endDate, inicioMinutos: b.start ? minutes(b.start) : null, finMinutos: b.end ? minutes(b.end) : null });
-      db.blocks.push(b);
-    },
-    true,
+      if (!block.reason || block.date > block.endDate || Boolean(block.start) !== Boolean(block.end) || (block.start && block.start >= block.end && block.date === block.endDate))
+        throw new Error('Verifica el motivo, las fechas y las dos horas del bloqueo.');
+      if (!isDemo && user.rol === 'profesional' && block.professionalId !== user.id)
+        throw new Error('Solo puedes gestionar bloqueos de tu propio perfil.');
+      if (block.professionalId) resource('professionals', block.professionalId, state.tenantId);
+      if (block.branchId) resource('branches', block.branchId, state.tenantId);
+      if (!isDemo) {
+        const payload = { personalId: block.professionalId, sucursalId: block.branchId, tipo: block.type, motivo: block.reason, fechaInicio: block.date, fechaFin: block.endDate, inicioMinutos: block.start ? minutes(block.start) : null, finMinutos: block.end ? minutes(block.end) : null };
+        await api(editing ? `/bloqueos/${existing.id}` : '/bloqueos', editing ? 'PATCH' : 'POST', payload);
+        (await import('../../../connected/screens/disponibilidad/view.js')).invalidateProjection();
+        return;
+      }
+      if (editing) Object.assign(resource('blocks', existing.id, state.tenantId), block);
+      else db.blocks.push({ id: Math.max(0, ...db.blocks.map((item) => item.id)) + 1, tenantId: state.tenantId, ...block });
+    }, true,
   );
-  document.querySelector('#f-professionalId').required = false;
-  document.querySelector('#f-branchId').required = false;
+  dialog.querySelector('#f-professionalId').required = false;
+  dialog.querySelector('#f-branchId').required = false;
+  if (!isDemo && user.rol === 'profesional') dialog.querySelector('#f-professionalId').disabled = true;
 }
+
+export function newBlock() { blockForm(); }
+export function editBlock(block) { blockForm(block); }
