@@ -1211,6 +1211,36 @@ p {
   background: rgba(240, 248, 241, 0.15);
   border-top: 1px solid rgba(103, 143, 116, 0.18);
 }
+.login-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 8px;
+}
+.login-actions button {
+  padding: 4px 0;
+  border: 0;
+  background: transparent;
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 600;
+}
+.login-actions button:hover {
+  color: var(--accent-dark);
+  text-decoration: underline;
+}
+.login-notice {
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+#login-form .form-error:empty {
+  display: none;
+}
+.login-footer {
+  background: transparent;
+  border-top: 0;
+}
 .toast-region {
   position: fixed;
   bottom: 24px;

@@ -391,8 +391,47 @@ document.addEventListener('keydown', (event) => {
 });
 function showLogin(message = '') {
   document.querySelector('#app').innerHTML = `<div class="startup-error"><img src="/favicon.svg" alt=""/><h1>Tu espacio en cita.</h1><p>Inicia sesión para trabajar con tu negocio.</p><button class="btn btn-primary" id="open-login">Iniciar sesión</button><a class="btn btn-light" href="${modeUrl(location.pathname, true)}">Ver demo</a></div>`;
-  document.querySelector('#open-login').onclick = () => {
-    const el = modal('Iniciar sesión', `<form id="login-form"><div class="dialog-body"><div class="form-field"><label class="form-label" for="login-email">Correo</label><input class="form-control" id="login-email" name="email" type="email" autocomplete="username" required/></div><div class="form-field"><label class="form-label" for="login-password">Contraseña</label><input class="form-control" id="login-password" name="password" type="password" autocomplete="current-password" required/></div><p class="form-error" role="alert" id="login-error">${escape(message)}</p></div><div class="dialog-footer"><button class="btn btn-primary" type="submit">Entrar</button></div></form>`);
+  const showRecoveryDialog = (email = '') => {
+    const el = modal('Recuperar contraseña', `<form id="recovery-email-form"><div class="dialog-body"><p class="form-intro">Ingresa tu correo y simularemos el envío de un código de verificación.</p><div class="form-field"><label class="form-label" for="recovery-email">Correo</label><input class="form-control" id="recovery-email" name="email" type="email" autocomplete="email" value="${escape(email)}" required/></div><div class="login-actions"><button type="button" data-recovery-action="back">Volver a iniciar sesión</button></div></div><div class="dialog-footer login-footer"><button class="btn btn-primary" type="submit">Enviar código de verificación</button></div></form>`);
+    el.classList.add('auth-screen-transition');
+    el.querySelector('[data-recovery-action="back"]').onclick = () => showLoginDialog();
+    el.querySelector('#recovery-email-form').onsubmit = (event) => {
+      event.preventDefault();
+      const form = new FormData(event.currentTarget);
+      showVerificationDialog(form.get('email'));
+    };
+    el.onclose = () => document.querySelector('#open-login')?.focus();
+  };
+  const showVerificationDialog = (email) => {
+    const el = modal('Verificar correo', `<form id="recovery-code-form"><div class="dialog-body"><p class="form-intro">Simulamos el envío de un código a <strong>${escape(email)}</strong>. Escribe cualquier código para continuar.</p><div class="form-field"><label class="form-label" for="recovery-code">Código de verificación</label><input class="form-control" id="recovery-code" name="code" type="text" autocomplete="one-time-code" required/></div><div class="login-actions"><button type="button" data-recovery-action="back">Cambiar correo</button></div></div><div class="dialog-footer login-footer"><button class="btn btn-primary" type="submit">Verificar código</button></div></form>`);
+    el.classList.add('auth-screen-transition');
+    el.querySelector('[data-recovery-action="back"]').onclick = () => showRecoveryDialog(email);
+    el.querySelector('#recovery-code-form').onsubmit = (event) => {
+      event.preventDefault();
+      showRecoveryConfirmation(email);
+    };
+    el.onclose = () => document.querySelector('#open-login')?.focus();
+  };
+  const showRecoveryConfirmation = (email) => {
+    const el = modal('Código verificado', `<div class="dialog-body"><p class="form-intro">El código para <strong>${escape(email)}</strong> se aceptó correctamente en esta simulación. No se envió ningún correo ni se cambió la contraseña.</p><div class="login-actions"><button type="button" data-recovery-action="back">Volver a iniciar sesión</button></div></div><div class="dialog-footer login-footer"><button class="btn btn-primary" type="button" data-close-recovery>Cerrar</button></div>`);
+    el.classList.add('auth-screen-transition');
+    el.querySelector('[data-recovery-action="back"]').onclick = () => showLoginDialog();
+    el.querySelector('[data-close-recovery]').onclick = () => el.close();
+    el.onclose = () => document.querySelector('#open-login')?.focus();
+  };
+  const showLoginDialog = (loginError = '') => {
+    const el = modal('Iniciar sesión', `<form id="login-form"><div class="dialog-body"><div class="form-field"><label class="form-label" for="login-email">Correo</label><input class="form-control" id="login-email" name="email" type="email" autocomplete="username" required/></div><div class="form-field"><label class="form-label" for="login-password">Contraseña</label><input class="form-control" id="login-password" name="password" type="password" autocomplete="current-password" required/></div><div class="login-actions"><button type="button" data-login-action="recover">Recuperar contraseña</button><button type="button" data-login-action="register">Crear cuenta</button></div><p class="login-notice" id="login-notice" role="status" hidden></p><p class="form-error" role="alert" id="login-error">${escape(loginError)}</p></div><div class="dialog-footer login-footer"><button class="btn btn-primary" type="submit">Entrar</button></div></form>`);
+    el.classList.add('auth-screen-transition');
+    el.querySelectorAll('[data-login-action]').forEach((button) => {
+      button.onclick = () => {
+        if (button.dataset.loginAction === 'register') {
+          showRegisterDialog();
+          return;
+        }
+        showRecoveryDialog(el.querySelector('#login-email').value);
+      };
+    });
+    el.onclose = () => document.querySelector('#open-login')?.focus();
     el.querySelector('form').onsubmit = async (event) => {
       event.preventDefault();
       const submit = event.target.querySelector('[type="submit"]'); submit.disabled = true;
@@ -403,6 +442,19 @@ function showLogin(message = '') {
       finally { submit.disabled = false; }
     };
   };
+  const showRegisterDialog = () => {
+    const el = modal('Crear cuenta', `<form id="register-form"><div class="dialog-body"><p class="form-intro">Completa tus datos y el código de activación para solicitar acceso.</p><div class="form-field"><label class="form-label" for="register-email">Correo</label><input class="form-control" id="register-email" name="email" type="email" autocomplete="email" required/></div><div class="form-field"><label class="form-label" for="register-password">Contraseña</label><input class="form-control" id="register-password" name="password" type="password" autocomplete="new-password" required/></div><div class="form-field"><label class="form-label" for="register-activation-code">Código de activación</label><input class="form-control" id="register-activation-code" name="activationCode" type="text" autocomplete="off" spellcheck="false" required/></div><div class="login-actions"><button type="button" data-login-action="back">Ya tengo cuenta · Iniciar sesión</button></div><p class="login-notice" id="register-notice" role="status" hidden></p></div><div class="dialog-footer login-footer"><button class="btn btn-primary" type="submit">Crear cuenta</button></div></form>`);
+    el.classList.add('auth-screen-transition');
+    el.querySelector('[data-login-action="back"]').onclick = () => showLoginDialog();
+    el.querySelector('#register-form').onsubmit = (event) => {
+      event.preventDefault();
+      const notice = el.querySelector('#register-notice');
+      notice.textContent = 'El registro aún no está conectado al servidor; no se enviaron tus datos.';
+      notice.hidden = false;
+    };
+    el.onclose = () => document.querySelector('#open-login')?.focus();
+  };
+  document.querySelector('#open-login').onclick = () => showLoginDialog(message);
   document.querySelector('#open-login').click();
 }
 window.addEventListener('cita-session-expired', () => { document.querySelector('#app-dialog')?.close(); showLogin('Tu sesión expiró. Inicia sesión nuevamente.'); });

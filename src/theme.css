@@ -238,6 +238,36 @@ html[data-theme='dark'] .app-toast.glass-effect { background: var(--glass-surfac
 html[data-theme='dark'] .glass-effect { color: var(--ink); }
 html[data-theme='dark'] .workspace-switch.glass-effect { color: #eff8f0; }
 html[data-theme='dark'] .sidebar { background: radial-gradient(circle at 18% 10%, #294b39 0, transparent 43%), var(--sidebar); }
+html[data-theme='light'] .sidebar {
+  background: #f8faf7;
+  border-right: 1px solid var(--border);
+  color: var(--ink);
+}
+html[data-theme='light'] .sidebar .brand { color: var(--ink); }
+html[data-theme='light'] .sidebar .workspace-switch.glass-effect {
+  background: #fff;
+  border-color: var(--border);
+  box-shadow: 0 4px 12px rgba(26, 49, 33, 0.06);
+  color: var(--ink);
+}
+html[data-theme='light'] .sidebar .workspace-switch.glass-effect:hover { background: var(--surface-soft); }
+html[data-theme='light'] .sidebar :is(.workspace-switch small, .nav-section, .sidebar-foot) { color: var(--muted); }
+html[data-theme='light'] .sidebar .nav-item { color: #526359; }
+html[data-theme='light'] .sidebar .nav-item > .icon { color: #78877c; }
+html[data-theme='light'] .sidebar .nav-item:hover { background: #e9efe9; color: var(--ink); }
+html[data-theme='light'] .sidebar .nav-item:hover > .icon { color: var(--ink); }
+html[data-theme='light'] .sidebar .nav-item.active,
+html[data-theme='light'] .sidebar .nav-item.active > .icon { color: #fff; }
+html[data-theme='light'] .sidebar .nav-item.active:hover,
+html[data-theme='light'] .sidebar .nav-item.active:hover > .icon { color: var(--ink); }
+html[data-theme='light'] .sidebar .portal-card {
+  background: linear-gradient(125deg, #fff, #f0f5ef);
+  border-color: var(--border);
+}
+html[data-theme='light'] .sidebar .portal-card strong { color: var(--ink); }
+html[data-theme='light'] .sidebar .portal-card p { color: var(--muted); }
+html[data-theme='light'] .sidebar .portal-card a,
+html[data-theme='light'] .sidebar .portal-icon { color: var(--accent); }
 html[data-theme='dark'] .app-dialog::backdrop { background: rgba(2, 9, 5, 0.68); }
 html[data-theme='dark'] .booking-summary.glass-effect { background: var(--glass-surface); border-color: var(--glass-border); }
 html[data-theme='dark'] .booking-summary.glass-effect :is(h3, p, .summary-items > div,
