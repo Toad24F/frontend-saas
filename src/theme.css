@@ -59,6 +59,7 @@ html[data-theme='dark'] :is(
   border-color: var(--border);
   color: var(--ink);
 }
+html[data-theme='dark'] .service-tags > span { background: #304237; color: #d2e0d4; }
 html[data-theme='dark'] :is(.stat-top, .stat-caption, .section-heading p, .subtle-text, .field-hint, .optional, .form-label, .booking-title p, .choice-content p, .booking-business p, .booking-trust p, .summary-items > div, .summary-items > div.filled) { color: #adbdaf; }
 html[data-theme='dark'] :is(.segmented, .month-label, .muted-day, .app-table thead th, .form-separator, .calendar-toolbar, .information-note, .compact-note) { background: #223229; border-color: var(--border); color: #bdd0c1; }
 html[data-theme='dark'] .segmented button { color: #bdcabe; }
