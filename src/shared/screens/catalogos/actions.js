@@ -4,8 +4,10 @@ import { db, list, resource } from '../../data.js';
 import { icon } from '../../icons.js';
 import { toast, escape as esc } from '../../ui.js';
 import { field, basicForm } from '../../forms.js';
-export function catalog(type, id) {
-  const existing = id ? resource(type, id, state.tenantId) : null;
+import { loadEditableResource } from '../../../connected/modules/catalogos/detail.js';
+export async function catalog(type, id) {
+  const cached = id ? resource(type, id, state.tenantId) : null;
+  const existing = cached && !isDemo && (type !== 'professionals' || user.rol === 'admin_negocio') ? await loadEditableResource(type, cached) : cached;
   if (type === 'services') {
     if (!isDemo && user.rol === 'profesional' && existing && existing.creatorId !== user.id) {
       toast('Solo puedes editar los servicios que creaste.');
@@ -51,20 +53,20 @@ export function catalog(type, id) {
     let liveId = existing?.id;
     basicForm(
       existing ? 'Editar profesional' : 'Nuevo profesional',
-      `${field('Nombre completo', 'name', existing?.name, 'text', own ? 'readonly' : 'required maxlength="150"')}${own ? '' : field('Especialidad', 'specialty', existing?.specialty, 'text', 'required maxlength="150"')}${field('Correo', 'email', existing?.email, 'email', own ? 'readonly' : 'required')}${isDemo || own ? '' : field(existing ? 'Nueva contraseña (opcional)' : 'Contraseña', 'password', '', 'password', existing ? 'autocomplete="new-password" minlength="12"' : 'required autocomplete="new-password" minlength="12"')}<div class="form-field"><label class="form-label">Servicios que ofrece</label><div class="checkbox-list">${list(
+      `${field('Nombre completo', 'name', existing?.name, 'text', own ? 'readonly' : 'required maxlength="150"')}${own ? '' : field('Especialidad', 'specialty', existing?.specialty, 'text', 'required maxlength="150"')}${field('Correo', 'email', existing?.email, 'email', own ? 'readonly' : 'required')}${isDemo || own ? '' : field(existing ? 'Nueva contraseña (opcional)' : 'Contraseña', 'password', '', 'password', existing ? 'autocomplete="new-password" minlength="12"' : 'required autocomplete="new-password" minlength="12"')}<div class="form-field"><label class="form-label">Servicios que ofrece</label><div class="checkbox-list">${(existing?.catalogServices || list(
         'services',
         state.tenantId,
-      )
+      ))
         .map(
           (s) =>
             `<label><input type="checkbox" class="form-check-input" name="services" value="${s.id}" ${!isDemo && s.active === false && !existing?.serviceIds.includes(s.id) ? 'disabled' : ''} ${existing?.serviceIds.includes(s.id) ? 'checked' : ''}/> ${esc(s.name)}</label>`,
         )
         .join(
           '',
-        )}</div></div><div class="form-field"><label class="form-label">Sucursales</label><div class="checkbox-list">${list(
+      )}</div></div><div class="form-field"><label class="form-label">Sucursales</label><div class="checkbox-list">${(existing?.catalogBranches || list(
         'branches',
         state.tenantId,
-      )
+      ))
         .map(
           (b) =>
             `<label><input type="checkbox" class="form-check-input" name="branches" value="${b.id}" ${own ? 'disabled' : ''} ${existing?.branchIds.includes(b.id) ? 'checked' : ''}/> ${esc(b.name)}</label>`,

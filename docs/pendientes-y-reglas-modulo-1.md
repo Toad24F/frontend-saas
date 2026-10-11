@@ -1,21 +1,21 @@
 # Pendientes y reglas del módulo 1
 
-**Revisión:** 11 de octubre de 2026. Inventario de la versión conectada tras completar la baja condicionada de servicios. Se contrastaron los controladores y servicios actuales del backend con las llamadas del frontend. El contrato detallado está en [actual.md](actual.md); las implementaciones previas se describen en [paso 1](resultado-navegacion-formularios-modulo-1.md), [paso 2](resultado-paso-2-modulo-1.md), [paso 3](resultado-paso-3-modulo-1.md), [estados y baja de profesionales](resultado-estados-baja-profesionales.md), [cupo y baja de sucursales](resultado-cupo-baja-sucursales.md) y [baja de servicios](resultado-baja-servicios.md).
+**Revisión:** 11 de octubre de 2026. Inventario de la versión conectada tras revisar las consultas individuales. Se contrastaron los controladores y servicios actuales del backend con las llamadas del frontend. El contrato detallado está en [actual.md](actual.md); las implementaciones previas se describen en [paso 1](resultado-navegacion-formularios-modulo-1.md), [paso 2](resultado-paso-2-modulo-1.md), [paso 3](resultado-paso-3-modulo-1.md), [estados y baja de profesionales](resultado-estados-baja-profesionales.md), [cupo y baja de sucursales](resultado-cupo-baja-sucursales.md), [baja de servicios](resultado-baja-servicios.md) y [consultas individuales](resultado-consultas-individuales.md).
 
-## Endpoints existentes que faltan por conectar
+## Estado de endpoints existentes
 
 ### Operaciones útiles para cerrar el módulo 1
 
 Ya se conectaron las operaciones de alta, edición, activación, desactivación y baja condicionada de los catálogos disponibles. No quedan operaciones de catálogo pendientes con la API actual.
 
-### Consultas individuales todavía sin uso directo
+### Consultas individuales revisadas
 
 | Endpoint | Estado | Criterio |
 | --- | --- | --- |
-| `GET /profesionales/:id` | Sin llamada directa. | El listado actual ya alimenta las tarjetas y el formulario; usarlo si se crea un detalle independiente o se necesita refrescar un solo perfil. |
-| `GET /sucursales/:id` | Sin llamada directa. | El listado actual contiene la ficha visible; usarlo para un detalle individual o antes de editar si hace falta la versión más reciente. |
-| `GET /servicios/:id` | Sin llamada directa. | El catálogo actual contiene los datos visibles; usarlo si se abre un detalle individual. |
-| `GET /profesionales/:id/sucursales/:sucursalId/atencion` | Sin llamada directa. | `GET /profesionales/:id/oferta` ya aporta `atencionActiva`; la consulta individual sirve para refrescar solo ese interruptor. |
+| `GET /profesionales/:id` | Conectado al abrir Editar profesional como AN. | Se refrescan perfil, asignaciones y opciones de catálogo antes de mostrar el formulario. |
+| `GET /sucursales/:id` | Conectado al abrir Editar sucursal. | Evita editar los campos de una ficha anterior a los cambios de otra sesión. |
+| `GET /servicios/:id` | Conectado al abrir Editar servicio. | Evita editar los campos y verificar autoría desde una ficha antigua. |
+| `GET /profesionales/:id/sucursales/:sucursalId/atencion` | Sin llamada directa; cubierta por `GET /profesionales/:id/oferta`. | La oferta ya aporta `atencionActiva` y se refresca tras cambiar el interruptor. |
 
 `GET /` es la respuesta de ejemplo de Nest (`Hello World!`), no una función de producto pendiente de pantalla. Que un endpoint de lectura no tenga llamada individual no significa necesariamente que falte una capacidad para el usuario.
 
@@ -38,6 +38,6 @@ Ya se conectaron las operaciones de alta, edición, activación, desactivación 
 8. **Validación y errores:** enviar solo campos admitidos por cada DTO; respetar `null`, arreglos vacíos, fechas civiles y respuestas 204. Mostrar errores 400/403/404/409 cerca de la acción y actualizar la vista tras una mutación confirmada.
 9. **Verificación y registro:** probar las transformaciones o permisos que representen un riesgo concreto, ejecutar pruebas y compilación del frontend, y documentar archivos agregados, modificados o movidos junto con límites conocidos. Evitar modificar datos reales del backend durante pruebas visuales sin necesidad.
 
-## Orden recomendado para lo pendiente con API disponible
+## Estado de API disponible
 
-1. Usar consultas individuales solo cuando un flujo de detalle o refresco las necesite; no añadir pantallas redundantes por alcanzar una cifra de endpoints usados.
+Los flujos de catálogo y estados previstos para el módulo 1 ya están conectados. La consulta individual de atención queda disponible para un futuro flujo que necesite refrescar solo ese interruptor; no se añade una pantalla redundante para consumirla.

@@ -188,7 +188,7 @@ export async function handleClick(e) {
       const selector = attr.replace(/[A-Z]/g, (c) => '-' + c.toLowerCase());
       const el = e.target.closest(`[data-${selector}]`);
       if (el) {
-        catalog(type, Number(el.dataset[attr]));
+        await catalog(type, Number(el.dataset[attr]));
         return;
       }
     }
