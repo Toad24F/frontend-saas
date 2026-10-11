@@ -1,0 +1,16 @@
+.connected-services .card-bottom {
+  flex-wrap: wrap;
+}
+.connected-services .service-management {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.connected-services .service-management .btn {
+  min-height: 36px;
+  font-size: 12px;
+}
+@media (max-width: 767px) {
+  .connected-services .service-management .btn { min-height: 44px; }
+}

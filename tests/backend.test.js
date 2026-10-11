@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { api, login, loadBackendData, catalogPayload, schedulePayload, modeUrl, availablePage, defaultPage } from '../src/connected/backend.js';
 import { db } from '../src/shared/data.js';
 import { validateNewPassword } from '../src/connected/modules/auth/password-policy.js';
+import { getBranchQuota } from '../src/connected/modules/sucursales/quota.js';
 
 test('semana completa: conserva IDs, descansos y orden por día; excluye borradores vacíos', () => {
   const row = { id: 12, day: 1, branchId: 3, start: '07:00', end: '12:00', breakStart: '09:00', breakEnd: '09:30', enabled: true };
@@ -50,6 +51,7 @@ test('carga datos reales aislados del negocio, sin inventar citas, y envía auto
     '/auth/login': { accessToken: 'test-token', usuario: { id: 2, nombre: 'Admin', rol: 'admin_negocio', negocioId: 7 } },
     '/servicios': [{ id: 10, nombre: 'Consulta', costo: '500.00', duracionMinutos: 45, activo: true }],
     '/sucursales': [{ id: 20, nombre: 'Centro', direccion: 'Calle 1', telefono: '6141234567', zonaHoraria: 'America/Chihuahua', activo: true }],
+    '/sucursales/cupo': { negocioId: 7, limiteSucursalesActivas: 3, sucursalesActivas: 1, disponibles: 2 },
     '/profesionales': [{ id: 30, nombre: 'Profesional', correo: 'test@example.com', activo: false }],
     '/recepcionistas': [{ id: 31, nombre: 'Recepción', email: 'recepcion@example.com', activo: true, activadoEn: '2026-10-10T12:00:00.000Z' }],
     '/bloqueos': [{ id: 40, personalId: 30, sucursalId: 20, tipo: 'vacaciones', motivo: 'Vacaciones', fechaInicio: '2026-10-10', fechaFin: '2026-10-11', inicioMinutos: null, finMinutos: null }],
@@ -69,6 +71,7 @@ test('carga datos reales aislados del negocio, sin inventar citas, y envía auto
     assert.equal(availablePage('servicios'), true);
     assert.equal(availablePage('agenda'), false);
     assert.equal(await loadBackendData(), 7);
+    assert.deepEqual(getBranchQuota(), responses['/sucursales/cupo']);
     assert.deepEqual(db.professionals[0].branchIds, [20]);
     assert.deepEqual(db.professionals[0].serviceIds, [10]);
     assert.equal(db.professionals[0].active, false);

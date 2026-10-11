@@ -22,6 +22,20 @@ let draftScheduleId = -1;
 
 export async function handleClick(e) {
   try {
+    if (!isDemo && user.rol === 'admin_negocio' && state.page === 'servicios') {
+      const service = e.target.closest('[data-delete-service]');
+      if (service) {
+        (await import('../connected/screens/servicios/actions.js')).confirmServiceDeletion(Number(service.dataset.deleteService));
+        return;
+      }
+    }
+    if (!isDemo && user.rol === 'admin_negocio' && state.page === 'sucursales') {
+      const branch = e.target.closest('[data-delete-branch]');
+      if (branch) {
+        (await import('../connected/screens/sucursales/actions.js')).confirmBranchDeletion(Number(branch.dataset.deleteBranch));
+        return;
+      }
+    }
     if (!isDemo && user.rol === 'admin_negocio' && state.page === 'profesionales') {
       const professional = e.target.closest('[data-professional-action]');
       if (professional) {

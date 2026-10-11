@@ -1,16 +1,12 @@
 # Pendientes y reglas del módulo 1
 
-**Revisión:** 11 de octubre de 2026. Inventario de la versión conectada tras completar estados y baja de profesionales. Se contrastaron los controladores y servicios actuales del backend con las llamadas del frontend. El contrato detallado está en [actual.md](actual.md); las implementaciones previas se describen en [paso 1](resultado-navegacion-formularios-modulo-1.md), [paso 2](resultado-paso-2-modulo-1.md), [paso 3](resultado-paso-3-modulo-1.md) y [estados y baja de profesionales](resultado-estados-baja-profesionales.md).
+**Revisión:** 11 de octubre de 2026. Inventario de la versión conectada tras completar la baja condicionada de servicios. Se contrastaron los controladores y servicios actuales del backend con las llamadas del frontend. El contrato detallado está en [actual.md](actual.md); las implementaciones previas se describen en [paso 1](resultado-navegacion-formularios-modulo-1.md), [paso 2](resultado-paso-2-modulo-1.md), [paso 3](resultado-paso-3-modulo-1.md), [estados y baja de profesionales](resultado-estados-baja-profesionales.md), [cupo y baja de sucursales](resultado-cupo-baja-sucursales.md) y [baja de servicios](resultado-baja-servicios.md).
 
 ## Endpoints existentes que faltan por conectar
 
 ### Operaciones útiles para cerrar el módulo 1
 
-| Endpoint | Rol | Pendiente en la interfaz | Regla del backend |
-| --- | --- | --- | --- |
-| `GET /sucursales/cupo` | AN | Mostrar límite, sucursales activas y disponibles en la vista de sucursales. | El cupo cuenta sucursales activas. La alta y la reactivación pueden responder 409 aunque la vista muestre espacio previo, por concurrencia o cambios de estado. |
-| `DELETE /sucursales/:id` | AN | Baja con confirmación y tratamiento de conflicto. | El backend verifica pertenencia, vínculos e historial; puede responder 409. Desactivar conserva el registro y libera cupo. |
-| `DELETE /servicios/:id` | AN | Baja con confirmación y tratamiento de conflicto. | Una selección o actividad posterior al alta puede impedir la eliminación con 409. Desactivar retira de la oferta efectiva sin borrar preferencias. |
+Ya se conectaron las operaciones de alta, edición, activación, desactivación y baja condicionada de los catálogos disponibles. No quedan operaciones de catálogo pendientes con la API actual.
 
 ### Consultas individuales todavía sin uso directo
 
@@ -44,6 +40,4 @@
 
 ## Orden recomendado para lo pendiente con API disponible
 
-1. Mostrar cupo propio y ofrecer baja condicionada de sucursales.
-2. Ofrecer baja condicionada de servicios.
-3. Usar consultas individuales solo cuando un flujo de detalle o refresco las necesite; no añadir pantallas redundantes por alcanzar una cifra de endpoints usados.
+1. Usar consultas individuales solo cuando un flujo de detalle o refresco las necesite; no añadir pantallas redundantes por alcanzar una cifra de endpoints usados.
