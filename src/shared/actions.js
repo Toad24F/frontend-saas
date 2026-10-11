@@ -56,7 +56,7 @@ export async function handleClick(e) {
           const serviceIds = professional.serviceIds.includes(service.id)
             ? professional.serviceIds.filter((id) => id !== service.id)
             : [...professional.serviceIds, service.id];
-          await api(`/profesionales/${user.id}/servicios`, 'PUT', { servicioIds });
+          await api(`/profesionales/${user.id}/servicios`, 'PUT', { servicioIds: serviceIds });
         } else await api(`/servicios/${service.id}/${service.active === false ? 'reactivar' : 'desactivar'}`, 'POST', {});
         if (!isDemo) await loadBackendData();
         render();
