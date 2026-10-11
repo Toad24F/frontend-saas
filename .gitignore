@@ -6,3 +6,5 @@ dist/
 tmp/
 *.log
 docs/cuentas.md
+/.agents
+skills-lock.json

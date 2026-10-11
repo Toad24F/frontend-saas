@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 660 120" role="img" aria-labelledby="title">
+  <title id="title">Citalendar</title>
+  <path fill="#1B2D28" d="M96 12H38C23.6 12 12 23.6 12 38v44c0 14.4 11.6 26 26 26h58c6.6 0 12-5.4 12-12V84H42c-3.3 0-6-2.7-6-6V42c0-3.3 2.7-6 6-6h66V24c0-6.6-5.4-12-12-12Z"/>
+  <rect x="72" y="52" width="24" height="24" rx="7" fill="#F16B43"/>
+  <text x="135" y="86" fill="#1B2D28" font-family="Manrope, 'DM Sans', Arial, sans-serif" font-size="69" font-weight="750" letter-spacing="-3.5">Citalendar</text>
+</svg>

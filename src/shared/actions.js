@@ -1,7 +1,7 @@
 import { catalog } from './screens/catalogos/actions.js';
 import { newBlock, editBlock } from './screens/disponibilidad/actions.js';
 import { switchTenant, newTenant } from './screens/plataforma/actions.js';
-import { isDemo, pending, api, user, loadBackendData } from '../connected/backend.js';
+import { isDemo, pending, api, user, loadBackendData, schedulePayload } from '../connected/backend.js';
 import { state, render, navigate } from './app.js';
 import {
   db,
