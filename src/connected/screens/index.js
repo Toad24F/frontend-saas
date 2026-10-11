@@ -1,4 +1,4 @@
-import { professionals } from '../../shared/screens/profesionales/view.js';
+import { professionals } from './profesionales/view.js';
 import { services } from '../../shared/screens/servicios/view.js';
 import { branches } from '../../shared/screens/sucursales/view.js';
 import { availability } from './disponibilidad/view.js';

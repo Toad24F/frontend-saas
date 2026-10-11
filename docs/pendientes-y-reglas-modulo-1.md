@@ -1,6 +1,6 @@
 # Pendientes y reglas del módulo 1
 
-**Revisión:** 10 de octubre de 2026. Inventario de la versión conectada tras los pasos 1–3. Se contrastaron los controladores y servicios actuales del backend con las llamadas del frontend. El contrato detallado está en [actual.md](actual.md); las implementaciones previas se describen en [paso 1](resultado-navegacion-formularios-modulo-1.md), [paso 2](resultado-paso-2-modulo-1.md) y [paso 3](resultado-paso-3-modulo-1.md).
+**Revisión:** 11 de octubre de 2026. Inventario de la versión conectada tras completar estados y baja de profesionales. Se contrastaron los controladores y servicios actuales del backend con las llamadas del frontend. El contrato detallado está en [actual.md](actual.md); las implementaciones previas se describen en [paso 1](resultado-navegacion-formularios-modulo-1.md), [paso 2](resultado-paso-2-modulo-1.md), [paso 3](resultado-paso-3-modulo-1.md) y [estados y baja de profesionales](resultado-estados-baja-profesionales.md).
 
 ## Endpoints existentes que faltan por conectar
 
@@ -8,9 +8,6 @@
 
 | Endpoint | Rol | Pendiente en la interfaz | Regla del backend |
 | --- | --- | --- | --- |
-| `POST /profesionales/:id/desactivar` | AN | Acción desde la ficha del profesional. | Desactiva la cuenta y revoca sus sesiones; conserva perfil e historial. Devuelve 204. |
-| `POST /profesionales/:id/reactivar` | AN | Acción desde la ficha del profesional. | Reactiva la cuenta, pero no restaura sesiones revocadas. Devuelve 204. |
-| `DELETE /profesionales/:id` | AN | Baja con confirmación y tratamiento de conflicto. | Elimina perfil y cuenta solo si no tienen uso o historial que impida la baja; en caso contrario responde 409. Devuelve 204 si procede. |
 | `GET /sucursales/cupo` | AN | Mostrar límite, sucursales activas y disponibles en la vista de sucursales. | El cupo cuenta sucursales activas. La alta y la reactivación pueden responder 409 aunque la vista muestre espacio previo, por concurrencia o cambios de estado. |
 | `DELETE /sucursales/:id` | AN | Baja con confirmación y tratamiento de conflicto. | El backend verifica pertenencia, vínculos e historial; puede responder 409. Desactivar conserva el registro y libera cupo. |
 | `DELETE /servicios/:id` | AN | Baja con confirmación y tratamiento de conflicto. | Una selección o actividad posterior al alta puede impedir la eliminación con 409. Desactivar retira de la oferta efectiva sin borrar preferencias. |
@@ -47,7 +44,6 @@
 
 ## Orden recomendado para lo pendiente con API disponible
 
-1. Completar estados y baja de profesionales.
-2. Mostrar cupo propio y ofrecer baja condicionada de sucursales.
-3. Ofrecer baja condicionada de servicios.
-4. Usar consultas individuales solo cuando un flujo de detalle o refresco las necesite; no añadir pantallas redundantes por alcanzar una cifra de endpoints usados.
+1. Mostrar cupo propio y ofrecer baja condicionada de sucursales.
+2. Ofrecer baja condicionada de servicios.
+3. Usar consultas individuales solo cuando un flujo de detalle o refresco las necesite; no añadir pantallas redundantes por alcanzar una cifra de endpoints usados.

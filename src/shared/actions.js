@@ -22,6 +22,13 @@ let draftScheduleId = -1;
 
 export async function handleClick(e) {
   try {
+    if (!isDemo && user.rol === 'admin_negocio' && state.page === 'profesionales') {
+      const professional = e.target.closest('[data-professional-action]');
+      if (professional) {
+        (await import('../connected/screens/profesionales/actions.js')).professionalAction(professional.dataset.professionalAction, Number(professional.dataset.professionalId));
+        return;
+      }
+    }
     if (!isDemo && state.page === 'disponibilidad') {
       const availability = await import('../connected/screens/disponibilidad/actions.js');
       if (await availability.handleAvailabilityClick(e)) return;
