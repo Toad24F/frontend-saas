@@ -83,7 +83,7 @@ html[data-theme='dark'] .professional-more-menu button:last-child { color: #f2a9
   .professional-filters { grid-column: 1; grid-row: auto; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px; }
   .professional-filters label { min-width: 0; }
   .professional-filters select { width: 100%; min-width: 0; max-width: none; padding-left: 7px; padding-right: 17px; font-size: 12px; }
-  .professional-view-switch { grid-column: 1; grid-row: auto; justify-self: stretch; }
+  .professional-workspace .professional-view-switch { display: none; }
   .professional-view-switch button { flex: 1; min-height: 40px; }
   .professional-view--list { gap: 0; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); }
   .professional-view--list .professional-entry, .professional-view--cards .professional-entry { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; padding: 16px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); }

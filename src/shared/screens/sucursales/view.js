@@ -69,6 +69,7 @@ export function branches({ quota = null, management = () => '' } = {}) {
   const professionals = list('professionals', state.tenantId);
   const active = branches.filter((branch) => branch.active !== false).length;
   const visible = branches.filter(matches);
+  const resultView = matchMedia('(max-width: 767px)').matches ? 'cards' : ui.view;
   return `<div class="professional-workspace branch-workspace">${pageHead('Sucursales', own ? 'Consulta y activa la disponibilidad de tus sucursales asignadas.' : 'Gestiona las ubicaciones de tu negocio.', own ? '' : button('Nueva sucursal', 'new-branch'))}
     <div class="professional-overview"><strong>${branches.length}</strong> ${branches.length === 1 ? 'sucursal' : 'sucursales'}<span aria-hidden="true">·</span><strong>${active}</strong> activas<span aria-hidden="true">·</span><strong>${branches.length - active}</strong> inactivas</div>
     ${quotaBar(branches, own, quota)}
@@ -78,7 +79,7 @@ export function branches({ quota = null, management = () => '' } = {}) {
       <div class="professional-view-switch" role="group" aria-label="Tipo de vista"><button type="button" data-branch-view="list" aria-pressed="${ui.view === 'list'}" class="${ui.view === 'list' ? 'is-selected' : ''}">${icon('menu')}<span>Lista</span></button><button type="button" data-branch-view="cards" aria-pressed="${ui.view === 'cards'}" class="${ui.view === 'cards' ? 'is-selected' : ''}">${icon('grid')}<span>Tarjetas</span></button></div>
     </section>
     <div class="professional-results-heading"><span id="branch-results-count" role="status" aria-live="polite">${visible.length} ${visible.length === 1 ? 'resultado' : 'resultados'}</span></div>
-    ${branches.length ? `<div class="professional-results professional-view--${ui.view}" id="branch-results">${branches.map((branch) => renderBranch(branch, professionals, own, management, visible.includes(branch))).join('')}</div><div class="professional-no-results" id="branch-no-results" ${visible.length ? 'hidden' : ''}>${empty('Sin coincidencias', 'Prueba otra búsqueda o cambia el filtro de estado.', '<button type="button" class="btn btn-light" data-branch-reset>Limpiar filtros</button>')}</div>` : empty('Aún no hay sucursales', own ? 'Tu negocio todavía no te asigna una sucursal.' : 'Crea una sucursal para empezar a organizar la atención.', own ? '' : '<button type="button" class="btn btn-primary" data-action="new-branch">Nueva sucursal</button>')}
+    ${branches.length ? `<div class="professional-results professional-view--${resultView}" data-desktop-view="${ui.view}" id="branch-results">${branches.map((branch) => renderBranch(branch, professionals, own, management, visible.includes(branch))).join('')}</div><div class="professional-no-results" id="branch-no-results" ${visible.length ? 'hidden' : ''}>${empty('Sin coincidencias', 'Prueba otra búsqueda o cambia el filtro de estado.', '<button type="button" class="btn btn-light" data-branch-reset>Limpiar filtros</button>')}</div>` : empty('Aún no hay sucursales', own ? 'Tu negocio todavía no te asigna una sucursal.' : 'Crea una sucursal para empezar a organizar la atención.', own ? '' : '<button type="button" class="btn btn-primary" data-action="new-branch">Nueva sucursal</button>')}
   </div>`;
 }
 

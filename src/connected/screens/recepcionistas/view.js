@@ -40,6 +40,7 @@ export function receptionists() {
   const people = list('receptionists', state.tenantId);
   const visible = people.filter(matches);
   const active = people.filter((person) => person.active).length;
+  const resultView = matchMedia('(max-width: 767px)').matches ? 'cards' : ui.view;
   return `<div class="professional-workspace reception-workspace">${pageHead('Recepcionistas', 'Gestiona las cuentas de recepción de tu negocio.', button('Nueva recepcionista', 'new-receptionist'))}
     <div class="professional-overview"><strong>${people.length}</strong> ${people.length === 1 ? 'recepcionista' : 'recepcionistas'}<span aria-hidden="true">·</span><strong>${active}</strong> ${active === 1 ? 'activa' : 'activas'}<span aria-hidden="true">·</span><strong>${people.length - active}</strong> ${people.length - active === 1 ? 'inactiva' : 'inactivas'}</div>
     <section class="professional-toolbar reception-toolbar" aria-label="Buscar y filtrar recepcionistas">
@@ -48,7 +49,7 @@ export function receptionists() {
       <div class="professional-view-switch" role="group" aria-label="Tipo de vista"><button type="button" data-reception-view="list" aria-pressed="${ui.view === 'list'}" class="${ui.view === 'list' ? 'is-selected' : ''}">${icon('menu')}<span>Lista</span></button><button type="button" data-reception-view="cards" aria-pressed="${ui.view === 'cards'}" class="${ui.view === 'cards' ? 'is-selected' : ''}">${icon('grid')}<span>Tarjetas</span></button></div>
     </section>
     <div class="professional-results-heading"><span id="reception-results-count" role="status" aria-live="polite">${visible.length} ${visible.length === 1 ? 'resultado' : 'resultados'}</span></div>
-    ${people.length ? `<div class="professional-results professional-view--${ui.view}" id="reception-results">${people.map((person) => renderPerson(person, visible.includes(person))).join('')}</div><div class="professional-no-results" id="reception-no-results" ${visible.length ? 'hidden' : ''}>${empty('Sin coincidencias', 'Prueba otra búsqueda o cambia el filtro de estado.', '<button type="button" class="btn btn-light" data-reception-reset>Limpiar filtros</button>')}</div>` : empty('Sin recepcionistas', 'Crea una cuenta para tu equipo de recepción.', '<button type="button" class="btn btn-primary" data-action="new-receptionist">Nueva recepcionista</button>')}
+    ${people.length ? `<div class="professional-results professional-view--${resultView}" data-desktop-view="${ui.view}" id="reception-results">${people.map((person) => renderPerson(person, visible.includes(person))).join('')}</div><div class="professional-no-results" id="reception-no-results" ${visible.length ? 'hidden' : ''}>${empty('Sin coincidencias', 'Prueba otra búsqueda o cambia el filtro de estado.', '<button type="button" class="btn btn-light" data-reception-reset>Limpiar filtros</button>')}</div>` : empty('Sin recepcionistas', 'Crea una cuenta para tu equipo de recepción.', '<button type="button" class="btn btn-primary" data-action="new-receptionist">Nueva recepcionista</button>')}
   </div>`;
 }
 

@@ -37,6 +37,7 @@ export function professionals(management = () => '') {
   const services = list('services', state.tenantId);
   const visible = people.filter(matches);
   const active = people.filter((person) => person.active !== false).length;
+  const resultView = matchMedia('(max-width: 767px)').matches ? 'cards' : ui.view;
   return `<div class="professional-workspace">${pageHead('Profesionales', 'Gestiona a quienes atienden en tu negocio.', button('Nuevo profesional', 'new-professional'))}
     <div class="professional-overview"><strong>${people.length}</strong> ${people.length === 1 ? 'profesional' : 'profesionales'}<span aria-hidden="true">·</span><strong>${active}</strong> activos<span aria-hidden="true">·</span><strong>${people.length - active}</strong> inactivos</div>
     <section class="professional-toolbar" aria-label="Buscar y filtrar profesionales">
@@ -45,7 +46,7 @@ export function professionals(management = () => '') {
       <div class="professional-view-switch" role="group" aria-label="Tipo de vista"><button type="button" data-professional-view="list" aria-pressed="${ui.view === 'list'}" class="${ui.view === 'list' ? 'is-selected' : ''}">${icon('menu')}<span>Lista</span></button><button type="button" data-professional-view="cards" aria-pressed="${ui.view === 'cards'}" class="${ui.view === 'cards' ? 'is-selected' : ''}">${icon('grid')}<span>Tarjetas</span></button></div>
     </section>
     <div class="professional-results-heading"><span id="professional-results-count" role="status" aria-live="polite">${visible.length} ${visible.length === 1 ? 'resultado' : 'resultados'}</span></div>
-    ${people.length ? `<div class="professional-results professional-view--${ui.view}" id="professional-results">${people.map((person) => renderPerson(person, management, visible.includes(person))).join('')}</div><div class="professional-no-results" id="professional-no-results" ${visible.length ? 'hidden' : ''}>${empty('Sin coincidencias', 'Prueba otra búsqueda o quita alguno de los filtros.', '<button type="button" class="btn btn-light" data-professional-reset>Limpiar filtros</button>')}</div>` : empty('Aún no hay profesionales', 'Crea el primer perfil para comenzar a organizar tu equipo.', '<button type="button" class="btn btn-primary" data-action="new-professional">Nuevo profesional</button>')}
+    ${people.length ? `<div class="professional-results professional-view--${resultView}" data-desktop-view="${ui.view}" id="professional-results">${people.map((person) => renderPerson(person, management, visible.includes(person))).join('')}</div><div class="professional-no-results" id="professional-no-results" ${visible.length ? 'hidden' : ''}>${empty('Sin coincidencias', 'Prueba otra búsqueda o quita alguno de los filtros.', '<button type="button" class="btn btn-light" data-professional-reset>Limpiar filtros</button>')}</div>` : empty('Aún no hay profesionales', 'Crea el primer perfil para comenzar a organizar tu equipo.', '<button type="button" class="btn btn-primary" data-action="new-professional">Nuevo profesional</button>')}
   </div>`;
 }
 

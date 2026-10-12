@@ -47,6 +47,7 @@ export function services(management = () => '') {
   const professionals = list('professionals', state.tenantId);
   const visible = services.filter(matches);
   const active = services.filter((service) => service.active !== false).length;
+  const resultView = matchMedia('(max-width: 767px)').matches ? 'cards' : ui.view;
   return `<div class="professional-workspace service-workspace">${pageHead('Servicios', own ? 'Los servicios que ofreces a tus clientes.' : 'Gestiona lo que ofrece tu negocio.', button('Nuevo servicio', 'new-service'))}
     <div class="professional-overview"><strong>${services.length}</strong> ${services.length === 1 ? 'servicio' : 'servicios'}<span aria-hidden="true">·</span><strong>${active}</strong> activos<span aria-hidden="true">·</span><strong>${services.length - active}</strong> inactivos</div>
     <section class="professional-toolbar service-toolbar" aria-label="Buscar y filtrar servicios">
@@ -55,7 +56,7 @@ export function services(management = () => '') {
       <div class="professional-view-switch" role="group" aria-label="Tipo de vista"><button type="button" data-service-view="list" aria-pressed="${ui.view === 'list'}" class="${ui.view === 'list' ? 'is-selected' : ''}">${icon('menu')}<span>Lista</span></button><button type="button" data-service-view="cards" aria-pressed="${ui.view === 'cards'}" class="${ui.view === 'cards' ? 'is-selected' : ''}">${icon('grid')}<span>Tarjetas</span></button></div>
     </section>
     <div class="professional-results-heading"><span id="service-results-count" role="status" aria-live="polite">${visible.length} ${visible.length === 1 ? 'resultado' : 'resultados'}</span></div>
-    ${services.length ? `<div class="professional-results professional-view--${ui.view}" id="service-results">${services.map((service) => renderService(service, professionals, own, professional, management, visible.includes(service))).join('')}</div><div class="professional-no-results" id="service-no-results" ${visible.length ? 'hidden' : ''}>${empty('Sin coincidencias', 'Prueba otra búsqueda o cambia el filtro de estado.', '<button type="button" class="btn btn-light" data-service-reset>Limpiar filtros</button>')}</div>` : empty('Aún no hay servicios', 'Crea el primer servicio para organizar tu oferta.', '<button type="button" class="btn btn-primary" data-action="new-service">Nuevo servicio</button>')}
+    ${services.length ? `<div class="professional-results professional-view--${resultView}" data-desktop-view="${ui.view}" id="service-results">${services.map((service) => renderService(service, professionals, own, professional, management, visible.includes(service))).join('')}</div><div class="professional-no-results" id="service-no-results" ${visible.length ? 'hidden' : ''}>${empty('Sin coincidencias', 'Prueba otra búsqueda o cambia el filtro de estado.', '<button type="button" class="btn btn-light" data-service-reset>Limpiar filtros</button>')}</div>` : empty('Aún no hay servicios', 'Crea el primer servicio para organizar tu oferta.', '<button type="button" class="btn btn-primary" data-action="new-service">Nuevo servicio</button>')}
     <div class="information-note">${icon('info')} La duración de cada servicio determina los horarios disponibles en tu portal. El precio es informativo; no se realizan cobros en línea.</div>
   </div>`;
 }

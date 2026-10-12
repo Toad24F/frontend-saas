@@ -74,6 +74,12 @@ export const state = {
   status: 'all',
   search: '',
 };
+matchMedia('(max-width: 767px)').addEventListener('change', ({ matches }) => {
+  document.querySelectorAll('.professional-workspace .professional-results[data-desktop-view]').forEach((results) => {
+    results.classList.remove('professional-view--list', 'professional-view--cards');
+    results.classList.add(`professional-view--${matches ? 'cards' : results.dataset.desktopView}`);
+  });
+});
 const nav = [
   ['general', 'PRINCIPAL'],
   ['resumen', 'grid', 'Resumen'],
