@@ -73,13 +73,21 @@ function projectionSection(person) {
 
 export function availability() {
   const person = selectedProfessional();
-  const weekly = weeklyAvailability();
-  if (!person) return weekly;
+  if (!person) return weeklyAvailability();
   if (cache?.id !== person.id && loading?.id !== person.id) void refreshAvailabilityData();
   const extra = cache?.id === person.id ? cache : null;
-  if (!extra || extra.busy) return `${weekly}<section class="surface availability-extra" aria-busy="true"><p class="availability-note">Cargando oferta y excepciones…</p></section>`;
-  if (extra.error) return `${weekly}<section class="surface availability-extra"><p role="alert">${esc(extra.error)}</p><button type="button" class="btn btn-light" data-availability-action="retry">Reintentar</button></section>`;
-  return weekly + offeringSection(person) + exceptionsSection() + projectionSection(person);
+  const pendingContent = !extra || extra.busy
+    ? '<section class="surface availability-extra" aria-busy="true"><p class="availability-note">Cargando datos de disponibilidad…</p></section>'
+    : extra.error
+      ? `<section class="surface availability-extra"><p role="alert">${esc(extra.error)}</p><button type="button" class="btn btn-light" data-availability-action="retry">Reintentar</button></section>`
+      : null;
+  return weeklyAvailability({
+    exceptionContent: pendingContent || exceptionsSection(),
+    extraPanels: [
+      { id: 'offering', label: 'Oferta por sucursal', content: pendingContent || offeringSection(person) },
+      { id: 'projection', label: 'Proyección', content: pendingContent || projectionSection(person) },
+    ],
+  });
 }
 
 export function currentAvailabilityData() { return cache; }

@@ -30,7 +30,7 @@ export async function catalog(type, id) {
   if (type === 'branches') {
     basicForm(
       existing ? 'Editar sucursal' : 'Nueva sucursal',
-      `${field('Nombre', 'name', existing?.name, 'text', 'required maxlength="150"')}${field('Dirección', 'address', existing?.address, 'text', 'required maxlength="255"')}${field('Teléfono', 'phone', existing?.phone, 'tel', isDemo ? 'required pattern="[0-9]{10}" maxlength="10" inputmode="numeric"' : 'required minlength="7" maxlength="20"')}${field('Indicaciones de llegada', 'notes', existing?.notes, 'text', 'maxlength="255"')}${isDemo ? '' : field('Zona horaria', 'timezone', existing?.timezone || 'America/Chihuahua', 'text', 'required') + field('Enlace de Google Maps', 'maps', existing?.maps || '', 'url')}`,
+      `${field('Nombre', 'name', existing?.name, 'text', 'required maxlength="150"')}${field('Dirección', 'address', existing?.address, 'text', 'required maxlength="255"')}${field('Teléfono', 'phone', existing?.phone, 'tel', isDemo ? 'required pattern="[0-9]{10}" maxlength="10" inputmode="numeric"' : 'required minlength="7" maxlength="20"')}${field('Indicaciones de llegada', 'notes', existing?.notes, 'text', 'maxlength="255"')}${isDemo ? '' : field('Zona horaria', 'timezone', existing?.timezone || 'America/Chihuahua', 'text', 'required')}${field('Enlace de Google Maps', 'maps', existing?.maps || '', 'url')}`,
       (f) =>
         save('branches', existing, {
           name: f.get('name').trim(),

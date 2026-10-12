@@ -1,102 +1,80 @@
-.branch-grid {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+.branch-workspace .page-heading { margin-bottom: 18px; }
+.branch-capacity {
+  display: grid;
+  gap: 10px;
+  max-width: 590px;
+  margin: 0 0 23px;
+  padding: 16px 18px;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  background: var(--surface);
 }
-.branch-visual {
-  height: 150px;
-  position: relative;
-  overflow: hidden;
-  background: #eef0e9;
+.branch-capacity-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; color: var(--muted); font-size: 12px; font-weight: 600; }
+.branch-capacity-heading strong { color: var(--ink); font-size: 18px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.branch-capacity-progress { display: block; width: 100%; height: 10px; appearance: none; border: 0; border-radius: 10px; overflow: hidden; background: var(--surface-soft); }
+.branch-capacity-progress::-webkit-progress-bar { border-radius: 10px; background: var(--surface-soft); }
+.branch-capacity-progress::-webkit-progress-value { border-radius: 10px; background: var(--accent); }
+.branch-capacity-progress::-moz-progress-bar { border-radius: 10px; background: var(--accent); }
+.branch-capacity small { color: var(--muted); font-size: 11px; }
+.branch-workspace .branch-toolbar { grid-template-columns: minmax(210px, 1fr) auto auto; }
+.branch-workspace .branch-icon { display: grid; place-items: center; flex: 0 0 46px; width: 46px; height: 46px; border-radius: 12px; color: var(--accent); background: var(--surface-soft); }
+.branch-workspace .branch-icon .icon { width: 21px; height: 21px; }
+.branch-workspace .professional-identity p { max-width: 46ch; }
+.branch-workspace .branch-details { align-items: flex-start; }
+.branch-workspace .branch-details a { display: inline-flex; align-items: center; gap: 4px; color: var(--accent); font-weight: 650; text-decoration: none; }
+.branch-workspace .branch-details a:hover { color: var(--accent-dark); text-decoration: underline; }
+.branch-workspace .branch-details .branch-arrival { flex-basis: 100%; white-space: normal; line-height: 1.4; }
+.branch-workspace .branch-details .branch-arrival .icon { flex: 0 0 14px; }
+.branch-workspace .professional-entry-actions .professional-availability { border: 0; }
+.branch-workspace .professional-entry-actions .professional-availability:disabled { opacity: .55; cursor: not-allowed; }
+.branch-workspace .professional-view--list .branch-entry { grid-template-columns: minmax(175px, 1.3fr) minmax(160px, 1fr) max-content max-content; }
+.branch-workspace .professional-view--list .branch-map { display: none; }
+.branch-workspace .professional-view--cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.branch-workspace .professional-view--cards .branch-entry { grid-template-columns: minmax(0, 1fr); gap: 12px; padding: 0 0 18px; }
+.branch-workspace .professional-view--cards .branch-map { grid-row: 1; }
+.branch-workspace .professional-view--cards .professional-person,
+.branch-workspace .professional-view--cards .professional-status,
+.branch-workspace .professional-view--cards .branch-details,
+.branch-workspace .professional-view--cards .professional-entry-actions { margin-left: 18px; margin-right: 18px; }
+.branch-workspace .professional-view--cards .professional-status { grid-row: 3; }
+.branch-workspace .professional-view--cards .branch-details { grid-row: 4; padding-top: 10px; border-top: 1px solid var(--border); }
+.branch-workspace .professional-view--cards .professional-entry-actions { grid-row: 5; margin-top: auto; padding-top: 10px; border-top: 1px solid var(--border); }
+.branch-map { position: relative; height: 166px; overflow: hidden; border-radius: 11px 11px 0 0; background: var(--surface-soft); }
+.branch-map iframe { display: block; width: 100%; height: 100%; border: 0; }
+.branch-map-placeholder { display: grid; place-content: center; justify-items: center; gap: 8px; height: 100%; color: var(--muted); font-size: 12px; }
+.branch-map-placeholder .icon { width: 23px; height: 23px; color: var(--accent); }
+.branch-map-caption { position: absolute; right: 10px; bottom: 10px; padding: 3px 6px; border-radius: 5px; background: var(--surface); color: var(--muted); font-size: 10px; }
+@media (max-width: 1260px) {
+  .branch-workspace .branch-toolbar { grid-template-columns: minmax(180px, 1fr) auto; }
+  .branch-workspace .branch-toolbar .professional-filters { grid-column: 1 / -1; grid-row: 2; }
+  .branch-workspace .branch-toolbar .professional-view-switch { grid-column: 2; grid-row: 1; }
 }
-.branch-visual.blue {
-  background: #eaf0f2;
+@media (max-width: 900px) {
+  .branch-workspace .professional-view--cards { grid-template-columns: minmax(0, 1fr); }
 }
-.map-street {
-  background: #fff;
-  position: absolute;
-  opacity: 0.85;
-  border: 1px solid #e1e6df;
-  transform: rotate(-22deg);
-  width: 130%;
-  height: 22px;
-  left: -30px;
+@media (max-width: 767px) {
+  .branch-workspace .branch-toolbar { grid-template-columns: minmax(0, 1fr); }
+  .branch-workspace .branch-toolbar .professional-filters { grid-column: 1; grid-row: auto; grid-template-columns: minmax(0, 1fr); }
+  .branch-workspace .branch-toolbar .professional-view-switch { grid-column: 1; grid-row: auto; }
+  .branch-workspace .professional-view--cards { grid-template-columns: minmax(0, 1fr); }
+  .branch-workspace .professional-view--cards .branch-entry { display: grid; grid-template-columns: minmax(0, 1fr); padding: 0 0 16px; }
+  .branch-workspace .professional-view--cards .professional-person,
+  .branch-workspace .professional-view--cards .professional-status,
+  .branch-workspace .professional-view--cards .branch-details,
+  .branch-workspace .professional-view--cards .professional-entry-actions { grid-column: 1; margin-left: 14px; margin-right: 14px; }
+  .branch-workspace .professional-view--cards .professional-person { grid-row: 2; }
+  .branch-workspace .professional-view--cards .professional-status { grid-row: 3; }
+  .branch-workspace .professional-view--cards .branch-details { grid-row: 4; }
+  .branch-workspace .professional-view--cards .professional-entry-actions { grid-row: 5; }
+  .branch-capacity { max-width: none; }
+  .branch-workspace .professional-more-menu { left: 0; right: auto; }
+  .branch-workspace .professional-view--cards .professional-more-menu { left: auto; right: 0; }
 }
-.street-one {
-  top: 25px;
+@container (max-width: 820px) {
+  .branch-workspace .professional-view--list .branch-entry { grid-template-columns: minmax(0, 1fr) auto; }
+  .branch-workspace .professional-view--list .branch-details { grid-column: 1; grid-row: 2; }
 }
-.street-two {
-  top: 115px;
-  height: 12px;
-}
-.street-three {
-  transform: rotate(66deg);
-  width: 200%;
-  top: 60px;
-  left: -20%;
-}
-.street-four {
-  transform: rotate(66deg);
-  width: 200%;
-  top: 60px;
-  left: -60%;
-  height: 12px;
-}
-.map-pin {
-  position: absolute;
-  left: 48%;
-  top: 45px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--accent);
-  color: white;
-  width: 42px;
-  height: 42px;
-  border-radius: 50% 50% 50% 5px;
-  transform: rotate(-45deg);
-  box-shadow: 0 4px 14px #aa775944;
-}
-.map-pin .icon {
-  transform: rotate(45deg);
-  width: 22px;
-  height: 22px;
-}
-.map-label {
-  position: absolute;
-  bottom: 13px;
-  right: 16px;
-  letter-spacing: 2px;
-  color: #939b93;
-  font-size: 8px;
-}
-.branch-content {
-  padding: 24px;
-}
-.branch-line {
-  display: flex;
-  align-items: flex-start;
-  gap: 11px;
-  color: #929aa3;
-  font-size: 13px;
-  margin-bottom: 14px;
-  line-height: 1.6;
-}
-.branch-line > .icon {
-  width: 17px;
-  height: 17px;
-  color: #a6afa9;
-}
-.branch-notes {
-  background: #f7f8f9;
-  padding: 13px 15px;
-  border-radius: 7px;
-  margin-top: 18px;
-}
-.branch-notes strong {
-  font-size: 11px;
-  font-weight: 600;
-  color: #7f8a83;
-}
-.branch-notes p {
-  font-size: 12px;
-  margin-top: 5px;
+@container (max-width: 500px) {
+  .branch-workspace .professional-view--list .branch-details { grid-column: 1; grid-row: 2; }
+  .branch-workspace .professional-view--list .professional-entry-actions { grid-column: 1 / -1; grid-row: 3; }
 }

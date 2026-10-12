@@ -1,3 +1,47 @@
+.availability-workspace { min-width: 0; }
+.availability-tabs {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  margin: 2px 0 20px;
+  padding: 0 2px 8px;
+  border-bottom: 1px solid var(--border);
+  scrollbar-width: thin;
+}
+.availability-tabs button {
+  flex: 0 0 auto;
+  min-height: 42px;
+  padding: 9px 14px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 650;
+  transition: background .2s ease, color .2s ease;
+}
+.availability-tabs button:hover { background: var(--surface-soft); color: var(--ink); }
+.availability-tabs button.is-selected { background: var(--surface); color: var(--accent); box-shadow: inset 0 -2px var(--accent); }
+.availability-tabs button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.availability-workspace [role='tabpanel'][hidden] { display: none !important; }
+.availability-workspace [role='tabpanel'] { min-width: 0; }
+.availability-workspace .availability-main-section + .availability-main-section,
+.availability-workspace .availability-main-section + .availability-extra { margin-top: 18px; }
+.availability-workspace .mode-section { margin-bottom: 0; }
+.availability-workspace .availability-extra { margin-top: 0; }
+.availability-workspace .section-heading { gap: 12px; }
+.availability-workspace .section-heading h2 { letter-spacing: -.025em; }
+.availability-workspace .section-heading p { text-wrap: pretty; }
+@media (max-width: 767px) {
+  .availability-tabs { gap: 4px; margin-bottom: 14px; }
+  .availability-tabs button { min-height: 44px; padding: 8px 12px; white-space: nowrap; }
+  .availability-workspace .section-heading { align-items: stretch; flex-direction: column; }
+  .availability-workspace .section-heading > .btn,
+  .availability-workspace .section-heading > button { min-height: 44px; }
+  .availability-workspace .mode-options { grid-template-columns: minmax(0, 1fr); gap: 9px; }
+  .availability-workspace .section-form-footer > .btn { width: 100%; margin-left: 0; }
+}
+
 .mode-section {
   padding: 24px;
   margin-bottom: 24px;

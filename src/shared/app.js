@@ -23,6 +23,9 @@ import {
 import { escape, avatar, pageHead, empty } from './ui.js';
 import { applyProfessionalFilters, resetProfessionalFilters, setProfessionalView } from './screens/profesionales/view.js';
 import { applyReceptionFilters, resetReceptionFilters, setReceptionView } from '../connected/screens/recepcionistas/view.js';
+import { applyServiceFilters, resetServiceFilters, setServiceView } from './screens/servicios/view.js';
+import { applyBranchFilters, resetBranchFilters, setBranchView } from './screens/sucursales/view.js';
+import { setAvailabilityTab } from './screens/disponibilidad/view.js';
 
 const themeKey = 'cita-theme';
 let theme = (() => {
@@ -129,7 +132,7 @@ export function renderShell(content) {
   ];
   const workspaceName = !isDemo && user.rol === 'superadmin' ? 'Plataforma' : tenant.name;
   const workspaceInitials = !isDemo && user.rol === 'superadmin' ? 'PL' : tenant.initials;
-  const mobileProfessionalBrand = ['profesionales', 'recepcionistas'].includes(state.page)
+  const mobileProfessionalBrand = ['profesionales', 'recepcionistas', 'servicios', 'sucursales'].includes(state.page)
     ? `<a class="mobile-professional-brand" href="/admin/${state.page}" data-nav="${state.page}" aria-label="Citalendar, ${labels[state.page].toLowerCase()}"><img class="brand-logo-on-light" src="/brand/citalendar-logo.svg" alt=""><img class="brand-logo-on-dark" src="/brand/citalendar-logo-light.svg" alt=""></a>`
     : '';
   document.querySelector('#app').innerHTML =
@@ -233,15 +236,23 @@ document.addEventListener('toggle', (event) => {
   menu.classList.toggle('is-upward', trigger.getBoundingClientRect().bottom + panel.offsetHeight + 6 > bottomLimit);
 }, true);
 document.addEventListener('click', (event) => {
-  if (!event.target.closest('.professional-more') || event.target.closest('[data-professional-action], [data-reception-action]')) closeProfessionalMenus();
+  if (!event.target.closest('.professional-more') || event.target.closest('[data-professional-action], [data-reception-action], [data-toggle-service], [data-delete-service], [data-toggle-branch], [data-delete-branch]')) closeProfessionalMenus();
 }, true);
 document.addEventListener('click', async (e) => {
+  const availabilityTab = e.target.closest('[data-availability-tab]');
+  if (availabilityTab) { setAvailabilityTab(availabilityTab.dataset.availabilityTab); return; }
   const professionalView = e.target.closest('[data-professional-view]');
   if (professionalView) { setProfessionalView(professionalView.dataset.professionalView); return; }
   if (e.target.closest('[data-professional-reset]')) { resetProfessionalFilters(); return; }
   const receptionView = e.target.closest('[data-reception-view]');
   if (receptionView) { setReceptionView(receptionView.dataset.receptionView); return; }
   if (e.target.closest('[data-reception-reset]')) { resetReceptionFilters(); return; }
+  const serviceView = e.target.closest('[data-service-view]');
+  if (serviceView) { setServiceView(serviceView.dataset.serviceView); return; }
+  if (e.target.closest('[data-service-reset]')) { resetServiceFilters(); return; }
+  const branchView = e.target.closest('[data-branch-view]');
+  if (branchView) { setBranchView(branchView.dataset.branchView); return; }
+  if (e.target.closest('[data-branch-reset]')) { resetBranchFilters(); return; }
   const business = e.target.closest('[data-business-detail]');
   if (business && !isDemo) {
     navigate('negocio', Number(business.dataset.businessDetail));
@@ -311,6 +322,8 @@ document.addEventListener('click', async (e) => {
 document.addEventListener('change', (e) => {
   if (e.target.dataset.professionalFilter) { applyProfessionalFilters(); return; }
   if (e.target.dataset.receptionFilter) { applyReceptionFilters(); return; }
+  if (e.target.dataset.serviceFilter) { applyServiceFilters(); return; }
+  if (e.target.dataset.branchFilter) { applyBranchFilters(); return; }
   if (e.target.dataset.filter) {
     state[e.target.dataset.filter] = e.target.value;
     render();
@@ -319,6 +332,8 @@ document.addEventListener('change', (e) => {
 document.addEventListener('input', (e) => {
   if (e.target.id === 'professional-search') { applyProfessionalFilters(); return; }
   if (e.target.id === 'reception-search') { applyReceptionFilters(); return; }
+  if (e.target.id === 'service-search') { applyServiceFilters(); return; }
+  if (e.target.id === 'branch-search') { applyBranchFilters(); return; }
   if (e.target.id === 'agenda-search') {
     const pos = e.target.selectionStart;
     state.search = e.target.value;
@@ -339,6 +354,15 @@ window.addEventListener('popstate', () => {
   render();
 });
 document.addEventListener('keydown', (event) => {
+  const availabilityTab = event.target.closest?.('[data-availability-tab]');
+  if (availabilityTab && ['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) {
+    const tabs = [...availabilityTab.closest('[role="tablist"]').querySelectorAll('[data-availability-tab]')];
+    const index = tabs.indexOf(availabilityTab);
+    const next = event.key === 'Home' ? 0 : event.key === 'End' ? tabs.length - 1 : (index + (event.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length;
+    setAvailabilityTab(tabs[next].dataset.availabilityTab, true);
+    event.preventDefault();
+    return;
+  }
   if (event.key === 'Escape') {
     const openMenu = document.querySelector('.professional-more[open]');
     if (openMenu) {
