@@ -21,7 +21,7 @@
 .professional-view--list { display: grid; container-type: inline-size; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); }
 .professional-entry { min-width: 0; overflow: visible; }
 .professional-entry:has(.professional-more[open]) { position: relative; z-index: 2; }
-.professional-view--list .professional-entry { display: grid; grid-template-columns: minmax(190px, 1.2fr) minmax(115px, .8fr) max-content max-content; align-items: center; gap: 12px; padding: 17px 18px; border: 0; border-radius: 0; box-shadow: none; background: transparent; }
+.professional-view--list .professional-entry { display: grid; grid-template-columns: minmax(190px, 1.2fr) minmax(115px, 1.3fr) max-content max-content; align-items: center; gap: 12px; padding: 17px 18px; border: 0; border-radius: 0; box-shadow: none; background: transparent; }
 .professional-view--list .professional-entry + .professional-entry { border-top: 1px solid var(--border); }
 .professional-person { display: flex; align-items: center; gap: 12px; min-width: 0; }
 .professional-avatar { width: 45px; height: 45px; border-radius: 12px; font-size: 13px; }

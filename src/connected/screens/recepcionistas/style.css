@@ -1,8 +1,14 @@
-.reception-section { padding: 22px; }
-.reception-actions { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; }
-.reception-actions .text-button { min-height: 36px; }
+.reception-workspace { min-width: 0; }
+.reception-toolbar { grid-template-columns: minmax(210px, 1fr) auto auto; }
+.reception-workspace .professional-assignment > span { white-space: normal; }
+.reception-workspace .professional-view--cards .professional-entry-actions { gap: 8px; }
+.reception-workspace .professional-more.is-reactivate .professional-more-menu button { color: var(--ink); }
+@media (max-width: 1260px) {
+  .reception-toolbar { grid-template-columns: minmax(180px, 1fr) auto; }
+}
 @media (max-width: 767px) {
-  .reception-section { padding: 18px; }
-  .reception-actions { gap: 6px 12px; }
-  .reception-actions .text-button { min-height: 44px; }
+  .reception-toolbar { grid-template-columns: minmax(0, 1fr); }
+  .reception-workspace .professional-filters { display: flex; }
+  .reception-workspace .professional-filters label { flex: 1; }
+  .reception-workspace .professional-filters select { max-width: none; }
 }
