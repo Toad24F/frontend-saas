@@ -270,3 +270,55 @@
   color: #9a9fa8;
   margin-top: 5px;
 }
+
+@media (max-width: 767px) {
+  #schedule-form > .table-responsive { width: 100%; max-width: 100%; overflow: visible; }
+  #schedule-form .schedule-table,
+  #schedule-form .schedule-table tbody { display: block; width: 100%; min-width: 0; max-width: 100%; }
+  #schedule-form .schedule-table tbody { padding: 10px; }
+  #schedule-form .schedule-table tbody tr {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+    min-width: 0;
+    margin-bottom: 10px;
+    overflow: hidden;
+  }
+  #schedule-form .schedule-table tbody td { min-width: 0; width: auto; padding: 9px 12px; }
+  #schedule-form .schedule-table tbody td:first-child {
+    grid-column: 1;
+    grid-row: 1;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  #schedule-form .schedule-table tbody td:nth-child(2) { grid-column: 1 / -1; grid-row: 2; }
+  #schedule-form .schedule-table tbody td:nth-child(3) { grid-column: 1; grid-row: 3; }
+  #schedule-form .schedule-table tbody td:nth-child(5) { grid-column: 2; grid-row: 3; }
+  #schedule-form .schedule-table tbody td:nth-child(4) { grid-column: 1 / -1; grid-row: 4; padding-top: 3px; padding-bottom: 12px; }
+  #schedule-form .schedule-table tbody td:last-child {
+    grid-column: 2;
+    grid-row: 1;
+    position: static;
+    padding: 5px 10px;
+    border-bottom: 1px solid var(--border);
+    box-shadow: none;
+    background: var(--schedule-tint);
+  }
+  #schedule-form .schedule-table tbody td:last-child::before { display: none; }
+  #schedule-form .schedule-table .schedule-actions { justify-content: flex-end; }
+  #schedule-form .schedule-table .schedule-add { min-width: 34px; min-height: 34px; padding: 3px 8px; }
+  #schedule-form .schedule-table select,
+  #schedule-form .schedule-table input[type='time'] { display: block; width: 100%; max-width: 100%; min-width: 0; }
+  #schedule-form .schedule-table .time-pair { min-width: 0; gap: 6px; }
+  #schedule-form .schedule-table .time-pair input { flex: 1 1 0; min-width: 0; }
+  #schedule-form .schedule-table .time-pair > span { flex: 0 0 auto; }
+  #schedule-form .schedule-table tbody td:nth-child(3),
+  #schedule-form .schedule-table tbody td:nth-child(5) { padding-bottom: 6px; }
+  #schedule-form .schedule-table tbody td:nth-child(3) { padding-right: 5px; }
+  #schedule-form .schedule-table tbody td:nth-child(5) { padding-left: 5px; }
+  #schedule-form .schedule-table tbody td:nth-child(3)::before,
+  #schedule-form .schedule-table tbody td:nth-child(5)::before { margin-bottom: 4px; }
+  html[data-theme='dark'] #schedule-form .schedule-table tbody td:last-child {
+    background: color-mix(in srgb, var(--schedule-accent) 15%, #1b2921);
+  }
+}
