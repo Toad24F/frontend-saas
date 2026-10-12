@@ -55,9 +55,9 @@ function licenseContent() {
   const progressMarkup = progress
     ? '<div class="account-license-progress"><div class="account-progress-heading"><span>Vigencia restante</span><strong>' +
       escape(remainingText(time)) + '</strong></div><progress max="100" value="' +
-      progress.value + '" aria-label="Vigencia restante en una escala de 12 meses">' +
+      progress.value + '" aria-label="Porcentaje restante de la vigencia total de la licencia">' +
       progress.value + '%</progress><p>' +
-      (progress.overYear ? 'Más de 12 meses de vigencia.' : 'Escala visual de 12 meses.') +
+      'Calculada sobre la vigencia total de tu licencia, incluidas renovaciones.' +
       '</p></div>'
     : '<p class="account-license-message">Aún no hay tiempo restante disponible.</p>';
   return '<div class="account-license-overview"><div><span class="account-eyebrow">Tiempo restante</span>' +

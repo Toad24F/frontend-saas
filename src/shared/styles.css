@@ -425,8 +425,15 @@ html[data-theme='dark'] .sidebar .brand .brand-logo-on-light { display: none; }
   display: flex;
   align-items: center;
   gap: 14px;
+  min-width: 0;
   font-size: 12px;
   color: #969ba4;
+}
+.breadcrumbs > span {
+  max-width: min(22vw, 240px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .breadcrumbs > .icon {
   width: 12px;
@@ -486,6 +493,87 @@ html[data-theme='dark'] .sidebar .brand .brand-logo-on-light { display: none; }
   align-items: center;
   gap: 10px;
   text-align: left;
+}
+.account-menu { position: relative; }
+.account-menu-trigger {
+  border-radius: 12px;
+  padding: 6px 8px;
+  margin: -6px -8px;
+  cursor: pointer;
+  transition: background-color 180ms ease, color 180ms ease;
+}
+.account-menu-trigger:hover,
+.account-menu-trigger[aria-expanded='true'] { background: var(--surface-soft); }
+.account-menu-trigger > .icon { transition: transform 180ms ease; }
+.account-menu-trigger[aria-expanded='true'] > .icon { transform: rotate(180deg); }
+.account-menu-panel {
+  position: absolute;
+  z-index: 30;
+  top: calc(100% + 14px);
+  right: 0;
+  width: 224px;
+  padding: 7px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  box-shadow: 0 16px 38px rgba(24, 43, 33, .16);
+}
+.account-menu-panel[hidden] { display: none; }
+.account-menu-panel::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  right: 19px;
+  width: 10px;
+  height: 10px;
+  transform: rotate(45deg);
+  border-top: 1px solid var(--border);
+  border-left: 1px solid var(--border);
+  background: var(--surface);
+}
+.account-menu-panel :is(a, button) {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  width: 100%;
+  min-height: 42px;
+  padding: 9px 11px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 650;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 160ms ease, color 160ms ease;
+}
+.account-menu-panel :is(a, button):hover,
+.account-menu-panel a[aria-current='page'] { background: var(--surface-soft); color: var(--accent-dark); }
+.account-menu-panel :is(a, button):focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.account-menu-panel .icon { width: 18px; height: 18px; color: var(--muted); }
+.account-menu-panel button { border-top: 1px solid var(--border); border-radius: 0 0 9px 9px; margin-top: 4px; padding-top: 12px; }
+.account-menu-panel button:hover,
+.account-menu-panel button:hover .icon { color: var(--accent-dark); }
+@media (max-width: 767px) {
+  .account-menu .account-menu-trigger {
+    min-width: 44px;
+    min-height: 44px;
+    margin: 0;
+    padding: 4px;
+    justify-content: center;
+  }
+  .account-menu-panel { top: calc(100% + 8px); }
+}
+@media (max-width: 480px) {
+  .topbar:has(.account-menu):not(:has(.mobile-professional-brand)) .breadcrumbs > span {
+    display: block;
+    max-width: min(42vw, 150px);
+  }
+  .topbar:has(.account-menu):not(:has(.mobile-professional-brand)) .breadcrumbs > .icon,
+  .topbar:has(.account-menu):not(:has(.mobile-professional-brand)) .breadcrumbs > strong {
+    display: none;
+  }
 }
 .profile-button > span:nth-child(2) {
   display: flex;

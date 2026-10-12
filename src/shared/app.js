@@ -113,6 +113,28 @@ function setMobileMenuOpen(isOpen) {
   if (isOpen) layout.querySelector('.sidebar nav .nav-item')?.focus();
   else layout.querySelector('.mobile-tabbar [data-action="menu"]')?.focus();
 }
+function setAccountMenuOpen(isOpen, returnFocus = false) {
+  const trigger = document.querySelector('.account-menu-trigger');
+  const panel = document.querySelector('.account-menu-panel');
+  if (!trigger || !panel) return;
+  trigger.setAttribute('aria-expanded', String(isOpen));
+  panel.hidden = !isOpen;
+  if (returnFocus) trigger.focus();
+}
+function connectedAccountMenu() {
+  const name = user.nombre || 'Mi cuenta';
+  const initials = name.trim().split(/\s+/).slice(0, 2).map((part) => part[0]).join('');
+  return '<div class="account-menu"><button type="button" class="profile-button account-menu-trigger" aria-label="Opciones de ' +
+    escape(name) + '" aria-expanded="false" aria-controls="account-menu-panel">' +
+    avatar(initials, 'peach') + '<span><strong>' + escape(name) + '</strong><small>' +
+    escape(roleLabel(user.rol)) + '</small></span>' + icon('down') + '</button>' +
+    '<nav id="account-menu-panel" class="account-menu-panel" aria-label="Opciones de usuario" hidden>' +
+    '<a href="' + modeUrl('/admin/cuenta') + '" data-nav="cuenta" ' +
+    (state.page === 'cuenta' ? 'aria-current="page"' : '') + '>' +
+    icon('user') + '<span>Mi cuenta</span></a>' +
+    '<button type="button" data-action="logout-account">' +
+    icon('logout') + '<span>Cerrar sesión</span></button></nav></div>';
+}
 export function navigate(page, id = null) {
   if (!isDemo && !availablePage(page)) page = defaultPage();
   if (page === 'negocio' && (!Number.isSafeInteger(Number(id)) || Number(id) < 1)) page = defaultPage();
@@ -142,7 +164,7 @@ export function renderShell(content) {
     ? `<a class="mobile-professional-brand" href="/admin/${state.page}" data-nav="${state.page}" aria-label="Citalendar, ${labels[state.page].toLowerCase()}"><img class="brand-logo-on-light" src="/brand/citalendar-logo.svg" alt=""><img class="brand-logo-on-dark" src="/brand/citalendar-logo-light.svg" alt=""></a>`
     : '';
   document.querySelector('#app').innerHTML =
-    `<div class="admin-layout"><div class="sidebar-overlay" data-action="menu"></div><aside class="sidebar"><a class="brand" aria-label="Citalendar: inicio" href="/admin/agenda" data-nav="agenda"><img class="brand-logo-on-light" src="/brand/citalendar-logo.svg" alt=""/><img class="brand-logo-on-dark" src="/brand/citalendar-logo-light.svg" alt=""/></a><div class="workspace-identity glass-effect glass-effect--dark">${avatar(workspaceInitials, 'workspace-avatar')}<span><strong>${escape(workspaceName)}</strong></span></div><nav aria-label="Navegación principal">${visibleNav.map((n) => (n.length === 2 ? `<div class="nav-section">${n[1]}</div>` : `<a href="/admin/${n[0]}" data-nav="${n[0]}" class="nav-item ${state.page === n[0] ? 'active' : ''}" ${state.page === n[0] ? 'aria-current="page"' : ''}>${icon(n[1])}<span>${n[2]}</span>${n[0] === 'agenda' ? `<span class="nav-count">${list('appointments', state.tenantId).filter((a) => a.date === TODAY).length}</span>` : ''}</a>`)).join('')}</nav><div class="sidebar-bottom"><a href="/admin/configuracion" data-nav="configuracion" class="nav-item ${state.page === 'configuracion' ? 'active' : ''}">${icon('settings')}<span>Configuración</span></a><div class="portal-card"><div class="portal-icon">${icon('link')}</div><strong>Tu agenda, a un enlace</strong><p>Comparte tu portal y recibe reservas en línea.</p><a href="/reservas/${tenant.slug}" data-portal>Ver portal de reservas ${icon('external')}</a></div><div class="sidebar-foot"><span class="green-dot"></span> Entorno de demostración <span>v1.0</span></div></div></aside><div class="main-layout"><header class="topbar"><div class="breadcrumbs">${mobileProfessionalBrand}<button class="icon-btn mobile-menu" data-action="menu" aria-label="Abrir menú">${icon('menu')}</button><span>Mi espacio</span>${icon('chevron')}<strong>${labels[state.page] || 'Agenda'}</strong></div><div class="topbar-right"><span class="demo-pill">Prototipo</span><span class="topbar-date">${icon('calendar')} ${formatDate(TODAY, { day: 'numeric', month: 'short', year: 'numeric' })}</span><button class="notification-button icon-btn" data-nav="notificaciones" aria-label="Ver notificaciones">${icon('bell')}<i></i></button><span class="topbar-divider"></span><button class="profile-button" data-nav="configuracion">${avatar('AV', 'peach')}<span><strong>Adriana Vega</strong><small>Administradora</small></span>${icon('down')}</button></div></header><main id="main-content" class="main-content${animateNextRoute ? ' motion-enter' : ''}">${content}</main><footer class="app-footer"><span>Un poco más de orden. Más tiempo para cuidar.</span><span>Hecho para tu día a día <span class="footer-logo">Citalendar</span></span></footer></div></div>`;
+    `<div class="admin-layout"><div class="sidebar-overlay" data-action="menu"></div><aside class="sidebar"><a class="brand" aria-label="Citalendar: inicio" href="/admin/agenda" data-nav="agenda"><img class="brand-logo-on-light" src="/brand/citalendar-logo.svg" alt=""/><img class="brand-logo-on-dark" src="/brand/citalendar-logo-light.svg" alt=""/></a><div class="workspace-identity glass-effect glass-effect--dark">${avatar(workspaceInitials, 'workspace-avatar')}<span><strong>${escape(workspaceName)}</strong></span></div><nav aria-label="Navegación principal">${visibleNav.map((n) => (n.length === 2 ? `<div class="nav-section">${n[1]}</div>` : `<a href="/admin/${n[0]}" data-nav="${n[0]}" class="nav-item ${state.page === n[0] ? 'active' : ''}" ${state.page === n[0] ? 'aria-current="page"' : ''}>${icon(n[1])}<span>${n[2]}</span>${n[0] === 'agenda' ? `<span class="nav-count">${list('appointments', state.tenantId).filter((a) => a.date === TODAY).length}</span>` : ''}</a>`)).join('')}</nav><div class="sidebar-bottom"><a href="/admin/configuracion" data-nav="configuracion" class="nav-item ${state.page === 'configuracion' ? 'active' : ''}">${icon('settings')}<span>Configuración</span></a><div class="portal-card"><div class="portal-icon">${icon('link')}</div><strong>Tu agenda, a un enlace</strong><p>Comparte tu portal y recibe reservas en línea.</p><a href="/reservas/${tenant.slug}" data-portal>Ver portal de reservas ${icon('external')}</a></div><div class="sidebar-foot"><span class="green-dot"></span> Entorno de demostración <span>v1.0</span></div></div></aside><div class="main-layout"><header class="topbar"><div class="breadcrumbs">${mobileProfessionalBrand}<button class="icon-btn mobile-menu" data-action="menu" aria-label="Abrir menú">${icon('menu')}</button><span>${escape(workspaceName)}</span>${icon('chevron')}<strong>${labels[state.page] || 'Agenda'}</strong></div><div class="topbar-right"><span class="demo-pill">Prototipo</span><span class="topbar-date">${icon('calendar')} ${formatDate(TODAY, { day: 'numeric', month: 'short', year: 'numeric' })}</span><button class="notification-button icon-btn" data-nav="notificaciones" aria-label="Ver notificaciones">${icon('bell')}<i></i></button><span class="topbar-divider"></span><button class="profile-button" data-nav="configuracion">${avatar('AV', 'peach')}<span><strong>Adriana Vega</strong><small>Administradora</small></span>${icon('down')}</button></div></header><main id="main-content" class="main-content${animateNextRoute ? ' motion-enter' : ''}">${content}</main><footer class="app-footer"><span>Un poco más de orden. Más tiempo para cuidar.</span><span>Hecho para tu día a día <span class="footer-logo">Citalendar</span></span></footer></div></div>`;
   const demoTabs = [
     ['resumen', 'grid', 'Inicio'],
     ['agenda', 'calendar', 'Agenda'],
@@ -181,10 +203,9 @@ export function renderShell(content) {
     document.querySelector('.portal-card').remove();
     document.querySelector('.notification-button').remove();
     document.querySelector('.topbar-divider').remove();
-    document.querySelector('.profile-button').dataset.nav = 'cuenta';
     document.querySelector('.breadcrumbs strong').textContent = labels[state.page] || labels[home];
     document.querySelector('.sidebar-foot').remove();
-    document.querySelector('.profile-button').innerHTML = avatar(user.nombre.split(' ').slice(0, 2).map((x) => x[0]).join(''), 'peach') + `<span><strong>${escape(user.nombre)}</strong><small>${escape(roleLabel(user.rol))}</small></span>${icon('down')}`;
+    document.querySelector('.profile-button').outerHTML = connectedAccountMenu();
   }
   mountThemeToggle();
   animateNextRoute = false;
@@ -244,6 +265,12 @@ document.addEventListener('click', (event) => {
   if (!event.target.closest('.professional-more') || event.target.closest('[data-professional-action], [data-reception-action], [data-toggle-service], [data-delete-service], [data-toggle-branch], [data-delete-branch]')) closeProfessionalMenus();
 }, true);
 document.addEventListener('click', async (e) => {
+  const accountTrigger = e.target.closest('.account-menu-trigger');
+  if (accountTrigger) {
+    setAccountMenuOpen(accountTrigger.getAttribute('aria-expanded') !== 'true');
+    return;
+  }
+  setAccountMenuOpen(false);
   const availabilityTab = e.target.closest('[data-availability-tab]');
   if (availabilityTab) { setAvailabilityTab(availabilityTab.dataset.availabilityTab); return; }
   const professionalView = e.target.closest('[data-professional-view]');
@@ -359,6 +386,11 @@ window.addEventListener('popstate', () => {
   render();
 });
 document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape' && document.querySelector('.account-menu-trigger[aria-expanded="true"]')) {
+    setAccountMenuOpen(false, true);
+    event.preventDefault();
+    return;
+  }
   const availabilityTab = event.target.closest?.('[data-availability-tab]');
   if (availabilityTab && ['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) {
     const tabs = [...availabilityTab.closest('[role="tablist"]').querySelectorAll('[data-availability-tab]')];
@@ -380,6 +412,9 @@ document.addEventListener('keydown', (event) => {
   if (event.key === 'Escape' && document.querySelector('.admin-layout.menu-open') && !document.querySelector('#app-dialog')?.open) {
     setMobileMenuOpen(false);
   }
+});
+document.addEventListener('focusin', (event) => {
+  if (!event.target.closest?.('.account-menu')) setAccountMenuOpen(false);
 });
 function showLogin(message = '') {
   showConnectedLogin(message, start);
