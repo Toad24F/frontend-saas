@@ -20,7 +20,7 @@ function showError(dialog, error) {
 }
 
 export function showConnectedLogin(message = '', onLogin) {
-  document.querySelector('#app').innerHTML = `<div class="startup-error"><img src="/favicon.svg" alt=""/><h1>Tu espacio en cita.</h1><p>Inicia sesión para trabajar con tu negocio.</p><div class="startup-actions"><button class="btn btn-primary" id="open-login">Iniciar sesión</button><a class="btn btn-light" href="${modeUrl('/admin/agenda', true)}">Ver demo</a></div></div>`;
+  document.querySelector('#app').innerHTML = `<div class="startup-error"><img src="/brand/citalendar-icon.svg" alt=""/><h1>Tu espacio en Citalendar</h1><p>Inicia sesión para trabajar con tu negocio.</p><div class="startup-actions"><button class="btn btn-primary" id="open-login">Iniciar sesión</button><a class="btn btn-light" href="${modeUrl('/admin/agenda', true)}">Ver demo</a></div></div>`;
 
   const showLoginDialog = (notice = '', email = '') => {
     const dialog = authDialog('Iniciar sesión', `<form id="login-form"><div class="dialog-body">${input('Correo', 'login-email', 'email', 'username', `value="${escape(email)}"`)}${input('Contraseña', 'login-password', 'password', 'current-password')}<div class="login-actions"><button type="button" data-auth="recover">Recuperar contraseña</button><button type="button" data-auth="activate">Activar invitación</button></div><p class="login-notice" role="status" ${notice ? '' : 'hidden'}>${escape(notice)}</p><p class="form-error" id="auth-error" role="alert" tabindex="-1" hidden></p></div><div class="dialog-footer login-footer"><button class="btn btn-primary" type="submit">Entrar</button></div></form>`);

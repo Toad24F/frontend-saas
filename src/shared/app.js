@@ -21,6 +21,7 @@ import {
   statuses,
 } from './data.js';
 import { escape, avatar, pageHead, empty } from './ui.js';
+import { applyProfessionalFilters, resetProfessionalFilters, setProfessionalView } from './screens/profesionales/view.js';
 
 const themeKey = 'cita-theme';
 let theme = (() => {
@@ -127,8 +128,11 @@ export function renderShell(content) {
   ];
   const workspaceName = !isDemo && user.rol === 'superadmin' ? 'Plataforma' : tenant.name;
   const workspaceInitials = !isDemo && user.rol === 'superadmin' ? 'PL' : tenant.initials;
+  const mobileProfessionalBrand = state.page === 'profesionales'
+    ? `<a class="mobile-professional-brand" href="/admin/profesionales" data-nav="profesionales" aria-label="Citalendar, profesionales"><img class="brand-logo-on-light" src="/brand/citalendar-logo.svg" alt=""><img class="brand-logo-on-dark" src="/brand/citalendar-logo-light.svg" alt=""></a>`
+    : '';
   document.querySelector('#app').innerHTML =
-    `<div class="admin-layout"><div class="sidebar-overlay" data-action="menu"></div><aside class="sidebar"><a class="brand" href="/admin/agenda" data-nav="agenda"><img src="/favicon.svg" alt=""/>cita<span class="brand-dot">.</span></a><button class="workspace-switch glass-effect glass-effect--dark" data-action="switch-tenant">${avatar(tenant.initials, 'workspace-avatar')}<span><strong>${escape(tenant.name)}</strong><small>Espacio de trabajo</small></span>${icon('down')}</button><nav aria-label="Navegación principal">${visibleNav.map((n) => (n.length === 2 ? `<div class="nav-section">${n[1]}</div>` : `<a href="/admin/${n[0]}" data-nav="${n[0]}" class="nav-item ${state.page === n[0] ? 'active' : ''}" ${state.page === n[0] ? 'aria-current="page"' : ''}>${icon(n[1])}<span>${n[2]}</span>${n[0] === 'agenda' ? `<span class="nav-count">${list('appointments', state.tenantId).filter((a) => a.date === TODAY).length}</span>` : ''}</a>`)).join('')}</nav><div class="sidebar-bottom"><a href="/admin/configuracion" data-nav="configuracion" class="nav-item ${state.page === 'configuracion' ? 'active' : ''}">${icon('settings')}<span>Configuración</span></a><div class="portal-card"><div class="portal-icon">${icon('link')}</div><strong>Tu agenda, a un enlace</strong><p>Comparte tu portal y recibe reservas en línea.</p><a href="/reservas/${tenant.slug}" data-portal>Ver portal de reservas ${icon('external')}</a></div><div class="sidebar-foot"><span class="green-dot"></span> Entorno de demostración <span>v1.0</span></div></div></aside><div class="main-layout"><header class="topbar"><div class="breadcrumbs"><button class="icon-btn mobile-menu" data-action="menu" aria-label="Abrir menú">${icon('menu')}</button><span>Mi espacio</span>${icon('chevron')}<strong>${labels[state.page] || 'Agenda'}</strong></div><div class="topbar-right"><span class="demo-pill">Prototipo</span><span class="topbar-date">${icon('calendar')} ${formatDate(TODAY, { day: 'numeric', month: 'short', year: 'numeric' })}</span><button class="notification-button icon-btn" data-nav="notificaciones" aria-label="Ver notificaciones">${icon('bell')}<i></i></button><span class="topbar-divider"></span><button class="profile-button" data-nav="configuracion">${avatar('AV', 'peach')}<span><strong>Adriana Vega</strong><small>Administradora</small></span>${icon('down')}</button></div></header><main id="main-content" class="main-content${animateNextRoute ? ' motion-enter' : ''}">${content}</main><footer class="app-footer"><span>Un poco más de orden. Más tiempo para cuidar.</span><span>Hecho para tu día a día <span class="footer-logo">cita.</span></span></footer></div></div>`;
+    `<div class="admin-layout"><div class="sidebar-overlay" data-action="menu"></div><aside class="sidebar"><a class="brand" aria-label="Citalendar: inicio" href="/admin/agenda" data-nav="agenda"><img class="brand-logo-on-light" src="/brand/citalendar-logo.svg" alt=""/><img class="brand-logo-on-dark" src="/brand/citalendar-logo-light.svg" alt=""/></a><button class="workspace-switch glass-effect glass-effect--dark" data-action="switch-tenant">${avatar(tenant.initials, 'workspace-avatar')}<span><strong>${escape(tenant.name)}</strong><small>Espacio de trabajo</small></span>${icon('down')}</button><nav aria-label="Navegación principal">${visibleNav.map((n) => (n.length === 2 ? `<div class="nav-section">${n[1]}</div>` : `<a href="/admin/${n[0]}" data-nav="${n[0]}" class="nav-item ${state.page === n[0] ? 'active' : ''}" ${state.page === n[0] ? 'aria-current="page"' : ''}>${icon(n[1])}<span>${n[2]}</span>${n[0] === 'agenda' ? `<span class="nav-count">${list('appointments', state.tenantId).filter((a) => a.date === TODAY).length}</span>` : ''}</a>`)).join('')}</nav><div class="sidebar-bottom"><a href="/admin/configuracion" data-nav="configuracion" class="nav-item ${state.page === 'configuracion' ? 'active' : ''}">${icon('settings')}<span>Configuración</span></a><div class="portal-card"><div class="portal-icon">${icon('link')}</div><strong>Tu agenda, a un enlace</strong><p>Comparte tu portal y recibe reservas en línea.</p><a href="/reservas/${tenant.slug}" data-portal>Ver portal de reservas ${icon('external')}</a></div><div class="sidebar-foot"><span class="green-dot"></span> Entorno de demostración <span>v1.0</span></div></div></aside><div class="main-layout"><header class="topbar"><div class="breadcrumbs">${mobileProfessionalBrand}<button class="icon-btn mobile-menu" data-action="menu" aria-label="Abrir menú">${icon('menu')}</button><span>Mi espacio</span>${icon('chevron')}<strong>${labels[state.page] || 'Agenda'}</strong></div><div class="topbar-right"><span class="demo-pill">Prototipo</span><span class="topbar-date">${icon('calendar')} ${formatDate(TODAY, { day: 'numeric', month: 'short', year: 'numeric' })}</span><button class="notification-button icon-btn" data-nav="notificaciones" aria-label="Ver notificaciones">${icon('bell')}<i></i></button><span class="topbar-divider"></span><button class="profile-button" data-nav="configuracion">${avatar('AV', 'peach')}<span><strong>Adriana Vega</strong><small>Administradora</small></span>${icon('down')}</button></div></header><main id="main-content" class="main-content${animateNextRoute ? ' motion-enter' : ''}">${content}</main><footer class="app-footer"><span>Un poco más de orden. Más tiempo para cuidar.</span><span>Hecho para tu día a día <span class="footer-logo">Citalendar</span></span></footer></div></div>`;
   const demoTabs = [
     ['resumen', 'grid', 'Inicio'],
     ['agenda', 'calendar', 'Agenda'],
@@ -190,7 +194,7 @@ export function render() {
     history.replaceState({}, '', modeUrl(`/admin/${state.page}`));
   }
   if (!isDemo && location.pathname.startsWith('/reservas/')) { renderShell(empty('Portal de reservas', pending)); return; }
-  document.title = `${import.meta.env.VITE_APP_NAME || 'Cita'} · ${location.pathname.startsWith('/reservas/') ? 'Reserva tu cita' : labels[state.page] || 'Agenda'}`;
+  document.title = `${import.meta.env.VITE_APP_NAME || 'Citalendar'} · ${location.pathname.startsWith('/reservas/') ? 'Reserva tu cita' : labels[state.page] || 'Agenda'}`;
   const path = location.pathname;
   if (path.startsWith('/reservas/')) {
     if (booking) booking.renderPortal(path.split('/')[2]);
@@ -208,7 +212,32 @@ export function render() {
         : empty('Preparando esta vista', 'La agenda ya está disponible.'),
   );
 }
+function closeProfessionalMenus(except = null) {
+  document.querySelectorAll('.professional-more[open]').forEach((menu) => {
+    if (menu !== except) menu.open = false;
+  });
+}
+
+document.addEventListener('toggle', (event) => {
+  const menu = event.target;
+  if (!menu.matches?.('.professional-more')) return;
+  if (!menu.open) { menu.classList.remove('is-upward'); return; }
+  closeProfessionalMenus(menu);
+  const trigger = menu.querySelector('summary');
+  const panel = menu.querySelector('.professional-more-menu');
+  const mobileBar = document.querySelector('.mobile-tabbar');
+  const bottomLimit = mobileBar && getComputedStyle(mobileBar).display !== 'none'
+    ? mobileBar.getBoundingClientRect().top - 8
+    : window.innerHeight - 8;
+  menu.classList.toggle('is-upward', trigger.getBoundingClientRect().bottom + panel.offsetHeight + 6 > bottomLimit);
+}, true);
+document.addEventListener('click', (event) => {
+  if (!event.target.closest('.professional-more') || event.target.closest('[data-professional-action]')) closeProfessionalMenus();
+}, true);
 document.addEventListener('click', async (e) => {
+  const professionalView = e.target.closest('[data-professional-view]');
+  if (professionalView) { setProfessionalView(professionalView.dataset.professionalView); return; }
+  if (e.target.closest('[data-professional-reset]')) { resetProfessionalFilters(); return; }
   const business = e.target.closest('[data-business-detail]');
   if (business && !isDemo) {
     navigate('negocio', Number(business.dataset.businessDetail));
@@ -276,12 +305,14 @@ document.addEventListener('click', async (e) => {
   if (actions) actions.handleClick(e);
 });
 document.addEventListener('change', (e) => {
+  if (e.target.dataset.professionalFilter) { applyProfessionalFilters(); return; }
   if (e.target.dataset.filter) {
     state[e.target.dataset.filter] = e.target.value;
     render();
   }
 });
 document.addEventListener('input', (e) => {
+  if (e.target.id === 'professional-search') { applyProfessionalFilters(); return; }
   if (e.target.id === 'agenda-search') {
     const pos = e.target.selectionStart;
     state.search = e.target.value;
@@ -302,6 +333,15 @@ window.addEventListener('popstate', () => {
   render();
 });
 document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape') {
+    const openMenu = document.querySelector('.professional-more[open]');
+    if (openMenu) {
+      openMenu.open = false;
+      openMenu.querySelector('summary')?.focus();
+      event.preventDefault();
+      return;
+    }
+  }
   if (event.key === 'Escape' && document.querySelector('.admin-layout.menu-open') && !document.querySelector('#app-dialog')?.open) {
     setMobileMenuOpen(false);
   }
@@ -332,7 +372,7 @@ export async function start() {
   } catch (error) {
     if (!isDemo && !user) { showLogin(error.message); return; }
     document.querySelector('#app').innerHTML =
-      `<div class="startup-error"><img src="/favicon.svg" alt=""/><h1>No pudimos abrir tu agenda</h1><p>${escape(error.message)}</p><div class="startup-actions"><button class="btn btn-primary" onclick="location.reload()">Volver a intentar</button><a class="btn btn-light" href="${modeUrl(location.pathname, true)}">Ver demo</a></div></div>`;
+      `<div class="startup-error"><img src="/brand/citalendar-icon.svg" alt=""/><h1>No pudimos abrir tu agenda</h1><p>${escape(error.message)}</p><div class="startup-actions"><button class="btn btn-primary" onclick="location.reload()">Volver a intentar</button><a class="btn btn-light" href="${modeUrl(location.pathname, true)}">Ver demo</a></div></div>`;
   }
 }
 // Mejora progresiva: los navegadores sin WebMCP siguen usando la misma interfaz.

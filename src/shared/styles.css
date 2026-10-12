@@ -206,6 +206,24 @@ p {
   height: 34px;
   margin-right: 10px;
 }
+.brand-logo-on-dark { display: none; }
+html[data-theme='dark'] .brand-logo-on-dark { display: block; }
+html[data-theme='dark'] .brand-logo-on-light { display: none; }
+.sidebar .brand { margin: 0 12px 30px; width: calc(100% - 24px); min-height: 44px; }
+.sidebar .brand img { display: block; width: 100%; height: 44px; margin: 0; object-fit: contain; object-position: left center; }
+.sidebar .brand .brand-logo-on-dark { display: none; }
+html[data-theme='dark'] .sidebar .brand .brand-logo-on-dark { display: block; }
+html[data-theme='dark'] .sidebar .brand .brand-logo-on-light { display: none; }
+.mobile-professional-brand { display: none; }
+@media (max-width: 767px) {
+  .topbar:has(.mobile-professional-brand) .breadcrumbs > span,
+  .topbar:has(.mobile-professional-brand) .breadcrumbs > .icon,
+  .topbar:has(.mobile-professional-brand) .breadcrumbs > strong,
+  .topbar:has(.mobile-professional-brand) .topbar-date,
+  .topbar:has(.mobile-professional-brand) .notification-button { display: none; }
+  .mobile-professional-brand { display: block; width: 148px; }
+  .mobile-professional-brand img { width: 100%; height: 28px; object-fit: contain; object-position: left center; }
+}
 .brand-dot {
   color: var(--accent);
 }
