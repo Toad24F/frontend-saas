@@ -1,15 +1,12 @@
 import { state, render } from '../../../shared/app.js';
+import { getCatalogView, setCatalogView } from '../../../shared/screens/catalog-view.js';
 import { list } from '../../../shared/data.js';
 import { icon } from '../../../shared/icons.js';
 import { avatar, escape, pageHead, button, empty } from '../../../shared/ui.js';
 import '../../../shared/screens/profesionales/style.css';
 import './style.css';
 
-const ui = { view: 'list', search: '', status: 'all' };
-try {
-  const saved = localStorage.getItem('citalendar-receptionists-view');
-  if (saved === 'list' || saved === 'cards') ui.view = saved;
-} catch { /* La vista funciona sin almacenamiento local. */ }
+const ui = { search: '', status: 'all' };
 let tenantId = null;
 const normalize = (value) => String(value ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('es-MX');
 
@@ -40,24 +37,22 @@ export function receptionists() {
   const people = list('receptionists', state.tenantId);
   const visible = people.filter(matches);
   const active = people.filter((person) => person.active).length;
-  const resultView = matchMedia('(max-width: 767px)').matches ? 'cards' : ui.view;
+  const desktopView = getCatalogView();
+  const resultView = matchMedia('(max-width: 767px)').matches ? 'cards' : desktopView;
   return `<div class="professional-workspace reception-workspace">${pageHead('Recepcionistas', 'Gestiona las cuentas de recepción de tu negocio.', button('Nueva recepcionista', 'new-receptionist'))}
     <div class="professional-overview"><strong>${people.length}</strong> ${people.length === 1 ? 'recepcionista' : 'recepcionistas'}<span aria-hidden="true">·</span><strong>${active}</strong> ${active === 1 ? 'activa' : 'activas'}<span aria-hidden="true">·</span><strong>${people.length - active}</strong> ${people.length - active === 1 ? 'inactiva' : 'inactivas'}</div>
     <section class="professional-toolbar reception-toolbar" aria-label="Buscar y filtrar recepcionistas">
       <label class="professional-search">${icon('search')}<span class="visually-hidden">Buscar recepcionistas</span><input id="reception-search" type="search" placeholder="Buscar por nombre o correo" value="${escape(ui.search)}" autocomplete="off"></label>
       <div class="professional-filters"><label><span>Estado</span><select data-reception-filter="status"><option value="all">Todas</option><option value="active" ${ui.status === 'active' ? 'selected' : ''}>Activas</option><option value="inactive" ${ui.status === 'inactive' ? 'selected' : ''}>Inactivas</option></select></label></div>
-      <div class="professional-view-switch" role="group" aria-label="Tipo de vista"><button type="button" data-reception-view="list" aria-pressed="${ui.view === 'list'}" class="${ui.view === 'list' ? 'is-selected' : ''}">${icon('menu')}<span>Lista</span></button><button type="button" data-reception-view="cards" aria-pressed="${ui.view === 'cards'}" class="${ui.view === 'cards' ? 'is-selected' : ''}">${icon('grid')}<span>Tarjetas</span></button></div>
+      <div class="professional-view-switch" role="group" aria-label="Tipo de vista"><button type="button" data-reception-view="list" aria-pressed="${desktopView === 'list'}" class="${desktopView === 'list' ? 'is-selected' : ''}">${icon('menu')}<span>Lista</span></button><button type="button" data-reception-view="cards" aria-pressed="${desktopView === 'cards'}" class="${desktopView === 'cards' ? 'is-selected' : ''}">${icon('grid')}<span>Tarjetas</span></button></div>
     </section>
     <div class="professional-results-heading"><span id="reception-results-count" role="status" aria-live="polite">${visible.length} ${visible.length === 1 ? 'resultado' : 'resultados'}</span></div>
-    ${people.length ? `<div class="professional-results professional-view--${resultView}" data-desktop-view="${ui.view}" id="reception-results">${people.map((person) => renderPerson(person, visible.includes(person))).join('')}</div><div class="professional-no-results" id="reception-no-results" ${visible.length ? 'hidden' : ''}>${empty('Sin coincidencias', 'Prueba otra búsqueda o cambia el filtro de estado.', '<button type="button" class="btn btn-light" data-reception-reset>Limpiar filtros</button>')}</div>` : empty('Sin recepcionistas', 'Crea una cuenta para tu equipo de recepción.', '<button type="button" class="btn btn-primary" data-action="new-receptionist">Nueva recepcionista</button>')}
+    ${people.length ? `<div class="professional-results professional-view--${resultView}" data-desktop-view="${desktopView}" id="reception-results">${people.map((person) => renderPerson(person, visible.includes(person))).join('')}</div><div class="professional-no-results" id="reception-no-results" ${visible.length ? 'hidden' : ''}>${empty('Sin coincidencias', 'Prueba otra búsqueda o cambia el filtro de estado.', '<button type="button" class="btn btn-light" data-reception-reset>Limpiar filtros</button>')}</div>` : empty('Sin recepcionistas', 'Crea una cuenta para tu equipo de recepción.', '<button type="button" class="btn btn-primary" data-action="new-receptionist">Nueva recepcionista</button>')}
   </div>`;
 }
 
 export function setReceptionView(view) {
-  if (!['list', 'cards'].includes(view) || ui.view === view) return;
-  ui.view = view;
-  try { localStorage.setItem('citalendar-receptionists-view', view); } catch { /* Preferencia temporal. */ }
-  render();
+  if (setCatalogView(view)) render();
 }
 
 export function resetReceptionFilters() {

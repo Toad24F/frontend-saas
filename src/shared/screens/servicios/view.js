@@ -1,16 +1,13 @@
 import { isDemo, user } from '../../../connected/backend.js';
 import { state, render } from '../../app.js';
+import { getCatalogView, setCatalogView } from '../catalog-view.js';
 import { list, money } from '../../data.js';
 import { icon } from '../../icons.js';
 import { escape as esc, pageHead, button, empty } from '../../ui.js';
 import '../profesionales/style.css';
 import './style.css';
 
-const ui = { view: 'list', search: '', status: 'all' };
-try {
-  const saved = localStorage.getItem('citalendar-services-view');
-  if (saved === 'list' || saved === 'cards') ui.view = saved;
-} catch { /* La vista sigue disponible sin almacenamiento local. */ }
+const ui = { search: '', status: 'all' };
 let tenantId = null;
 const normalize = (value) => String(value ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('es-MX');
 
@@ -47,25 +44,23 @@ export function services(management = () => '') {
   const professionals = list('professionals', state.tenantId);
   const visible = services.filter(matches);
   const active = services.filter((service) => service.active !== false).length;
-  const resultView = matchMedia('(max-width: 767px)').matches ? 'cards' : ui.view;
+  const desktopView = getCatalogView();
+  const resultView = matchMedia('(max-width: 767px)').matches ? 'cards' : desktopView;
   return `<div class="professional-workspace service-workspace">${pageHead('Servicios', own ? 'Los servicios que ofreces a tus clientes.' : 'Gestiona lo que ofrece tu negocio.', button('Nuevo servicio', 'new-service'))}
     <div class="professional-overview"><strong>${services.length}</strong> ${services.length === 1 ? 'servicio' : 'servicios'}<span aria-hidden="true">·</span><strong>${active}</strong> activos<span aria-hidden="true">·</span><strong>${services.length - active}</strong> inactivos</div>
     <section class="professional-toolbar service-toolbar" aria-label="Buscar y filtrar servicios">
       <label class="professional-search">${icon('search')}<span class="visually-hidden">Buscar servicios</span><input id="service-search" type="search" placeholder="Buscar por nombre o descripción" value="${esc(ui.search)}" autocomplete="off"></label>
       <div class="professional-filters"><label><span>Estado</span><select data-service-filter="status"><option value="all">Todos</option><option value="active" ${ui.status === 'active' ? 'selected' : ''}>Activos</option><option value="inactive" ${ui.status === 'inactive' ? 'selected' : ''}>Inactivos</option></select></label></div>
-      <div class="professional-view-switch" role="group" aria-label="Tipo de vista"><button type="button" data-service-view="list" aria-pressed="${ui.view === 'list'}" class="${ui.view === 'list' ? 'is-selected' : ''}">${icon('menu')}<span>Lista</span></button><button type="button" data-service-view="cards" aria-pressed="${ui.view === 'cards'}" class="${ui.view === 'cards' ? 'is-selected' : ''}">${icon('grid')}<span>Tarjetas</span></button></div>
+      <div class="professional-view-switch" role="group" aria-label="Tipo de vista"><button type="button" data-service-view="list" aria-pressed="${desktopView === 'list'}" class="${desktopView === 'list' ? 'is-selected' : ''}">${icon('menu')}<span>Lista</span></button><button type="button" data-service-view="cards" aria-pressed="${desktopView === 'cards'}" class="${desktopView === 'cards' ? 'is-selected' : ''}">${icon('grid')}<span>Tarjetas</span></button></div>
     </section>
     <div class="professional-results-heading"><span id="service-results-count" role="status" aria-live="polite">${visible.length} ${visible.length === 1 ? 'resultado' : 'resultados'}</span></div>
-    ${services.length ? `<div class="professional-results professional-view--${resultView}" data-desktop-view="${ui.view}" id="service-results">${services.map((service) => renderService(service, professionals, own, professional, management, visible.includes(service))).join('')}</div><div class="professional-no-results" id="service-no-results" ${visible.length ? 'hidden' : ''}>${empty('Sin coincidencias', 'Prueba otra búsqueda o cambia el filtro de estado.', '<button type="button" class="btn btn-light" data-service-reset>Limpiar filtros</button>')}</div>` : empty('Aún no hay servicios', 'Crea el primer servicio para organizar tu oferta.', '<button type="button" class="btn btn-primary" data-action="new-service">Nuevo servicio</button>')}
+    ${services.length ? `<div class="professional-results professional-view--${resultView}" data-desktop-view="${desktopView}" id="service-results">${services.map((service) => renderService(service, professionals, own, professional, management, visible.includes(service))).join('')}</div><div class="professional-no-results" id="service-no-results" ${visible.length ? 'hidden' : ''}>${empty('Sin coincidencias', 'Prueba otra búsqueda o cambia el filtro de estado.', '<button type="button" class="btn btn-light" data-service-reset>Limpiar filtros</button>')}</div>` : empty('Aún no hay servicios', 'Crea el primer servicio para organizar tu oferta.', '<button type="button" class="btn btn-primary" data-action="new-service">Nuevo servicio</button>')}
     <div class="information-note">${icon('info')} La duración de cada servicio determina los horarios disponibles en tu portal. El precio es informativo; no se realizan cobros en línea.</div>
   </div>`;
 }
 
 export function setServiceView(view) {
-  if (!['list', 'cards'].includes(view) || ui.view === view) return;
-  ui.view = view;
-  try { localStorage.setItem('citalendar-services-view', view); } catch { /* Preferencia temporal. */ }
-  render();
+  if (setCatalogView(view)) render();
 }
 
 export function resetServiceFilters() {
