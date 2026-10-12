@@ -1,4 +1,35 @@
 .availability-workspace { min-width: 0; }
+.availability-workspace [data-availability-context][hidden] { display: none !important; }
+.availability-person-context {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+  margin: 0 0 22px;
+  padding: 16px 20px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+}
+.availability-person-avatar {
+  display: grid;
+  place-items: center;
+  flex: 0 0 46px;
+  width: 46px;
+  height: 46px;
+  border-radius: 10px;
+  background: var(--surface-soft);
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 17px;
+}
+.availability-person-avatar .icon { width: 22px; height: 22px; }
+.availability-person-copy { display: grid; gap: 3px; min-width: 0; flex: 1; }
+.availability-person-copy strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 15px; font-weight: 650; }
+.availability-person-copy small { color: var(--muted); font-size: 12px; }
+.availability-person-control { display: grid; gap: 5px; flex: 0 1 250px; min-width: 190px; }
+.availability-person-control span { color: var(--muted); font-size: 11px; font-weight: 650; }
+.availability-person-control select { width: 100%; min-height: 42px; font-weight: 600; }
 .availability-tabs {
   display: flex;
   gap: 6px;
@@ -33,6 +64,8 @@
 .availability-workspace .section-heading h2 { letter-spacing: -.025em; }
 .availability-workspace .section-heading p { text-wrap: pretty; }
 @media (max-width: 767px) {
+  .availability-person-context { flex-wrap: wrap; gap: 11px; padding: 14px; margin-bottom: 16px; }
+  .availability-person-control { flex-basis: 100%; min-width: 0; }
   .availability-tabs { gap: 4px; margin-bottom: 14px; }
   .availability-tabs button { min-height: 44px; padding: 8px 12px; white-space: nowrap; }
   .availability-workspace .section-heading { align-items: stretch; flex-direction: column; }

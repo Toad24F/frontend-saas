@@ -7,6 +7,10 @@ import './style.css';
 
 const days = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
 let activeTab = 'schedule';
+let blockScope = '';
+
+export function getBlockScope() { return blockScope; }
+export function setBlockScope(value) { blockScope = value === '' ? '' : String(value); }
 
 export function scheduleRow(schedule, selected, tenantId, removable = false, blockIndex = 0) {
   const day = days[schedule.day];
@@ -21,10 +25,10 @@ export function scheduleRow(schedule, selected, tenantId, removable = false, blo
   </tr>`;
 }
 
-function scheduleSection(people, selected, schedules) {
+function scheduleSection(selected, schedules) {
   const rows = schedules.sort((a, b) => (isDemo ? a.day - b.day : (a.day || 7) - (b.day || 7)) || a.start.localeCompare(b.start))
     .map((schedule) => scheduleRow(schedule, selected, state.tenantId, schedules.filter((item) => item.day === schedule.day).length > 1, schedules.filter((item) => item.day === schedule.day && item.start < schedule.start).length)).join('');
-  return `<section class="surface availability-main-section"><div class="section-heading"><div><h2>Horario semanal</h2><p>Agrega varias franjas por día; cada una puede tener otra sucursal.</p></div><select class="form-select professional-select" id="schedule-professional" aria-label="Profesional del horario">${people.map((person) => `<option value="${person.id}" ${person.id === selected.id ? 'selected' : ''}>${esc(person.name)}</option>`).join('')}</select></div><form id="schedule-form"><div class="table-responsive"><table class="table app-table schedule-table align-middle"><thead><tr><th>Día</th><th>Sucursal</th><th>Entrada</th><th>Descanso opcional</th><th>Salida</th><th>Franjas</th></tr></thead><tbody>${rows}</tbody></table></div><p class="schedule-help">Para comer y volver en otra sucursal, termina una franja antes de comer y agrega otra después. Las franjas pueden ser consecutivas si no se empalman.</p><p id="schedule-error" class="form-error" role="alert" tabindex="-1" hidden></p><div class="section-form-footer"><span>${icon('coffee')} Los descansos y huecos entre franjas quedan fuera de las citas disponibles.</span><button class="btn btn-primary" type="submit">${icon('check')}Guardar horario</button></div></form></section>`;
+  return `<section class="surface availability-main-section"><div class="section-heading"><div><h2>Horario semanal</h2><p>Agrega varias franjas por día; cada una puede tener otra sucursal.</p></div></div><form id="schedule-form"><div class="table-responsive"><table class="table app-table schedule-table align-middle"><thead><tr><th>Día</th><th>Sucursal</th><th>Entrada</th><th>Descanso opcional</th><th>Salida</th><th>Franjas</th></tr></thead><tbody>${rows}</tbody></table></div><p class="schedule-help">Para comer y volver en otra sucursal, termina una franja antes de comer y agrega otra después. Las franjas pueden ser consecutivas si no se empalman.</p><p id="schedule-error" class="form-error" role="alert" tabindex="-1" hidden></p><div class="section-form-footer"><span>${icon('coffee')} Los descansos y huecos entre franjas quedan fuera de las citas disponibles.</span><button class="btn btn-primary" type="submit">${icon('check')}Guardar horario</button></div></form></section>`;
 }
 
 function modeSection(tenant) {
@@ -32,18 +36,36 @@ function modeSection(tenant) {
 }
 
 function blocksSection() {
-  const blocks = list('blocks', state.tenantId);
-  return `<section class="surface availability-main-section"><div class="section-heading"><div><h2>Bloqueos</h2><p>Vacaciones, festivos o cambios de último momento.</p></div>${button('Agregar bloqueo', 'new-block', 'plus', 'btn-light')}</div>${blocks.length ? `<div class="blocks-list">${blocks.map((block) => `<div class="block-item"><span class="stat-icon amber">${icon('lock')}</span><div><strong>${esc(block.reason)}</strong><small>${formatDate(block.date, { day: 'numeric', month: 'short' })}${block.endDate !== block.date ? ` – ${formatDate(block.endDate, { day: 'numeric', month: 'short' })}` : ''} · ${block.start ? block.start + ' – ' + block.end : 'Todo el día'} · ${block.professionalId ? esc(resource('professionals', block.professionalId, state.tenantId).name) : 'Todo el equipo'}</small></div><button class="icon-btn" data-edit-block="${block.id}" ${!isDemo && user.rol === 'profesional' && block.professionalId !== user.id ? 'disabled' : ''} aria-label="Editar bloqueo ${esc(block.reason)}">${icon('edit')}</button><button class="icon-btn" data-remove-block="${block.id}" ${!isDemo && user.rol === 'profesional' && block.professionalId !== user.id ? 'disabled' : ''} aria-label="Eliminar bloqueo ${esc(block.reason)}">${icon('x')}</button></div>`).join('')}</div>` : empty('Sin bloqueos programados', 'Tu equipo mantiene su horario habitual.')}</section>`;
+  const scope = !isDemo && user.rol === 'profesional' ? String(user.id) : blockScope;
+  const blocks = list('blocks', state.tenantId).filter((block) => !scope || !block.professionalId || String(block.professionalId) === scope);
+  return `<section class="surface availability-main-section"><div class="section-heading"><div><h2>Bloqueos</h2><p>Vacaciones, festivos o cambios de último momento.${scope ? ' Incluye los bloqueos de todo el equipo.' : ''}</p></div>${button('Agregar bloqueo', 'new-block', 'plus', 'btn-light')}</div>${blocks.length ? `<div class="blocks-list">${blocks.map((block) => `<div class="block-item"><span class="stat-icon amber">${icon('lock')}</span><div><strong>${esc(block.reason)}</strong><small>${formatDate(block.date, { day: 'numeric', month: 'short' })}${block.endDate !== block.date ? ` – ${formatDate(block.endDate, { day: 'numeric', month: 'short' })}` : ''} · ${block.start ? block.start + ' – ' + block.end : 'Todo el día'} · ${block.professionalId ? esc(resource('professionals', block.professionalId, state.tenantId).name) : 'Todo el equipo'}</small></div><button class="icon-btn" data-edit-block="${block.id}" ${!isDemo && user.rol === 'profesional' && block.professionalId !== user.id ? 'disabled' : ''} aria-label="Editar bloqueo ${esc(block.reason)}">${icon('edit')}</button><button class="icon-btn" data-remove-block="${block.id}" ${!isDemo && user.rol === 'profesional' && block.professionalId !== user.id ? 'disabled' : ''} aria-label="Eliminar bloqueo ${esc(block.reason)}">${icon('x')}</button></div>`).join('')}</div>` : empty('Sin bloqueos en esta vista', 'No hay bloqueos para la selección actual.')}</section>`;
 }
 
-function tabLayout(tabs) {
+function professionalContext(people, selected, tabId) {
+  const isTeam = tabId === 'changes' && (isDemo || user.rol === 'admin_negocio') && !blockScope;
+  const person = tabId === 'changes' && !isDemo && user.rol === 'profesional'
+    ? people.find((item) => item.id === user.id) || selected
+    : tabId === 'changes' && blockScope ? people.find((item) => String(item.id) === blockScope) || selected : selected;
+  const selectedValue = isTeam ? '' : String(person.id);
+  const id = { schedule: 'schedule-professional', changes: 'block-professional', offering: 'offering-professional', projection: 'projection-professional' }[tabId];
+  const label = tabId === 'changes' ? 'Ver bloqueos y excepciones de' : tabId === 'offering' ? 'Ver oferta de' : tabId === 'projection' ? 'Ver proyección de' : 'Ver horario de';
+  const initial = isTeam ? icon('users') : esc(person.name.trim().charAt(0).toUpperCase());
+  const name = isTeam ? 'Todo el equipo' : esc(person.name);
+  const detail = isTeam ? `${people.length} profesionales` : `${person.branchIds?.length || 0} sucursales asignadas`;
+  const eligiblePeople = tabId === 'changes' && !isDemo && user.rol === 'profesional' ? [person] : people;
+  const options = `${tabId === 'changes' && (isDemo || user.rol === 'admin_negocio') ? '<option value="">Todo el equipo</option>' : ''}${eligiblePeople.map((item) => `<option value="${item.id}" ${String(item.id) === selectedValue ? 'selected' : ''}>${esc(item.name)}</option>`).join('')}`;
+  return `<div class="availability-person-context"><span class="availability-person-avatar" aria-hidden="true">${initial}</span><div class="availability-person-copy"><strong>${name}</strong><small>${detail}</small></div><label class="availability-person-control" for="${id}"><span>${label}</span><select class="form-select" id="${id}" data-availability-professional="${tabId}">${options}</select></label></div>`;
+}
+
+function tabLayout(tabs, people, selected) {
   if (!tabs.some((tab) => tab.id === activeTab)) activeTab = 'schedule';
-  return `<div class="availability-workspace"><nav class="availability-tabs" role="tablist" aria-label="Secciones de disponibilidad">${tabs.map((tab) => `<button type="button" role="tab" id="availability-tab-${tab.id}" aria-controls="availability-panel-${tab.id}" aria-selected="${tab.id === activeTab}" tabindex="${tab.id === activeTab ? '0' : '-1'}" data-availability-tab="${tab.id}" class="${tab.id === activeTab ? 'is-selected' : ''}">${tab.label}</button>`).join('')}</nav>${tabs.map((tab) => `<div role="tabpanel" id="availability-panel-${tab.id}" aria-labelledby="availability-tab-${tab.id}" data-availability-panel="${tab.id}" ${tab.id === activeTab ? '' : 'hidden'}>${tab.content}</div>`).join('')}</div>`;
+  return `<div class="availability-workspace">${tabs.map((tab) => `<div data-availability-context="${tab.id}" ${tab.id === activeTab ? '' : 'hidden'}>${professionalContext(people, selected, tab.id)}</div>`).join('')}<nav class="availability-tabs" role="tablist" aria-label="Secciones de disponibilidad">${tabs.map((tab) => `<button type="button" role="tab" id="availability-tab-${tab.id}" aria-controls="availability-panel-${tab.id}" aria-selected="${tab.id === activeTab}" tabindex="${tab.id === activeTab ? '0' : '-1'}" data-availability-tab="${tab.id}" class="${tab.id === activeTab ? 'is-selected' : ''}">${tab.label}</button>`).join('')}</nav>${tabs.map((tab) => `<div role="tabpanel" id="availability-panel-${tab.id}" aria-labelledby="availability-tab-${tab.id}" data-availability-panel="${tab.id}" ${tab.id === activeTab ? '' : 'hidden'}>${tab.content}</div>`).join('')}</div>`;
 }
 
 export function availability({ exceptionContent = '', extraPanels = [] } = {}) {
   const tenant = tenantById(state.tenantId);
   const people = list('professionals', state.tenantId);
+  if (blockScope && !people.some((person) => String(person.id) === blockScope)) blockScope = '';
   const selected = people.find((person) => person.id === Number(state.scheduleProfessional)) || people[0];
   if (!selected) return `${pageHead('Disponibilidad', 'Organiza horarios y fechas de atención.')}${empty('Agrega a tu primer profesional', 'Después podrás configurar sus horarios.')}`;
   const schedules = list('schedules', state.tenantId).filter((schedule) => schedule.professionalId === selected.id);
@@ -51,14 +73,14 @@ export function availability({ exceptionContent = '', extraPanels = [] } = {}) {
     if (!schedules.some((schedule) => schedule.day === day)) schedules.push({ id: -100 - day, day, branchId: selected.branchIds[0], enabled: false, start: '', end: '', breakStart: '', breakEnd: '' });
   }
   const tabs = [
-    { id: 'schedule', label: 'Horario semanal', content: scheduleSection(people, selected, schedules) + modeSection(tenant) },
+    { id: 'schedule', label: 'Horario semanal', content: scheduleSection(selected, schedules) + modeSection(tenant) },
     { id: 'changes', label: exceptionContent ? 'Bloqueos y excepciones' : 'Bloqueos', content: blocksSection() + exceptionContent },
     ...extraPanels,
   ];
   const description = extraPanels.length
     ? 'Organiza horarios, cambios por fecha y servicios por sucursal.'
     : 'Organiza horarios y bloqueos de atención.';
-  return `${pageHead('Disponibilidad', description)}${tabLayout(tabs)}`;
+  return `${pageHead('Disponibilidad', description)}${tabLayout(tabs, people, selected)}`;
 }
 
 export function setAvailabilityTab(tabId, focus = false) {
@@ -73,5 +95,6 @@ export function setAvailabilityTab(tabId, focus = false) {
     item.tabIndex = selected ? 0 : -1;
   });
   root.querySelectorAll('[data-availability-panel]').forEach((panel) => { panel.hidden = panel.dataset.availabilityPanel !== tabId; });
+  root.querySelectorAll('[data-availability-context]').forEach((context) => { context.hidden = context.dataset.availabilityContext !== tabId; });
   if (focus) tab.focus();
 }

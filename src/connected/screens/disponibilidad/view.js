@@ -2,12 +2,14 @@ import { api, user } from '../../backend.js';
 import { state, render } from '../../../shared/app.js';
 import { list, TODAY, addDays, formatDate } from '../../../shared/data.js';
 import { escape as esc, empty } from '../../../shared/ui.js';
-import { availability as weeklyAvailability } from '../../../shared/screens/disponibilidad/view.js';
+import { availability as weeklyAvailability, getBlockScope } from '../../../shared/screens/disponibilidad/view.js';
 import { minutesToLabel } from './payload.js';
 import './style.css';
 
 let cache = null;
 let loading = null;
+let teamExceptions = null;
+let teamLoading = null;
 let projection = null;
 let range = { from: TODAY, to: addDays(TODAY, 13) };
 
@@ -17,6 +19,7 @@ export function selectedProfessional() {
 }
 
 export async function refreshAvailabilityData(force = false) {
+  if (force) teamExceptions = null;
   const person = selectedProfessional();
   if (!person) return;
   const id = person.id;
@@ -36,6 +39,25 @@ export async function refreshAvailabilityData(force = false) {
   });
   loading = { id, promise };
   return promise;
+}
+
+function refreshTeamExceptions() {
+  const ids = list('professionals', state.tenantId).map((person) => person.id);
+  const key = `${state.tenantId}:${ids.join(',')}`;
+  if (teamExceptions?.key === key || teamLoading?.key === key) return;
+  teamExceptions = { key, busy: true, error: '', items: [] };
+  const promise = Promise.all(ids.map(async (id) => {
+    const items = await api(`/profesionales/${id}/excepciones`);
+    return items.map((item) => ({ ...item, professionalId: id }));
+  })).then((groups) => {
+    if (teamExceptions?.key === key) teamExceptions = { key, busy: false, error: '', items: groups.flat() };
+  }).catch((error) => {
+    if (teamExceptions?.key === key) teamExceptions = { key, busy: false, error: error.message, items: [] };
+  }).finally(() => {
+    if (teamLoading?.key === key) teamLoading = null;
+    if (state.page === 'disponibilidad' && !getBlockScope()) render();
+  });
+  teamLoading = { key, promise };
 }
 
 export function setProjection(result, from, to) {
@@ -61,9 +83,8 @@ function offeringSection(person) {
   <p class="availability-note">La oferta muestra estados y preferencias; no representa horarios libres ni citas disponibles.</p></section>`;
 }
 
-function exceptionsSection() {
-  const exceptions = cache?.exceptions || [];
-  return `<section class="surface availability-extra"><div class="section-heading"><div><h2>Excepciones por fecha</h2><p>Define una jornada especial o cierra una sucursal solo para una fecha.</p></div><button type="button" class="btn btn-light" data-availability-action="new-exception">Agregar excepción</button></div>${exceptions.length ? `<div class="blocks-list">${exceptions.map((item) => `<div class="block-item"><div><strong>${esc(branchName(item.sucursalId))} · ${esc(dateText(item.fechaLocal))}</strong><small>${item.franjas.length ? item.franjas.map((slot) => `${minutesToLabel(slot.inicioMinutos)}–${minutesToLabel(slot.finMinutos)}`).join(', ') : 'Cierre de todo el día'}</small></div><div class="availability-row-actions"><button type="button" class="btn btn-light" data-availability-action="edit-exception" data-branch-id="${item.sucursalId}" data-date="${item.fechaLocal}">Editar</button><button type="button" class="icon-btn" data-availability-action="delete-exception" data-branch-id="${item.sucursalId}" data-date="${item.fechaLocal}" aria-label="Eliminar excepción de ${esc(branchName(item.sucursalId))} del ${esc(dateText(item.fechaLocal))}">×</button></div></div>`).join('')}</div>` : empty('Sin excepciones', 'Se aplicará el horario semanal habitual.')}</section>`;
+function exceptionsSection(exceptions, team = false) {
+  return `<section class="surface availability-extra"><div class="section-heading"><div><h2>Excepciones por fecha</h2><p>Define una jornada especial o cierra una sucursal solo para una fecha.</p></div><button type="button" class="btn btn-light" data-availability-action="new-exception">Agregar excepción</button></div>${exceptions.length ? `<div class="blocks-list">${exceptions.map((item) => `<div class="block-item"><div><strong>${team ? `${esc(personName(item.professionalId))} · ` : ''}${esc(branchName(item.sucursalId))} · ${esc(dateText(item.fechaLocal))}</strong><small>${item.franjas.length ? item.franjas.map((slot) => `${minutesToLabel(slot.inicioMinutos)}–${minutesToLabel(slot.finMinutos)}`).join(', ') : 'Cierre de todo el día'}</small></div><div class="availability-row-actions"><button type="button" class="btn btn-light" data-availability-action="edit-exception" data-professional-id="${item.professionalId || selectedProfessional().id}" data-branch-id="${item.sucursalId}" data-date="${item.fechaLocal}">Editar</button><button type="button" class="icon-btn" data-availability-action="delete-exception" data-professional-id="${item.professionalId || selectedProfessional().id}" data-branch-id="${item.sucursalId}" data-date="${item.fechaLocal}" aria-label="Eliminar excepción de ${esc(branchName(item.sucursalId))} del ${esc(dateText(item.fechaLocal))}">×</button></div></div>`).join('')}</div>` : empty('Sin excepciones', 'Se aplicará el horario semanal habitual.')}</section>`;
 }
 
 function projectionSection(person) {
@@ -75,6 +96,8 @@ export function availability() {
   const person = selectedProfessional();
   if (!person) return weeklyAvailability();
   if (cache?.id !== person.id && loading?.id !== person.id) void refreshAvailabilityData();
+  const team = !getBlockScope() && user.rol === 'admin_negocio';
+  if (team) refreshTeamExceptions();
   const extra = cache?.id === person.id ? cache : null;
   const pendingContent = !extra || extra.busy
     ? '<section class="surface availability-extra" aria-busy="true"><p class="availability-note">Cargando datos de disponibilidad…</p></section>'
@@ -82,7 +105,13 @@ export function availability() {
       ? `<section class="surface availability-extra"><p role="alert">${esc(extra.error)}</p><button type="button" class="btn btn-light" data-availability-action="retry">Reintentar</button></section>`
       : null;
   return weeklyAvailability({
-    exceptionContent: pendingContent || exceptionsSection(),
+    exceptionContent: team
+      ? teamExceptions?.busy
+        ? '<section class="surface availability-extra" aria-busy="true"><p class="availability-note">Cargando excepciones del equipo…</p></section>'
+        : teamExceptions?.error
+          ? `<section class="surface availability-extra"><p role="alert">${esc(teamExceptions.error)}</p><button type="button" class="btn btn-light" data-availability-action="retry-team">Reintentar</button></section>`
+          : exceptionsSection(teamExceptions?.items || [], true)
+      : pendingContent || exceptionsSection(extra.exceptions.map((item) => ({ ...item, professionalId: person.id }))),
     extraPanels: [
       { id: 'offering', label: 'Oferta por sucursal', content: pendingContent || offeringSection(person) },
       { id: 'projection', label: 'Proyección', content: pendingContent || projectionSection(person) },
@@ -91,3 +120,8 @@ export function availability() {
 }
 
 export function currentAvailabilityData() { return cache; }
+export function findAvailabilityException(personId, date, branchId) {
+  const items = teamExceptions?.items || (cache?.id === personId ? cache.exceptions : []);
+  return items.find((item) => (item.professionalId || personId) === personId && item.fechaLocal === date && item.sucursalId === branchId);
+}
+export function retryTeamExceptions() { teamExceptions = null; refreshTeamExceptions(); }

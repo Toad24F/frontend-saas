@@ -16,7 +16,7 @@ import { icon } from './icons.js';
 import { modal, toast, escape as esc } from './ui.js';
 import { reportState } from '../demo/screens/reportes/state.js';
 import { appointmentTable } from './screens/agenda/table.js';
-import { scheduleRow } from './screens/disponibilidad/view.js';
+import { scheduleRow, setBlockScope } from './screens/disponibilidad/view.js';
 import { validateSchedules, appointmentCovered } from '../demo/schedule.js';
 let draftScheduleId = -1;
 
@@ -298,7 +298,11 @@ document.addEventListener('input', (e) => {
   }
 });
 document.addEventListener('change', (e) => {
-  if (e.target.id === 'schedule-professional') {
+  if (e.target.id === 'block-professional') {
+    setBlockScope(e.target.value);
+    if (e.target.value) state.scheduleProfessional = Number(e.target.value);
+    render();
+  } else if (['schedule-professional', 'offering-professional', 'projection-professional'].includes(e.target.id)) {
     state.scheduleProfessional = Number(e.target.value);
     render();
   }

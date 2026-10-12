@@ -2,6 +2,7 @@ import { isDemo, api, user } from '../../../connected/backend.js';
 import { state } from '../../app.js';
 import { db, list, resource, TODAY, minutes } from '../../data.js';
 import { field, select, basicForm } from '../../forms.js';
+import { getBlockScope } from './view.js';
 
 function blockForm(existing = null) {
   const editing = Boolean(existing);
@@ -17,7 +18,7 @@ function blockForm(existing = null) {
       { id: 'dia_festivo', name: 'Día festivo' },
       { id: 'emergencia', name: 'Emergencia' },
     ], existing?.type === 'feriado' ? 'dia_festivo' : existing?.type || 'vacaciones')}
-    ${select('Profesional', 'professionalId', professionalOptions, existing?.professionalId ?? (canTargetTeam ? '' : user.id))}</div>
+    ${select('Profesional', 'professionalId', professionalOptions, existing ? existing.professionalId ?? '' : (canTargetTeam ? getBlockScope() : user.id))}</div>
     ${select('Sucursal', 'branchId', branches, existing?.branchId ?? '')}
     <div class="form-row-two">${field('Desde', 'date', existing?.date || TODAY, 'date', 'required')}${field('Hasta', 'endDate', existing?.endDate || TODAY, 'date', 'required')}</div>
     <div class="form-row-two">${field('Hora inicial (opcional)', 'start', existing?.start || '', 'time')}${field('Hora final (opcional)', 'end', existing?.end || '', 'time')}</div>
