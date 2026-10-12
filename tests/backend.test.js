@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { api, login, loadBackendData, catalogPayload, schedulePayload, modeUrl, availablePage, defaultPage } from '../src/connected/backend.js';
+import { api, login, restoreSession, loadBackendData, catalogPayload, schedulePayload, modeUrl, availablePage, defaultPage } from '../src/connected/backend.js';
 import { db } from '../src/shared/data.js';
 import { validateNewPassword } from '../src/connected/modules/auth/password-policy.js';
 import { getBranchQuota } from '../src/connected/modules/sucursales/quota.js';
@@ -49,6 +49,7 @@ test('carga datos reales aislados del negocio, sin inventar citas, y envía auto
   global.sessionStorage = { setItem() {}, removeItem() {} };
   const responses = {
     '/auth/login': { accessToken: 'test-token', usuario: { id: 2, nombre: 'Admin', rol: 'admin_negocio', negocioId: 7 } },
+    '/auth/profile': { user: { sub: 2, nombre: 'Admin', rol: 'admin_negocio', negocioId: 7 }, nombreNegocio: 'Clínica Central' },
     '/servicios': [{ id: 10, nombre: 'Consulta', costo: '500.00', duracionMinutos: 45, activo: true }],
     '/sucursales': [{ id: 20, nombre: 'Centro', direccion: 'Calle 1', telefono: '6141234567', zonaHoraria: 'America/Chihuahua', activo: true }],
     '/sucursales/cupo': { negocioId: 7, limiteSucursalesActivas: 3, sucursalesActivas: 1, disponibles: 2 },
@@ -67,10 +68,12 @@ test('carga datos reales aislados del negocio, sin inventar citas, y envía auto
       return Response.json(responses[path]);
     };
     await login('test@example.com', 'test-password');
+    await restoreSession();
     assert.equal(defaultPage(), 'profesionales');
     assert.equal(availablePage('servicios'), true);
     assert.equal(availablePage('agenda'), false);
     assert.equal(await loadBackendData(), 7);
+    assert.equal(db.tenants[0].name, 'Clínica Central');
     assert.deepEqual(getBranchQuota(), responses['/sucursales/cupo']);
     assert.deepEqual(db.professionals[0].branchIds, [20]);
     assert.deepEqual(db.professionals[0].serviceIds, [10]);

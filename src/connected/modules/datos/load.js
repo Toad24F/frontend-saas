@@ -8,7 +8,8 @@ export async function loadBackendData() {
   setBranchQuota(null);
   const tenantId = user.negocioId || 1;
   const next = { tenants: [], professionals: [], receptionists: [], branches: [], services: [], schedules: [], blocks: [], appointments: [], clients: [], holds: [] };
-  next.tenants = [{ id: tenantId, name: user.rol === 'superadmin' ? 'Plataforma' : 'Mi negocio', slug: '', initials: 'MN', mode: null }];
+  const businessName = user.nombreNegocio || 'Mi negocio';
+  next.tenants = [{ id: tenantId, name: user.rol === 'superadmin' ? 'Plataforma' : businessName, slug: '', initials: initials(user.rol === 'superadmin' ? 'Plataforma' : businessName), mode: null }];
   if (user.rol === 'superadmin') {
     const businesses = await api('/negocios');
     next.tenants = await Promise.all(businesses.map(async (b) => {

@@ -40,6 +40,14 @@ export async function logout() {
 export async function restoreSession() {
   if (!token) return false;
   const result = await api('/auth/profile');
-  user = { ...result.user, id: result.user.sub };
+  const businessName = [
+    result.user?.nombreNegocio,
+    result.user?.negocioNombre,
+    result.user?.negocio?.nombre,
+    result.nombreNegocio,
+    result.negocioNombre,
+    result.negocio?.nombre,
+  ].find((name) => typeof name === 'string' && name.trim());
+  user = { ...result.user, id: result.user.sub, nombreNegocio: businessName?.trim() || null };
   return true;
 }

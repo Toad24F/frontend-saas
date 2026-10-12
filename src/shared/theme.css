@@ -209,13 +209,12 @@ html[data-theme='dark'] .app-toast.glass-effect { background: var(--glass-surfac
 .app-dialog h2 { color: var(--ink); }
 .app-dialog .checkbox-list label { color: var(--ink); }
 .app-dialog::backdrop { background: rgba(18, 34, 25, 0.4); }
-.workspace-switch.glass-effect {
+.workspace-identity.glass-effect {
   background: rgba(216, 240, 220, 0.13);
   border-color: rgba(223, 244, 227, 0.24);
   box-shadow: 0 12px 28px rgba(5, 18, 11, 0.16);
 }
-.workspace-switch.glass-effect:hover { background: rgba(216, 240, 220, 0.2); }
-.sidebar :is(.workspace-switch small, .nav-section, .portal-card p, .sidebar-foot) {
+.sidebar :is(.nav-section, .portal-card p, .sidebar-foot) {
   color: var(--sidebar-muted);
 }
 .sidebar .nav-item.active { background: var(--accent); color: #fff; }
@@ -236,7 +235,7 @@ html[data-theme='dark'] .app-toast.glass-effect { background: var(--glass-surfac
 .selected > .choice-radio { color: #fff; }
 
 html[data-theme='dark'] .glass-effect { color: var(--ink); }
-html[data-theme='dark'] .workspace-switch.glass-effect { color: #eff8f0; }
+html[data-theme='dark'] .workspace-identity.glass-effect { color: #eff8f0; }
 html[data-theme='dark'] .sidebar { background: radial-gradient(circle at 18% 10%, #294b39 0, transparent 43%), var(--sidebar); }
 html[data-theme='light'] .sidebar {
   background: #f8faf7;
@@ -244,22 +243,21 @@ html[data-theme='light'] .sidebar {
   color: var(--ink);
 }
 html[data-theme='light'] .sidebar .brand { color: var(--ink); }
-html[data-theme='light'] .sidebar .workspace-switch.glass-effect {
+html[data-theme='light'] .sidebar .workspace-identity.glass-effect {
   background: #fff;
   border-color: var(--border);
   box-shadow: 0 4px 12px rgba(26, 49, 33, 0.06);
   color: var(--ink);
 }
-html[data-theme='light'] .sidebar .workspace-switch.glass-effect:hover { background: var(--surface-soft); }
-html[data-theme='light'] .sidebar :is(.workspace-switch small, .nav-section, .sidebar-foot) { color: var(--muted); }
+html[data-theme='light'] .sidebar :is(.nav-section, .sidebar-foot) { color: var(--muted); }
 html[data-theme='light'] .sidebar .nav-item { color: #526359; }
 html[data-theme='light'] .sidebar .nav-item > .icon { color: #78877c; }
-html[data-theme='light'] .sidebar .nav-item:hover { background: #e9efe9; color: var(--ink); }
+html[data-theme='light'] .sidebar .nav-item:hover { background: #dce8dc; color: var(--ink); }
 html[data-theme='light'] .sidebar .nav-item:hover > .icon { color: var(--ink); }
 html[data-theme='light'] .sidebar .nav-item.active,
 html[data-theme='light'] .sidebar .nav-item.active > .icon { color: #fff; }
-html[data-theme='light'] .sidebar .nav-item.active:hover,
-html[data-theme='light'] .sidebar .nav-item.active:hover > .icon { color: var(--ink); }
+html[data-theme='light'] .sidebar .nav-item.active:hover { background: #a33d24; color: #fff; }
+html[data-theme='light'] .sidebar .nav-item.active:hover > .icon { color: #fff; }
 html[data-theme='light'] .sidebar .portal-card {
   background: linear-gradient(125deg, #fff, #f0f5ef);
   border-color: var(--border);
@@ -297,7 +295,7 @@ html[data-theme='dark'] .app-toast.glass-effect { background: var(--glass-surfac
 @supports not ((backdrop-filter: blur(10px)) or (-webkit-backdrop-filter: blur(10px))) {
   .app-dialog.glass-effect { background: var(--surface); }
   html[data-theme='dark'] .glass-effect { background: var(--surface); }
-  html[data-theme='dark'] .workspace-switch.glass-effect { background: #263c31; }
+  html[data-theme='dark'] .workspace-identity.glass-effect { background: #263c31; }
 }
 
 @media (max-width: 767px) {

@@ -271,7 +271,7 @@
 .booking-summary.glass-effect .summary-price > strong { color: #4a6047; }
 .booking-aside .booking-trust p { color: #627465; }
 @supports not ((backdrop-filter: blur(10px)) or (-webkit-backdrop-filter: blur(10px))) {
-  .workspace-switch.glass-effect { background: #303a32; }
+  .workspace-identity.glass-effect { background: #303a32; }
   .booking-summary.glass-effect { background: #f5f8f3; }
   .daily-insight::before { background: #f4f8f2; }
 }
