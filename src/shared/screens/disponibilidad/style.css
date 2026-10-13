@@ -52,7 +52,7 @@
   transition: background .2s ease, color .2s ease;
 }
 .availability-tabs button:hover { background: var(--surface-soft); color: var(--ink); }
-.availability-tabs button.is-selected { background: var(--accent); color: var(--surface);}
+.availability-tabs button.is-selected { background: var(--accent); color: #fff; }
 .availability-tabs button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .availability-workspace [role='tabpanel'][hidden] { display: none !important; }
 .availability-workspace [role='tabpanel'] { min-width: 0; }
@@ -319,6 +319,6 @@
   #schedule-form .schedule-table tbody td:nth-child(3)::before,
   #schedule-form .schedule-table tbody td:nth-child(5)::before { margin-bottom: 4px; }
   html[data-theme='dark'] #schedule-form .schedule-table tbody td:last-child {
-    background: color-mix(in srgb, var(--schedule-accent) 15%, #1b2921);
+    background: color-mix(in srgb, var(--schedule-accent) 10%, var(--surface));
   }
 }

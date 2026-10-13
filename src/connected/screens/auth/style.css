@@ -212,8 +212,11 @@ html[data-theme='dark'] .auth-brand .auth-logo-dark { display: block; }
   line-height: 1.2;
   text-wrap: balance;
 }
-html[data-theme='dark'] .auth-notice { color: #a9dfb8; }
+html[data-theme='dark'] .auth-notice { color: #c6d6e4; }
 html[data-theme='dark'] .auth-error { color: #ffb9a6; }
+html[data-theme='dark'] .auth-visual { background: #28262b; }
+html[data-theme='dark'] .auth-visual > img { filter: grayscale(1) sepia(.16); }
+html[data-theme='dark'] .auth-visual::after { background: linear-gradient(transparent, rgba(17, 16, 21, .76)); }
 
 @media (max-width: 900px) {
   .auth-page { grid-template-columns: minmax(0, 1fr); }

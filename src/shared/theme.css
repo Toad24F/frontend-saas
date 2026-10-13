@@ -15,37 +15,43 @@
 
 html[data-theme='dark'] {
   color-scheme: dark;
-  --dialog-glass: rgba(28, 44, 34, 0.5);
-  --accent: #b9482b;
-  --accent-dark: #d76143;
-  --ink: #e9f0ec;
-  --muted: #b6c9ba;
-  --border: #41584a;
-  --canvas: #0e1915;
-  --surface: #1b2921;
-  --surface-soft: #24362b;
-  --sidebar: #0c1511;
-  --sidebar-muted: #c0d2c5;
-  --glass-surface: rgba(28, 44, 34, 0.94);
-  --glass-border: rgba(210, 236, 216, 0.22);
-  --glass-shadow: 0 18px 42px rgba(2, 12, 7, 0.34);
+  --dialog-glass: rgba(31, 32, 38, 0.94);
+  --accent: #ba4e34;
+  --accent-dark: #ef8c6d;
+  --ink: #f2f0ed;
+  --muted: #b4b3ba;
+  --border: #3a3b43;
+  --canvas: #15161a;
+  --surface: #202127;
+  --surface-soft: #2b2c33;
+  --sidebar: #191a20;
+  --sidebar-muted: #b8b7bd;
+  --green: #b6c7d4;
+  --glass-surface: rgba(33, 34, 40, 0.96);
+  --glass-border: rgba(240, 235, 231, 0.15);
+  --glass-shadow: 0 18px 42px rgba(4, 4, 8, 0.4);
   --bs-primary: var(--accent);
-  --bs-body-bg: #0e1915;
-  --bs-body-color: #e9f0ec;
-  --bs-border-color: #35483e;
-  --bs-secondary-color: #a9b9af;
+  --bs-body-bg: var(--canvas);
+  --bs-body-color: var(--ink);
+  --bs-border-color: var(--border);
+  --bs-secondary-color: var(--muted);
 }
 html[data-theme='dark'] body { color: var(--ink); }
-html[data-theme='dark'] :is(.topbar, .portal-topbar) { background: #19261f; border-color: var(--border); }
-html[data-theme='dark'] :is(.breadcrumbs, .breadcrumbs strong, .topbar-date, .profile-button, .profile-button small, .profile-button > .icon, .page-heading p, .app-footer, .portal-footer) { color: #afbeb3; }
-html[data-theme='dark'] :is(.icon-btn, .btn-subtle, .text-button) { color: #cad7ce; }
-html[data-theme='dark'] .icon-btn:hover { background: #304237; color: #fff; }
-html[data-theme='dark'] .theme-toggle { background: #25362b; border-color: #47604e; color: #f3d995; }
-html[data-theme='dark'] .demo-pill { background: #324033; border-color: #485944; color: #d8cca8; }
+html[data-theme='dark'] :is(.topbar, .portal-topbar) { background: #1d1e24; border-color: var(--border); }
+html[data-theme='dark'] :is(.breadcrumbs, .breadcrumbs strong, .topbar-date, .profile-button, .profile-button small, .profile-button > .icon, .page-heading p, .app-footer, .portal-footer) { color: var(--muted); }
+html[data-theme='dark'] :is(.icon-btn, .btn-subtle, .text-button) { color: #d2d0d3; }
+html[data-theme='dark'] .icon-btn:hover { background: #34353d; color: #fff; }
+html[data-theme='dark'] .theme-toggle { background: #2a2b32; border-color: #44454f; color: #f1cc9c; }
+html[data-theme='dark'] .demo-pill { background: #302c2c; border-color: #544846; color: #ead0b8; }
 html[data-theme='dark'] .btn-light,
-html[data-theme='dark'] .btn-today { background: #27382e; border-color: #476052; color: #e7efe9; }
+html[data-theme='dark'] .btn-today { background: #2c2d34; border-color: #454650; color: var(--ink); }
 html[data-theme='dark'] .btn-light:hover,
-html[data-theme='dark'] .btn-today:hover { background: #354b3d; color: #fff; }
+html[data-theme='dark'] .btn-today:hover { background: #393a43; color: #fff; }
+html[data-theme='dark'] :is(.btn-primary:hover, .btn-primary:focus-visible, .professional-availability:hover) {
+  background: #a6402a;
+  border-color: #a6402a;
+  color: #fff;
+}
 html[data-theme='dark'] .btn-danger-soft { background: #4a2a2d; border-color: #7b4245; color: #ffd6d2; }
 
 html[data-theme='dark'] :is(
@@ -55,34 +61,34 @@ html[data-theme='dark'] :is(
   .booking-surface, .booking-choice, .booking-date, .booking-slot,
   .tenant-option, .section-card
 ) {
-  background: #1b2921;
+  background: var(--surface);
   border-color: var(--border);
   color: var(--ink);
 }
-html[data-theme='dark'] .service-tags > span { background: #304237; color: #d2e0d4; }
-html[data-theme='dark'] :is(.stat-top, .stat-caption, .section-heading p, .subtle-text, .field-hint, .optional, .form-label, .booking-title p, .choice-content p, .booking-business p, .booking-trust p, .summary-items > div, .summary-items > div.filled) { color: #adbdaf; }
-html[data-theme='dark'] :is(.segmented, .month-label, .muted-day, .app-table thead th, .form-separator, .calendar-toolbar, .information-note, .compact-note) { background: #223229; border-color: var(--border); color: #bdd0c1; }
-html[data-theme='dark'] .segmented button { color: #bdcabe; }
-html[data-theme='dark'] .segmented button.selected { background: #45644e; color: #fff; }
-html[data-theme='dark'] :is(.filter-select, .search-field, .table-search, .phone-input) { background: #223229; border-color: #476052; color: #d8e4da; }
+html[data-theme='dark'] .service-tags > span { background: var(--surface-soft); color: #d6d3d5; }
+html[data-theme='dark'] :is(.stat-top, .stat-caption, .section-heading p, .subtle-text, .field-hint, .optional, .form-label, .booking-title p, .choice-content p, .booking-business p, .booking-trust p, .summary-items > div, .summary-items > div.filled) { color: var(--muted); }
+html[data-theme='dark'] :is(.segmented, .month-label, .muted-day, .app-table thead th, .form-separator, .calendar-toolbar, .information-note, .compact-note) { background: #292a31; border-color: var(--border); color: #c5c3c7; }
+html[data-theme='dark'] .segmented button { color: #c4c1c6; }
+html[data-theme='dark'] .segmented button.selected { background: #454047; color: #fff; }
+html[data-theme='dark'] :is(.filter-select, .search-field, .table-search, .phone-input) { background: #292a31; border-color: #484951; color: var(--ink); }
 html[data-theme='dark'] :is(.filter-select select, .search-field input, .table-search input) { color: var(--ink); }
 html[data-theme='dark'] :is(input, select, textarea, .form-control, .form-select) {
-  background-color: #24352b;
-  border-color: #4a6252;
-  color: #f0f5f0;
+  background-color: #292a31;
+  border-color: #484951;
+  color: var(--ink);
 }
-html[data-theme='dark'] :is(input, textarea)::placeholder { color: #a4b5a8; opacity: 1; }
-html[data-theme='dark'] :is(input, select, textarea):focus { background-color: #2a3e31; color: #fff; }
-html[data-theme='dark'] option { background: #24352b; color: #f0f5f0; }
+html[data-theme='dark'] :is(input, textarea)::placeholder { color: #a7a6ae; opacity: 1; }
+html[data-theme='dark'] :is(input, select, textarea):focus { background-color: #33343c; color: #fff; }
+html[data-theme='dark'] option { background: #292a31; color: var(--ink); }
 
-html[data-theme='dark'] :is(.app-table, .app-table td, .app-table td strong, .app-table thead th, .detail-list strong, .detail-list small) { color: #d2e0d4; border-color: var(--border); }
-html[data-theme='dark'] .app-table td small { color: #a9baad; }
-html[data-theme='dark'] :is(.app-table tbody tr:hover, .app-table .table-active) { background: #2a3b30; }
-html[data-theme='dark'] :is(.day-header, .day-column, .calendar-cell, .month-day) { background: #1b2921; color: #c5d5c8; border-color: var(--border); }
-html[data-theme='dark'] :is(.day-column.is-today, .weekend, .muted-day) { background: #223229 !important; }
-html[data-theme='dark'] .calendar-cell::after { border-color: #34473b; }
-html[data-theme='dark'] .lunch-block { background: repeating-linear-gradient(135deg, #26362b, #26362b 4px, #304336 4px, #304336 5px); color: #b9c7bb; }
-html[data-theme='dark'] :is(.time-gutter > span, .time-header, .day-off, .legend > span, .timezone, .agenda-note, .month-date) { color: #a9b9ac; }
+html[data-theme='dark'] :is(.app-table, .app-table td, .app-table td strong, .app-table thead th, .detail-list strong, .detail-list small) { color: #dddadd; border-color: var(--border); }
+html[data-theme='dark'] .app-table td small { color: var(--muted); }
+html[data-theme='dark'] :is(.app-table tbody tr:hover, .app-table .table-active) { background: #303139; }
+html[data-theme='dark'] :is(.day-header, .day-column, .calendar-cell, .month-day) { background: var(--surface); color: #d1ced3; border-color: var(--border); }
+html[data-theme='dark'] :is(.day-column.is-today, .weekend, .muted-day) { background: #292a31 !important; }
+html[data-theme='dark'] .calendar-cell::after { border-color: #3e4049; }
+html[data-theme='dark'] .lunch-block { background: repeating-linear-gradient(135deg, #292a31, #292a31 4px, #363740 4px, #363740 5px); color: #c4c1c6; }
+html[data-theme='dark'] :is(.time-gutter > span, .time-header, .day-off, .legend > span, .timezone, .agenda-note, .month-date) { color: var(--muted); }
 html[data-theme='dark'] .calendar-event.confirmada,
 html[data-theme='dark'] .month-event.confirmada,
 html[data-theme='dark'] .status-badge.confirmada { background: #213c59; color: #c4deff; border-color: #4b82b6; }
@@ -91,7 +97,7 @@ html[data-theme='dark'] .month-event.pendiente,
 html[data-theme='dark'] .status-badge.pendiente { background: #493b22; color: #f5dda6; border-color: #a78347; }
 html[data-theme='dark'] .calendar-event.completada,
 html[data-theme='dark'] .month-event.completada,
-html[data-theme='dark'] .status-badge.completada { background: #244737; color: #c3f0d4; border-color: #579773; }
+html[data-theme='dark'] .status-badge.completada { background: #2e3437; color: #bed8cb; border-color: #5d7569; }
 html[data-theme='dark'] .calendar-event.cancelada,
 html[data-theme='dark'] .month-event.cancelada,
 html[data-theme='dark'] .status-badge.cancelada { background: #4b2d32; color: #ffced0; border-color: #a86770; }
@@ -100,40 +106,42 @@ html[data-theme='dark'] .month-event.no_asistio,
 html[data-theme='dark'] .status-badge.no_asistio { background: #3c304d; color: #e0cff6; border-color: #8d72aa; }
 html[data-theme='dark'] .schedule-table tbody tr:not(.schedule-disabled) > td,
 html[data-theme='dark'] .schedule-table tbody tr.schedule-repeat:not(.schedule-disabled) > td {
-  background: color-mix(in srgb, var(--schedule-accent) 15%, #1b2921);
+  background: color-mix(in srgb, var(--schedule-accent) 10%, var(--surface));
 }
 html[data-theme='dark'] .schedule-table th:last-child,
 html[data-theme='dark'] .schedule-table td:last-child,
-html[data-theme='dark'] .schedule-table .schedule-disabled td:last-child { background: #1b2921; }
+html[data-theme='dark'] .schedule-table .schedule-disabled td:last-child { background: var(--surface); }
 html[data-theme='dark'] .schedule-table .schedule-day-label { color: color-mix(in srgb, var(--schedule-accent) 60%, white); }
+html[data-theme='dark'] .schedule-table .schedule-day-0 { --schedule-accent: #c17c62; }
+html[data-theme='dark'] .schedule-table .schedule-day-2 { --schedule-accent: #7799b7; }
 html[data-theme='dark'] .schedule-table .schedule-disabled,
 html[data-theme='dark'] .schedule-table .schedule-disabled > td,
 html[data-theme='dark'] .schedule-table .schedule-disabled td:last-child {
-  background: #223027 !important;
-  color: #a9b9ac !important;
+  background: #292a30 !important;
+  color: var(--muted) !important;
 }
 
-html[data-theme='dark'] .daily-insight { background: radial-gradient(circle at 85% 18%, #345841, transparent 42%), radial-gradient(circle at 12% 88%, #594135, transparent 46%), #203629; border-color: #47604e; }
-html[data-theme='dark'] .daily-insight::before { background: rgba(17, 30, 21, .48); border-color: rgba(200, 229, 205, .16); }
-html[data-theme='dark'] .daily-insight :is(h2, p) { color: #e4f2e6; }
-html[data-theme='dark'] .booking-layout { background: #111a16; }
-html[data-theme='dark'] .portal-brand { color: #e6f0e8; }
-html[data-theme='dark'] .booking-layout :is(h1, h2, h3, h4, .choice-content > strong, .summary-top h3, .date-picker-heading h3) { color: #edf5ee; }
-html[data-theme='dark'] .booking-layout :is(.choice-meta, .booking-title .eyebrow, .slot-heading, .date-picker-heading > span) { color: #c0d1c3; }
-html[data-theme='dark'] .booking-business > .soft-tag { background: #284031; border-color: #4c6a54; color: #d4ead9; }
-html[data-theme='dark'] .booking-step > span { background: #2b3e30; border-color: #58725d; color: #e1eae1; }
+html[data-theme='dark'] .daily-insight { background: radial-gradient(circle at 85% 18%, #49414a, transparent 42%), radial-gradient(circle at 12% 88%, #5a3d39, transparent 46%), #2a272d; border-color: #51434a; }
+html[data-theme='dark'] .daily-insight::before { background: rgba(26, 24, 29, .52); border-color: rgba(241, 219, 209, .14); }
+html[data-theme='dark'] .daily-insight :is(h2, p) { color: var(--ink); }
+html[data-theme='dark'] .booking-layout { background: var(--canvas); }
+html[data-theme='dark'] .portal-brand { color: var(--ink); }
+html[data-theme='dark'] .booking-layout :is(h1, h2, h3, h4, .choice-content > strong, .summary-top h3, .date-picker-heading h3) { color: var(--ink); }
+html[data-theme='dark'] .booking-layout :is(.choice-meta, .booking-title .eyebrow, .slot-heading, .date-picker-heading > span) { color: var(--muted); }
+html[data-theme='dark'] .booking-business > .soft-tag { background: #343039; border-color: #514951; color: #e3d7d3; }
+html[data-theme='dark'] .booking-step > span { background: #2d2d35; border-color: #4b4b55; color: var(--ink); }
 html[data-theme='dark'] .booking-step.current > span { background: var(--accent); border-color: var(--accent); color: #fff; }
-html[data-theme='dark'] .booking-aside { background: radial-gradient(circle at 87% 14%, #34513b, transparent 42%), radial-gradient(circle at 8% 80%, #503d32, transparent 52%), #1b2a20; }
-html[data-theme='dark'] .booking-summary.glass-effect { background: rgba(31, 48, 36, .83); border-color: rgba(203, 232, 207, .18); }
-html[data-theme='dark'] .booking-summary.glass-effect :is(h3, p, .summary-items > div, .summary-items > div.filled, .summary-price > strong) { color: #dcecdf; }
-html[data-theme='dark'] :is(.booking-choice:hover, .booking-date:hover, .booking-slot:hover) { background: #2a3d30; }
+html[data-theme='dark'] .booking-aside { background: radial-gradient(circle at 87% 14%, #46404a, transparent 42%), radial-gradient(circle at 8% 80%, #543b37, transparent 52%), #242329; }
+html[data-theme='dark'] .booking-summary.glass-effect { background: rgba(33, 32, 39, .9); border-color: var(--glass-border); }
+html[data-theme='dark'] .booking-summary.glass-effect :is(h3, p, .summary-items > div, .summary-items > div.filled, .summary-price > strong) { color: #e4e0df; }
+html[data-theme='dark'] :is(.booking-choice:hover, .booking-date:hover, .booking-slot:hover) { background: #303139; }
 html[data-theme='dark'] :is(.booking-choice.selected, .booking-date.selected, .booking-slot.selected) { background: #523729; border-color: #e08b60; color: #fff1e5; }
-html[data-theme='dark'] :is(.booking-step, .portal-topbar-caption, .portal-topbar > .text-button) { color: #b6c5b8; }
+html[data-theme='dark'] :is(.booking-step, .portal-topbar-caption, .portal-topbar > .text-button) { color: var(--muted); }
 
 html[data-theme='dark'] .app-dialog.glass-effect { background: var(--dialog-glass); border-color: var(--glass-border); color: var(--ink); text-shadow: none; }
-html[data-theme='dark'] .app-dialog :is(.eyebrow, .form-label, .field-hint, .optional, .form-separator > span, .detail-list small, .detail-list strong, .app-table td, .app-table td strong, .app-table td small, .app-table thead th) { color: #c8d9cb; }
+html[data-theme='dark'] .app-dialog :is(.eyebrow, .form-label, .field-hint, .optional, .form-separator > span, .detail-list small, .detail-list strong, .app-table td, .app-table td strong, .app-table td small, .app-table thead th) { color: #d1cdd1; }
 html[data-theme='dark'] .dialog-header,
-html[data-theme='dark'] .dialog-footer { background: rgba(53, 80, 58, .28); border-color: #49604c; }
+html[data-theme='dark'] .dialog-footer { background: rgba(64, 61, 67, .3); border-color: var(--border); }
 html[data-theme='dark'] .app-toast.glass-effect { background: var(--glass-surface); color: var(--ink); border-color: var(--glass-border); }
 
 /* Shared color roles keep labels readable when the theme changes. */
@@ -235,8 +243,31 @@ html[data-theme='dark'] .app-toast.glass-effect { background: var(--glass-surfac
 .selected > .choice-radio { color: #fff; }
 
 html[data-theme='dark'] .glass-effect { color: var(--ink); }
-html[data-theme='dark'] .workspace-identity.glass-effect { color: #eff8f0; }
-html[data-theme='dark'] .sidebar { background: radial-gradient(circle at 18% 10%, #294b39 0, transparent 43%), var(--sidebar); }
+html[data-theme='dark'] .workspace-identity.glass-effect {
+  background: rgba(232, 226, 225, 0.08);
+  border-color: rgba(232, 226, 225, 0.16);
+  color: var(--ink);
+}
+html[data-theme='dark'] .sidebar { background: radial-gradient(circle at 18% 10%, #313038 0, transparent 44%), var(--sidebar); }
+html[data-theme='dark'] .sidebar .nav-item:hover { background: #33343d; color: #fff; }
+html[data-theme='dark'] .sidebar .nav-item.active:hover { background: #a6402a; }
+html[data-theme='dark'] .sidebar .portal-card {
+  background: linear-gradient(125deg, #2a2a32, #24252b);
+  border-color: #42414a;
+}
+html[data-theme='dark'] .sidebar .portal-icon { color: #e1aa84; }
+html[data-theme='dark'] .sidebar .portal-card strong { color: var(--ink); }
+html[data-theme='dark'] .sidebar .portal-card p { color: var(--muted); }
+html[data-theme='dark'] .sidebar .portal-card a { color: #efac91; }
+html[data-theme='dark'] .green-dot,
+html[data-theme='dark'] .availability-label > i { background: #d98b70; }
+html[data-theme='dark'] .availability-label { color: var(--muted); }
+html[data-theme='dark'] .menu-open .sidebar-overlay { background: rgba(8, 8, 12, .62); }
+html[data-theme='dark'] .avatar.workspace-avatar { background: #d5c8bf; color: #4b3934; }
+html[data-theme='dark'] .mint { background: #cfd9e4; color: #465c70; }
+html[data-theme='dark'] :is(.orange, .blue, .amber, .green, .purple) { background: var(--surface-soft); }
+html[data-theme='dark'] .green { color: #bfd0dc; }
+html[data-theme='dark'] .mini-dot { background: #d98b70; }
 html[data-theme='light'] .sidebar {
   background: #f8faf7;
   border-right: 1px solid var(--border);
@@ -266,7 +297,7 @@ html[data-theme='light'] .sidebar .portal-card strong { color: var(--ink); }
 html[data-theme='light'] .sidebar .portal-card p { color: var(--muted); }
 html[data-theme='light'] .sidebar .portal-card a,
 html[data-theme='light'] .sidebar .portal-icon { color: var(--accent); }
-html[data-theme='dark'] .app-dialog::backdrop { background: rgba(2, 9, 5, 0.68); }
+html[data-theme='dark'] .app-dialog::backdrop { background: rgba(6, 6, 10, 0.72); }
 html[data-theme='dark'] .booking-summary.glass-effect { background: var(--glass-surface); border-color: var(--glass-border); }
 html[data-theme='dark'] .booking-summary.glass-effect :is(h3, p, .summary-items > div,
   .summary-items > div.filled, .summary-price > strong) { color: var(--ink); }
@@ -295,7 +326,7 @@ html[data-theme='dark'] .app-toast.glass-effect { background: var(--glass-surfac
 @supports not ((backdrop-filter: blur(10px)) or (-webkit-backdrop-filter: blur(10px))) {
   .app-dialog.glass-effect { background: var(--surface); }
   html[data-theme='dark'] .glass-effect { background: var(--surface); }
-  html[data-theme='dark'] .workspace-identity.glass-effect { background: #263c31; }
+  html[data-theme='dark'] .workspace-identity.glass-effect { background: #292a31; }
 }
 
 @media (max-width: 767px) {
@@ -339,7 +370,7 @@ html[data-theme='dark'] .app-toast.glass-effect { background: var(--glass-surfac
   .schedule-table .time-pair input { flex: 1 1 0; }
   .schedule-table .schedule-actions { justify-content: flex-end; }
   .schedule-table .schedule-add { min-height: 42px; min-width: 42px; }
-  html[data-theme='dark'] .schedule-table tbody td:last-child { background: color-mix(in srgb, var(--schedule-accent) 15%, #1b2921); }
+  html[data-theme='dark'] .schedule-table tbody td:last-child { background: color-mix(in srgb, var(--schedule-accent) 10%, var(--surface)); }
 }
 
 @media (max-width: 480px) {

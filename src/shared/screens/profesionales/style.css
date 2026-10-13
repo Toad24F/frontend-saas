@@ -60,7 +60,7 @@
 .professional-view--cards .professional-entry-actions { justify-content: flex-start; flex-wrap: wrap; margin-top: auto; padding-top: 14px; border-top: 1px solid var(--border); }
 .professional-view--cards .professional-status { grid-row: 2; }
 .professional-no-results .empty-state, .professional-workspace > .empty-state { max-width: none; padding: 46px 20px; }
-html[data-theme='dark'] .professional-status.is-active { color: #b9e8ca; background: #254636; }
+html[data-theme='dark'] .professional-status.is-active { color: #c1d5ce; background: #30343a; }
 html[data-theme='dark'] .professional-status.is-inactive { color: #e9c5c0; background: #49322f; }
 html[data-theme='dark'] .professional-more-menu { box-shadow: 0 14px 34px rgba(0, 0, 0, .3); }
 html[data-theme='dark'] .professional-more-menu button:last-child { color: #f2a99e; }

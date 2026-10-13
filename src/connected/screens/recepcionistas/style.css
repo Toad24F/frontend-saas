@@ -1,6 +1,7 @@
 .reception-workspace { min-width: 0; }
 .reception-toolbar { grid-template-columns: minmax(210px, 1fr) auto auto; }
 .reception-workspace .professional-assignment > span { white-space: normal; }
+.reception-workspace .professional-entry-actions .professional-availability { border: 0; }
 .reception-workspace .professional-view--cards .professional-entry-actions { gap: 8px; }
 .reception-workspace .professional-more.is-reactivate .professional-more-menu button { color: var(--ink); }
 @media (max-width: 1260px) {
