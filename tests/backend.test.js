@@ -97,6 +97,10 @@ test('el profesional ve sus sucursales asignadas y la autoría real de servicios
     '/profesionales/5/servicios': [{ id: 11, nombre: 'Consulta', costo: '300.00', duracionMinutos: 30, descripcion: 'Inicial', creadorPersonalId: 5, activo: true, seleccionado: true }],
     '/profesionales/5/horario': [],
     '/profesionales/5/oferta': { cuentaActiva: true, sucursales: [{ id: 20, nombre: 'Centro', sucursalActiva: true, atencionActiva: false, servicios: [] }] },
+    '/sucursales': [
+      { id: 20, nombre: 'Centro', direccion: 'Av. Principal 10', telefono: '6141234567', zonaHoraria: 'America/Chihuahua', urlGoogleMaps: 'https://www.google.com/maps?q=Centro', notasLlegada: 'Entrada norte', activo: true },
+      { id: 21, nombre: 'Otra sede', direccion: 'Av. Sur 20', activo: true },
+    ],
     '/bloqueos': [],
   };
   try {
@@ -108,9 +112,21 @@ test('el profesional ve sus sucursales asignadas y la autoría real de servicios
     await loadBackendData();
     assert.deepEqual(db.professionals[0].branchIds, [20]);
     assert.equal(db.branches[0].name, 'Centro');
+    assert.equal(db.branches.length, 1);
+    assert.equal(db.branches[0].address, 'Av. Principal 10');
+    assert.equal(db.branches[0].phone, '6141234567');
+    assert.equal(db.branches[0].maps, 'https://www.google.com/maps?q=Centro');
+    assert.equal(db.branches[0].notes, 'Entrada norte');
     assert.equal(db.branches[0].active, false);
     assert.equal(db.services[0].description, 'Inicial');
     assert.equal(db.services[0].creatorId, 5);
+    global.fetch = async (url) => new URL(url).pathname === '/sucursales'
+      ? Response.json({ message: 'Acceso denegado: privilegios insuficientes.' }, { status: 403 })
+      : Response.json(responses[new URL(url).pathname]);
+    await loadBackendData();
+    assert.equal(db.branches[0].name, 'Centro');
+    assert.equal(db.branches[0].address, '');
+    assert.equal(db.branches[0].active, false);
   } finally { global.fetch = original; global.sessionStorage = storage; }
 });
 

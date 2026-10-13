@@ -21,11 +21,25 @@ export async function loadBackendData() {
     }));
     if (!next.tenants.length) next.tenants.push({ id: 1, name: 'Plataforma', initials: 'PL', slug: '' });
   } else if (user.rol === 'profesional') {
-    const [services, schedules, blocks, offering] = await Promise.all([api(`/profesionales/${user.id}/servicios`), api(`/profesionales/${user.id}/horario`), api('/bloqueos'), api(`/profesionales/${user.id}/oferta`)]);
+    const [services, schedules, blocks, offering, branchCatalog] = await Promise.all([
+      api(`/profesionales/${user.id}/servicios`),
+      api(`/profesionales/${user.id}/horario`),
+      api('/bloqueos'),
+      api(`/profesionales/${user.id}/oferta`),
+      api('/sucursales').catch(() => null),
+    ]);
     const branchIds = offering.sucursales.map((branch) => branch.id);
+    const branchDetails = new Map((branchCatalog || []).map((branch) => [branch.id, branch]));
     next.services = services.map((s) => ({ id: s.id, tenantId, name: s.nombre, duration: s.duracionMinutos, price: Number(s.costo), active: s.activo, description: s.descripcion || '', creatorId: s.creadorPersonalId, icon: 'briefcase', color: 'blue' }));
     next.professionals = [{ id: user.id, tenantId, name: user.nombre, email: user.email, active: offering.cuentaActiva, specialty: '', initials: initials(user.nombre), color: 'peach', branchIds, serviceIds: services.filter((s) => s.seleccionado).map((s) => s.id) }];
-    next.branches = offering.sucursales.map((branch) => ({ id: branch.id, tenantId, name: branch.nombre, active: branch.atencionActiva, globalActive: branch.sucursalActiva }));
+    next.branches = offering.sucursales.map((branch) => {
+      const detail = branchDetails.get(branch.id);
+      return { id: branch.id, tenantId, name: detail?.nombre || branch.nombre,
+        address: detail?.direccion || '', phone: detail?.telefono || '',
+        timezone: detail?.zonaHoraria || '', maps: detail?.urlGoogleMaps || '',
+        notes: detail?.notasLlegada || '', active: branch.atencionActiva,
+        globalActive: branch.sucursalActiva, color: 'orange' };
+    });
     next.schedules = schedules.map((s) => ({ id: s.id, tenantId, professionalId: user.id, day: s.diaSemana, branchId: s.sucursalId, start: clock(s.inicioMinutos), end: clock(s.finMinutos), breakStart: clock(s.descansoInicioMinutos), breakEnd: clock(s.descansoFinMinutos), enabled: s.activo }));
     next.blocks = blocks.map((b) => ({ id: b.id, tenantId, professionalId: b.personalId, branchId: b.sucursalId, date: b.fechaInicio.slice(0, 10), endDate: b.fechaFin.slice(0, 10), start: clock(b.inicioMinutos), end: clock(b.finMinutos), type: b.tipo, reason: b.motivo }));
   } else if (user.rol === 'admin_negocio') {
