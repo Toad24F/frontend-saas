@@ -39,12 +39,13 @@ let theme = (() => {
 })();
 function applyTheme() {
   document.documentElement.dataset.theme = theme;
-  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'dark' ? '#0e1915' : '#f5f7f4');
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'dark' ? '#0e1915' : '#f4f5f6');
 }
 applyTheme();
-function mountThemeToggle() {
+export function mountThemeToggle() {
   const host = document.querySelector('.topbar-right, .portal-topbar');
   if (!host) return;
+  if (host.querySelector('.theme-toggle')) return;
   const dark = theme === 'dark';
   host.insertAdjacentHTML(
     'beforeend',

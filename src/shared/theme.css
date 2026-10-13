@@ -1,5 +1,29 @@
-/* Tema oscuro y ajustes finales para pantallas táctiles. */
+/* Temas compartidos y ajustes finales para pantallas táctiles. */
 :root { --dialog-glass: rgba(255, 255, 255, 0.5); }
+/* Light surfaces share a neutral family; terracotta remains the brand accent.
+   Status colors are semantic and retain their calendar meaning. */
+html[data-theme='light'] {
+  color-scheme: light;
+  --ink: #252a2e;
+  --muted: #626970;
+  --border: #dde1e4;
+  --canvas: #f4f5f6;
+  --surface: #ffffff;
+  --surface-soft: #eef0f2;
+  --sidebar: #fafbfc;
+  --sidebar-muted: var(--muted);
+  --accent-soft: #fbefea;
+  --border-strong: #a3abb3;
+  --surface-shadow: 0 2px 8px rgba(37, 42, 46, 0.035);
+  --glass-surface: rgba(255, 255, 255, 0.97);
+  --dialog-glass: rgba(255, 255, 255, 0.98);
+  --glass-border: #dde1e4;
+  --glass-shadow: 0 18px 48px rgba(37, 42, 46, 0.12);
+  --bs-body-bg: var(--canvas);
+  --bs-body-color: var(--ink);
+  --bs-secondary-color: var(--muted);
+  --bs-border-color: var(--border);
+}
 .theme-toggle {
   flex: 0 0 44px;
   width: 44px;
@@ -269,34 +293,140 @@ html[data-theme='dark'] :is(.orange, .blue, .amber, .green, .purple) { backgroun
 html[data-theme='dark'] .green { color: #bfd0dc; }
 html[data-theme='dark'] .mini-dot { background: #d98b70; }
 html[data-theme='light'] .sidebar {
-  background: #f8faf7;
+  background: var(--sidebar);
   border-right: 1px solid var(--border);
   color: var(--ink);
 }
 html[data-theme='light'] .sidebar .brand { color: var(--ink); }
 html[data-theme='light'] .sidebar .workspace-identity.glass-effect {
-  background: #fff;
+  background: var(--surface);
   border-color: var(--border);
-  box-shadow: 0 4px 12px rgba(26, 49, 33, 0.06);
+  box-shadow: var(--surface-shadow);
   color: var(--ink);
 }
 html[data-theme='light'] .sidebar :is(.nav-section, .sidebar-foot) { color: var(--muted); }
-html[data-theme='light'] .sidebar .nav-item { color: #526359; }
-html[data-theme='light'] .sidebar .nav-item > .icon { color: #78877c; }
-html[data-theme='light'] .sidebar .nav-item:hover { background: #dce8dc; color: var(--ink); }
+html[data-theme='light'] .sidebar .nav-item { color: var(--muted); }
+html[data-theme='light'] .sidebar .nav-item > .icon { color: currentColor; }
+html[data-theme='light'] .sidebar .nav-item:hover { background: var(--surface-soft); color: var(--ink); }
 html[data-theme='light'] .sidebar .nav-item:hover > .icon { color: var(--ink); }
 html[data-theme='light'] .sidebar .nav-item.active,
-html[data-theme='light'] .sidebar .nav-item.active > .icon { color: #fff; }
-html[data-theme='light'] .sidebar .nav-item.active:hover { background: #a33d24; color: #fff; }
-html[data-theme='light'] .sidebar .nav-item.active:hover > .icon { color: #fff; }
+html[data-theme='light'] .sidebar .nav-item.active > .icon { color: var(--surface); }
+html[data-theme='light'] .sidebar .nav-item.active {
+  background: var(--accent);
+  box-shadow: inset 3px 0 0 var(--accent);
+  font-weight: 700;
+}
+html[data-theme='light'] .sidebar .nav-item.active:hover { background: #f6e3da; }
+html[data-theme='light'] .sidebar .nav-item.active:hover > .icon { color: var(--accent-dark); }
+html[data-theme='light'] .sidebar .nav-count {
+  background: #f0d8cd;
+  color: var(--accent-dark);
+  font-variant-numeric: tabular-nums;
+}
 html[data-theme='light'] .sidebar .portal-card {
-  background: linear-gradient(125deg, #fff, #f0f5ef);
+  background: var(--surface);
   border-color: var(--border);
 }
 html[data-theme='light'] .sidebar .portal-card strong { color: var(--ink); }
 html[data-theme='light'] .sidebar .portal-card p { color: var(--muted); }
 html[data-theme='light'] .sidebar .portal-card a,
 html[data-theme='light'] .sidebar .portal-icon { color: var(--accent); }
+
+/* Target legacy fixed colors without changing layout or dark-mode rules. */
+html[data-theme='light'] body { color: var(--ink); }
+html[data-theme='light'] .booking-layout { background: var(--canvas); }
+html[data-theme='light'] :is(.page-heading h1, .section-heading h2,
+  .booking-title h2, .choice-content > strong, .summary-top h3,
+  .summary-price > strong, .detail-list strong, .app-table td strong) { color: var(--ink); }
+html[data-theme='light'] :is(.section-heading p, .subtle-text, .field-hint,
+  .optional, .form-label, .eyebrow, .footer-logo, .bar-column,
+  .app-table td small, .table-search, .search-field, .filter-select > .icon,
+  .profile-button small, .profile-button > .icon, .day-header,
+  .time-header, .day-off, .date-picker-heading > span) { color: var(--muted); }
+html[data-theme='light'] :is(.stat-number, .app-table, .summary-price,
+  .calendar-event, .month-event) { font-variant-numeric: tabular-nums; }
+html[data-theme='light'] :is(.stat-card, .calendar-panel, .surface) { box-shadow: var(--surface-shadow); }
+html[data-theme='light'] :is(.btn-light, .btn-today, .theme-toggle) {
+  background: var(--surface);
+  border-color: var(--border);
+  color: var(--ink);
+}
+html[data-theme='light'] :is(.btn-light:hover, .btn-today:hover,
+  .icon-btn:hover, .theme-toggle:hover) {
+  background: var(--surface-soft);
+  border-color: var(--border-strong);
+  color: var(--ink);
+}
+html[data-theme='light'] :is(.btn-subtle, .segmented button) { color: var(--muted); }
+html[data-theme='light'] .segmented button.selected {
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 1px 4px rgba(37, 42, 46, 0.1);
+}
+html[data-theme='light'] .calendar-toolbar { background: var(--surface); }
+html[data-theme='light'] :is(.filter-select, .table-search, .phone-input) {
+  background: var(--surface);
+  border-color: var(--border);
+  color: var(--ink);
+}
+html[data-theme='light'] :is(.filter-select, .search-field, .table-search):focus-within {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+html[data-theme='light'] :is(input, select, textarea, .form-control, .form-select) {
+  color: var(--ink);
+  border-color: var(--border-strong);
+}
+html[data-theme='light'] :is(input, textarea)::placeholder { color: var(--muted); opacity: 1; }
+html[data-theme='light'] :is(.form-control, .form-select, .phone-input) { background-color: var(--surface); }
+html[data-theme='light'] :is(.soft-tag, .count-badge, .month-label,
+  .information-note, .compact-note, .form-separator, .app-table thead th) {
+  background: var(--surface-soft);
+  color: var(--muted);
+  border-color: var(--border);
+}
+html[data-theme='light'] :is(.app-table td, .app-table thead th) {
+  --bs-table-color: var(--ink);
+  border-color: var(--border);
+}
+html[data-theme='light'] .app-table td { color: var(--ink); }
+html[data-theme='light'] .app-table tbody tr:hover { background: var(--surface-soft); }
+html[data-theme='light'] .app-dialog :is(.dialog-header, .dialog-footer) { background: var(--surface-soft); }
+html[data-theme='light'] .app-dialog::backdrop { background: rgba(37, 42, 46, 0.42); }
+html[data-theme='light'] .daily-insight {
+  background: var(--accent-soft);
+  border-color: #ecd5ca;
+}
+html[data-theme='light'] .daily-insight::before { content: none; }
+html[data-theme='light'] .daily-insight :is(h2, p) { color: var(--ink); }
+html[data-theme='light'] .daily-insight :is(.eyebrow, .insight-icon) { color: var(--accent-dark); }
+html[data-theme='light'] .daily-insight .btn { background: var(--surface); border-color: #ecd5ca; }
+html[data-theme='light'] .bar-fill:not(.highlight) { background: #c5cbd0; }
+html[data-theme='light'] .booking-aside { background: var(--surface-soft); }
+html[data-theme='light'] .choice-radio { border-color: var(--border-strong); }
+html[data-theme='light'] .selected > .choice-radio { border-color: var(--accent); }
+html[data-theme='light'] :is(.booking-steps, .booking-controls,
+  .summary-items > div, .summary-price, .booking-trust) { border-color: var(--border); }
+html[data-theme='light'] :is(.booking-business > .soft-tag, .booking-step > span) {
+  background: var(--surface-soft);
+  border-color: var(--border);
+}
+html[data-theme='light'] .booking-step.current > span {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+html[data-theme='light'] :is(.booking-choice:hover, .booking-date:hover, .booking-slot:hover) {
+  background: var(--surface-soft);
+  border-color: var(--border-strong);
+}
+html[data-theme='light'] :is(.booking-choice.selected, .booking-date.selected, .booking-slot.selected) {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent-dark);
+}
+html[data-theme='light'] .booking-summary.glass-effect :is(h3, .summary-price > strong) { color: var(--ink); }
+html[data-theme='light'] .booking-aside .booking-trust p { color: var(--muted); }
 html[data-theme='dark'] .app-dialog::backdrop { background: rgba(6, 6, 10, 0.72); }
 html[data-theme='dark'] .booking-summary.glass-effect { background: var(--glass-surface); border-color: var(--glass-border); }
 html[data-theme='dark'] .booking-summary.glass-effect :is(h3, p, .summary-items > div,

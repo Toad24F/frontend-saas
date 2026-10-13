@@ -645,3 +645,14 @@
 .print-heading p {
   font-size: 13px;
 }
+
+/* This lazy-loaded stylesheet must preserve the shared mobile column layout. */
+@media (max-width: 767px) {
+  .booking-columns {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .booking-surface,
+  .booking-aside { width: 100%; min-width: 0; }
+}
