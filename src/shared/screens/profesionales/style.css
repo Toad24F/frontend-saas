@@ -1,4 +1,14 @@
 .professional-workspace .page-heading { margin-bottom: 18px; }
+.professional-choice-group .form-label { display: block; }
+.app-dialog [data-professional-field].has-error .form-label { color: #a43835; }
+.app-dialog [data-professional-field].has-error .form-control,
+.app-dialog [data-professional-field].has-error .checkbox-list { border-color: #c6534b; }
+.app-dialog [data-professional-field].has-error .form-control:focus,
+.app-dialog [data-professional-field].has-error:focus { outline: 2px solid #c6534b; outline-offset: 2px; box-shadow: none; }
+.app-dialog .professional-choice-group.has-error .checkbox-list { border: 1px solid #c6534b; border-radius: 8px; padding: 10px; }
+.professional-field-error { margin: 7px 0 0; color: #a43835; font-size: 12px; line-height: 1.4; }
+html[data-theme='dark'] .app-dialog [data-professional-field].has-error .form-label,
+html[data-theme='dark'] .professional-field-error { color: #ffb2a8; }
 .professional-workspace .page-heading p { color: var(--muted); font-size: 14px; }
 .professional-overview { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 22px; color: var(--muted); font-size: 13px; }
 .professional-overview strong { color: var(--ink); font-variant-numeric: tabular-nums; }

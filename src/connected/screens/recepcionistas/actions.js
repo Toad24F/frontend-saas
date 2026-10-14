@@ -3,11 +3,40 @@ import { validateNewPassword } from '../../modules/auth/password-policy.js';
 import { render } from '../../../shared/app.js';
 import { field, basicForm, errorSlot } from '../../../shared/forms.js';
 import { modal, toast, escape } from '../../../shared/ui.js';
+import { showProfessionalErrors, clearProfessionalErrors, clearProfessionalField } from '../../../shared/screens/profesionales/errors.js';
+import { validateReceptionist, receptionistError } from './errors.js';
 
-const passwordFields = (prefix = '') => `${field('Nueva contraseña', `${prefix}password`, '', 'password', 'required minlength="12" autocomplete="new-password"')}${field('Confirmar contraseña', `${prefix}confirm`, '', 'password', 'required minlength="12" autocomplete="new-password"')}`;
+const markedField = (...args) => field(...args).replace('class="form-field"', `class="form-field" data-professional-field="${args[1]}"`);
+const passwordFields = () => `${markedField('Nueva contraseña', 'password', '', 'password', 'required minlength="12" autocomplete="new-password"')}${markedField('Confirmar contraseña', 'confirm', '', 'password', 'required minlength="12" autocomplete="new-password"')}`;
+
+function receptionistForm(title, content, onSubmit, reset = false) {
+  const dialog = basicForm(title, content, onSubmit, false, {
+    validate(form) {
+      const errors = validateReceptionist(new FormData(form), reset);
+      if (!Object.keys(errors).length) { clearProfessionalErrors(form); return true; }
+      showProfessionalErrors(form, errors);
+      return false;
+    },
+    onError(error, form) {
+      const errors = receptionistError(error);
+      if (errors) showProfessionalErrors(form, errors);
+      else {
+        const target = form.querySelector('#form-error');
+        target.textContent = error.message || 'No se pudieron guardar los cambios. Inténtalo de nuevo.';
+        target.hidden = false;
+        target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        target.focus({ preventScroll: true });
+      }
+    },
+  });
+  const form = dialog.querySelector('#editor-form');
+  form.addEventListener('input', (event) => clearProfessionalField(form, event.target));
+  form.addEventListener('change', (event) => clearProfessionalField(form, event.target));
+  return dialog;
+}
 
 export function newReceptionist() {
-  basicForm('Nueva recepcionista', `${field('Nombre completo', 'name', '', 'text', 'required maxlength="150"')}${field('Correo', 'email', '', 'email', 'required maxlength="150" autocomplete="email"')}${passwordFields()}`, async (form) => {
+  receptionistForm('Nueva recepcionista', `${markedField('Nombre completo', 'name', '', 'text', 'required maxlength="150"')}${markedField('Correo', 'email', '', 'email', 'required maxlength="150" autocomplete="email"')}${passwordFields()}`, async (form) => {
     const password = form.get('password');
     validateNewPassword(password, form.get('confirm'));
     await api('/recepcionistas', 'POST', { nombre: form.get('name').trim(), emailRecepcionista: form.get('email').trim(), password });
@@ -21,11 +50,11 @@ export async function receptionistDetail(id) {
 
 export function receptionistAction(action, id) {
   if (action === 'reset') {
-    basicForm('Restablecer contraseña', `${passwordFields()}<p class="form-intro">Se cerrarán las sesiones de esta recepcionista.</p>`, async (form) => {
+    receptionistForm('Restablecer contraseña', `${passwordFields()}<p class="form-intro">Se cerrarán las sesiones de esta recepcionista.</p>`, async (form) => {
       const password = form.get('password');
       validateNewPassword(password, form.get('confirm'));
       await api(`/recepcionistas/${id}/restablecer-contrasena`, 'POST', { nuevaPassword: password });
-    });
+    }, true);
     return;
   }
   if (!['deactivate', 'reactivate'].includes(action)) return;

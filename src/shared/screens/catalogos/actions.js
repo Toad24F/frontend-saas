@@ -5,6 +5,11 @@ import { icon } from '../../icons.js';
 import { toast, escape as esc } from '../../ui.js';
 import { field, basicForm } from '../../forms.js';
 import { loadEditableResource } from '../../../connected/modules/catalogos/detail.js';
+import { validateProfessional, professionalError, showProfessionalErrors, clearProfessionalErrors, clearProfessionalField } from '../profesionales/errors.js';
+import { validateService, serviceError } from '../servicios/errors.js';
+
+const professionalField = (...args) => field(...args).replace('class="form-field"', `class="form-field" data-professional-field="${args[1]}"`);
+const assignmentError = (field, message) => Object.assign(new Error(message), { field });
 export async function catalog(type, id) {
   const cached = id ? resource(type, id, state.tenantId) : null;
   const existing = cached && !isDemo && (type !== 'professionals' || user.rol === 'admin_negocio') ? await loadEditableResource(type, cached) : cached;
@@ -13,9 +18,9 @@ export async function catalog(type, id) {
       toast('Solo puedes editar los servicios que creaste.');
       return;
     }
-    basicForm(
+    const dialog = basicForm(
       existing ? 'Editar servicio' : 'Nuevo servicio',
-      `${field('Nombre del servicio', 'name', existing?.name, 'text', 'required maxlength="150"')}${field('Descripción', 'description', existing?.description, 'text', isDemo ? 'required maxlength="200"' : 'maxlength="500"')}<div class="form-row-two">${field('Duración en minutos', 'duration', existing?.duration || 45, 'number', isDemo ? 'required min="15" max="240" step="15"' : 'required min="1" step="1"')}${field('Precio informativo (MXN)', 'price', existing?.price ?? 600, 'number', 'required min="0" max="99999" step="0.01"')}</div>`,
+      `${professionalField('Nombre del servicio', 'name', existing?.name, 'text', 'required maxlength="150"')}${professionalField('Descripción', 'description', existing?.description, 'text', isDemo ? 'required maxlength="200"' : 'maxlength="500"')}<div class="form-row-two">${professionalField('Duración en minutos', 'duration', existing?.duration || 45, 'number', isDemo ? 'required min="15" max="240" step="15"' : 'required min="1" step="1"')}${professionalField('Precio informativo (MXN)', 'price', existing?.price ?? 600, 'number', 'required min="0" max="99999" step="0.01"')}</div>`,
       (f) =>
         save('services', existing, {
           name: f.get('name').trim(),
@@ -25,7 +30,30 @@ export async function catalog(type, id) {
           icon: existing?.icon || 'briefcase',
           color: existing?.color || 'blue',
         }),
+      false,
+      {
+        validate(form) {
+          const errors = validateService(new FormData(form), isDemo);
+          if (!Object.keys(errors).length) { clearProfessionalErrors(form); return true; }
+          showProfessionalErrors(form, errors);
+          return false;
+        },
+        onError(error, form) {
+          const errors = serviceError(error);
+          if (errors) showProfessionalErrors(form, errors);
+          else {
+            const target = form.querySelector('#form-error');
+            target.textContent = error.message || 'No se pudo guardar el servicio. Inténtalo de nuevo.';
+            target.hidden = false;
+            target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            target.focus({ preventScroll: true });
+          }
+        },
+      },
     );
+    const form = dialog.querySelector('#editor-form');
+    form.addEventListener('input', (event) => clearProfessionalField(form, event.target));
+    form.addEventListener('change', (event) => clearProfessionalField(form, event.target));
   }
   if (type === 'branches') {
     basicForm(
@@ -51,9 +79,9 @@ export async function catalog(type, id) {
     }
     const own = !isDemo && user.rol === 'profesional';
     let liveId = existing?.id;
-    basicForm(
+    const dialog = basicForm(
       existing ? 'Editar profesional' : 'Nuevo profesional',
-      `${field('Nombre completo', 'name', existing?.name, 'text', own ? 'readonly' : 'required maxlength="150"')}${own ? '' : field('Especialidad', 'specialty', existing?.specialty, 'text', 'required maxlength="150"')}${field('Correo', 'email', existing?.email, 'email', own ? 'readonly' : 'required')}${isDemo || own ? '' : field(existing ? 'Nueva contraseña (opcional)' : 'Contraseña', 'password', '', 'password', existing ? 'autocomplete="new-password" minlength="12"' : 'required autocomplete="new-password" minlength="12"')}<div class="form-field"><label class="form-label">Servicios que ofrece</label><div class="checkbox-list">${(existing?.catalogServices || list(
+      `${professionalField('Nombre completo', 'name', existing?.name, 'text', own ? 'readonly' : 'required maxlength="150"')}${own ? '' : professionalField('Especialidad', 'specialty', existing?.specialty, 'text', 'required maxlength="150"')}${professionalField('Correo', 'email', existing?.email, 'email', own ? 'readonly' : 'required maxlength="150"')}${isDemo || own ? '' : professionalField(existing ? 'Nueva contraseña (opcional)' : 'Contraseña', 'password', '', 'password', existing ? 'autocomplete="new-password" minlength="12"' : 'required autocomplete="new-password" minlength="12"')}<div class="form-field professional-choice-group" data-professional-field="services" role="group" aria-labelledby="professional-services-label" tabindex="-1"><span class="form-label" id="professional-services-label">Servicios que ofrece</span><div class="checkbox-list">${(existing?.catalogServices || list(
         'services',
         state.tenantId,
       ))
@@ -63,7 +91,7 @@ export async function catalog(type, id) {
         )
         .join(
           '',
-      )}</div></div><div class="form-field"><label class="form-label">Sucursales</label><div class="checkbox-list">${(existing?.catalogBranches || list(
+      )}</div></div><div class="form-field professional-choice-group" data-professional-field="branches" role="group" aria-labelledby="professional-branches-label" tabindex="-1"><span class="form-label" id="professional-branches-label">Sucursales</span><div class="checkbox-list">${(existing?.catalogBranches || list(
         'branches',
         state.tenantId,
       ))
@@ -80,14 +108,12 @@ export async function catalog(type, id) {
           const identity = { nombre: f.get('name').trim(), correo: f.get('email').trim(), especialidad: f.get('specialty').trim(), ...(f.get('password') ? { password: f.get('password') } : {}) };
           const saved = await api(liveId ? `/profesionales/${liveId}` : '/profesionales', liveId ? 'PATCH' : 'POST', identity);
           liveId = saved.id;
-          try {
-            await api(`/profesionales/${liveId}/sucursales`, 'PUT', { sucursalIds: branchIds });
-            await api(`/profesionales/${liveId}/servicios`, 'PUT', { servicioIds: serviceIds });
-          } catch (error) { throw new Error('Cuenta guardada. Falta completar las asignaciones; puedes reintentar: ' + error.message); }
+          try { await api(`/profesionales/${liveId}/sucursales`, 'PUT', { sucursalIds: branchIds }); }
+          catch (error) { throw assignmentError('branches', 'La cuenta se guardó, pero no se actualizaron las sucursales. Reintenta guardar. ' + error.message); }
+          try { await api(`/profesionales/${liveId}/servicios`, 'PUT', { servicioIds: serviceIds }); }
+          catch (error) { throw assignmentError('services', 'La cuenta y las sucursales se guardaron, pero no se actualizaron los servicios. Reintenta guardar. ' + error.message); }
           return;
         }
-        if (!serviceIds.length || !branchIds.length)
-          throw new Error('Selecciona al menos un servicio y una sucursal.');
         serviceIds.forEach((id) => resource('services', id, state.tenantId));
         branchIds.forEach((id) => resource('branches', id, state.tenantId));
         if (existing) {
@@ -96,16 +122,10 @@ export async function catalog(type, id) {
               a.professionalId === existing.id &&
               !['cancelada', 'no_asistio', 'completada'].includes(a.status),
           );
-          if (
-            linked.some(
-              (a) =>
-                !serviceIds.includes(a.serviceId) ||
-                !branchIds.includes(a.branchId),
-            )
-          )
-            throw new Error(
-              'Hay citas activas asociadas. Conserva sus servicios y sucursales.',
-            );
+          if (linked.some((a) => !serviceIds.includes(a.serviceId)))
+            throw assignmentError('services', 'Hay citas activas con un servicio que quitaste. Conserva ese servicio hasta que terminen las citas.');
+          if (linked.some((a) => !branchIds.includes(a.branchId)))
+            throw assignmentError('branches', 'Hay citas activas en una sucursal que quitaste. Conserva esa sucursal hasta que terminen las citas.');
         }
         const p = save('professionals', existing, {
           name: f.get('name').trim(),
@@ -145,7 +165,28 @@ export async function catalog(type, id) {
             .forEach((s) => (s.branchId = branchIds[0]));
       },
       true,
+      {
+        validate(form) {
+          const errors = validateProfessional(new FormData(form), { own, existing: Boolean(existing), demo: isDemo });
+          if (!Object.keys(errors).length) { clearProfessionalErrors(form); return true; }
+          showProfessionalErrors(form, errors);
+          return false;
+        },
+        onError(error, form) {
+          const errors = professionalError(error);
+          if (errors) showProfessionalErrors(form, errors);
+          else {
+            const target = form.querySelector('#form-error');
+            target.textContent = error.message || 'No se pudieron guardar los cambios. Inténtalo de nuevo.';
+            target.hidden = false;
+            target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            target.focus({ preventScroll: true });
+          }
+        },
+      },
     );
+    dialog.querySelector('#editor-form').addEventListener('input', (event) => clearProfessionalField(event.currentTarget, event.target));
+    dialog.querySelector('#editor-form').addEventListener('change', (event) => clearProfessionalField(event.currentTarget, event.target));
   }
 }
 export function save(table, existing, values) {

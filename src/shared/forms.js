@@ -16,15 +16,18 @@ export const formError = (error) => {
 };
 export const errorSlot =
   '<p id="form-error" class="form-error" role="alert" tabindex="-1" hidden></p>';
-export function basicForm(title, content, onSubmit, wide = false) {
+export function basicForm(title, content, onSubmit, wide = false, options = {}) {
   const el = modal(
     title,
     `<form id="editor-form"><div class="dialog-body">${content}${errorSlot}</div><div class="dialog-footer"><button type="button" class="btn btn-light" data-dismiss>Cancelar</button><button type="submit" class="btn btn-primary">${icon('check')}Guardar</button></div></form>`,
     wide,
   );
   el.querySelector('[data-dismiss]').onclick = () => el.close();
-  el.querySelector('form').onsubmit = async (e) => {
+  const form = el.querySelector('form');
+  if (options.validate) form.noValidate = true;
+  form.onsubmit = async (e) => {
     e.preventDefault();
+    if (options.validate && !options.validate(e.target)) return;
     const submit = e.target.querySelector('[type="submit"]');
     submit.disabled = true;
     try {
@@ -36,7 +39,8 @@ export function basicForm(title, content, onSubmit, wide = false) {
       }
       toast(isDemo ? 'Cambios guardados en esta demostración.' : 'Cambios guardados.');
     } catch (error) {
-      formError(error);
+      if (options.onError) options.onError(error, e.target);
+      else formError(error);
     } finally { submit.disabled = false; }
   };
   return el;
