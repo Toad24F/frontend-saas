@@ -412,6 +412,9 @@ html[data-theme='dark'] .sidebar .brand .brand-logo-on-light { display: none; }
   min-width: 0;
 }
 .topbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
   height: 80px;
   background: #fff;
   border-bottom: 1px solid var(--border);

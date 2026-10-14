@@ -313,10 +313,9 @@ html[data-theme='light'] .sidebar .nav-item.active,
 html[data-theme='light'] .sidebar .nav-item.active > .icon { color: var(--surface); }
 html[data-theme='light'] .sidebar .nav-item.active {
   background: var(--accent);
-  box-shadow: inset 3px 0 0 var(--accent);
   font-weight: 700;
 }
-html[data-theme='light'] .sidebar .nav-item.active:hover { background: #f6e3da; }
+html[data-theme='light'] .sidebar .nav-item.active:hover { background: #f6e3da; color: var(--accent-dark); }
 html[data-theme='light'] .sidebar .nav-item.active:hover > .icon { color: var(--accent-dark); }
 html[data-theme='light'] .sidebar .nav-count {
   background: #f0d8cd;
