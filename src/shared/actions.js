@@ -17,7 +17,8 @@ import { modal, toast, escape as esc } from './ui.js';
 import { reportState } from '../demo/screens/reportes/state.js';
 import { appointmentTable } from './screens/agenda/table.js';
 import { scheduleRow, setBlockScope } from './screens/disponibilidad/view.js';
-import { validateSchedules, appointmentCovered } from '../demo/schedule.js';
+import { appointmentCovered } from '../demo/schedule.js';
+import { clearAvailabilityErrors, clearAvailabilityField, showAvailabilityErrors, showAvailabilityGeneralError, validateScheduleRows, scheduleApiErrors } from './screens/disponibilidad/errors.js';
 let draftScheduleId = -1;
 
 export async function handleClick(e) {
@@ -318,6 +319,7 @@ document.addEventListener('submit', async (e) => {
   const submit = form.querySelector('[type="submit"]');
   if (submit.disabled) return;
   submit.disabled = true;
+  let scheduleRows = [];
   try {
     const f = new FormData(form),
       t = tenantById(state.tenantId);
@@ -345,15 +347,19 @@ document.addEventListener('submit', async (e) => {
           breakStart: f.get(`breakStart-${id}`), breakEnd: f.get(`breakEnd-${id}`),
         };
       });
+      scheduleRows = updates;
+      const scheduleErrors = validateScheduleRows(updates, professional.branchIds, isDemo);
+      if (Object.keys(scheduleErrors).length) {
+        showAvailabilityErrors(form, scheduleErrors);
+        return;
+      }
+      clearAvailabilityErrors(form);
       if (!isDemo) {
         await api(`/profesionales/${p}/horario`, 'PUT', schedulePayload(updates));
         (await import('../connected/screens/disponibilidad/view.js')).invalidateProjection();
         try { await loadBackendData(); render(); toast('Horario guardado.'); } catch (error) { toast('Horario guardado. No se pudo actualizar la vista: ' + error.message); }
         return;
       }
-      validateSchedules(updates, professional.branchIds);
-      if (updates.some((s) => s.enabled && (s.start < '09:00' || s.end > '18:00')))
-        throw new Error('Este prototipo admite atención de 09:00 a 18:00.');
       const active = list('appointments', state.tenantId).filter((a) =>
         a.professionalId === p && a.date >= TODAY &&
         !['cancelada', 'no_asistio', 'completada'].includes(a.status));
@@ -367,10 +373,16 @@ document.addEventListener('submit', async (e) => {
     toast('Configuración guardada en esta demostración.');
   } catch (error) {
     if (form.id === 'schedule-form') {
-      const target = form.querySelector('#schedule-error');
-      target.textContent = error.message;
-      target.hidden = false;
-      target.focus();
+      const errors = scheduleApiErrors(error, scheduleRows);
+      if (errors) showAvailabilityErrors(form, errors);
+      else showAvailabilityGeneralError(form, error, '#schedule-error');
     } else toast(error.message);
   } finally { submit.disabled = false; }
+});
+
+document.addEventListener('input', (event) => {
+  if (event.target.closest('#schedule-form')) clearAvailabilityField(event.target.form, event.target);
+});
+document.addEventListener('change', (event) => {
+  if (event.target.closest('#schedule-form')) clearAvailabilityField(event.target.form, event.target);
 });

@@ -7,7 +7,7 @@ import { showProfessionalErrors, clearProfessionalErrors, clearProfessionalField
 import { validateReceptionist, receptionistError } from './errors.js';
 
 const markedField = (...args) => field(...args).replace('class="form-field"', `class="form-field" data-professional-field="${args[1]}"`);
-const passwordFields = () => `${markedField('Nueva contraseña', 'password', '', 'password', 'required minlength="12" autocomplete="new-password"')}${markedField('Confirmar contraseña', 'confirm', '', 'password', 'required minlength="12" autocomplete="new-password"')}`;
+const passwordFields = () => markedField('Contraseña', 'password', '', 'password', 'required minlength="12" autocomplete="new-password"');
 
 function receptionistForm(title, content, onSubmit, reset = false) {
   const dialog = basicForm(title, content, onSubmit, false, {
@@ -38,7 +38,7 @@ function receptionistForm(title, content, onSubmit, reset = false) {
 export function newReceptionist() {
   receptionistForm('Nueva recepcionista', `${markedField('Nombre completo', 'name', '', 'text', 'required maxlength="150"')}${markedField('Correo', 'email', '', 'email', 'required maxlength="150" autocomplete="email"')}${passwordFields()}`, async (form) => {
     const password = form.get('password');
-    validateNewPassword(password, form.get('confirm'));
+    validateNewPassword(password);
     await api('/recepcionistas', 'POST', { nombre: form.get('name').trim(), emailRecepcionista: form.get('email').trim(), password });
   });
 }
@@ -52,7 +52,7 @@ export function receptionistAction(action, id) {
   if (action === 'reset') {
     receptionistForm('Restablecer contraseña', `${passwordFields()}<p class="form-intro">Se cerrarán las sesiones de esta recepcionista.</p>`, async (form) => {
       const password = form.get('password');
-      validateNewPassword(password, form.get('confirm'));
+      validateNewPassword(password);
       await api(`/recepcionistas/${id}/restablecer-contrasena`, 'POST', { nuevaPassword: password });
     }, true);
     return;

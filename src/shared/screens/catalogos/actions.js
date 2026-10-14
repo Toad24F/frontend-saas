@@ -7,6 +7,7 @@ import { field, basicForm } from '../../forms.js';
 import { loadEditableResource } from '../../../connected/modules/catalogos/detail.js';
 import { validateProfessional, professionalError, showProfessionalErrors, clearProfessionalErrors, clearProfessionalField } from '../profesionales/errors.js';
 import { validateService, serviceError } from '../servicios/errors.js';
+import { validateBranch, branchError } from '../sucursales/errors.js';
 
 const professionalField = (...args) => field(...args).replace('class="form-field"', `class="form-field" data-professional-field="${args[1]}"`);
 const assignmentError = (field, message) => Object.assign(new Error(message), { field });
@@ -56,9 +57,9 @@ export async function catalog(type, id) {
     form.addEventListener('change', (event) => clearProfessionalField(form, event.target));
   }
   if (type === 'branches') {
-    basicForm(
+    const dialog = basicForm(
       existing ? 'Editar sucursal' : 'Nueva sucursal',
-      `${field('Nombre', 'name', existing?.name, 'text', 'required maxlength="150"')}${field('Dirección', 'address', existing?.address, 'text', 'required maxlength="255"')}${field('Teléfono', 'phone', existing?.phone, 'tel', isDemo ? 'required pattern="[0-9]{10}" maxlength="10" inputmode="numeric"' : 'required minlength="7" maxlength="20"')}${field('Indicaciones de llegada', 'notes', existing?.notes, 'text', 'maxlength="255"')}${isDemo ? '' : field('Zona horaria', 'timezone', existing?.timezone || 'America/Chihuahua', 'text', 'required')}${field('Enlace de Google Maps', 'maps', existing?.maps || '', 'url')}`,
+      `${professionalField('Nombre', 'name', existing?.name, 'text', 'required maxlength="150"')}${professionalField('Dirección', 'address', existing?.address, 'text', 'required maxlength="255"')}${professionalField('Teléfono', 'phone', existing?.phone, 'tel', isDemo ? 'required pattern="[0-9]{10}" maxlength="10" inputmode="numeric"' : 'required minlength="7" maxlength="20"')}${professionalField('Indicaciones de llegada', 'notes', existing?.notes, 'text', 'maxlength="255"')}${isDemo ? '' : professionalField('Zona horaria', 'timezone', existing?.timezone || 'America/Chihuahua', 'text', 'required maxlength="64"')}${professionalField('Enlace de Google Maps', 'maps', existing?.maps || '', 'url', 'maxlength="2048"')}`,
       (f) =>
         save('branches', existing, {
           name: f.get('name').trim(),
@@ -67,7 +68,30 @@ export async function catalog(type, id) {
           notes: f.get('notes'), timezone: f.get('timezone'), maps: f.get('maps'),
           color: existing?.color || 'orange',
         }),
+      false,
+      {
+        validate(form) {
+          const errors = validateBranch(new FormData(form), isDemo);
+          if (!Object.keys(errors).length) { clearProfessionalErrors(form); return true; }
+          showProfessionalErrors(form, errors);
+          return false;
+        },
+        onError(error, form) {
+          const errors = branchError(error);
+          if (errors) showProfessionalErrors(form, errors);
+          else {
+            const target = form.querySelector('#form-error');
+            target.textContent = error.message || 'No se pudo guardar la sucursal. Inténtalo de nuevo.';
+            target.hidden = false;
+            target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            target.focus({ preventScroll: true });
+          }
+        },
+      },
     );
+    const form = dialog.querySelector('#editor-form');
+    form.addEventListener('input', (event) => clearProfessionalField(form, event.target));
+    form.addEventListener('change', (event) => clearProfessionalField(form, event.target));
   }
   if (type === 'professionals') {
     if (isDemo && (

@@ -1,4 +1,16 @@
 .availability-workspace { min-width: 0; }
+.availability-field-error { margin: 6px 0 0; color: #a43835; font-size: 11px; font-weight: 600; line-height: 1.35; }
+[data-availability-field].has-error > :is(input, select, textarea),
+[data-availability-field].has-error .form-control,
+[data-availability-field].has-error .form-select,
+.offering-checks.has-error { border-color: #c6534b; }
+[data-availability-field].has-error > :is(input, select, textarea):focus,
+[data-availability-field].has-error .form-control:focus,
+[data-availability-field].has-error .form-select:focus,
+[data-availability-field].has-error:focus { outline: 2px solid #c6534b; outline-offset: 2px; box-shadow: none; }
+.schedule-table td.has-error { box-shadow: inset 0 -2px #c6534b; }
+.schedule-table .availability-field-error { max-width: 180px; white-space: normal; }
+html[data-theme='dark'] .availability-field-error { color: #ffb2a8; }
 .availability-workspace [data-availability-context][hidden] { display: none !important; }
 .availability-person-context {
   display: flex;
