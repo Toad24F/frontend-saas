@@ -3,13 +3,15 @@ import { state } from '../../app.js';
 import { db, list, resource } from '../../data.js';
 import { icon } from '../../icons.js';
 import { toast, escape as esc } from '../../ui.js';
-import { field, basicForm } from '../../forms.js';
+import { field, select, basicForm } from '../../forms.js';
 import { loadEditableResource } from '../../../connected/modules/catalogos/detail.js';
 import { validateProfessional, professionalError, showProfessionalErrors, clearProfessionalErrors, clearProfessionalField } from '../profesionales/errors.js';
 import { validateService, serviceError } from '../servicios/errors.js';
 import { validateBranch, branchError } from '../sucursales/errors.js';
+import { MEXICO_TIMEZONES } from '../sucursales/timezones.js';
 
 const professionalField = (...args) => field(...args).replace('class="form-field"', `class="form-field" data-professional-field="${args[1]}"`);
+const professionalSelect = (...args) => select(...args).replace('class="form-field"', `class="form-field" data-professional-field="${args[1]}"`);
 const assignmentError = (field, message) => Object.assign(new Error(message), { field });
 export async function catalog(type, id) {
   const cached = id ? resource(type, id, state.tenantId) : null;
@@ -59,7 +61,7 @@ export async function catalog(type, id) {
   if (type === 'branches') {
     const dialog = basicForm(
       existing ? 'Editar sucursal' : 'Nueva sucursal',
-      `${professionalField('Nombre', 'name', existing?.name, 'text', 'required maxlength="150"')}${professionalField('Dirección', 'address', existing?.address, 'text', 'required maxlength="255"')}${professionalField('Teléfono', 'phone', existing?.phone, 'tel', isDemo ? 'required pattern="[0-9]{10}" maxlength="10" inputmode="numeric"' : 'required minlength="7" maxlength="20"')}${professionalField('Indicaciones de llegada', 'notes', existing?.notes, 'text', 'maxlength="255"')}${isDemo ? '' : professionalField('Zona horaria', 'timezone', existing?.timezone || 'America/Chihuahua', 'text', 'required maxlength="64"')}${professionalField('Enlace de Google Maps', 'maps', existing?.maps || '', 'url', 'maxlength="2048"')}`,
+      `${professionalField('Nombre', 'name', existing?.name, 'text', 'required maxlength="150"')}${professionalField('Dirección', 'address', existing?.address, 'text', 'required maxlength="255"')}${professionalField('Teléfono', 'phone', existing?.phone, 'tel', isDemo ? 'required pattern="[0-9]{10}" maxlength="10" inputmode="numeric"' : 'required minlength="7" maxlength="20"')}${professionalField('Indicaciones de llegada', 'notes', existing?.notes, 'text', 'maxlength="255"')}${isDemo ? '' : professionalSelect('Zona horaria', 'timezone', MEXICO_TIMEZONES, existing?.timezone || 'America/Chihuahua')}${professionalField('Enlace de Google Maps', 'maps', existing?.maps || '', 'url', 'maxlength="2048"')}`,
       (f) =>
         save('branches', existing, {
           name: f.get('name').trim(),
