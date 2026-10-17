@@ -13,6 +13,7 @@
 - `src/main.js` elige `src/connected/` o `src/demo/` mediante `?demo=1`. La UI, el enrutado y los estilos comunes viven en `src/shared/`. Reutiliza esa separación y limita los cambios a las pantallas solicitadas.
 - Vite (`npm run dev`) se usa para desarrollo y depuración; `npm run build` genera `dist/` y `npm run preview` permite revisar esa salida. **Nginx es el servidor previsto para publicar el frontend**, no sustituye a Vite durante el desarrollo. No hay configuración de Nginx en este repositorio: antes de implementarla, acuerda dominio, HTTPS, ubicación de la API y proxy. Al servir la SPA, las rutas de frontend deben volver a `index.html`; no redirijas rutas de API sin conocer el despliegue.
 - Las variables `VITE_*` quedan expuestas en el navegador. No coloques secretos, tokens ni contraseñas en el código, la demo, `.env.example` o la documentación.
+- Usar una estructura de carpetas modular y nombres de archivos coherentes.
 
 ## Demo, backend e interfaz
 
@@ -26,16 +27,16 @@
 
 Las skills están en `.agents/skills/`. Lee el `SKILL.md` de la que corresponda antes de aplicarla. Son herramientas situacionales; sus preferencias estéticas generales **no autorizan** cambiar la marca, los colores, la navegación ni el stack de este proyecto.
 
-| Skill | Cuándo usarla aquí |
-| --- | --- |
-| `redesign-existing-projects` | Al auditar o mejorar una pantalla existente. Primero examina la implementación y sus estados; después haz cambios acotados y comprueba que la función siga intacta. |
-| `design-taste-frontend` | Para una dirección visual de login, portal público o una página nueva. Su propio alcance excluye dashboards y flujos de producto densos; no impongas sus patrones de landing en los catálogos o la agenda. |
-| `high-end-visual-design` | Como fuente puntual de criterios de detalle, ritmo o movimiento cuando el usuario pida refinamiento visual. Adapta sus propuestas al diseño actual; no apliques sus prohibiciones de fuentes, bordes o layouts literalmente. |
-| `minimalist-ui` | Si se pide simplificar una vista densa. Toma principios de claridad, jerarquía y espaciado, sin reemplazar la paleta ni eliminar controles necesarios. |
-| `imagegen-frontend-web` | Para referencias **en imagen** de pantallas web antes de implementarlas, cuando el usuario pida una propuesta visual. No produce código ni demuestra que la interfaz funcione. |
-| `imagegen-frontend-mobile` | Para referencias **en imagen** de vistas de teléfono. No produce código; la implementación debe respetar la navegación móvil real. |
-| `image-to-code` | Solo si el usuario pide explícitamente implementar una referencia visual nueva mediante ese proceso. Ajusta el resultado al HTML/CSS/JS existente. |
-| `brandkit` o `stitch-design-taste` | Solo si se pide trabajar la identidad visual o un `DESIGN.md` para Stitch. No sustituyen automáticamente la marca vigente. |
+| Skill                              | Cuándo usarla aquí                                                                                                                                                                                                           |
+| ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `redesign-existing-projects`       | Al auditar o mejorar una pantalla existente. Primero examina la implementación y sus estados; después haz cambios acotados y comprueba que la función siga intacta.                                                          |
+| `design-taste-frontend`            | Para una dirección visual de login, portal público o una página nueva. Su propio alcance excluye dashboards y flujos de producto densos; no impongas sus patrones de landing en los catálogos o la agenda.                   |
+| `high-end-visual-design`           | Como fuente puntual de criterios de detalle, ritmo o movimiento cuando el usuario pida refinamiento visual. Adapta sus propuestas al diseño actual; no apliques sus prohibiciones de fuentes, bordes o layouts literalmente. |
+| `minimalist-ui`                    | Si se pide simplificar una vista densa. Toma principios de claridad, jerarquía y espaciado, sin reemplazar la paleta ni eliminar controles necesarios.                                                                       |
+| `imagegen-frontend-web`            | Para referencias **en imagen** de pantallas web antes de implementarlas, cuando el usuario pida una propuesta visual. No produce código ni demuestra que la interfaz funcione.                                               |
+| `imagegen-frontend-mobile`         | Para referencias **en imagen** de vistas de teléfono. No produce código; la implementación debe respetar la navegación móvil real.                                                                                           |
+| `image-to-code`                    | Solo si el usuario pide explícitamente implementar una referencia visual nueva mediante ese proceso. Ajusta el resultado al HTML/CSS/JS existente.                                                                           |
+| `brandkit` o `stitch-design-taste` | Solo si se pide trabajar la identidad visual o un `DESIGN.md` para Stitch. No sustituyen automáticamente la marca vigente.                                                                                                   |
 
 `gpt-taste` e `industrial-brutalist-ui` proponen lenguajes visuales ajenos al panel actual; úsalas solo ante una petición explícita de esa dirección. `design-taste-frontend-v1` se reserva para compatibilidad con trabajos que pidan esa versión. `full-output-enforcement` sirve cuando se solicite una entrega íntegra y extensa, no para decidir estilos.
 
