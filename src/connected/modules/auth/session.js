@@ -11,14 +11,20 @@ export async function api(path, method = 'GET', body) {
       method, headers: { ...(body === undefined ? {} : { 'Content-Type': 'application/json' }), ...(token ? { Authorization: `Bearer ${token}` } : {}) },
       ...(body === undefined ? {} : { body: JSON.stringify(body) }),
     });
-  } catch { throw new Error('No se pudo conectar con el backend. Comprueba que esté iniciado y revisa VITE_API_URL.'); }
+  } catch {
+    const error = new Error('No se pudo conectar con el backend. Comprueba que esté iniciado y revisa VITE_API_URL.');
+    error.status = 0;
+    throw error;
+  }
   const data = response.status === 204 ? null : await response.json().catch(() => null);
   if (!response.ok) {
     if (response.status === 401 && !['/auth/login', '/auth/activar-administrador', '/auth/recuperar-contrasena'].includes(path)) {
       clearSession();
       if (typeof window !== 'undefined') window.dispatchEvent(new Event('cita-session-expired'));
     }
-    throw new Error(Array.isArray(data?.message) ? data.message.join(' · ') : data?.message || `Error del servidor (${response.status}).`);
+    const error = new Error(Array.isArray(data?.message) ? data.message.join(' · ') : data?.message || `Error del servidor (${response.status}).`);
+    error.status = response.status;
+    throw error;
   }
   return data;
 }

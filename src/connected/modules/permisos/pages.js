@@ -4,7 +4,7 @@ const pagesByRole = {
   superadmin: ['plataforma', 'negocio', 'cuenta'],
   admin_negocio: ['profesionales', 'recepcionistas', 'servicios', 'sucursales', 'disponibilidad', 'cuenta'],
   profesional: ['servicios', 'sucursales', 'disponibilidad', 'cuenta'],
-  recepcionista: ['cuenta'],
+  recepcionista: ['disponibilidad', 'cuenta'],
 };
 
 export function defaultPage() {

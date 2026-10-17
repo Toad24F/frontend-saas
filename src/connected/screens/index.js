@@ -7,6 +7,7 @@ import { account } from './cuenta/view.js';
 import { businessDetail } from './negocio/view.js';
 import { receptionists } from './recepcionistas/view.js';
 import { empty } from '../../shared/ui.js';
+import './disponibilidad/actions.js';
 
 const views = {
   profesionales: professionals,

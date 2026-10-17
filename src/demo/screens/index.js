@@ -3,7 +3,7 @@ import { clients } from './clientes/view.js';
 import { professionals } from '../../shared/screens/profesionales/view.js';
 import { services } from '../../shared/screens/servicios/view.js';
 import { branches } from '../../shared/screens/sucursales/view.js';
-import { availability } from '../../shared/screens/disponibilidad/view.js';
+import { availability } from './disponibilidad/view.js';
 import { reports } from './reportes/view.js';
 import { notifications } from './notificaciones/view.js';
 import { settings } from './configuracion/view.js';

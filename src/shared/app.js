@@ -175,7 +175,7 @@ export function renderShell(content) {
     superadmin: [['plataforma', 'grid', 'Negocios']],
     admin_negocio: [['profesionales', 'stethoscope', 'Equipo'], ['servicios', 'briefcase', 'Servicios'], ['sucursales', 'pin', 'Sucursales']],
     profesional: [['servicios', 'briefcase', 'Servicios'], ['sucursales', 'pin', 'Sucursales'], ['disponibilidad', 'clock', 'Horario']],
-    recepcionista: [['cuenta', 'user', 'Mi cuenta']],
+    recepcionista: [['disponibilidad', 'clock', 'Disponibilidad'], ['cuenta', 'user', 'Mi cuenta']],
   };
   const primaryTabs = isDemo ? demoTabs : roleTabs[user.rol] || [['cuenta', 'user', 'Mi cuenta']];
   const moreIsCurrent = !primaryTabs.some(([page]) => page === state.page);

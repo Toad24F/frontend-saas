@@ -4,8 +4,9 @@ import { list, TODAY, formatDate } from '../../../shared/data.js';
 import { basicForm, field, select, errorSlot } from '../../../shared/forms.js';
 import { modal, toast, escape as esc } from '../../../shared/ui.js';
 import { exceptionPayload, minutesToClock } from './payload.js';
-import { currentAvailabilityData, findAvailabilityException, invalidateProjection, refreshAvailabilityData, retryTeamExceptions, selectedProfessional, setProjection } from './view.js';
+import { consultAffected, consultAvailability, currentAvailabilityData, findAvailabilityException, invalidateProjection, refreshAvailabilityData, refreshConfiguration, retryTeamExceptions, saveConfiguration, selectSlot, selectedProfessional, setAffectedErrors, setProjection, setQueryErrors, setQueryFilters, validateStart } from './view.js';
 import { getBlockScope } from '../../../shared/screens/disponibilidad/view.js';
+import { validateConfiguration, validateInclusiveRange } from '../../../shared/screens/disponibilidad/operational-contract.js';
 import { clearAvailabilityErrors, clearAvailabilityField, exceptionApiErrors, showAvailabilityErrors, showAvailabilityGeneralError, validateException, validateProjection } from '../../../shared/screens/disponibilidad/errors.js';
 
 const route = (personId = selectedProfessional().id) => `/profesionales/${personId}`;
@@ -147,6 +148,11 @@ function deleteException(date, branchId, personId) {
 }
 
 export async function handleAvailabilityClick(event) {
+  const slot = event.target.closest('[data-availability-slot]');
+  if (slot) {
+    selectSlot(slot.dataset.slotDate, slot.dataset.slotTime);
+    return true;
+  }
   const button = event.target.closest('[data-availability-action]');
   if (!button) return false;
   if (button.disabled) return true;
@@ -165,14 +171,59 @@ export async function handleAvailabilityClick(event) {
     } else if (action === 'delete-exception') deleteException(button.dataset.date, branchId, professionalId);
     else if (action === 'retry') await refreshAvailabilityData(true);
     else if (action === 'retry-team') retryTeamExceptions();
+    else if (action === 'retry-configuration') await refreshConfiguration();
+    else if (action === 'retry-query') await consultAvailability();
+    else if (action === 'retry-affected') await consultAffected();
+    else if (action === 'switch-manual') { setQueryFilters({ modalidad: 'manual' }); render(); }
   } finally { button.disabled = false; }
   return true;
 }
 
 document.addEventListener('submit', async (event) => {
-  if (event.target.id !== 'projection-form' || state.page !== 'disponibilidad') return;
+  if (state.page !== 'disponibilidad') return;
   event.preventDefault();
   const form = event.target;
+  if (form.id === 'agenda-configuration-form') {
+    const data = new FormData(form);
+    const values = { modo: data.get('modo'), intervaloMinutos: Number(data.get('intervaloMinutos')), anticipacionMinutos: Number(data.get('anticipacionMinutos')), diasFuturos: Number(data.get('diasFuturos')) };
+    const saved = await saveConfiguration(values, validateConfiguration(values));
+    if (saved) toast('Reglas de agenda guardadas.');
+    return;
+  }
+  if (form.id === 'availability-query-form') {
+    const data = new FormData(form);
+    const values = { personalId: Number(data.get('personalId')), sucursalId: Number(data.get('sucursalId')), servicioId: Number(data.get('servicioId')), from: data.get('from'), to: data.get('to'), modalidad: data.get('modalidad') };
+    const errors = validateInclusiveRange(values.from, values.to);
+    for (const key of ['personalId', 'sucursalId', 'servicioId']) if (!Number.isSafeInteger(values[key]) || values[key] <= 0) errors[key] = 'Selecciona un identificador válido.';
+    if (Object.keys(errors).length) { setQueryFilters(values); setQueryErrors(errors); return; }
+    await consultAvailability(values);
+    return;
+  }
+  if (form.id === 'availability-validation-form') {
+    const data = new FormData(form);
+    const values = { personalId: Number(data.get('personalId')), sucursalId: Number(data.get('sucursalId')), servicioId: Number(data.get('servicioId')), fechaLocal: data.get('fechaLocal'), horaInicio: data.get('horaInicio'), modalidad: data.get('modalidad') };
+    if ([values.personalId, values.sucursalId, values.servicioId]
+      .some((value) => !Number.isSafeInteger(value) || value <= 0)) {
+      showAvailabilityGeneralError(form, new Error('Consulta primero una combinación válida.'), '#availability-validation-error');
+      return;
+    }
+    if (Object.keys(validateInclusiveRange(values.fechaLocal, values.fechaLocal)).length || !/^([01]\d|2[0-3]):[0-5]\d$/.test(values.horaInicio || '')) {
+      showAvailabilityGeneralError(form, new Error('Selecciona una fecha y hora válidas.'), '#availability-validation-error');
+      return;
+    }
+    await validateStart(values);
+    return;
+  }
+  if (form.id === 'affected-appointments-form') {
+    const data = new FormData(form);
+    const values = { personalId: data.get('personalId') ? Number(data.get('personalId')) : '', sucursalId: data.get('sucursalId') ? Number(data.get('sucursalId')) : '', from: data.get('from'), to: data.get('to') };
+    const errors = validateInclusiveRange(values.from, values.to);
+    for (const key of ['personalId', 'sucursalId']) if (values[key] !== '' && (!Number.isSafeInteger(values[key]) || values[key] <= 0)) errors[key] = 'Usa un identificador entero positivo.';
+    if (Object.keys(errors).length) { setAffectedErrors(errors, values); return; }
+    await consultAffected(values);
+    return;
+  }
+  if (form.id !== 'projection-form') return;
   const button = form.querySelector('[type="submit"]');
   const from = form.elements.from.value, to = form.elements.to.value;
   button.disabled = true;
@@ -191,4 +242,9 @@ document.addEventListener('input', (event) => {
 });
 document.addEventListener('change', (event) => {
   if (event.target.closest('#projection-form')) clearAvailabilityField(event.target.form, event.target);
+  if (event.target.form?.id === 'availability-query-form' && event.target.name === 'modalidad') {
+    const data = new FormData(event.target.form);
+    setQueryFilters({ personalId: Number(data.get('personalId')) || '', sucursalId: Number(data.get('sucursalId')) || '', servicioId: Number(data.get('servicioId')) || '', from: data.get('from'), to: data.get('to'), modalidad: data.get('modalidad') });
+    render();
+  }
 });

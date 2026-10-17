@@ -19,10 +19,23 @@ import { appointmentTable } from './screens/agenda/table.js';
 import { scheduleRow, setBlockScope } from './screens/disponibilidad/view.js';
 import { appointmentCovered } from '../demo/schedule.js';
 import { clearAvailabilityErrors, clearAvailabilityField, showAvailabilityErrors, showAvailabilityGeneralError, validateScheduleRows, scheduleApiErrors } from './screens/disponibilidad/errors.js';
+import { validateConfiguration, validateInclusiveRange } from './screens/disponibilidad/operational-contract.js';
 let draftScheduleId = -1;
 
 export async function handleClick(e) {
   try {
+    if (isDemo && state.page === 'disponibilidad') {
+      const slot = e.target.closest('[data-availability-slot]');
+      const operationalAction = e.target.closest('[data-availability-action]');
+      if (slot) {
+        (await import('../demo/screens/disponibilidad/view.js')).demoSelectSlot(slot.dataset.slotDate, slot.dataset.slotTime);
+        return;
+      }
+      if (operationalAction?.dataset.availabilityAction === 'switch-manual') {
+        (await import('../demo/screens/disponibilidad/view.js')).demoSwitchManual();
+        return;
+      }
+    }
     if (!isDemo && user.rol === 'admin_negocio' && state.page === 'servicios') {
       const service = e.target.closest('[data-delete-service]');
       if (service) {
@@ -310,6 +323,26 @@ document.addEventListener('change', (e) => {
 });
 document.addEventListener('submit', async (e) => {
   const form = e.target;
+  if (isDemo && state.page === 'disponibilidad' && ['agenda-configuration-form', 'availability-query-form', 'availability-validation-form', 'affected-appointments-form'].includes(form.id)) {
+    e.preventDefault();
+    const demo = await import('../demo/screens/disponibilidad/view.js');
+    const data = new FormData(form);
+    if (form.id === 'agenda-configuration-form') {
+      const values = { modo: data.get('modo'), intervaloMinutos: Number(data.get('intervaloMinutos')), anticipacionMinutos: Number(data.get('anticipacionMinutos')), diasFuturos: Number(data.get('diasFuturos')) };
+      if (demo.demoSaveConfiguration(values, validateConfiguration(values))) toast('Reglas guardadas en esta demostración.');
+    } else if (form.id === 'availability-query-form') {
+      const values = { personalId: Number(data.get('personalId')), sucursalId: Number(data.get('sucursalId')), servicioId: Number(data.get('servicioId')), from: data.get('from'), to: data.get('to'), modalidad: data.get('modalidad') };
+      const errors = validateInclusiveRange(values.from, values.to);
+      for (const key of ['personalId', 'sucursalId', 'servicioId']) if (!Number.isSafeInteger(values[key]) || values[key] <= 0) errors[key] = 'Selecciona un identificador válido.';
+      demo.demoQuery(values, errors);
+    } else if (form.id === 'availability-validation-form') {
+      demo.demoValidate({ personalId: Number(data.get('personalId')), sucursalId: Number(data.get('sucursalId')), servicioId: Number(data.get('servicioId')), fechaLocal: data.get('fechaLocal'), horaInicio: data.get('horaInicio'), modalidad: data.get('modalidad') });
+    } else {
+      const values = { personalId: data.get('personalId') ? Number(data.get('personalId')) : '', sucursalId: data.get('sucursalId') ? Number(data.get('sucursalId')) : '', from: data.get('from'), to: data.get('to') };
+      demo.demoAffected(values, validateInclusiveRange(values.from, values.to));
+    }
+    return;
+  }
   if (
     !['schedule-form', 'business-form', 'notification-form'].includes(form.id)
   )

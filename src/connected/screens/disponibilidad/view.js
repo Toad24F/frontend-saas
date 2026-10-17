@@ -3,6 +3,7 @@ import { state, render } from '../../../shared/app.js';
 import { list, TODAY, addDays, formatDate } from '../../../shared/data.js';
 import { escape as esc, empty } from '../../../shared/ui.js';
 import { availability as weeklyAvailability, getBlockScope } from '../../../shared/screens/disponibilidad/view.js';
+import { affectedAppointmentsPanel, availabilityQueryPanel, configurationPanel } from '../../../shared/screens/disponibilidad/operational.js';
 import { minutesToLabel } from './payload.js';
 import './style.css';
 
@@ -12,11 +13,26 @@ let teamExceptions = null;
 let teamLoading = null;
 let projection = null;
 let range = { from: TODAY, to: addDays(TODAY, 13) };
+let configuration = { loaded: false, busy: false, data: null, draft: null, errors: {}, error: '' };
+let query = {
+  busy: false, result: null, error: '', errors: {}, stale: false,
+  filters: { personalId: '', sucursalId: '', servicioId: '', from: TODAY, to: addDays(TODAY, 6), modalidad: 'publica' },
+  validation: { busy: false, result: null, error: '', date: '', time: '' },
+};
+let affected = {
+  busy: false, result: null, error: '', errors: {}, stale: false,
+  filters: { personalId: '', sucursalId: '', from: TODAY, to: addDays(TODAY, 6) },
+};
 
 export function selectedProfessional() {
   const people = list('professionals', state.tenantId);
   return people.find((person) => person.id === Number(state.scheduleProfessional)) || people[0];
 }
+
+const safeError = (error) => [403, 404].includes(error.status)
+  ? 'La operación o el recurso no está disponible.' : error.message;
+const isTechnical = (error) => !error.status || error.status === 500 || error.status === 503;
+const rerender = () => { if (state.page === 'disponibilidad') render(); };
 
 export async function refreshAvailabilityData(force = false) {
   if (force) teamExceptions = null;
@@ -32,10 +48,10 @@ export async function refreshAvailabilityData(force = false) {
   ]).then(([offering, exceptions]) => {
     if (cache?.id === id) cache = { id, busy: false, error: '', offering, exceptions };
   }).catch((error) => {
-    if (cache?.id === id) cache = { id, busy: false, error: error.message, offering: null, exceptions: [] };
+    if (cache?.id === id) cache = { id, busy: false, error: safeError(error), offering: null, exceptions: [] };
   }).finally(() => {
     if (loading?.id === id) loading = null;
-    if (state.page === 'disponibilidad' && selectedProfessional()?.id === id) render();
+    rerender();
   });
   loading = { id, promise };
   return promise;
@@ -52,10 +68,10 @@ function refreshTeamExceptions() {
   })).then((groups) => {
     if (teamExceptions?.key === key) teamExceptions = { key, busy: false, error: '', items: groups.flat() };
   }).catch((error) => {
-    if (teamExceptions?.key === key) teamExceptions = { key, busy: false, error: error.message, items: [] };
+    if (teamExceptions?.key === key) teamExceptions = { key, busy: false, error: safeError(error), items: [] };
   }).finally(() => {
     if (teamLoading?.key === key) teamLoading = null;
-    if (state.page === 'disponibilidad' && !getBlockScope()) render();
+    rerender();
   });
   teamLoading = { key, promise };
 }
@@ -89,12 +105,120 @@ function exceptionsSection(exceptions, team = false) {
 
 function projectionSection(person) {
   const data = projection?.id === person.id ? projection.result : null;
-  return `<section class="surface availability-extra"><div class="section-heading"><div><h2>Proyección de atención</h2><p>Tramos de trabajo tras descansos, excepciones y bloqueos.</p></div></div><form id="projection-form" class="projection-filter" novalidate><label data-availability-field="from">Desde<input class="form-control" type="date" name="from" required value="${range.from}"></label><label data-availability-field="to">Hasta<input class="form-control" type="date" name="to" required value="${range.to}"></label><button class="btn btn-primary" type="submit">Consultar</button><p id="projection-error" class="form-error availability-general-error" role="alert" tabindex="-1" hidden></p></form><p class="availability-note">Estos tramos no son espacios reservables. La proyección no aplica la selección de servicios ni el interruptor individual de atención por sucursal.</p>${data ? `<div class="projection-results"><h3>Intervalos (${data.intervalos.length})</h3>${data.intervalos.length ? `<div class="table-responsive"><table class="table app-table align-middle"><thead><tr><th>Fecha</th><th>Sucursal</th><th>Horario local</th></tr></thead><tbody>${data.intervalos.map((item) => `<tr><td>${esc(dateText(item.fecha))}</td><td>${esc(branchName(item.sucursalId))}</td><td>${minutesToLabel(item.inicioMinutos)}–${minutesToLabel(item.finMinutos)}</td></tr>`).join('')}</tbody></table></div>` : empty('Sin intervalos', 'No hay tramos de atención en este rango.')}<h3>Omisiones (${data.omisiones.length})</h3>${data.omisiones.length ? `<div class="blocks-list">${data.omisiones.map((item) => `<div class="block-item"><div><strong>${esc(dateText(item.fecha))} · ${esc(branchName(item.sucursalId))}</strong><small>${esc(item.motivo)}</small></div></div>`).join('')}</div>` : '<p class="availability-note">No se reportaron omisiones.</p>'}</div>` : ''}</section>`;
+  return `<section class="surface availability-extra"><div class="section-heading"><div><h2>Proyección de atención</h2><p>Muestra tramos de trabajo; no representa espacios reservables.</p></div></div><form id="projection-form" class="projection-filter" novalidate><label data-availability-field="from">Desde<input class="form-control" type="date" name="from" required value="${range.from}"></label><label data-availability-field="to">Hasta<input class="form-control" type="date" name="to" required value="${range.to}"></label><button class="btn btn-primary" type="submit">Consultar proyección</button><p id="projection-error" class="form-error availability-general-error" role="alert" tabindex="-1" hidden></p></form><p class="availability-note">La proyección no aplica la selección de servicios ni el interruptor individual de atención por sucursal.</p>${data ? `<div class="projection-results"><h3>Intervalos (${data.intervalos.length})</h3>${data.intervalos.length ? `<div class="table-responsive"><table class="table app-table align-middle"><thead><tr><th>Fecha</th><th>Sucursal</th><th>Horario local</th></tr></thead><tbody>${data.intervalos.map((item) => `<tr><td>${esc(dateText(item.fecha))}</td><td>${esc(branchName(item.sucursalId))}</td><td>${minutesToLabel(item.inicioMinutos)}–${minutesToLabel(item.finMinutos)}</td></tr>`).join('')}</tbody></table></div>` : empty('Sin intervalos', 'No hay tramos de atención en este rango.')}<h3>Omisiones (${data.omisiones.length})</h3>${data.omisiones.length ? `<div class="blocks-list">${data.omisiones.map((item) => `<div class="block-item"><div><strong>${esc(dateText(item.fecha))} · ${esc(branchName(item.sucursalId))}</strong><small>${esc(item.motivo)}</small></div></div>`).join('')}</div>` : '<p class="availability-note">No se reportaron omisiones.</p>'}</div>` : ''}</section>`;
+}
+
+function seedFilters() {
+  const people = list('professionals', state.tenantId);
+  const branches = list('branches', state.tenantId);
+  const services = list('services', state.tenantId);
+  const person = user.rol === 'profesional' ? people[0] : people.find((item) => item.id === Number(query.filters.personalId)) || people[0];
+  if (person && !query.filters.personalId) query.filters.personalId = person.id;
+  if (person && !affected.filters.personalId && user.rol === 'profesional') affected.filters.personalId = person.id;
+  const allowedBranches = person ? branches.filter((item) => person.branchIds?.includes(item.id)) : branches;
+  const allowedServices = person ? services.filter((item) => person.serviceIds?.includes(item.id)) : services;
+  if (!query.filters.sucursalId && allowedBranches[0]) query.filters.sucursalId = allowedBranches[0].id;
+  if (!query.filters.servicioId && allowedServices[0]) query.filters.servicioId = allowedServices[0].id;
+  return { people, branches, services };
+}
+
+export async function refreshConfiguration() {
+  if (user.rol !== 'admin_negocio' || configuration.busy) return;
+  configuration = { ...configuration, busy: true, error: '' };
+  rerender();
+  try {
+    const data = await api('/disponibilidad/configuracion');
+    configuration = { loaded: true, busy: false, data, draft: null, errors: {}, error: '' };
+  } catch (error) {
+    configuration = { ...configuration, loaded: true, busy: false, error: safeError(error) };
+  }
+  rerender();
+}
+
+export async function saveConfiguration(values, errors = {}) {
+  configuration = { ...configuration, draft: values, errors };
+  if (Object.keys(errors).length) { rerender(); return false; }
+  configuration = { ...configuration, busy: true, error: '' };
+  rerender();
+  try {
+    const data = await api('/disponibilidad/configuracion', 'PUT', values);
+    configuration = { loaded: true, busy: false, data, draft: null, errors: {}, error: '' };
+    rerender();
+    return true;
+  } catch (error) {
+    const fields = {};
+    for (const name of ['modo', 'intervaloMinutos', 'anticipacionMinutos', 'diasFuturos']) {
+      if (error.status === 400 && error.message.includes(name)) fields[name] = error.message;
+    }
+    configuration = { ...configuration, busy: false, errors: fields, error: Object.keys(fields).length ? '' : safeError(error) };
+    rerender();
+    return false;
+  }
+}
+
+export function setQueryFilters(filters) {
+  query = { ...query, filters: { ...query.filters, ...filters }, errors: {}, error: '', validation: { ...query.validation, result: null, error: '' } };
+}
+export function setQueryErrors(errors) { query = { ...query, errors }; rerender(); }
+export function selectSlot(date, time) { query = { ...query, validation: { ...query.validation, date, time, result: null, error: '' } }; rerender(); }
+
+export async function consultAvailability(filters = query.filters) {
+  setQueryFilters(filters);
+  query = { ...query, busy: true, error: '' };
+  rerender();
+  const params = new URLSearchParams({ personalId: String(filters.personalId), sucursalId: String(filters.sucursalId), servicioId: String(filters.servicioId), desde: filters.from, hasta: filters.to, modalidad: filters.modalidad });
+  try {
+    const result = await api(`/disponibilidad?${params}`);
+    query = { ...query, busy: false, result, error: '', errors: {}, stale: false };
+  } catch (error) {
+    const technical = isTechnical(error);
+    query = { ...query, busy: false, result: technical ? query.result : null, error: safeError(error), stale: Boolean(query.result) && technical };
+  }
+  rerender();
+}
+
+export async function validateStart(values) {
+  query = { ...query, validation: { ...query.validation, busy: true, result: null, error: '', date: values.fechaLocal, time: values.horaInicio } };
+  rerender();
+  try {
+    const result = await api('/disponibilidad/validar', 'POST', values);
+    query = { ...query, validation: { ...query.validation, busy: false, result, error: '' } };
+  } catch (error) {
+    query = { ...query, validation: { ...query.validation, busy: false, result: null, error: safeError(error) } };
+  }
+  rerender();
+}
+
+export function setAffectedErrors(errors, filters = affected.filters) { affected = { ...affected, filters: { ...filters }, errors }; rerender(); }
+export async function consultAffected(filters = affected.filters) {
+  affected = { ...affected, filters: { ...filters }, busy: true, error: '', errors: {} };
+  rerender();
+  const params = new URLSearchParams({ desde: filters.from, hasta: filters.to });
+  if (filters.personalId) params.set('personalId', String(filters.personalId));
+  if (filters.sucursalId) params.set('sucursalId', String(filters.sucursalId));
+  try {
+    const result = await api(`/disponibilidad/citas-afectadas?${params}`);
+    affected = { ...affected, busy: false, result, error: '', stale: false };
+  } catch (error) {
+    const technical = isTechnical(error);
+    affected = { ...affected, busy: false, result: technical ? affected.result : null, error: safeError(error), stale: Boolean(affected.result) && technical };
+  }
+  rerender();
 }
 
 export function availability() {
+  const catalogs = seedFilters();
+  if (user.rol === 'admin_negocio' && !configuration.loaded && !configuration.busy) void refreshConfiguration();
+  const operational = [];
+  if (user.rol === 'admin_negocio') operational.push({ id: 'configuration', label: 'Reglas de agenda', context: false, content: configurationPanel(configuration) });
+  operational.push(
+    { id: 'slots', label: 'Horarios disponibles', context: false, content: availabilityQueryPanel({ ...query, role: user.rol, professionals: catalogs.people, branches: catalogs.branches, services: catalogs.services }) },
+    { id: 'affected', label: 'Citas afectadas', context: false, content: affectedAppointmentsPanel({ ...affected, role: user.rol, professionals: catalogs.people, branches: catalogs.branches, services: catalogs.services }) },
+  );
+  if (user.rol === 'recepcionista') return weeklyAvailability({ extraPanels: operational });
+
   const person = selectedProfessional();
-  if (!person) return weeklyAvailability();
+  if (!person) return weeklyAvailability({ extraPanels: operational });
   if (cache?.id !== person.id && loading?.id !== person.id) void refreshAvailabilityData();
   const team = !getBlockScope() && user.rol === 'admin_negocio';
   if (team) refreshTeamExceptions();
@@ -114,7 +238,8 @@ export function availability() {
       : pendingContent || exceptionsSection(extra.exceptions.map((item) => ({ ...item, professionalId: person.id }))),
     extraPanels: [
       { id: 'offering', label: 'Oferta por sucursal', content: pendingContent || offeringSection(person) },
-      { id: 'projection', label: 'Proyección', content: pendingContent || projectionSection(person) },
+      { id: 'projection', label: 'Proyección de atención', content: pendingContent || projectionSection(person) },
+      ...operational,
     ],
   });
 }

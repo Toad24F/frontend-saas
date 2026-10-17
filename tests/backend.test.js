@@ -38,8 +38,26 @@ test('API interpreta 204 y errores de validación sin ocultarlos', async () => {
     global.fetch = async () => new Response(null, { status: 204 });
     assert.equal(await api('/bloqueos/1', 'DELETE'), null);
     global.fetch = async () => Response.json({ message: ['Horario solapado', 'Sucursal no asignada'] }, { status: 400 });
-    await assert.rejects(api('/profesionales/2/horario', 'PUT', { franjas: [] }), /Horario solapado · Sucursal no asignada/);
+    await assert.rejects(api('/profesionales/2/horario', 'PUT', { franjas: [] }), (error) => {
+      assert.match(error.message, /Horario solapado · Sucursal no asignada/);
+      assert.equal(error.status, 400);
+      return true;
+    });
   } finally { global.fetch = original; }
+});
+
+test('Recepción accede a disponibilidad privada y conserva cuenta', async () => {
+  const original = global.fetch;
+  const storage = global.sessionStorage;
+  global.sessionStorage = { setItem() {}, removeItem() {} };
+  try {
+    global.fetch = async () => Response.json({ accessToken: 'reception-token', usuario: { id: 8, nombre: 'Recepción', rol: 'recepcionista', negocioId: 7 } });
+    await login('recepcion@example.com', 'test-password');
+    assert.equal(defaultPage(), 'disponibilidad');
+    assert.equal(availablePage('disponibilidad'), true);
+    assert.equal(availablePage('cuenta'), true);
+    assert.equal(availablePage('profesionales'), false);
+  } finally { global.fetch = original; global.sessionStorage = storage; }
 });
 
 test('carga datos reales aislados del negocio, sin inventar citas, y envía autorización', async () => {

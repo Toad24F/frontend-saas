@@ -58,8 +58,8 @@ function professionalContext(people, selected, tabId) {
 }
 
 function tabLayout(tabs, people, selected) {
-  if (!tabs.some((tab) => tab.id === activeTab)) activeTab = 'schedule';
-  return `<div class="availability-workspace">${tabs.map((tab) => `<div data-availability-context="${tab.id}" ${tab.id === activeTab ? '' : 'hidden'}>${professionalContext(people, selected, tab.id)}</div>`).join('')}<nav class="availability-tabs" role="tablist" aria-label="Secciones de disponibilidad">${tabs.map((tab) => `<button type="button" role="tab" id="availability-tab-${tab.id}" aria-controls="availability-panel-${tab.id}" aria-selected="${tab.id === activeTab}" tabindex="${tab.id === activeTab ? '0' : '-1'}" data-availability-tab="${tab.id}" class="${tab.id === activeTab ? 'is-selected' : ''}">${tab.label}</button>`).join('')}</nav>${tabs.map((tab) => `<div role="tabpanel" id="availability-panel-${tab.id}" aria-labelledby="availability-tab-${tab.id}" data-availability-panel="${tab.id}" ${tab.id === activeTab ? '' : 'hidden'}>${tab.content}</div>`).join('')}</div>`;
+  if (!tabs.some((tab) => tab.id === activeTab)) activeTab = tabs[0]?.id || '';
+  return `<div class="availability-workspace">${tabs.filter((tab) => tab.context !== false).map((tab) => `<div data-availability-context="${tab.id}" ${tab.id === activeTab ? '' : 'hidden'}>${professionalContext(people, selected, tab.id)}</div>`).join('')}<nav class="availability-tabs" role="tablist" aria-label="Secciones de disponibilidad">${tabs.map((tab) => `<button type="button" role="tab" id="availability-tab-${tab.id}" aria-controls="availability-panel-${tab.id}" aria-selected="${tab.id === activeTab}" tabindex="${tab.id === activeTab ? '0' : '-1'}" data-availability-tab="${tab.id}" class="${tab.id === activeTab ? 'is-selected' : ''}">${tab.label}</button>`).join('')}</nav>${tabs.map((tab) => `<div role="tabpanel" id="availability-panel-${tab.id}" aria-labelledby="availability-tab-${tab.id}" data-availability-panel="${tab.id}" ${tab.id === activeTab ? '' : 'hidden'}>${tab.content}</div>`).join('')}</div>`;
 }
 
 export function availability({ exceptionContent = '', extraPanels = [] } = {}) {
@@ -67,17 +67,22 @@ export function availability({ exceptionContent = '', extraPanels = [] } = {}) {
   const people = list('professionals', state.tenantId);
   if (blockScope && !people.some((person) => String(person.id) === blockScope)) blockScope = '';
   const selected = people.find((person) => person.id === Number(state.scheduleProfessional)) || people[0];
-  if (!selected) return `${pageHead('Disponibilidad', 'Organiza horarios y fechas de atención.')}${empty('Agrega a tu primer profesional', 'Después podrás configurar sus horarios.')}`;
-  const schedules = list('schedules', state.tenantId).filter((schedule) => schedule.professionalId === selected.id);
-  if (!isDemo) for (const day of [1, 2, 3, 4, 5, 6, 0]) {
-    if (!schedules.some((schedule) => schedule.day === day)) schedules.push({ id: -100 - day, day, branchId: selected.branchIds[0], enabled: false, start: '', end: '', breakStart: '', breakEnd: '' });
+  if (!selected && !extraPanels.length) return `${pageHead('Disponibilidad', 'Organiza horarios y fechas de atención.')}${empty('Agrega a tu primer profesional', 'Después podrás configurar sus horarios.')}`;
+  const tabs = [];
+  if (selected) {
+    const schedules = list('schedules', state.tenantId).filter((schedule) => schedule.professionalId === selected.id);
+    if (!isDemo) for (const day of [1, 2, 3, 4, 5, 6, 0]) {
+      if (!schedules.some((schedule) => schedule.day === day)) schedules.push({ id: -100 - day, day, branchId: selected.branchIds[0], enabled: false, start: '', end: '', breakStart: '', breakEnd: '' });
+    }
+    tabs.push(
+      { id: 'schedule', label: 'Horario semanal', content: scheduleSection(selected, schedules) + (isDemo && !extraPanels.length ? modeSection(tenant) : '') },
+      { id: 'changes', label: exceptionContent ? 'Bloqueos y excepciones' : 'Bloqueos', content: blocksSection() + exceptionContent },
+    );
   }
-  const tabs = [
-    { id: 'schedule', label: 'Horario semanal', content: scheduleSection(selected, schedules) + modeSection(tenant) },
-    { id: 'changes', label: exceptionContent ? 'Bloqueos y excepciones' : 'Bloqueos', content: blocksSection() + exceptionContent },
-    ...extraPanels,
-  ];
-  const description = extraPanels.length
+  tabs.push(...extraPanels);
+  const description = !selected
+    ? 'Consulta horarios disponibles y revisa afectaciones operativas.'
+    : extraPanels.length
     ? 'Organiza horarios, cambios por fecha y servicios por sucursal.'
     : 'Organiza horarios y bloqueos de atención.';
   return `${pageHead('Disponibilidad', description)}${tabLayout(tabs, people, selected)}`;
