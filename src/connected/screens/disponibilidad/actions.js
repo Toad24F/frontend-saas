@@ -34,6 +34,36 @@ async function editGeneral() {
   form.addEventListener('change', (event) => clearAvailabilityField(form, event.target));
 }
 
+async function editAssignedBranches() {
+  if (user.rol !== 'admin_negocio') return;
+  const person = selectedProfessional();
+  if (!person) throw new Error('Selecciona un profesional.');
+  const [assignedIds, branches] = await Promise.all([
+    api(`/profesionales/${person.id}/sucursales`),
+    api('/sucursales'),
+  ]);
+  if (!branches.length) throw new Error('Crea una sucursal antes de asignarla.');
+  const choices = branches.map((branch) => `<label class="form-check"><input class="form-check-input" type="checkbox" name="branchIds" value="${branch.id}" ${assignedIds.includes(branch.id) ? 'checked' : ''} ${!branch.activo && !assignedIds.includes(branch.id) ? 'disabled' : ''}><span>${esc(branch.nombre)}${branch.activo ? '' : ' · Inactiva'}</span></label>`).join('');
+  const dialog = basicForm('Sucursales asignadas', `<p class="field-hint">Selecciona las sucursales donde puede atender ${esc(person.name)}.</p><div class="offering-checks assigned-branch-choices" role="group" aria-label="Sucursales disponibles">${choices}</div><p class="field-hint">Si una sucursal tiene franjas o excepciones, quítalas antes de desasignarla.</p>`, async (form) => {
+    const branchIds = form.getAll('branchIds').map(Number);
+    await api(`/profesionales/${person.id}/sucursales`, 'PUT', { sucursalIds: branchIds });
+    invalidateProjection();
+    await refreshAvailabilityData(true);
+  }, false, {
+    onError(error, form) {
+      const target = form.querySelector('#form-error');
+      target.textContent = error.status === 409
+        ? 'No se pudo quitar la sucursal: conserva franjas o excepciones. Revísalas en Horario semanal y Bloqueos y excepciones antes de reintentar.'
+        : error.status === 404 || error.status === 403
+          ? 'La asignación o la sucursal ya no está disponible. Cierra y vuelve a abrir para actualizarla.'
+          : error.message || 'No se pudieron guardar las sucursales. Inténtalo de nuevo.';
+      target.hidden = false;
+      target.focus();
+    },
+  });
+  dialog.querySelector('.assigned-branch-choices input:not(:disabled)')?.focus();
+}
+
 async function editBranch(branchId) {
   const branch = currentAvailabilityData()?.offering?.sucursales.find((item) => item.id === branchId);
   if (!branch) throw new Error('La sucursal no está asignada a este profesional.');
@@ -162,6 +192,7 @@ export async function handleAvailabilityClick(event) {
   const professionalId = Number(button.dataset.professionalId);
   try {
     if (action === 'general') await editGeneral();
+    else if (action === 'assign-branches') await editAssignedBranches();
     else if (action === 'branch-services') await editBranch(branchId);
     else if (action === 'attention') await toggleAttention(branchId, button);
     else if (action === 'new-exception') editException();

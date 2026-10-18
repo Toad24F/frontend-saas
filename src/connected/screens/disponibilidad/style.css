@@ -1,7 +1,3 @@
-.availability-extra { margin-top: 24px; padding: 24px; }
-.availability-extra .section-heading { margin-bottom: 18px; }
-.availability-extra .section-heading p, .availability-note { color: var(--muted, #667085); font-size: 13px; }
-.availability-note { margin: 16px 0 0; line-height: 1.5; }
 .offering-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
 .offering-branch { border: 1px solid var(--border); border-radius: 10px; padding: 18px; min-width: 0; }
 .offering-branch-head, .offering-service, .availability-row-actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
@@ -27,4 +23,4 @@
 .exception-break { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
 .exception-break .availability-field-error { grid-column: 1 / -1; }
 @media (max-width: 900px) { .offering-grid { grid-template-columns: 1fr; } }
-@media (max-width: 767px) { .availability-extra { padding: 18px; } .offering-branch-head { flex-wrap: wrap; } .availability-extra .block-item { padding: 16px 0; flex-wrap: wrap; } .exception-row { grid-template-columns: repeat(2, minmax(0, 1fr)); } .exception-break { grid-column: 1 / -1; } .exception-row .icon-btn { min-height: 44px; } }
+@media (max-width: 767px) { .offering-branch-head { flex-wrap: wrap; } .availability-extra .block-item { padding: 16px 0; flex-wrap: wrap; } .exception-row { grid-template-columns: repeat(2, minmax(0, 1fr)); } .exception-break { grid-column: 1 / -1; } .exception-row .icon-btn { min-height: 44px; } }

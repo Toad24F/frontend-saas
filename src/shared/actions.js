@@ -27,6 +27,10 @@ export async function handleClick(e) {
     if (isDemo && state.page === 'disponibilidad') {
       const slot = e.target.closest('[data-availability-slot]');
       const operationalAction = e.target.closest('[data-availability-action]');
+      if (e.target.closest('[data-demo-branch-action]')) {
+        (await import('../demo/screens/disponibilidad/view.js')).editDemoAssignedBranches();
+        return;
+      }
       if (slot) {
         (await import('../demo/screens/disponibilidad/view.js')).demoSelectSlot(slot.dataset.slotDate, slot.dataset.slotTime);
         return;
@@ -128,7 +132,12 @@ export async function handleClick(e) {
     const removeSchedule = e.target.closest('[data-remove-schedule]');
     if (removeSchedule) {
       const row = removeSchedule.closest('[data-schedule-row]');
-      if (document.querySelectorAll(`[data-schedule-row][data-schedule-day="${row.dataset.scheduleDay}"]`).length > 1) row.remove();
+      const siblings = document.querySelectorAll(`[data-schedule-row][data-schedule-day="${row.dataset.scheduleDay}"]`);
+      if (!isDemo && siblings.length === 1 && Number(row.dataset.id) > 0) {
+        const selected = resource('professionals', document.querySelector('#schedule-professional').value, state.tenantId);
+        row.insertAdjacentHTML('afterend', scheduleRow({ id: draftScheduleId--, day: Number(row.dataset.scheduleDay), branchId: selected.branchIds[0] || null, enabled: false, start: '', end: '', breakStart: '', breakEnd: '' }, selected, state.tenantId));
+      }
+      if (!isDemo || siblings.length > 1) row.remove();
       return;
     }
     const action = e.target.closest('[data-action]')?.dataset.action;

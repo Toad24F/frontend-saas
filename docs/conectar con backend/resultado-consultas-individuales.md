@@ -17,7 +17,7 @@
 | --- | --- | --- |
 | `GET /servicios/:id` | Conectado al abrir Editar servicio. | Evita iniciar el formulario con nombre, precio, duración o autoría obsoletos. P conserva la restricción de edición por autor con la autoría reciente. |
 | `GET /sucursales/:id` | Conectado al abrir Editar sucursal. | Actualiza dirección, teléfono, zona horaria e indicaciones antes de editar. |
-| `GET /profesionales/:id` | Conectado al abrir Editar profesional como AN. | Actualiza los datos de cuenta y perfil. En el mismo flujo se consultan sus sucursales y servicios seleccionados, además de los catálogos de opciones actuales, para evitar retirar asignaciones recientes al guardar. |
+| `GET /profesionales/:id` | Conectado al abrir Editar profesional como AN. | Actualiza los datos de cuenta y perfil. La edición ya no guarda asignaciones; el editor de Sucursales asignadas consulta sus selecciones actuales por separado. |
 | `GET /profesionales/:id/sucursales/:sucursalId/atencion` | Sin llamada directa. | La pantalla de disponibilidad ya carga `GET /profesionales/:id/oferta`, que incluye `atencionActiva` por sucursal, y vuelve a cargarla tras cambiar el interruptor. La consulta individual duplicaría el dato en este flujo. |
 
 ## Verificación

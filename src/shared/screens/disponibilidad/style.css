@@ -1,5 +1,14 @@
 .availability-workspace { min-width: 0; }
 .availability-field-error { margin: 6px 0 0; color: #a43835; font-size: 11px; font-weight: 600; line-height: 1.35; }
+.availability-extra { margin-top: 24px; padding: 24px; }
+.availability-extra .section-heading { margin-bottom: 18px; }
+.availability-extra .section-heading p, .availability-note { color: var(--muted, #667085); font-size: 13px; }
+.availability-note { margin: 16px 0 0; line-height: 1.5; }
+.assigned-branch-choices { margin: 12px 0; }
+.assigned-branch-choices .form-check { display: flex; align-items: center; gap: 10px; min-height: 36px; }
+.assigned-branch-list { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--border); }
+.assigned-branch-list li { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+.assigned-branch-list li span { color: var(--muted); text-align: right; }
 [data-availability-field].has-error > :is(input, select, textarea),
 [data-availability-field].has-error .form-control,
 [data-availability-field].has-error .form-select,
@@ -76,6 +85,7 @@ html[data-theme='dark'] .availability-field-error { color: #ffb2a8; }
 .availability-workspace .section-heading h2 { letter-spacing: -.025em; }
 .availability-workspace .section-heading p { text-wrap: pretty; }
 @media (max-width: 767px) {
+  .availability-extra { padding: 18px; }
   .availability-person-context { flex-wrap: wrap; gap: 11px; padding: 14px; margin-bottom: 16px; }
   .availability-person-control { flex-basis: 100%; min-width: 0; }
   .availability-tabs { gap: 4px; margin-bottom: 14px; }

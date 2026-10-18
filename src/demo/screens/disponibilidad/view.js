@@ -2,6 +2,8 @@ import { state, render } from '../../../shared/app.js';
 import { addDays, list, tenantById, TODAY } from '../../../shared/data.js';
 import { availability as weeklyAvailability } from '../../../shared/screens/disponibilidad/view.js';
 import { affectedAppointmentsPanel, availabilityQueryPanel, configurationPanel } from '../../../shared/screens/disponibilidad/operational.js';
+import { basicForm } from '../../../shared/forms.js';
+import { escape as esc, empty, toast } from '../../../shared/ui.js';
 
 let configuration = null;
 let query = null;
@@ -28,11 +30,30 @@ const utcAt = (date, hour) => utcClock(date, `${String(hour).padStart(2, '0')}:0
 export function availability() {
   const data = models();
   const common = { role: 'admin_negocio', professionals: data.professionals, branches: data.branches, services: data.services };
+  const person = data.professionals.find((item) => item.id === Number(state.scheduleProfessional)) || data.professionals[0];
+  const assigned = data.branches.filter((branch) => person?.branchIds.includes(branch.id));
+  const branchPanel = person ? `<section class="surface availability-extra"><div class="section-heading"><div><h2>Sucursales asignadas</h2><p>Define en qué sucursales puede atender ${esc(person.name)}.</p></div><button type="button" class="btn btn-light" data-demo-branch-action ${data.branches.length ? '' : 'disabled'}>Editar asignaciones</button></div>${assigned.length ? `<ul class="assigned-branch-list">${assigned.map((branch) => `<li><strong>${esc(branch.name)}</strong><span>Asignada</span></li>`).join('')}</ul>` : empty('Sin sucursales asignadas', 'Elige una sucursal para configurar horarios.')}<p class="availability-note">Los cambios de esta demo se restablecen al recargar.</p></section>` : '';
   return weeklyAvailability({ extraPanels: [
+    ...(person ? [{ id: 'branches', label: 'Sucursales asignadas', content: branchPanel }] : []),
     { id: 'configuration', label: 'Reglas de agenda', context: false, content: configurationPanel(configuration, true) },
     { id: 'slots', label: 'Horarios disponibles', context: false, content: availabilityQueryPanel({ ...query, ...common }, true) },
     { id: 'affected', label: 'Citas afectadas', context: false, content: affectedAppointmentsPanel({ ...affected, ...common }, true) },
   ] });
+}
+
+export function editDemoAssignedBranches() {
+  const person = list('professionals', state.tenantId).find((item) => item.id === Number(state.scheduleProfessional)) || list('professionals', state.tenantId)[0];
+  const branches = list('branches', state.tenantId);
+  if (!person || !branches.length) { toast('Crea una sucursal y un profesional primero.'); return; }
+  const choices = branches.map((branch) => `<label class="form-check"><input class="form-check-input" type="checkbox" name="branchIds" value="${branch.id}" ${person.branchIds.includes(branch.id) ? 'checked' : ''}><span>${esc(branch.name)}</span></label>`).join('');
+  basicForm('Sucursales asignadas', `<p class="field-hint">Selecciona las sucursales donde puede atender ${esc(person.name)}.</p><div class="offering-checks assigned-branch-choices" role="group" aria-label="Sucursales disponibles">${choices}</div>`, async (form) => {
+    const next = form.getAll('branchIds').map(Number);
+    const removed = person.branchIds.filter((id) => !next.includes(id));
+    const schedules = list('schedules', state.tenantId).some((row) => row.professionalId === person.id && removed.includes(row.branchId));
+    const appointments = list('appointments', state.tenantId).some((item) => item.professionalId === person.id && removed.includes(item.branchId) && !['cancelada', 'no_asistio', 'completada'].includes(item.status));
+    if (schedules || appointments) throw new Error('La sucursal conserva franjas o citas activas. Resuélvelas antes de quitarla.');
+    person.branchIds = next;
+  });
 }
 
 export function demoSaveConfiguration(values, errors) {
