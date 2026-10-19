@@ -2,11 +2,12 @@ import { isDemo, pending, user } from '../../../connected/backend.js';
 import { state } from '../../app.js';
 import { list, resource, tenantById, formatDate } from '../../data.js';
 import { icon } from '../../icons.js';
+import { availabilityGroups, groupForAvailabilityTab, resolveAvailabilityGroup } from './groups.js';
 import { escape as esc, pageHead, button, empty } from '../../ui.js';
 import './style.css';
 
 const days = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
-let activeTab = 'schedule';
+let activeTab = 'branches';
 let blockScope = '';
 
 export function getBlockScope() { return blockScope; }
@@ -58,8 +59,13 @@ function professionalContext(people, selected, tabId) {
 }
 
 function tabLayout(tabs, people, selected) {
-  if (!tabs.some((tab) => tab.id === activeTab)) activeTab = tabs[0]?.id || '';
-  return `<div class="availability-workspace">${tabs.filter((tab) => tab.context !== false).map((tab) => `<div data-availability-context="${tab.id}" ${tab.id === activeTab ? '' : 'hidden'}>${professionalContext(people, selected, tab.id)}</div>`).join('')}<nav class="availability-tabs" role="tablist" aria-label="Secciones de disponibilidad">${tabs.map((tab) => `<button type="button" role="tab" id="availability-tab-${tab.id}" aria-controls="availability-panel-${tab.id}" aria-selected="${tab.id === activeTab}" tabindex="${tab.id === activeTab ? '0' : '-1'}" data-availability-tab="${tab.id}" class="${tab.id === activeTab ? 'is-selected' : ''}">${tab.label}</button>`).join('')}</nav>${tabs.map((tab) => `<div role="tabpanel" id="availability-panel-${tab.id}" aria-labelledby="availability-tab-${tab.id}" data-availability-panel="${tab.id}" ${tab.id === activeTab ? '' : 'hidden'}>${tab.content}</div>`).join('')}</div>`;
+  const groupId = resolveAvailabilityGroup(state.availabilityGroup, isDemo, user?.rol);
+  const group = availabilityGroups.find((item) => item.id === groupId);
+  const visible = tabs.filter((tab) => groupForAvailabilityTab(tab.id) === groupId)
+    .sort((a, b) => group.tabs.indexOf(a.id) - group.tabs.indexOf(b.id));
+  if (!visible.some((tab) => tab.id === activeTab)) activeTab = visible[0]?.id || '';
+  const single = visible.length === 1;
+  return `<div class="availability-workspace">${visible.filter((tab) => tab.context !== false).map((tab) => `<div data-availability-context="${tab.id}" ${tab.id === activeTab ? '' : 'hidden'}>${professionalContext(people, selected, tab.id)}</div>`).join('')}${single ? visible[0].content : `<nav class="availability-tabs" role="tablist" aria-label="Opciones de ${group.label}">${visible.map((tab) => `<button type="button" role="tab" id="availability-tab-${tab.id}" aria-controls="availability-panel-${tab.id}" aria-selected="${tab.id === activeTab}" tabindex="${tab.id === activeTab ? '0' : '-1'}" data-availability-tab="${tab.id}" class="${tab.id === activeTab ? 'is-selected' : ''}">${tab.label}</button>`).join('')}</nav>${visible.map((tab) => `<div role="tabpanel" id="availability-panel-${tab.id}" aria-labelledby="availability-tab-${tab.id}" data-availability-panel="${tab.id}" ${tab.id === activeTab ? '' : 'hidden'}>${tab.content}</div>`).join('')}`}</div>`;
 }
 
 export function availability({ exceptionContent = '', extraPanels = [] } = {}) {
@@ -78,13 +84,15 @@ export function availability({ exceptionContent = '', extraPanels = [] } = {}) {
       { id: 'schedule', label: 'Horario semanal', content: scheduleSection(selected, schedules) + (isDemo && !extraPanels.length ? modeSection(tenant) : '') },
       { id: 'changes', label: exceptionContent ? 'Bloqueos y excepciones' : 'Bloqueos', content: blocksSection() + exceptionContent },
     );
+  } else if (state.availabilityGroup === 'equipo') {
+    tabs.push({ id: 'team-empty', label: 'Equipo', context: false, content: empty('Agrega a tu primer profesional', user?.rol === 'admin_negocio' || isDemo ? 'Después podrás asignar sucursales y configurar sus horarios.' : 'Pide a administración que configure tu perfil.', user?.rol === 'admin_negocio' || isDemo ? '<a class="btn btn-light" href="/admin/profesionales" data-nav="profesionales">Ir a profesionales</a>' : '') });
   }
   tabs.push(...extraPanels);
-  const description = !selected
-    ? 'Consulta horarios disponibles y revisa afectaciones operativas.'
-    : extraPanels.length
-    ? 'Organiza horarios, cambios por fecha y servicios por sucursal.'
-    : 'Organiza horarios y bloqueos de atención.';
+  const description = {
+    equipo: isDemo ? 'Configura sucursales, horarios y cambios de atención.' : 'Configura sucursales, servicios, horarios y cambios de atención.',
+    negocio: 'Define las reglas de agenda que se aplican a todo el negocio.',
+    comprobar: 'Consulta horarios y revisa el efecto de los cambios en las citas.',
+  }[resolveAvailabilityGroup(state.availabilityGroup, isDemo, user?.rol)];
   return `${pageHead('Disponibilidad', description)}${tabLayout(tabs, people, selected)}`;
 }
 

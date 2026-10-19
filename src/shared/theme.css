@@ -317,6 +317,10 @@ html[data-theme='light'] .sidebar .nav-item.active {
 }
 html[data-theme='light'] .sidebar .nav-item.active:hover { background: #f6e3da; color: var(--accent-dark); }
 html[data-theme='light'] .sidebar .nav-item.active:hover > .icon { color: var(--accent-dark); }
+html[data-theme='light'] .sidebar .nav-submenu { border-color: var(--border); }
+html[data-theme='light'] .sidebar .nav-subitem { color: var(--muted); }
+html[data-theme='light'] .sidebar .nav-subitem:hover { background: var(--surface-soft); color: var(--ink); }
+html[data-theme='light'] .sidebar .nav-subitem.is-current { background: #f6e3da; color: var(--accent-dark); }
 html[data-theme='light'] .sidebar .nav-count {
   background: #f0d8cd;
   color: var(--accent-dark);

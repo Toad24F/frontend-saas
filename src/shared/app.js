@@ -26,6 +26,7 @@ import { applyReceptionFilters, resetReceptionFilters, setReceptionView } from '
 import { applyServiceFilters, resetServiceFilters, setServiceView } from './screens/servicios/view.js';
 import { applyBranchFilters, resetBranchFilters, setBranchView } from './screens/sucursales/view.js';
 import { setAvailabilityTab } from './screens/disponibilidad/view.js';
+import { allowedAvailabilityGroups, resolveAvailabilityGroup } from './screens/disponibilidad/groups.js';
 
 const themeKey = 'cita-theme';
 let theme = (() => {
@@ -74,6 +75,7 @@ export const state = {
   professional: 'all',
   status: 'all',
   search: '',
+  availabilityGroup: '',
 };
 matchMedia('(max-width: 767px)').addEventListener('change', ({ matches }) => {
   document.querySelectorAll('.professional-workspace .professional-results[data-desktop-view]').forEach((results) => {
@@ -104,6 +106,18 @@ labels.negocio = 'Detalle de negocio';
 labels.cuenta = 'Mi cuenta';
 labels.recepcionistas = 'Recepcionistas';
 let animateNextRoute = true;
+let availabilityMenuOpen = null;
+const availabilityPath = (group) => `/admin/disponibilidad/${group}`;
+const selectedAvailabilityGroup = () => resolveAvailabilityGroup(state.availabilityGroup, isDemo, user?.rol);
+function navItem(item) {
+  if (item.length === 2) return `<div class="nav-section">${item[1]}</div>`;
+  if (item[0] === 'disponibilidad') {
+    const open = availabilityMenuOpen ?? state.page === 'disponibilidad';
+    const children = allowedAvailabilityGroups(isDemo, user?.rol).map((group) => `<a href="${availabilityPath(group.id)}" data-availability-group="${group.id}" class="nav-subitem ${state.page === 'disponibilidad' && selectedAvailabilityGroup() === group.id ? 'is-current' : ''}" ${state.page === 'disponibilidad' && selectedAvailabilityGroup() === group.id ? 'aria-current="page"' : ''}>${group.label}</a>`).join('');
+    return `<div class="nav-disclosure"><button type="button" class="nav-item nav-disclosure-trigger ${state.page === 'disponibilidad' ? 'active' : ''}" data-availability-menu aria-expanded="${open}" aria-controls="availability-sidebar-submenu">${icon('clock')}<span>Disponibilidad</span>${icon('chevron', 'nav-disclosure-arrow')}</button><div class="nav-submenu" id="availability-sidebar-submenu" ${open ? '' : 'hidden'}>${children}</div></div>`;
+  }
+  return `<a href="/admin/${item[0]}" data-nav="${item[0]}" class="nav-item ${state.page === item[0] ? 'active' : ''}" ${state.page === item[0] ? 'aria-current="page"' : ''}>${icon(item[1])}<span>${item[2]}</span>${item[0] === 'agenda' ? `<span class="nav-count">${list('appointments', state.tenantId).filter((a) => a.date === TODAY).length}</span>` : ''}</a>`;
+}
 function setMobileMenuOpen(isOpen) {
   const layout = document.querySelector('.admin-layout');
   if (!layout) return;
@@ -139,12 +153,35 @@ function connectedAccountMenu() {
 export function navigate(page, id = null) {
   if (!isDemo && !availablePage(page)) page = defaultPage();
   if (page === 'negocio' && (!Number.isSafeInteger(Number(id)) || Number(id) < 1)) page = defaultPage();
-  history.pushState({}, '', modeUrl(`/admin/${page}${page === 'negocio' ? `/${id}` : ''}`));
+  if (page === 'disponibilidad') {
+    state.availabilityGroup = selectedAvailabilityGroup();
+    availabilityMenuOpen = true;
+  }
+  history.pushState({}, '', modeUrl(page === 'disponibilidad' ? availabilityPath(state.availabilityGroup) : `/admin/${page}${page === 'negocio' ? `/${id}` : ''}`));
   state.page = page;
   state.businessId = page === 'negocio' ? Number(id) : null;
   state.search = '';
   animateNextRoute = true;
   render();
+}
+function navigateAvailabilityGroup(group) {
+  const resolved = resolveAvailabilityGroup(group, isDemo, user?.rol);
+  if (!resolved) return;
+  availabilityMenuOpen = true;
+  state.availabilityGroup = resolved;
+  state.page = 'disponibilidad';
+  state.search = '';
+  history.pushState({}, '', modeUrl(availabilityPath(resolved)));
+  animateNextRoute = true;
+  render();
+}
+function restoreAvailabilityGroup() {
+  if (state.page !== 'disponibilidad') return;
+  const requested = location.pathname.split('/')[3];
+  state.availabilityGroup = resolveAvailabilityGroup(requested, isDemo, user?.rol);
+  if (state.availabilityGroup && requested !== state.availabilityGroup) {
+    history.replaceState({}, '', modeUrl(availabilityPath(state.availabilityGroup)));
+  }
 }
 export function renderShell(content) {
   if (!tenantById(state.tenantId)) state.tenantId = db.tenants[0].id;
@@ -165,7 +202,7 @@ export function renderShell(content) {
     ? `<a class="mobile-professional-brand" href="/admin/${state.page}" data-nav="${state.page}" aria-label="Citalendar, ${labels[state.page].toLowerCase()}"><img class="brand-logo-on-light" src="/brand/citalendar-logo.svg" alt=""><img class="brand-logo-on-dark" src="/brand/citalendar-logo-light.svg" alt=""></a>`
     : '';
   document.querySelector('#app').innerHTML =
-    `<div class="admin-layout"><div class="sidebar-overlay" data-action="menu"></div><aside class="sidebar"><a class="brand" aria-label="Citalendar: inicio" href="/admin/agenda" data-nav="agenda"><img class="brand-logo-on-light" src="/brand/citalendar-logo.svg" alt=""/><img class="brand-logo-on-dark" src="/brand/citalendar-logo-light.svg" alt=""/></a><div class="workspace-identity glass-effect glass-effect--dark">${avatar(workspaceInitials, 'workspace-avatar')}<span><strong>${escape(workspaceName)}</strong></span></div><nav aria-label="Navegación principal">${visibleNav.map((n) => (n.length === 2 ? `<div class="nav-section">${n[1]}</div>` : `<a href="/admin/${n[0]}" data-nav="${n[0]}" class="nav-item ${state.page === n[0] ? 'active' : ''}" ${state.page === n[0] ? 'aria-current="page"' : ''}>${icon(n[1])}<span>${n[2]}</span>${n[0] === 'agenda' ? `<span class="nav-count">${list('appointments', state.tenantId).filter((a) => a.date === TODAY).length}</span>` : ''}</a>`)).join('')}</nav><div class="sidebar-bottom"><a href="/admin/configuracion" data-nav="configuracion" class="nav-item ${state.page === 'configuracion' ? 'active' : ''}">${icon('settings')}<span>Configuración</span></a><div class="portal-card"><div class="portal-icon">${icon('link')}</div><strong>Tu agenda, a un enlace</strong><p>Comparte tu portal y recibe reservas en línea.</p><a href="/reservas/${tenant.slug}" data-portal>Ver portal de reservas ${icon('external')}</a></div><div class="sidebar-foot"><span class="green-dot"></span> Entorno de demostración <span>v1.0</span></div></div></aside><div class="main-layout"><header class="topbar"><div class="breadcrumbs">${mobileProfessionalBrand}<button class="icon-btn mobile-menu" data-action="menu" aria-label="Abrir menú">${icon('menu')}</button><span>${escape(workspaceName)}</span>${icon('chevron')}<strong>${labels[state.page] || 'Agenda'}</strong></div><div class="topbar-right"><span class="demo-pill">Prototipo</span><span class="topbar-date">${icon('calendar')} ${formatDate(TODAY, { day: 'numeric', month: 'short', year: 'numeric' })}</span><button class="notification-button icon-btn" data-nav="notificaciones" aria-label="Ver notificaciones">${icon('bell')}<i></i></button><span class="topbar-divider"></span><button class="profile-button" data-nav="configuracion">${avatar('AV', 'peach')}<span><strong>Adriana Vega</strong><small>Administradora</small></span>${icon('down')}</button></div></header><main id="main-content" class="main-content${animateNextRoute ? ' motion-enter' : ''}">${content}</main><footer class="app-footer"><span>Un poco más de orden. Más tiempo para cuidar.</span><span>Hecho para tu día a día <span class="footer-logo">Citalendar</span></span></footer></div></div>`;
+    `<div class="admin-layout"><div class="sidebar-overlay" data-action="menu"></div><aside class="sidebar"><a class="brand" aria-label="Citalendar: inicio" href="/admin/agenda" data-nav="agenda"><img class="brand-logo-on-light" src="/brand/citalendar-logo.svg" alt=""/><img class="brand-logo-on-dark" src="/brand/citalendar-logo-light.svg" alt=""/></a><div class="workspace-identity glass-effect glass-effect--dark">${avatar(workspaceInitials, 'workspace-avatar')}<span><strong>${escape(workspaceName)}</strong></span></div><nav aria-label="Navegación principal">${visibleNav.map(navItem).join('')}</nav><div class="sidebar-bottom"><a href="/admin/configuracion" data-nav="configuracion" class="nav-item ${state.page === 'configuracion' ? 'active' : ''}">${icon('settings')}<span>Configuración</span></a><div class="portal-card"><div class="portal-icon">${icon('link')}</div><strong>Tu agenda, a un enlace</strong><p>Comparte tu portal y recibe reservas en línea.</p><a href="/reservas/${tenant.slug}" data-portal>Ver portal de reservas ${icon('external')}</a></div><div class="sidebar-foot"><span class="green-dot"></span> Entorno de demostración <span>v1.0</span></div></div></aside><div class="main-layout"><header class="topbar"><div class="breadcrumbs">${mobileProfessionalBrand}<button class="icon-btn mobile-menu" data-action="menu" aria-label="Abrir menú">${icon('menu')}</button><span>${escape(workspaceName)}</span>${icon('chevron')}<strong>${labels[state.page] || 'Agenda'}</strong></div><div class="topbar-right"><span class="demo-pill">Prototipo</span><span class="topbar-date">${icon('calendar')} ${formatDate(TODAY, { day: 'numeric', month: 'short', year: 'numeric' })}</span><button class="notification-button icon-btn" data-nav="notificaciones" aria-label="Ver notificaciones">${icon('bell')}<i></i></button><span class="topbar-divider"></span><button class="profile-button" data-nav="configuracion">${avatar('AV', 'peach')}<span><strong>Adriana Vega</strong><small>Administradora</small></span>${icon('down')}</button></div></header><main id="main-content" class="main-content${animateNextRoute ? ' motion-enter' : ''}">${content}</main><footer class="app-footer"><span>Un poco más de orden. Más tiempo para cuidar.</span><span>Hecho para tu día a día <span class="footer-logo">Citalendar</span></span></footer></div></div>`;
   const demoTabs = [
     ['resumen', 'grid', 'Inicio'],
     ['agenda', 'calendar', 'Agenda'],
@@ -272,6 +309,19 @@ document.addEventListener('click', async (e) => {
     return;
   }
   setAccountMenuOpen(false);
+  const availabilityMenu = e.target.closest('[data-availability-menu]');
+  if (availabilityMenu) {
+    availabilityMenuOpen = availabilityMenu.getAttribute('aria-expanded') !== 'true';
+    availabilityMenu.setAttribute('aria-expanded', String(availabilityMenuOpen));
+    document.querySelector('#availability-sidebar-submenu').hidden = !availabilityMenuOpen;
+    return;
+  }
+  const availabilityGroup = e.target.closest('[data-availability-group]');
+  if (availabilityGroup) {
+    e.preventDefault();
+    navigateAvailabilityGroup(availabilityGroup.dataset.availabilityGroup);
+    return;
+  }
   const availabilityTab = e.target.closest('[data-availability-tab]');
   if (availabilityTab) { setAvailabilityTab(availabilityTab.dataset.availabilityTab); return; }
   const professionalView = e.target.closest('[data-professional-view]');
@@ -382,6 +432,7 @@ document.addEventListener('input', (e) => {
 });
 window.addEventListener('popstate', () => {
   state.page = location.pathname.split('/')[2] || (isDemo ? 'agenda' : defaultPage());
+  restoreAvailabilityGroup();
   state.businessId = state.page === 'negocio' ? Number(location.pathname.split('/')[3]) : null;
   animateNextRoute = true;
   render();
@@ -432,6 +483,7 @@ export async function start() {
     state.page = location.pathname.startsWith('/admin/')
       ? location.pathname.split('/')[2]
       : isDemo ? 'agenda' : defaultPage();
+    restoreAvailabilityGroup();
     state.businessId = state.page === 'negocio' ? Number(location.pathname.split('/')[3]) : null;
     [extraViews, booking, actions] = await Promise.all([
       isDemo ? import('../demo/screens/index.js') : import('../connected/screens/index.js'),
