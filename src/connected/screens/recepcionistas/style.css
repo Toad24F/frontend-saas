@@ -3,7 +3,10 @@
 .reception-workspace .professional-assignment > span { white-space: normal; }
 .reception-workspace .professional-entry-actions .professional-availability { border: 0; }
 .reception-workspace .professional-view--cards .professional-entry-actions { gap: 8px; }
-.reception-workspace .professional-more.is-reactivate .professional-more-menu button { color: var(--ink); }
+.reception-workspace .reception-status-action.is-deactivate { background: var(--surface); color: #b54b43; border: 1px solid #b54b43; }
+.reception-workspace .reception-status-action.is-deactivate:hover { background: var(--surface-soft); color: #a9433c; }
+html[data-theme='dark'] .reception-workspace .reception-status-action.is-deactivate { color: #f2a99e; border-color: #f2a99e; }
+html[data-theme='dark'] .reception-workspace .reception-status-action.is-deactivate:hover { background: var(--surface-soft); color: #ffbdb4; }
 @media (max-width: 1260px) {
   .reception-toolbar { grid-template-columns: minmax(180px, 1fr) auto; }
 }

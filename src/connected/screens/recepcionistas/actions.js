@@ -2,7 +2,7 @@ import { api, loadBackendData } from '../../backend.js';
 import { validateNewPassword } from '../../modules/auth/password-policy.js';
 import { render } from '../../../shared/app.js';
 import { field, basicForm, errorSlot } from '../../../shared/forms.js';
-import { modal, toast, escape } from '../../../shared/ui.js';
+import { modal, toast } from '../../../shared/ui.js';
 import { showProfessionalErrors, clearProfessionalErrors, clearProfessionalField } from '../../../shared/screens/profesionales/errors.js';
 import { validateReceptionist, receptionistError } from './errors.js';
 
@@ -41,11 +41,6 @@ export function newReceptionist() {
     validateNewPassword(password);
     await api('/recepcionistas', 'POST', { nombre: form.get('name').trim(), emailRecepcionista: form.get('email').trim(), password });
   });
-}
-
-export async function receptionistDetail(id) {
-  const person = await api(`/recepcionistas/${id}`);
-  modal('Detalle de recepcionista', `<div class="dialog-body"><div class="business-detail-list"><div><span>Nombre</span><strong>${escape(person.nombre)}</strong></div><div><span>Correo</span><strong>${escape(person.email)}</strong></div><div><span>Estado</span><strong>${person.activo ? 'Activa' : 'Inactiva'}</strong></div><div><span>Activada</span><strong>${person.activadoEn ? new Intl.DateTimeFormat('es-MX', { dateStyle: 'medium' }).format(new Date(person.activadoEn)) : '—'}</strong></div></div><p class="form-intro mt-3">Los datos de identidad no tienen edición en la API actual.</p></div>`);
 }
 
 export function receptionistAction(action, id) {

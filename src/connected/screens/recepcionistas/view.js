@@ -28,7 +28,7 @@ function renderPerson(person, visible) {
     <div class="professional-person">${avatar(person.initials, 'mint', 'professional-avatar')}<div class="professional-identity"><h2>${escape(person.name)}</h2><p>Cuenta de recepción</p><small>${escape(person.email)}</small></div></div>
     <div class="professional-assignment"><span>${icon('calendar')}${escape(activationLabel(person.activatedAt))}</span></div>
     <span class="professional-status ${active ? 'is-active' : 'is-inactive'}"><i></i>${active ? 'Activa' : 'Inactiva'}</span>
-    <div class="professional-entry-actions"><button type="button" class="professional-availability" data-reception-detail="${person.id}">Ver detalle ${icon('arrow')}</button><button type="button" class="professional-edit" data-reception-action="reset" data-reception-id="${person.id}">Restablecer clave</button><details class="professional-more ${active ? '' : 'is-reactivate'}"><summary aria-label="Más acciones para ${escape(person.name)}">${icon('more')}</summary><div class="professional-more-menu"><button type="button" data-reception-action="${active ? 'deactivate' : 'reactivate'}" data-reception-id="${person.id}">${active ? 'Desactivar' : 'Reactivar'}</button></div></details></div>
+    <div class="professional-entry-actions"><button type="button" class="professional-availability reception-status-action ${active ? 'is-deactivate' : ''}" data-reception-action="${active ? 'deactivate' : 'reactivate'}" data-reception-id="${person.id}" aria-label="${active ? 'Desactivar' : 'Reactivar'} a ${escape(person.name)}">${active ? 'Desactivar' : 'Reactivar'}</button><button type="button" class="professional-edit" data-reception-action="reset" data-reception-id="${person.id}">Restablecer clave</button></div>
   </article>`;
 }
 

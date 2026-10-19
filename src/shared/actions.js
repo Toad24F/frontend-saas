@@ -17,6 +17,7 @@ import { modal, toast, escape as esc } from './ui.js';
 import { reportState } from '../demo/screens/reportes/state.js';
 import { appointmentTable } from './screens/agenda/table.js';
 import { scheduleRow, setBlockScope } from './screens/disponibilidad/view.js';
+import { readScheduleRows, setScheduleRowEnabled } from './screens/disponibilidad/schedule-rows.js';
 import { appointmentCovered } from '../demo/schedule.js';
 import { clearAvailabilityErrors, clearAvailabilityField, showAvailabilityErrors, showAvailabilityGeneralError, validateScheduleRows, scheduleApiErrors } from './screens/disponibilidad/errors.js';
 import { validateConfiguration, validateInclusiveRange } from './screens/disponibilidad/operational-contract.js';
@@ -71,12 +72,10 @@ export async function handleClick(e) {
       }
     }
     if (!isDemo && user.rol === 'admin_negocio' && state.page === 'recepcionistas') {
-      const detail = e.target.closest('[data-reception-detail]');
       const accountAction = e.target.closest('[data-reception-action]');
-      if (detail || accountAction) {
+      if (accountAction) {
         const reception = await import('../connected/screens/recepcionistas/actions.js');
-        if (detail) await reception.receptionistDetail(Number(detail.dataset.receptionDetail));
-        else reception.receptionistAction(accountAction.dataset.receptionAction, Number(accountAction.dataset.receptionId));
+        reception.receptionistAction(accountAction.dataset.receptionAction, Number(accountAction.dataset.receptionId));
         return;
       }
     }
@@ -392,15 +391,7 @@ document.addEventListener('submit', async (e) => {
     if (form.id === 'schedule-form') {
       const p = Number(document.querySelector('#schedule-professional').value);
       const professional = resource('professionals', p, state.tenantId);
-      const updates = [...form.querySelectorAll('[data-schedule-row]')].map((row) => {
-        const id = Number(row.dataset.id);
-        return {
-          id, tenantId: state.tenantId, professionalId: p, day: Number(row.dataset.scheduleDay),
-          enabled: f.has(`enabled-${id}`), branchId: Number(f.get(`branch-${id}`)),
-          start: f.get(`start-${id}`), end: f.get(`end-${id}`),
-          breakStart: f.get(`breakStart-${id}`), breakEnd: f.get(`breakEnd-${id}`),
-        };
-      });
+      const updates = readScheduleRows(form, state.tenantId, p);
       scheduleRows = updates;
       const scheduleErrors = validateScheduleRows(updates, professional.branchIds, isDemo);
       if (Object.keys(scheduleErrors).length) {
@@ -438,5 +429,10 @@ document.addEventListener('input', (event) => {
   if (event.target.closest('#schedule-form')) clearAvailabilityField(event.target.form, event.target);
 });
 document.addEventListener('change', (event) => {
-  if (event.target.closest('#schedule-form')) clearAvailabilityField(event.target.form, event.target);
+  if (event.target.closest('#schedule-form')) {
+    if (event.target.matches('input[type="checkbox"][name^="enabled-"]')) {
+      setScheduleRowEnabled(event.target.closest('[data-schedule-row]'), event.target.checked);
+    }
+    clearAvailabilityField(event.target.form, event.target);
+  }
 });
