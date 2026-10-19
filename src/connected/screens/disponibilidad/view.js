@@ -3,6 +3,7 @@ import { state, render } from '../../../shared/app.js';
 import { list, TODAY, addDays, formatDate } from '../../../shared/data.js';
 import { escape as esc, empty } from '../../../shared/ui.js';
 import { availability as weeklyAvailability, getBlockScope } from '../../../shared/screens/disponibilidad/view.js';
+import { branchAssignmentForm } from '../../../shared/screens/disponibilidad/branch-assignments.js';
 import { affectedAppointmentsPanel, availabilityQueryPanel, configurationPanel } from '../../../shared/screens/disponibilidad/operational.js';
 import { minutesToLabel } from './payload.js';
 import './style.css';
@@ -101,10 +102,8 @@ function offeringSection(person) {
 
 function assignedBranchesSection(person) {
   const branches = list('branches', state.tenantId);
-  const assigned = branches.filter((branch) => person.branchIds.includes(branch.id));
-  return `<section class="surface availability-extra"><div class="section-heading"><div><h2>Sucursales asignadas</h2><p>Define en qué sucursales puede atender ${esc(person.name)}. Después configura sus horarios y servicios.</p></div><button type="button" class="btn btn-light" data-availability-action="assign-branches" ${branches.length ? '' : 'disabled'}>Editar asignaciones</button></div>
-    ${assigned.length ? `<ul class="assigned-branch-list">${assigned.map((branch) => `<li><strong>${esc(branch.name)}</strong><span>${branch.active === false ? 'Sucursal inactiva' : 'Asignada'}</span></li>`).join('')}</ul>` : empty('Sin sucursales asignadas', branches.length ? 'Usa Editar asignaciones para elegir dónde puede atender.' : 'Crea una sucursal en el catálogo antes de asignarla.')}
-    <p class="availability-note">Para retirar una sucursal, quita primero sus franjas y excepciones. Si aún está en uso, verás el motivo antes de guardar.</p></section>`;
+  return `<section class="surface availability-extra"><div class="section-heading"><div><h2>Sucursales asignadas</h2><p>Elige las sucursales donde puede atender ${esc(person.name)}. Después configura sus horarios y servicios.</p></div></div>
+    ${branches.length ? branchAssignmentForm(person, branches) : empty('Sin sucursales disponibles', 'Crea una sucursal en el catálogo antes de asignarla.')}</section>`;
 }
 
 function exceptionsSection(exceptions, team = false) {

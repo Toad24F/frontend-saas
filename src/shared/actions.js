@@ -27,10 +27,6 @@ export async function handleClick(e) {
     if (isDemo && state.page === 'disponibilidad') {
       const slot = e.target.closest('[data-availability-slot]');
       const operationalAction = e.target.closest('[data-availability-action]');
-      if (e.target.closest('[data-demo-branch-action]')) {
-        (await import('../demo/screens/disponibilidad/view.js')).editDemoAssignedBranches();
-        return;
-      }
       if (slot) {
         (await import('../demo/screens/disponibilidad/view.js')).demoSelectSlot(slot.dataset.slotDate, slot.dataset.slotTime);
         return;
@@ -332,6 +328,22 @@ document.addEventListener('change', (e) => {
 });
 document.addEventListener('submit', async (e) => {
   const form = e.target;
+  if (isDemo && state.page === 'disponibilidad' && form.id === 'branch-assignments-form') {
+    e.preventDefault();
+    const submit = form.querySelector('[type="submit"]');
+    if (submit.disabled) return;
+    submit.disabled = true;
+    try {
+      const branchIds = [...new FormData(form).getAll('branchIds')].map(Number);
+      (await import('../demo/screens/disponibilidad/view.js')).saveDemoAssignedBranches(Number(form.dataset.personId), branchIds);
+    } catch (error) {
+      const target = form.querySelector('[data-assignment-error]');
+      target.textContent = error.message;
+      target.hidden = false;
+      target.focus();
+    } finally { submit.disabled = false; }
+    return;
+  }
   if (isDemo && state.page === 'disponibilidad' && ['agenda-configuration-form', 'availability-query-form', 'availability-validation-form', 'affected-appointments-form'].includes(form.id)) {
     e.preventDefault();
     const demo = await import('../demo/screens/disponibilidad/view.js');

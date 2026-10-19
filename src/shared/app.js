@@ -26,6 +26,7 @@ import { applyReceptionFilters, resetReceptionFilters, setReceptionView } from '
 import { applyServiceFilters, resetServiceFilters, setServiceView } from './screens/servicios/view.js';
 import { applyBranchFilters, resetBranchFilters, setBranchView } from './screens/sucursales/view.js';
 import { setAvailabilityTab } from './screens/disponibilidad/view.js';
+import { updateAssignmentDraft } from './screens/disponibilidad/branch-assignments.js';
 import { allowedAvailabilityGroups, resolveAvailabilityGroup } from './screens/disponibilidad/groups.js';
 
 const themeKey = 'cita-theme';
@@ -403,6 +404,7 @@ document.addEventListener('click', async (e) => {
   if (actions) actions.handleClick(e);
 });
 document.addEventListener('change', (e) => {
+  if (e.target.closest('#branch-assignments-form')) { updateAssignmentDraft(e.target.form); return; }
   if (e.target.dataset.professionalFilter) { applyProfessionalFilters(); return; }
   if (e.target.dataset.receptionFilter) { applyReceptionFilters(); return; }
   if (e.target.dataset.serviceFilter) { applyServiceFilters(); return; }

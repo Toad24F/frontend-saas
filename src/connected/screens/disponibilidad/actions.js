@@ -1,4 +1,4 @@
-import { api, user } from '../../backend.js';
+import { api, loadBackendData, user } from '../../backend.js';
 import { state, render } from '../../../shared/app.js';
 import { list, TODAY, formatDate } from '../../../shared/data.js';
 import { basicForm, field, select, errorSlot } from '../../../shared/forms.js';
@@ -6,6 +6,7 @@ import { modal, toast, escape as esc } from '../../../shared/ui.js';
 import { exceptionPayload, minutesToClock } from './payload.js';
 import { consultAffected, consultAvailability, currentAvailabilityData, findAvailabilityException, invalidateProjection, refreshAvailabilityData, refreshConfiguration, retryTeamExceptions, saveConfiguration, selectSlot, selectedProfessional, setAffectedErrors, setProjection, setQueryErrors, setQueryFilters, validateStart } from './view.js';
 import { getBlockScope } from '../../../shared/screens/disponibilidad/view.js';
+import { assignmentDraft, clearAssignmentDraft, validateAssignmentSnapshot } from '../../../shared/screens/disponibilidad/branch-assignments.js';
 import { validateConfiguration, validateInclusiveRange } from '../../../shared/screens/disponibilidad/operational-contract.js';
 import { clearAvailabilityErrors, clearAvailabilityField, exceptionApiErrors, showAvailabilityErrors, showAvailabilityGeneralError, validateException, validateProjection } from '../../../shared/screens/disponibilidad/errors.js';
 
@@ -34,34 +35,29 @@ async function editGeneral() {
   form.addEventListener('change', (event) => clearAvailabilityField(form, event.target));
 }
 
-async function editAssignedBranches() {
-  if (user.rol !== 'admin_negocio') return;
+async function saveAssignedBranches(form) {
+  if (user.rol !== 'admin_negocio') throw new Error('No tienes permiso para cambiar asignaciones.');
   const person = selectedProfessional();
-  if (!person) throw new Error('Selecciona un profesional.');
-  const [assignedIds, branches] = await Promise.all([
+  if (!person || person.id !== Number(form.dataset.personId)) throw new Error('La selección de profesional cambió. Actualiza la vista.');
+  const current = assignmentDraft(person.id, person.branchIds);
+  const branchIds = [...new FormData(form).getAll('branchIds')].map(Number);
+  const [latestIds, branches] = await Promise.all([
     api(`/profesionales/${person.id}/sucursales`),
     api('/sucursales'),
   ]);
-  if (!branches.length) throw new Error('Crea una sucursal antes de asignarla.');
-  const choices = branches.map((branch) => `<label class="form-check"><input class="form-check-input" type="checkbox" name="branchIds" value="${branch.id}" ${assignedIds.includes(branch.id) ? 'checked' : ''} ${!branch.activo && !assignedIds.includes(branch.id) ? 'disabled' : ''}><span>${esc(branch.nombre)}${branch.activo ? '' : ' · Inactiva'}</span></label>`).join('');
-  const dialog = basicForm('Sucursales asignadas', `<p class="field-hint">Selecciona las sucursales donde puede atender ${esc(person.name)}.</p><div class="offering-checks assigned-branch-choices" role="group" aria-label="Sucursales disponibles">${choices}</div><p class="field-hint">Si una sucursal tiene franjas o excepciones, quítalas antes de desasignarla.</p>`, async (form) => {
-    const branchIds = form.getAll('branchIds').map(Number);
-    await api(`/profesionales/${person.id}/sucursales`, 'PUT', { sucursalIds: branchIds });
-    invalidateProjection();
+  validateAssignmentSnapshot(current.original, branchIds, latestIds, branches);
+  await api(`/profesionales/${person.id}/sucursales`, 'PUT', { sucursalIds: branchIds });
+  clearAssignmentDraft(person.id);
+  invalidateProjection();
+  try {
+    await loadBackendData();
     await refreshAvailabilityData(true);
-  }, false, {
-    onError(error, form) {
-      const target = form.querySelector('#form-error');
-      target.textContent = error.status === 409
-        ? 'No se pudo quitar la sucursal: conserva franjas o excepciones. Revísalas en Horario semanal y Bloqueos y excepciones antes de reintentar.'
-        : error.status === 404 || error.status === 403
-          ? 'La asignación o la sucursal ya no está disponible. Cierra y vuelve a abrir para actualizarla.'
-          : error.message || 'No se pudieron guardar las sucursales. Inténtalo de nuevo.';
-      target.hidden = false;
-      target.focus();
-    },
-  });
-  dialog.querySelector('.assigned-branch-choices input:not(:disabled)')?.focus();
+    render();
+    toast('Asignaciones guardadas.');
+  } catch (error) {
+    render();
+    toast('Asignaciones guardadas. No se pudo actualizar la vista: ' + error.message);
+  }
 }
 
 async function editBranch(branchId) {
@@ -192,7 +188,6 @@ export async function handleAvailabilityClick(event) {
   const professionalId = Number(button.dataset.professionalId);
   try {
     if (action === 'general') await editGeneral();
-    else if (action === 'assign-branches') await editAssignedBranches();
     else if (action === 'branch-services') await editBranch(branchId);
     else if (action === 'attention') await toggleAttention(branchId, button);
     else if (action === 'new-exception') editException();
@@ -214,6 +209,23 @@ document.addEventListener('submit', async (event) => {
   if (state.page !== 'disponibilidad') return;
   event.preventDefault();
   const form = event.target;
+  if (form.id === 'branch-assignments-form') {
+    const button = form.querySelector('[type="submit"]');
+    if (button.disabled) return;
+    button.disabled = true;
+    try { await saveAssignedBranches(form); }
+    catch (error) {
+      const target = form.querySelector('[data-assignment-error]');
+      target.textContent = error.status === 409
+        ? 'No se pudo quitar la sucursal: conserva franjas o excepciones. Revísalas en Horario semanal y Bloqueos antes de reintentar.'
+        : [403, 404].includes(error.status)
+          ? 'La asignación o la sucursal ya no está disponible. Actualiza la página y vuelve a intentarlo.'
+          : error.message || 'No se pudieron guardar las asignaciones. Inténtalo de nuevo.';
+      target.hidden = false;
+      target.focus();
+    } finally { button.disabled = false; }
+    return;
+  }
   if (form.id === 'agenda-configuration-form') {
     const data = new FormData(form);
     const values = { modo: data.get('modo'), intervaloMinutos: Number(data.get('intervaloMinutos')), anticipacionMinutos: Number(data.get('anticipacionMinutos')), diasFuturos: Number(data.get('diasFuturos')) };
