@@ -1,5 +1,6 @@
 import { icon } from './icons.js';
 import { statuses } from './data.js';
+import { animateDialog, animateToast, animateToastOut } from './motion.js';
 export const escape = (v = '') =>
   String(v).replace(
     /[&<>"']/g,
@@ -19,9 +20,10 @@ export function toast(message) {
   el.className = 'app-toast glass-effect';
   el.textContent = message;
   document.querySelector('#toast-region').append(el);
-  setTimeout(() => {
-    el.classList.add('is-leaving');
-    setTimeout(() => el.remove(), 180);
+  animateToast(el);
+  setTimeout(async () => {
+    await animateToastOut(el);
+    el.remove();
   }, 4320);
 }
 let returnFocus;
@@ -31,6 +33,7 @@ export function modal(title, body, wide = false) {
   el.className = wide ? 'app-dialog glass-effect wide' : 'app-dialog glass-effect';
   el.innerHTML = `<header class="dialog-header"><div><span class="eyebrow">${document.documentElement.dataset.appMode === 'connected' ? 'MI NEGOCIO' : 'CLÍNICA · DEMOSTRACIÓN'}</span><h2 id="dialog-title">${title}</h2></div><button class="icon-btn" data-close aria-label="Cerrar">${icon('x')}</button></header>${body}`;
   if (!el.open) el.showModal();
+  animateDialog(el);
   el.querySelector('[data-close]').onclick = () => el.close();
   el.onclose = () => returnFocus?.focus();
   el.onclick = (e) => {

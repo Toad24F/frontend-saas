@@ -6,6 +6,7 @@ import './theme.css';
 import './motion.css';
 import './mobile.css';
 import './screens/agenda/calendar.css';
+import { animateDisclosure, animateThemeChange, animateView, initializeMotion } from './motion.js';
 import { icon } from './icons.js';
 import { agendaView } from './screens/agenda/view.js';
 import {
@@ -44,6 +45,7 @@ function applyTheme() {
   document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'dark' ? '#0e1915' : '#f4f5f6');
 }
 applyTheme();
+initializeMotion();
 export function mountThemeToggle() {
   const host = document.querySelector('.topbar-right, .portal-topbar');
   if (!host) return;
@@ -55,15 +57,17 @@ export function mountThemeToggle() {
   );
 }
 function toggleTheme() {
-  theme = theme === 'dark' ? 'light' : 'dark';
-  applyTheme();
-  try { localStorage.setItem(themeKey, theme); } catch { /* preferencia temporal */ }
-  document.querySelectorAll('.theme-toggle').forEach((button) => {
-    const dark = theme === 'dark';
-    button.innerHTML = icon(dark ? 'sun' : 'moon');
-    button.setAttribute('aria-label', `Activar modo ${dark ? 'claro' : 'oscuro'}`);
-    button.setAttribute('title', `Modo ${dark ? 'claro' : 'oscuro'}`);
-    button.setAttribute('aria-pressed', String(dark));
+  animateThemeChange(() => {
+    theme = theme === 'dark' ? 'light' : 'dark';
+    applyTheme();
+    try { localStorage.setItem(themeKey, theme); } catch { /* preferencia temporal */ }
+    document.querySelectorAll('.theme-toggle').forEach((button) => {
+      const dark = theme === 'dark';
+      button.innerHTML = icon(dark ? 'sun' : 'moon');
+      button.setAttribute('aria-label', `Activar modo ${dark ? 'claro' : 'oscuro'}`);
+      button.setAttribute('title', `Modo ${dark ? 'claro' : 'oscuro'}`);
+      button.setAttribute('aria-pressed', String(dark));
+    });
   });
 }
 
@@ -134,7 +138,7 @@ function setAccountMenuOpen(isOpen, returnFocus = false) {
   const panel = document.querySelector('.account-menu-panel');
   if (!trigger || !panel) return;
   trigger.setAttribute('aria-expanded', String(isOpen));
-  panel.hidden = !isOpen;
+  animateDisclosure(panel, isOpen);
   if (returnFocus) trigger.focus();
 }
 function connectedAccountMenu() {
@@ -247,6 +251,7 @@ export function renderShell(content) {
     document.querySelector('.profile-button').outerHTML = connectedAccountMenu();
   }
   mountThemeToggle();
+  if (animateNextRoute) requestAnimationFrame(() => animateView(document.querySelector('#main-content')));
   animateNextRoute = false;
 }
 let extraViews = null,
@@ -314,7 +319,7 @@ document.addEventListener('click', async (e) => {
   if (availabilityMenu) {
     availabilityMenuOpen = availabilityMenu.getAttribute('aria-expanded') !== 'true';
     availabilityMenu.setAttribute('aria-expanded', String(availabilityMenuOpen));
-    document.querySelector('#availability-sidebar-submenu').hidden = !availabilityMenuOpen;
+    animateDisclosure(document.querySelector('#availability-sidebar-submenu'), availabilityMenuOpen);
     return;
   }
   const availabilityGroup = e.target.closest('[data-availability-group]');

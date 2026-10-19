@@ -10,7 +10,8 @@
     "test": "node --test tests/*.test.js"
   },
   "dependencies": {
-    "bootstrap": "5.3.8"
+    "bootstrap": "5.3.8",
+    "gsap": "^3.15.0"
   },
   "devDependencies": {
     "prettier": "3.6.2",
