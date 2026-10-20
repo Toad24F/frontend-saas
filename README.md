@@ -17,7 +17,7 @@ Conecta el teléfono y esta computadora a la misma red Wi-Fi y ejecuta `npm run 
 
 El botón de luna o sol del encabezado cambia entre modo claro y oscuro; la elección se recuerda en ese navegador. En pantallas estrechas, la agenda inicia en vista diaria y las franjas del horario semanal se presentan como tarjetas.
 
-La versión conectada requiere la API del backend y una cuenta activa. La demo (`?demo=1`) lee datos ficticios mediante `fetch('/data/demo.json')`, sin credenciales ni API. Cada modo tiene su propia entrada en `src/connected/` o `src/demo/`; las pantallas y estilos comunes viven en `src/shared/`. Ambas versiones navegan con History API. El servidor que publique `dist/` debe resolver rutas desconocidas a `index.html` (fallback de SPA).
+El panel conectado requiere la API del backend y una cuenta activa. La entrada pública `/reservas/:slug` inicia una sesión anónima sin login administrativo y permite seleccionar servicio, sucursal, profesional, fecha y horario consultando la API (T098–T103). El apartado y el envío todavía no están disponibles. La demo (`?demo=1`) lee datos ficticios mediante `fetch('/data/demo.json')`, sin credenciales ni API. Las entradas se eligen en `src/entry-router.js`; las pantallas y estilos comunes viven en `src/shared/`. El servidor que publique `dist/` debe resolver rutas desconocidas a `index.html` (fallback de SPA).
 
 ## Integración con el backend actual
 
@@ -27,9 +27,19 @@ La versión conectada requiere la API del backend y una cuenta activa. La demo (
 - Administración: profesionales (identidad, contraseña y asignaciones), servicios, sucursales, semana completa con múltiples franjas y descansos, y creación/eliminación de bloqueos.
 - Profesional: sus servicios, horarios y bloqueos. La API restringe el catálogo de sucursales a administración; en este rol se muestran los IDs de las sucursales presentes en su horario.
 - Superadministración: negocios, registro con RFC y límite de sucursales, suspensión/reactivación y renovación de licencias según el servidor.
-- Agenda/citas, clientes, reportes, WhatsApp, portal público, datos generales del negocio, especialidad, descripción de servicios y modos libre/compacto muestran **Aún no forma parte de esta entrega** en la versión conectada. Permanecen disponibles en la demo.
+- Agenda/citas, clientes, reportes, WhatsApp, datos generales del negocio, especialidad, descripción de servicios y modos libre/compacto muestran **Aún no forma parte de esta entrega** en la versión conectada. Permanecen disponibles en la demo. El acceso al portal desde el panel sigue pendiente; su entrada directa `/reservas/:slug` ya comprueba conexión y sesión anónima, sin ofrecer todavía reservas reales.
 - El selector del espacio permite cerrar sesión. El token se guarda solo en la sesión de esta pestaña; los errores de la API se muestran en los formularios.
 - La carpeta del backend se conserva como fuente de consulta: esta integración solo modifica el frontend.
+
+### Entrada pública conectada: T098–T103
+
+El cliente público llama exclusivamente a `/publico/negocios/:slug/...` bajo el mismo origen del frontend, con cookie HttpOnly y protección CSRF. No usa el JWT del panel ni llama directamente a `VITE_API_URL`. En desarrollo, `vite.config.js` dirige `/publico` hacia `VITE_API_URL` (por defecto `http://localhost:3000`) sin cambiar el encabezado Origin ni la ruta de la cookie.
+
+La API debe tener configurados `PORTAL_PUBLICO_ORIGEN` con el origen exacto de Vite y `PORTAL_CSRF_SECRET` con un secreto de servidor válido. Esta entrega no modifica esas variables en el backend; nunca deben trasladarse a variables `VITE_*`. Se necesitan HTTPS o localhost, Web Locks, BroadcastChannel y cookies habilitadas. Una dirección HTTP de red local puede no ofrecer las APIs de contexto seguro.
+
+El proxy anterior es solo de desarrollo: `dist/` y `npm run preview` requieren un proxy de mismo origen externo para una sesión conectada. La configuración de Nginx sigue pendiente de acordar dominio, HTTPS y ubicación de la API. Evidencia y límites: [resultado T098–T100](docs/fase-4/resultados-tareas/resultado-t098-t100.md) y [resultado T101–T103](docs/fase-4/resultados-tareas/resultado-t101-t103.md).
+
+La selección invalida las opciones posteriores cuando cambia un dato y descarta respuestas antiguas. El selector de fecha consulta un día por petición, sin imponer un horizonte diferente del servidor, y muestra las horas en la zona IANA devuelta por la API. Una consulta fallida ofrece reintento y no se presenta como agenda vacía. Elegir un horario aún no lo aparta.
 
 ## Pantallas de la demo
 
@@ -78,7 +88,8 @@ La última nota del usuario limita el trabajo a un **prototipo de pantallas**. E
 
 ```text
 src/
-  main.js              # Selecciona la entrada según ?demo=1
+  main.js              # Delega al selector de entradas
+  entry-router.js      # Separa portal público, panel conectado y demo explícita
   demo/                # Datos ficticios, reservas y horarios en memoria
     entry.js
     data.js
@@ -94,6 +105,7 @@ src/
       reservas/        # booking.js y style.css
   connected/           # Integración con el backend
     entry.js
+    public/            # Entrada pública aislada, HTTP y coordinación del navegador
     backend.js         # Fachada para las vistas comunes
     mode.js
     screens/index.js   # Registro de pantallas conectadas

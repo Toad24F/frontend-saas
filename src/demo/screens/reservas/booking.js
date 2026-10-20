@@ -54,7 +54,8 @@ const stepDescriptions = [
   'Selecciona el servicio que necesitas.',
   'Elige la ubicación más cómoda para ti.',
   'Conoce al equipo disponible para tu servicio.',
-  'Selecciona la fecha y el horario que mejor te convengan.',
+  // La demo conserva su motor local; no presenta estos horarios como respuesta de la API.
+  'Selecciona la fecha y el horario que mejor te convengan. Los horarios de esta demo son simulados.',
   'Solo necesitamos algunos datos para preparar tu visita.',
   'Nos dará mucho gusto recibirte.',
 ];
