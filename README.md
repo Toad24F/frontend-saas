@@ -31,7 +31,9 @@ El panel conectado requiere la API del backend y una cuenta activa. La entrada p
 - El selector del espacio permite cerrar sesión. El token se guarda solo en la sesión de esta pestaña; los errores de la API se muestran en los formularios.
 - La carpeta del backend se conserva como fuente de consulta: esta integración solo modifica el frontend.
 
-### Entrada pública conectada: T098–T114
+### Entrada pública conectada: T098–T116
+
+T115 añade avisos accesibles en una región estable, restauración de foco visible y ajustes móviles. T116 amplía las pruebas de invalidación, respuestas fuera de orden, contacto en memoria e incertidumbre. Detalle y evidencia: [T115–T116](docs/fase-4/resultados-tareas/resultado-t115-t116.md). El runner T117 sigue fuera de este alcance.
 
 El cliente público llama exclusivamente a `/publico/negocios/:slug/...` bajo el mismo origen del frontend, con cookie HttpOnly y protección CSRF. No usa el JWT del panel ni llama directamente a `VITE_API_URL`. En desarrollo, `vite.config.js` dirige `/publico` hacia `VITE_API_URL` (por defecto `http://localhost:3000`) sin cambiar el encabezado Origin ni la ruta de la cookie.
 

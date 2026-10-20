@@ -6,6 +6,47 @@ import { renderSelection } from '../src/connected/public/selection-view.js';
 
 // Dobles del contrato público real: nunca se consulta el panel ni una base de datos.
 const slug = 'centro';
+
+// Estos dobles ignoran AbortSignal a propósito: la revisión debe descartar
+// respuestas tardías incluso si el transporte no coopera con la cancelación.
+test('T116: éxito y fallo antiguos no pisan la disponibilidad más reciente', async () => {
+  for (const fails of [false, true]) {
+    let finish;
+    const { controller } = setup((path, { query }) => {
+      if (path === 'catalogo') return catalog(query);
+      if (query.desde === '2026-10-21') return new Promise((resolve, reject) => {
+        finish = () => fails ? reject(Error('respuesta vieja')) : resolve(availability(query));
+      });
+      return availability(query, [{ inicioUtc: `${query.desde}T17:00:00.000Z`, finUtc: `${query.desde}T17:30:00.000Z` }]);
+    });
+    await toDate(controller);
+    const pending = controller.setDate('2026-10-21');
+    await controller.setDate('2026-10-22');
+    controller.chooseSlot('2026-10-22T17:00:00.000Z');
+    const current = controller.getState();
+    finish(); await pending;
+    assert.deepEqual(controller.getState(), current);
+  }
+});
+
+test('T116: cambiar cada dependencia limpia fecha y ranuras; snapshot no permite mutar el estado', async () => {
+  for (const [key, id, backs] of [['servicioId', 4, 3], ['sucursalId', 5, 2], ['personalId', 6, 1]]) {
+    const { controller } = setup((path, { query }) => path === 'disponibilidad' ? availability(query) : ({ ...catalog(query),
+      sucursales: query.servicioId ? [branch, { ...branch, id: 5 }] : [],
+      profesionales: query.sucursalId ? [professional, { ...professional, id: 6 }] : [],
+    }));
+    await toDate(controller); await controller.setDate('2026-10-20'); controller.chooseSlot('2026-10-20T17:00:00.000Z');
+    for (let index = 0; index < backs; index++) await controller.back();
+    controller.choose(key, id);
+    const state = controller.getState();
+    assert.equal(state.selection[key], id); assert.equal(state.selection.date, '');
+    assert.equal(state.selection.slot, null); assert.deepEqual(state.slots, []);
+    if (key === 'servicioId') assert.equal(state.selection.sucursalId, null);
+    if (key !== 'personalId') assert.equal(state.selection.personalId, null);
+    state.selection[key] = 999;
+    assert.equal(controller.getState().selection[key], id);
+  }
+});
 const service = { id: 1, nombre: 'Consulta', costo: '450.00', duracionMinutos: 30 };
 const branch = { id: 2, nombre: 'Centro', direccion: 'Calle 1', zonaHoraria: 'America/Mazatlan' };
 const professional = { id: 3, nombre: 'Ana' };

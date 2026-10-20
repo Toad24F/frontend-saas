@@ -646,8 +646,18 @@
   font-size: 13px;
 }
 
+/* La demo refleja el foco visible y tamaño de escritura del portal conectado,
+   manteniendo su motor ficticio, navegación y paleta existentes. */
+.booking-layout button:focus-visible,
+.booking-layout a:focus-visible,
+.booking-layout .form-control:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+
 /* This lazy-loaded stylesheet must preserve the shared mobile column layout. */
 @media (max-width: 767px) {
+  .booking-layout .form-control { font-size: 16px; }
   .booking-columns {
     display: flex;
     flex-direction: column;

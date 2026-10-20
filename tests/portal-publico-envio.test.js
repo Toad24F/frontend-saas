@@ -7,6 +7,43 @@ import { memoryStorage } from './fixtures/memory-storage.js';
 import { acquirePublicMutation } from '../src/connected/public/browser-session.js';
 
 const marker = { negocio: 'centro', apartadoId: 8, clave: 'attempt_test_000001' };
+
+// Una carrera incierta no equivale a permiso para iniciar otra reserva. Se
+// ejercitan las acciones públicas completas y se inspeccionan llamadas reales del doble.
+test('T116: incertidumbre bloquea navegación y concesiones hasta ausencia terminal', async () => {
+  let absent = false;
+  const base = setup((path) => {
+    if (path === 'intentos') return { id: marker.clave, apartadoId: 8, estado: 'preparado' };
+    if (path.endsWith('/resolver') && absent) return { estado: 'no_registrado' };
+    throw Error('respuesta perdida');
+  });
+  await form(base.flow); const contact = base.flow.getState().contact;
+  await base.flow.submitReservation(); const count = base.calls.length;
+  base.flow.choose('servicioId', 1); base.flow.chooseSlot(result.inicioUtc);
+  await base.flow.setDate('2026-10-22'); await base.flow.next(); await base.flow.back();
+  await base.flow.returnToAvailability(); await base.flow.reserveSelected(); await base.flow.submitReservation();
+  assert.equal(base.calls.length, count); assert.equal(base.flow.getState().phase, 'uncertain');
+  assert.deepEqual(base.flow.getState().contact, contact);
+  assert.deepEqual(Object.keys(JSON.parse(base.storage.getItem(base.store.key))).sort(), ['apartadoId', 'clave', 'negocio']);
+  await base.flow.resolveSubmission(); assert.equal(base.flow.getState().phase, 'uncertain');
+  absent = true; await base.flow.resolveSubmission();
+  assert.equal(base.flow.getState().phase, 'selection'); assert.equal(base.flow.getState().selection.slot, null);
+  assert.deepEqual(base.flow.getState().contact, contact); assert.equal(base.store.read().status, 'missing');
+});
+
+test('T116: contacto sobrevive vencimiento y navegación interna sin persistirse', async () => {
+  let mono = 0;
+  const base = setup(null, { monotonicNow: () => mono });
+  await form(base.flow); const contact = base.flow.getState().contact;
+  mono = 300001; base.flow.tick();
+  assert.equal(base.flow.getState().holdStatus, 'expired');
+  await base.flow.returnToAvailability();
+  assert.equal(base.flow.getState().phase, 'selection'); assert.deepEqual(base.flow.getState().contact, contact);
+  assert.equal(base.store.read().status, 'missing');
+  await base.flow.back(); await base.flow.next();
+  assert.deepEqual(base.flow.getState().contact, contact);
+  base.flow.exit(); assert.deepEqual(base.flow.getState().contact, { nombre: '', telefono: '', notas: '' });
+});
 const result = { folio: 'P-123456789012345678', estado: 'pendiente', inicioUtc: '2026-10-20T17:00:00.000Z',
   finUtc: '2026-10-20T17:30:00.000Z', zonaHoraria: 'America/Mazatlan', costoAceptado: '450.00',
   nombreNegocio: 'Negocio histórico', nombreServicio: 'Servicio guardado', nombreSucursal: 'Sucursal histórica', nombreProfesional: 'Profesional histórico' };

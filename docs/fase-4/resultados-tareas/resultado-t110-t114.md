@@ -2,6 +2,8 @@
 
 Fecha: 20 de octubre de 2026.
 
+Actualización posterior: [T115–T116](resultado-t115-t116.md) incorpora accesibilidad móvil y pruebas adicionales. Este documento conserva la evidencia y el punto de parada del lote T110–T114; el límite de sesión/CSRF descrito al final sigue vigente.
+
 ## Tareas implementadas en frontend
 
 - [x] **M3-T110 — Persistir marcador mínimo antes del envío.** Se verifica en sessionStorage un marcador de negocio, apartado y clave antes de cualquier preparación/envío. No contiene contacto, notas, CSRF ni resultado.

@@ -1,5 +1,6 @@
 import { renderSelection, mountSelection } from './selection-view.js';
 import { dateLabel, localTime, localDate } from './dates.js';
+import { focusPublicControl } from './accessibility.js';
 
 // Todo dato personal se escapa antes de generar HTML; no se consulta por teléfono.
 const esc = (value = '') => String(value).replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
@@ -8,10 +9,12 @@ export function clockLabel(ms) {
   return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
 }
 export function renderBooking(state) {
-  const notice = state.notice ? `<p class="public-hold-notice" role="status" aria-live="polite">${esc(state.notice)}</p>` : '';
+  // La región estable de mountSelection anuncia estos avisos; el texto visible
+  // no es otra región viva que compita al reemplazar la pantalla.
+  const notice = state.notice ? `<p class="public-hold-notice">${esc(state.notice)}</p>` : '';
   if (state.phase === 'selection') return `${notice}${renderSelection(state)}`;
   if (state.phase === 'hold') return `<h2 id="selection-title" tabindex="-1">Apartar tu horario</h2>${notice}
-    ${state.holdStatus === 'request-error' ? '<button class="btn btn-primary" type="button" data-selection-retry>Reintentar el mismo apartado</button>' : '<p role="status">Espera mientras comprobamos el horario. Todavía no se ha creado una cita.</p>'}`;
+    ${state.holdStatus === 'request-error' ? '<button class="btn btn-primary" type="button" data-selection-retry>Reintentar el mismo apartado</button>' : '<p>Espera mientras comprobamos el horario. Todavía no se ha creado una cita.</p>'}`;
   // Estas pantallas no dependen del apartado ni del catálogo: una recuperación
   // tras recarga puede no tener selecciones locales o contacto en memoria.
   if (state.phase === 'sending' || state.phase === 'uncertain') return `<h2 id="selection-title" tabindex="-1">${state.phase === 'sending' ? 'Registrando tu reserva' : 'Comprueba tu envío'}</h2>
@@ -21,7 +24,7 @@ export function renderBooking(state) {
   if (state.phase === 'result') {
     const result = state.result;
     return `<h2 id="selection-title" tabindex="-1">Reserva registrada</h2>${notice}
-      <p class="status-badge pendiente public-result-status" role="status">Pendiente</p>
+      <p class="status-badge pendiente public-result-status">Pendiente</p>
       <p>Conserva el folio de tu reserva.</p><p class="public-result-folio">${esc(result.folio)}</p>
       <dl class="public-result-details"><dt>Negocio</dt><dd>${esc(result.nombreNegocio)}</dd>
       <dt>Servicio</dt><dd>${esc(result.nombreServicio)}</dd><dt>Sucursal</dt><dd>${esc(result.nombreSucursal)}</dd>
@@ -47,12 +50,12 @@ export function renderBooking(state) {
       <div class="public-contact-field"><label for="contact-notas">Notas o motivo de consulta (opcional)</label>
         <textarea class="form-control" id="contact-notas" name="notas" rows="4" data-contact-field="notas" autocomplete="off" aria-invalid="${Boolean(errors.notas)}" aria-describedby="contact-notas-help contact-notas-error">${esc(contact.notas)}</textarea>
         <small id="contact-notas-help">Hasta 2000 caracteres. Se conservan solo mientras permanezcas en este flujo.</small><p class="public-field-error" id="contact-notas-error">${esc(errors.notas || '')}</p></div>
-      ${errors.form ? `<p class="public-field-error" role="alert">${esc(errors.form)}</p>` : ''}
-      ${state.contactChecked ? '<p id="contact-checked" role="status">Los datos tienen un formato válido. Aún no se ha enviado una reserva.</p>' : ''}
+      ${errors.form ? `<p class="public-field-error">${esc(errors.form)}</p>` : ''}
+      ${state.contactChecked ? '<p id="contact-checked">Los datos tienen un formato válido. Aún no se ha enviado una reserva.</p>' : ''}
       <p class="public-limit">La reserva se registrará como pendiente. El apartado no se amplía al escribir, revisar los datos o reintentar.</p>
       <div class="public-selection-actions"><button class="btn btn-light" type="button" data-return-availability ${state.holdStatus === 'releasing' ? 'disabled' : ''}>Volver a horarios</button>
         ${['unverified', 'checking'].includes(state.holdStatus) ? `<button class="btn btn-light" type="button" data-check-hold ${state.holdStatus === 'checking' ? 'disabled' : ''}>Comprobar vigencia</button>` : ''}
-        <button class="btn btn-light" type="submit" ${!active ? 'disabled' : ''}>Revisar datos</button>
+        <button class="btn btn-light" type="submit" data-review-contact ${!active ? 'disabled' : ''}>Revisar datos</button>
         <button class="btn btn-primary" type="button" data-submit-reservation ${!active ? 'disabled' : ''}>Reservar</button></div>
     </form>`;
 }
@@ -78,13 +81,13 @@ export function mountBooking(host, flow) {
   host.addEventListener('submit', (event) => {
     if (!event.target.matches('[data-contact-form]')) return;
     event.preventDefault(); flow.validateContact();
-    host.querySelector('[aria-invalid="true"]')?.focus();
+    focusPublicControl(host.querySelector('[aria-invalid="true"]'));
   });
   host.addEventListener('click', (event) => {
     if (event.target.closest('[data-return-availability]')) void flow.returnToAvailability();
     else if (event.target.closest('[data-check-hold]')) void flow.recheck();
     else if (event.target.closest('[data-submit-reservation]')) {
-      void flow.submitReservation().then(() => host.querySelector('[aria-invalid="true"]')?.focus());
+      void flow.submitReservation().then(() => focusPublicControl(host.querySelector('[aria-invalid="true"]')));
     } else if (event.target.closest('[data-resolve-submission]')) void flow.resolveSubmission();
     else if (event.target.closest('[data-repeat-submission]')) void flow.repeatSubmission();
   });

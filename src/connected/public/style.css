@@ -23,6 +23,8 @@
 .public-options, .public-slots { border: 0; margin: 0; padding: 0; display: grid; gap: 12px; }
 .public-option { display: flex; align-items: center; gap: 16px; padding: 20px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); cursor: pointer; min-width: 0; }
 .public-option strong, .public-option small { display: block; }
+/* Permite encoger textos largos dentro de flex sin expulsar controles en móvil. */
+.public-option > span { min-width: 0; }
 .public-option small { margin-top: 6px; color: var(--muted); line-height: 1.6; }
 .public-option input, .public-slot input { accent-color: var(--accent); flex-shrink: 0; width: 18px; height: 18px; }
 .public-option:has(:checked), .public-slot:has(:checked) { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
@@ -48,6 +50,11 @@ fieldset:disabled .public-option, fieldset:disabled .public-slot { opacity: .6; 
 .public-contact-field { margin-block: 20px; }
 .public-contact-field label { display: block; font-weight: 600; margin-bottom: 8px; }
 .public-contact-field input { min-height: 48px; }
+/* Tamaño de escritura que evita zoom automático en teléfonos; foco explícito
+   para teclado en ambos temas sin cambiar los tokens de la marca. */
+.public-portal .form-control { font-size: 16px; min-width: 0; max-width: 100%; }
+.public-portal button:focus-visible, .public-portal .form-control:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+.public-portal button, .public-portal .form-control, #selection-title { scroll-margin-block: 12px; }
 .public-contact-field textarea { resize: vertical; min-height: 120px; }
 .public-contact-field small { display: block; margin-top: 8px; color: var(--muted); line-height: 1.6; }
 .public-field-error { color: #b22e25; font-size: 14px; line-height: 1.6; margin-top: 6px; }
@@ -64,4 +71,9 @@ html[data-theme='light'] .public-result-status { background: #fff1ce; color: #76
   .public-steps { grid-template-columns: repeat(2, 1fr); row-gap: 16px; }
   .public-portal-content:has(#public-selection:not([hidden])) { margin-top: 8px; }
   .public-option { padding: 16px; }
+  .public-selection-actions .btn { flex: 1 1 160px; min-width: 0; white-space: normal; }
+  .public-result-details { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+  .public-result-details dd { margin-bottom: 12px; }
+  /* El último control sigue alcanzable con la zona segura del dispositivo. */
+  .public-portal-content { padding-bottom: max(28px, env(safe-area-inset-bottom)); }
 }
