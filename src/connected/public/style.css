@@ -40,6 +40,19 @@ fieldset:disabled .public-option, fieldset:disabled .public-slot { opacity: .6; 
 #selection-status { color: var(--muted); line-height: 1.7; margin-top: 18px; }
 .public-selection-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 12px; margin-top: 24px; }
 .public-selection-actions .btn { min-width: 110px; }
+/* Captura y apartado: errores asociados a cada campo y contador independiente
+   del render del formulario. Las superficies usan los mismos tokens por tema. */
+.public-hold-clock { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px; margin-block: 20px; border: 1px solid var(--border); background: var(--surface); border-radius: 10px; }
+.public-hold-clock strong { font-variant-numeric: tabular-nums; font-size: 24px; }
+.public-hold-notice { padding: 16px; border-inline-start: 3px solid var(--accent); background: var(--surface); line-height: 1.7; }
+.public-contact-field { margin-block: 20px; }
+.public-contact-field label { display: block; font-weight: 600; margin-bottom: 8px; }
+.public-contact-field input { min-height: 48px; }
+.public-contact-field textarea { resize: vertical; min-height: 120px; }
+.public-contact-field small { display: block; margin-top: 8px; color: var(--muted); line-height: 1.6; }
+.public-field-error { color: #b22e25; font-size: 14px; line-height: 1.6; margin-top: 6px; }
+html[data-theme='dark'] .public-field-error { color: #ffafa7; }
+.public-contact-field [aria-invalid='true'] { border-color: #b22e25; }
 @media (max-width: 575px) {
   .public-steps { grid-template-columns: repeat(2, 1fr); row-gap: 16px; }
   .public-portal-content:has(#public-selection:not([hidden])) { margin-top: 8px; }

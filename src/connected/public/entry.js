@@ -2,13 +2,14 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import '../../shared/styles.css';
 import '../../shared/theme.css';
 import './style.css';
-import { createPublicClient } from './http.js';
+import { createPublicClient, PublicPortalError } from './http.js';
 import { initializePublicBrowser } from './browser-session.js';
-import { createPortalSelection } from './selection.js';
-import { mountSelection } from './selection-view.js';
+import { createPortalBooking } from './booking.js';
+import { mountBooking } from './booking-view.js';
+import { bindBookingLifecycle } from './booking-lifecycle.js';
 
-// Entrada independiente: sesión y selección pública; la concesión del apartado
-// y el formulario quedan para T104 y siguientes, sin simular una reserva local.
+// Entrada independiente hasta captura de contacto. No prepara ni envía una cita;
+// sesión, apartados y liberación utilizan exclusivamente las rutas públicas.
 export async function startPublicPortal(slug) {
   const root = document.querySelector('#app');
   let savedTheme;
@@ -64,11 +65,13 @@ export async function startPublicPortal(slug) {
       const host = root.querySelector('#public-selection');
       host.hidden = false;
       let render;
-      const selection = createPortalSelection(client, { slug, onChange: (state) => render(state) });
-      render = mountSelection(host, selection);
-      await selection.start();
+      const channel = new BroadcastChannel(`citalendar:portal:${slug}`);
+      const flow = createPortalBooking(client, { slug, channel, onChange: (state, kind) => render(state, kind) });
+      render = mountBooking(host, flow);
+      bindBookingLifecycle(flow);
+      await flow.start();
     } catch (error) {
-      status.textContent = error.message;
+      status.textContent = error instanceof PublicPortalError ? error.message : 'No se pudo iniciar el portal. Reintenta la conexión.';
       retry.hidden = error.kind === 'http' && [403, 404].includes(error.status);
     } finally {
       initializing = false;

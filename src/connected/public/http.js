@@ -14,12 +14,16 @@ export function createPublicClient(slug, { fetchImpl = globalThis.fetch, timeout
   let csrfToken = null;
 
   // La cookie HttpOnly viaja con fetch; JWT y VITE_API_URL no intervienen aquí.
-  async function send(path, { method = 'GET', body, query, signal } = {}, initialization = false) {
+  async function send(path, { method = 'GET', body, query, signal, keepalive = false } = {}, initialization = false) {
     if ((!routes.test(path) && !(initialization && path === 'sesion')) || !['GET', 'POST'].includes(method)) {
       throw new PublicPortalError('protocol', 'Ruta pública no permitida.');
     }
     if (method !== 'GET' && !initialization && !csrfToken) {
       throw new PublicPortalError('session', 'Inicie la sesión pública antes de continuar.', { action: 'reiniciar' });
+    }
+    // Solo una liberación pequeña puede sobrevivir a la salida de la página.
+    if (keepalive && (method !== 'POST' || !/^apartados\/[1-9]\d*\/liberar$/.test(path))) {
+      throw new PublicPortalError('protocol', 'Keepalive solo está permitido para liberar un apartado.');
     }
     const headers = { Accept: 'application/json' };
     if (method !== 'GET') {
@@ -33,7 +37,7 @@ export function createPublicClient(slug, { fetchImpl = globalThis.fetch, timeout
     try {
       const timeout = AbortSignal.timeout(timeoutMs);
       response = await fetchImpl(`${base}/${path}${suffix}`, {
-        method, headers, credentials: 'same-origin', cache: 'no-store', redirect: 'error',
+        method, headers, credentials: 'same-origin', cache: 'no-store', redirect: 'error', keepalive,
         signal: signal ? AbortSignal.any([signal, timeout]) : timeout,
         ...(body === undefined ? {} : { body: JSON.stringify(body) }),
       });

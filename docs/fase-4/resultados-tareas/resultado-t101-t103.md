@@ -2,6 +2,8 @@
 
 Fecha: 20 de octubre de 2026.
 
+Nota posterior: este documento conserva la evidencia del lote T101–T103. La fixture de revisión y el portal se ampliaron después con apartados y contacto; su estado actual y límites constan en [resultado T104–T109](resultado-t104-t109.md).
+
 ## Estado del lote
 
 - [x] **M3-T101 — Definir estados y selecciones dependientes.** Estado aislado en memoria, invalidación de las selecciones posteriores y descarte de consultas atrasadas, incluidos sus errores.

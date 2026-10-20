@@ -56,7 +56,8 @@ const stepDescriptions = [
   'Conoce al equipo disponible para tu servicio.',
   // La demo conserva su motor local; no presenta estos horarios como respuesta de la API.
   'Selecciona la fecha y el horario que mejor te convengan. Los horarios de esta demo son simulados.',
-  'Solo necesitamos algunos datos para preparar tu visita.',
+  // La exclusión entre pestañas y el reloj de servidor pertenecen al portal conectado.
+  'Solo necesitamos algunos datos para preparar tu visita. Este apartado es simulado y solo funciona en esta pestaña.',
   'Nos dará mucho gusto recibirte.',
 ];
 function options() {
