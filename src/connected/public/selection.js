@@ -110,6 +110,12 @@ export function createPortalSelection(client, { slug, onChange = () => {}, now =
   }
   return {
     getState: snapshot, start: load, retry: load,
+    // Solo se reinicia después de que el resolutor confirme ausencia terminal.
+    async reset() {
+      invalidate(); state.step = 0;
+      state.selection.servicioId = null; state.options.servicios = []; clearAfter(0);
+      await load();
+    },
     choose(field, value) {
       const index = fields.indexOf(field);
       if (state.phase !== 'selection' || index !== state.step || !['ready', 'empty'].includes(state.query.status) ||

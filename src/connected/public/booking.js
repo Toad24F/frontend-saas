@@ -3,15 +3,17 @@ import { validateContact } from './contact.js';
 import { createHoldClock } from './hold-clock.js';
 import { PublicPortalError } from './http.js';
 import { localDate } from './dates.js';
+import { createSubmission } from './submission.js';
 
 const blankContact = () => ({ nombre: '', telefono: '', notas: '' });
 const generation = (value) => typeof value === 'string' && /^[1-9]\d*$/.test(value);
 const protocolError = () => new PublicPortalError('protocol', 'No se pudo comprobar el apartado. Reintenta antes de continuar.');
 
-// Compone la selección existente con el ciclo del apartado. No prepara intentos
-// de reserva ni guarda contacto, operación o credenciales fuera de esta memoria.
+// Compone selección, apartado y envío. Solo el marcador mínimo del intento sale
+// a sessionStorage; contacto y operaciones de apartado permanecen en memoria.
 export function createPortalBooking(client, { slug, onChange = () => {}, now,
-  monotonicNow = () => performance.now(), operationKey = () => crypto.randomUUID(), channel } = {}) {
+  monotonicNow = () => performance.now(), operationKey = () => crypto.randomUUID(), channel,
+  storage, attemptKey, acquireMutation = async () => ({ release() {} }) } = {}) {
   const clock = createHoldClock(monotonicNow);
   const booking = { phase: 'selection', hold: null, holdStatus: 'none', remainingMs: 0,
     contact: blankContact(), contactErrors: {}, contactChecked: false, notice: '', bookingAvailable: true };
@@ -27,6 +29,19 @@ export function createPortalBooking(client, { slug, onChange = () => {}, now,
   const emit = (kind = 'render') => { if (!exiting) onChange(snapshot(), kind); };
   const selection = createPortalSelection(client, { slug, now, onChange: (value) => { selectionState = value; emit(); } });
   selectionState = selection.getState();
+  const submission = createSubmission(client, { slug, storage, attemptKey, acquireMutation,
+    onBegin: () => { epoch++; },
+    onState: (value) => {
+      Object.assign(booking, value);
+      if (value.phase === 'result') { booking.hold = null; booking.holdStatus = 'consumed'; booking.contact = blankContact(); }
+      emit();
+    },
+    onAbsent: async () => {
+      epoch++; booking.phase = 'selection'; booking.hold = null; booking.holdStatus = 'none'; booking.submission = null; operation = null;
+      booking.notice = 'Se comprobó que el envío no quedó registrado. Puedes elegir un nuevo horario.';
+      await selection.reset(); emit();
+    },
+  });
   const notify = (data) => {
     try { channel?.postMessage({ ...data, slug }); } catch { /* El servidor sigue siendo autoridad. Se revalida al reenfocar. */ }
   };
@@ -81,7 +96,10 @@ export function createPortalBooking(client, { slug, onChange = () => {}, now,
     busy = true; booking.phase = 'hold'; booking.holdStatus = 'requesting'; booking.notice = 'Comprobando y apartando el horario…'; emit();
     const current = ++epoch;
     const started = monotonicNow();
+    let grantLease;
     try {
+      grantLease = await acquireMutation();
+      if (!grantLease) throw new PublicPortalError('coordination', 'Otra pestaña tiene un envío pendiente. Comprueba ese envío antes de apartar otro horario.');
       const data = await client.request('apartados', { method: 'POST', body: { ...operation } });
       const hold = readGrant(data);
       const repeated = ownIdentity(booking.hold, hold);
@@ -109,7 +127,7 @@ export function createPortalBooking(client, { slug, onChange = () => {}, now,
       } else {
         booking.holdStatus = 'request-error'; booking.notice = `${errorText(error)} Se conservará la misma operación al reintentar.`; emit();
       }
-    } finally { busy = false; }
+    } finally { grantLease?.release(); busy = false; }
   }
   async function recheck() {
     if (exiting || booking.phase !== 'form' || !booking.hold || ['releasing', 'release-error'].includes(booking.holdStatus)) return;
@@ -141,14 +159,23 @@ export function createPortalBooking(client, { slug, onChange = () => {}, now,
   }
   if (channel) channel.onmessage = (event) => { void handleMessage(event.data); };
   return {
-    getState: snapshot, start: () => selection.start(),
+    getState: snapshot, start: async () => { if (!await submission.start()) await selection.start(); },
     choose: (...args) => { if (booking.phase === 'selection') { operation = null; booking.notice = ''; selection.choose(...args); } },
     chooseSlot: (...args) => { if (booking.phase === 'selection') { operation = null; booking.notice = ''; selection.chooseSlot(...args); } },
     setDate: (...args) => { if (booking.phase === 'selection') { operation = null; booking.notice = ''; return selection.setDate(...args); } },
     next: () => booking.phase === 'selection' ? selection.getState().step === 3 ? reserveSelected() : selection.next() : undefined,
     back: () => booking.phase === 'selection' ? selection.back() : undefined,
-    retry: () => booking.phase === 'selection' ? selection.retry() : booking.phase === 'hold' ? reserveSelected() : recheck(),
+    retry: () => booking.phase === 'uncertain' ? submission.resolve() : booking.phase === 'selection' ? selection.retry() : booking.phase === 'hold' ? reserveSelected() : recheck(),
     reserveSelected, recheck, handleMessage,
+    async submitReservation() {
+      if (exiting || booking.phase !== 'form' || booking.holdStatus !== 'active' || clock.remaining() <= 0) return;
+      const checked = validateContact(booking.contact);
+      booking.contactErrors = checked.errors;
+      if (!checked.valid) { emit(); return; }
+      await submission.submit(booking.hold, checked.value);
+    },
+    repeatSubmission: () => booking.phase === 'uncertain' ? submission.repeat() : undefined,
+    resolveSubmission: () => booking.phase === 'uncertain' ? submission.resolve() : undefined,
     updateContact(field, value) {
       if (booking.phase !== 'form' || !Object.hasOwn(booking.contact, field)) return;
       booking.contact[field] = value; booking.contactChecked = false;
@@ -186,6 +213,7 @@ export function createPortalBooking(client, { slug, onChange = () => {}, now,
       }
     },
     exit() {
+      submission.exit();
       exiting = true; epoch++; booking.contact = blankContact(); booking.contactErrors = {}; booking.contactChecked = false;
       if (!['sending', 'uncertain', 'result'].includes(booking.phase)) releaseOnExit(booking.hold);
     },

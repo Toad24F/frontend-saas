@@ -53,6 +53,13 @@ fieldset:disabled .public-option, fieldset:disabled .public-slot { opacity: .6; 
 .public-field-error { color: #b22e25; font-size: 14px; line-height: 1.6; margin-top: 6px; }
 html[data-theme='dark'] .public-field-error { color: #ffafa7; }
 .public-contact-field [aria-invalid='true'] { border-color: #b22e25; }
+/* Resultado histórico: etiqueta semántica existente y datos legibles en móvil. */
+.public-result-status { display: inline-flex; margin-block: 10px 20px; font-size: 14px; font-weight: 600; }
+html[data-theme='light'] .public-result-status { background: #fff1ce; color: #765016; }
+.public-result-folio { font-family: 'Manrope', sans-serif; font-size: clamp(20px, 4vw, 28px); font-weight: 750; overflow-wrap: anywhere; }
+.public-result-details { display: grid; grid-template-columns: minmax(110px, .4fr) minmax(0, 1fr); gap: 16px 24px; padding-block: 24px; border-top: 1px solid var(--border); }
+.public-result-details dt { color: var(--muted); font-weight: 500; }
+.public-result-details dd { margin: 0; overflow-wrap: anywhere; }
 @media (max-width: 575px) {
   .public-steps { grid-template-columns: repeat(2, 1fr); row-gap: 16px; }
   .public-portal-content:has(#public-selection:not([hidden])) { margin-top: 8px; }

@@ -6,6 +6,7 @@ import { createHoldClock } from '../src/connected/public/hold-clock.js';
 import { bindBookingLifecycle } from '../src/connected/public/booking-lifecycle.js';
 import { renderBooking } from '../src/connected/public/booking-view.js';
 import { createPublicClient } from '../src/connected/public/http.js';
+import { memoryStorage } from './fixtures/memory-storage.js';
 
 const start = '2026-10-20T17:00:00.000Z';
 const now = '2026-10-20T16:00:00.000Z';
@@ -34,7 +35,7 @@ function setup(handler, extra = {}) {
     return own();
   } };
   const flow = createPortalBooking(client, { slug: 'centro', now: () => new Date(now), monotonicNow: () => mono,
-    operationKey: () => 'operation_test_0000001', channel, ...extra });
+    operationKey: () => 'operation_test_0000001', storage: memoryStorage(), channel, ...extra });
   return { flow, calls, messages, channel, setMono: (value) => { mono = value; } };
 }
 async function select(flow) {
@@ -213,12 +214,14 @@ test('T109: cliente HTTP permite keepalive de liberación con cookie y CSRF', as
   assert.equal(calls.at(-1).credentials, 'same-origin');
 });
 
-test('T105–T107: formulario escapado, errores accesibles y envío aún deshabilitado', async () => {
+test('T105–T107: formulario escapado, errores accesibles y envío sujeto a vigencia', async () => {
   const { flow } = setup(); await form(flow); flow.updateContact('nombre', '<script>x</script>');
   flow.validateContact(); const html = renderBooking(flow.getState());
   assert.match(html, /&lt;script&gt;/); assert.doesNotMatch(html, /<script>/);
   assert.match(html, /autocomplete="off"/); assert.match(html, /aria-invalid="true"/);
-  assert.match(html, /Reservar[^<]*<\/button>/); assert.match(html, /disabled[^>]*>Reservar/);
+  assert.match(html, /data-submit-reservation/);
+  const expired = { ...flow.getState(), remainingMs: 0 };
+  assert.match(renderBooking(expired), /disabled[^>]*>Reservar/);
 });
 
 test('T108–T109: eventos de foco, visibilidad y salida se conectan y limpian', async () => {

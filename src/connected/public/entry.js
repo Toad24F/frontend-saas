@@ -3,13 +3,14 @@ import '../../shared/styles.css';
 import '../../shared/theme.css';
 import './style.css';
 import { createPublicClient, PublicPortalError } from './http.js';
-import { initializePublicBrowser } from './browser-session.js';
+import { initializePublicBrowser, acquirePublicMutation } from './browser-session.js';
+import { createAttemptStore } from './attempt-store.js';
 import { createPortalBooking } from './booking.js';
 import { mountBooking } from './booking-view.js';
 import { bindBookingLifecycle } from './booking-lifecycle.js';
 
-// Entrada independiente hasta captura de contacto. No prepara ni envía una cita;
-// sesión, apartados y liberación utilizan exclusivamente las rutas públicas.
+// La recuperación con marcador precede a cualquier catálogo o nueva selección.
+// Toda escritura conserva la sesión pública; nunca usa autenticación del panel.
 export async function startPublicPortal(slug) {
   const root = document.querySelector('#app');
   let savedTheme;
@@ -66,13 +67,22 @@ export async function startPublicPortal(slug) {
       host.hidden = false;
       let render;
       const channel = new BroadcastChannel(`citalendar:portal:${slug}`);
-      const flow = createPortalBooking(client, { slug, channel, onChange: (state, kind) => render(state, kind) });
+      const flow = createPortalBooking(client, { slug, channel, acquireMutation: () => acquirePublicMutation(slug),
+        onChange: (state, kind) => {
+          if (state.phase === 'result') {
+            root.querySelector('#public-business').textContent = state.result.nombreNegocio;
+            document.title = `Reserva pendiente · ${state.result.nombreNegocio}`;
+          }
+          render(state, kind);
+        } });
       render = mountBooking(host, flow);
       bindBookingLifecycle(flow);
       await flow.start();
     } catch (error) {
       status.textContent = error instanceof PublicPortalError ? error.message : 'No se pudo iniciar el portal. Reintenta la conexión.';
-      retry.hidden = error.kind === 'http' && [403, 404].includes(error.status);
+      const pending = createAttemptStore(slug).read().status !== 'missing';
+      if (pending) status.textContent += ' Hay una recuperación pendiente; se conservará el marcador hasta poder comprobar el resultado.';
+      retry.hidden = !pending && error.kind === 'http' && [403, 404].includes(error.status);
     } finally {
       initializing = false;
       root.querySelector('#public-main').setAttribute('aria-busy', 'false');

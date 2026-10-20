@@ -48,7 +48,8 @@ const stepTitles = [
   'Elige quién te acompaña',
   'Un espacio en tu día',
   'Ya casi está, cuéntanos de ti',
-  'Tu cita está confirmada',
+  // La cita simulada nace pendiente, igual que el resultado del portal conectado.
+  'Tu cita está pendiente',
 ];
 const stepDescriptions = [
   'Selecciona el servicio que necesitas.',
@@ -58,7 +59,7 @@ const stepDescriptions = [
   'Selecciona la fecha y el horario que mejor te convengan. Los horarios de esta demo son simulados.',
   // La exclusión entre pestañas y el reloj de servidor pertenecen al portal conectado.
   'Solo necesitamos algunos datos para preparar tu visita. Este apartado es simulado y solo funciona en esta pestaña.',
-  'Nos dará mucho gusto recibirte.',
+  'Esta reserva de demostración está pendiente. Guarda tu folio ficticio.',
 ];
 function options() {
   return {

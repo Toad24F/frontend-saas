@@ -2,6 +2,8 @@
 
 Fecha: 20 de octubre de 2026.
 
+Nota posterior: este documento conserva la evidencia del lote T104–T109. El envío, el marcador mínimo, la recuperación y el resumen se añadieron después; véase [resultado T110–T114](resultado-t110-t114.md) para el alcance actual y sus límites.
+
 ## Tareas terminadas y alcance
 
 - [x] **M3-T104 — Solicitar apartado antes de abrir formulario.** Operación estable por selección final, reintento con el mismo contenido y apertura solo después de concesión y comprobación de vigencia propia. El conflicto vuelve a consultar disponibilidad.
