@@ -1,0 +1,16 @@
+/* Sección común de perfil/configuración: mismos tokens de marca en ambos temas. */
+.account-portal { min-width: 0; padding: 26px 30px; }
+.account-portal h2 { font-size: 17px; }
+.account-portal p { color: var(--muted); line-height: 1.6; margin-top: 10px; }
+.account-portal label { display: block; margin: 20px 0 8px; font-weight: 600; }
+.account-portal .form-control { width: 100%; min-width: 0; font-size: 16px; }
+.account-portal-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 20px; }
+.account-portal-actions .btn { min-height: 44px; white-space: normal; }
+/* Bootstrap conserva su azul por defecto al deshabilitar: mantener el acento. */
+.account-portal .btn-primary { --bs-btn-disabled-bg: var(--accent); --bs-btn-disabled-border-color: var(--accent); }
+.account-portal-status:empty { margin: 0; }
+.account-portal :focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+@media (max-width: 767px) {
+  .account-portal { padding: 20px; }
+  .account-portal-actions .btn { flex: 1 1 160px; }
+}

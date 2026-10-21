@@ -11,13 +11,33 @@ let clockOffset = 0;
 let qaMode = 'normal';
 let nextResult = 1;
 const serverTime = () => Date.now() + clockOffset;
+const accountQa = process.argv.includes('--account');
+// Opt-in para revisar el perfil conectado con el contrato privado simulado.
+// Cambia solo esta instancia de Vite; nunca usa credenciales ni API reales.
+const accountUser = { id: 7, sub: 7, nombre: 'Administración ficticia', email: 'admin@example.test',
+  rol: 'admin_negocio', negocioId: 7, negocioNombre: 'Consultorio de prueba · API simulada', identificadorPublico: 'qa-portal' };
 
 // Servidor de revisión aislado: intercepta TODA ruta /publico antes del proxy.
 // Sus respuestas son ficticias, visibles como tales; nunca escribe en el backend.
 const server = await createServer({
+  ...(accountQa ? { define: { 'import.meta.env.VITE_API_URL': JSON.stringify('http://127.0.0.1:5193') } } : {}),
   server: { host: '127.0.0.1', port: 5193, strictPort: true },
   plugins: [{ name: 'public-selection-fixture', configureServer(vite) {
     vite.middlewares.use((req, res, next) => {
+      if (accountQa && /^\/(auth|licencias|servicios|sucursales|profesionales|recepcionistas|bloqueos|negocios)(\/|\?|$)/.test(req.url)) {
+        const path = new URL(req.url, 'http://localhost').pathname;
+        res.setHeader('Content-Type', 'application/json'); res.setHeader('Cache-Control', 'no-store');
+        const send = (data) => res.end(JSON.stringify(data));
+        if (path === '/auth/login' && req.method === 'POST') return send({ accessToken: 'token-exclusivo-fixture-sin-autoridad-real', usuario: accountUser });
+        if (path === '/auth/profile') return send({ user: accountUser });
+        if (path === '/licencias/mi-vigencia') return send({ estado: 'vigente', condicionAcceso: true,
+          ahora: '2026-10-20T16:00:00Z', venceEn: '2027-10-20T16:00:00Z', bloqueoProgramadoEn: null,
+          tiempoRestante: { dias: 365, horas: 0, minutos: 0 }, duracionTotalMs: 31536000000 });
+        if (path === '/sucursales/cupo') return send({ negocioId: 7, disponibles: 1, limiteSucursalesActivas: 1, sucursalesActivas: 0 });
+        if (['/servicios', '/sucursales', '/profesionales', '/recepcionistas', '/bloqueos'].includes(path) && req.method === 'GET') return send([]);
+        // Ninguna otra ruta privada se delega al proxy ni al backend cotidiano.
+        res.statusCode = 404; return send({ message: 'Ruta privada no simulada.' });
+      }
       if (req.url.startsWith('/__qa/mode?')) {
         const mode = new URL(req.url, 'http://localhost').searchParams.get('value');
         if (['normal', 'lost_after', 'lost_before', 'resolve_error'].includes(mode)) qaMode = mode;

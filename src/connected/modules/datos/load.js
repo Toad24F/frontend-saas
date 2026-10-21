@@ -9,7 +9,11 @@ export async function loadBackendData() {
   const tenantId = user.negocioId || 1;
   const next = { tenants: [], professionals: [], receptionists: [], branches: [], services: [], schedules: [], blocks: [], appointments: [], clients: [], holds: [] };
   const businessName = user.nombreNegocio || 'Mi negocio';
-  next.tenants = [{ id: tenantId, name: user.rol === 'superadmin' ? 'Plataforma' : businessName, slug: '', initials: initials(user.rol === 'superadmin' ? 'Plataforma' : businessName), mode: null }];
+  // Login y perfil entregan el identificador público del negocio reconstruido
+  // en servidor. Una respuesta antigua/inválida no reutiliza otro enlace.
+  const identifier = user.identificadorPublico;
+  const slug = user.rol !== 'superadmin' && typeof identifier === 'string' && identifier.length <= 80 && /^[a-z0-9]+(-[a-z0-9]+)*$/.test(identifier) ? identifier : '';
+  next.tenants = [{ id: tenantId, name: user.rol === 'superadmin' ? 'Plataforma' : businessName, slug, initials: initials(user.rol === 'superadmin' ? 'Plataforma' : businessName), mode: null }];
   if (user.rol === 'superadmin') {
     const businesses = await api('/negocios');
     next.tenants = await Promise.all(businesses.map(async (b) => {

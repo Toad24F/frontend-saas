@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="es" data-theme="light">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Perfil · Revisión ficticia</title></head>
+<body><main class="account-page" style="max-width:1000px;margin:32px auto;padding:20px"><h1>Mi cuenta</h1><p>Revisión del componente con datos ficticios. Sin sesión ni API real.</p><button class="btn btn-light" id="theme">Cambiar tema</button><div id="fixture"></div></main>
+<script type="module">
+  import 'bootstrap/dist/css/bootstrap.min.css';
+  import '../../src/shared/styles.css';
+  import '../../src/shared/theme.css';
+  import '../../src/connected/screens/cuenta/style.css';
+  import '../../src/shared/account-portal.css';
+  import { renderAccountPortal, bindAccountPortal } from '../../src/shared/account-portal.js';
+  // El caso predeterminado reproduce el contrato actual: no expone el slug.
+  // El caso demo comprueba controles con un enlace ficticio y ?demo=1 explícito.
+  const demo = new URL(location.href).searchParams.get('case') === 'demo';
+  document.querySelector('#fixture').innerHTML = renderAccountPortal({
+    user: { rol: 'admin_negocio', negocioId: 7 },
+    tenant: { id: 7, slug: demo ? 'clinica-bienestar' : '' }, origin: location.origin, demo,
+  });
+  bindAccountPortal(document);
+  document.querySelector('#theme').onclick = () => {
+    document.documentElement.dataset.theme = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light';
+  };
+</script></body></html>

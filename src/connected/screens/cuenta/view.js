@@ -4,6 +4,9 @@ import { icon } from '../../../shared/icons.js';
 import { escape, pageHead } from '../../../shared/ui.js';
 import { licenseProgress } from './license-progress.js';
 import './style.css';
+import { db } from '../../../shared/data.js';
+import { renderAccountPortal, bindAccountPortal } from '../../../shared/account-portal.js';
+import '../../../shared/account-portal.css';
 
 let licenseUserId = null;
 let license = null;
@@ -71,6 +74,7 @@ function licenseContent() {
 }
 
 export function account() {
+  bindAccountPortal(document);
   if (user.rol !== 'superadmin' && licenseUserId !== user.id) {
     licenseUserId = user.id;
     license = null;
@@ -98,6 +102,7 @@ export function account() {
     '<div class="account-security-actions"><button type="button" class="btn btn-primary" data-action="change-password">' +
     icon('lock') + 'Cambiar contraseña</button>' +
     '<button type="button" class="btn btn-light" data-action="logout-account">Cerrar sesión</button></div></section></div>' +
+    renderAccountPortal({ user, tenant: db.tenants.find((tenant) => tenant.id === user.negocioId), origin: location.origin }) +
     (user.rol === 'superadmin' ? '' :
       '<section class="surface account-section account-license"><div class="account-section-heading">' +
       '<span class="account-section-icon" aria-hidden="true">' + icon('calendar') + '</span>' +
