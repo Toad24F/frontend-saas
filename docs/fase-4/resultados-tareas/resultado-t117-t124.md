@@ -54,4 +54,17 @@ El proceso de T124 se ejecutó por separado porque espera los cinco minutos comp
 
 ## Límites
 
+### Reejecución del 21 de octubre de 2026
+
+Se revisó el lote ya implementado, sin modificar el código del portal ni las pruebas. Las marcas **M3-T117–M3-T124** ya constan como hechas en el documento fuente de tareas. El archivo `tests/browser/global-setup.js` compila el backend y necesita conectar con MariaDB antes de crear la base temporal; por eso la prueba de navegador no puede comenzar si ese servicio no está disponible.
+
+| Comprobación | Resultado de esta reejecución |
+| --- | --- |
+| `npm test` | **152/152 aprobadas**, 0 fallidas. Cubre la lógica Node del frontend, incluidos los flujos relacionados del portal. |
+| `npm run test:browser` | **No inició casos**: la preparación falló en `global-setup.js:75` al conectar con MariaDB (`AggregateError`). La comprobación TCP a `localhost:3306` devolvió `False`. No se creó base temporal en esta ejecución. |
+| `npm run build` | Aprobado; Vite transformó **122 módulos**. |
+| `git diff --check` | Aprobado antes de esta nota. |
+
+El flujo de prueba sigue siendo portal → API → base temporal. La falta de MariaDB impide verificarlo de nuevo en este entorno; los resultados 8/8 y 1/1 de Playwright indicados arriba corresponden a la ejecución anterior, no a esta reejecución. No se alteró el backend ni su base cotidiana. El único archivo modificado ahora es esta nota, para distinguir los resultados históricos de los actuales.
+
 La suspensión de T124 se representa con una pestaña de fondo de Edge; no equivale al modo de suspensión física de todos los dispositivos móviles. Las cookies de T122 se bloquean interceptando la cabecera `Set-Cookie` en el contexto de prueba. Los recorridos T120–T121 observan conflictos de escritura reales en la API y la base temporal, pero no sustituyen todas las pruebas de carga. T125 y el cierre de seguridad posterior siguen pendientes.
