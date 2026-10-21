@@ -18,16 +18,14 @@ export async function startPublicPortal(slug) {
   let theme = ['light', 'dark'].includes(savedTheme) ? savedTheme :
     (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
   root.innerHTML = `<div class="public-portal">
-    <header class="public-portal-header"><img width="176" height="42" alt="Citalendar" id="public-brand">
+    <header class="public-portal-header"><img width="176" height="42" alt="Citalendar" id="public-brand"><span class="public-header-caption">Un momento para tu bienestar</span>
       <button type="button" class="theme-toggle" id="public-theme">Cambiar tema</button></header>
     <main id="public-main" class="public-portal-content" aria-labelledby="public-title">
-      <p class="public-eyebrow">Portal de reservas</p>
-      <h1 id="public-title">Tu próxima cita</h1>
-      <p id="public-business"></p>
+      <div class="public-business-heading"><span class="public-business-mark" aria-hidden="true">✳</span><div><p class="public-eyebrow">PORTAL DE RESERVAS</p><h1 id="public-title">Tu próxima cita</h1><p id="public-business"></p><p id="public-category" hidden></p></div><span class="public-online-tag">Reservas en línea</span></div>
       <div id="public-status" role="status" aria-live="polite" aria-atomic="true"></div>
       <button type="button" class="btn btn-primary mt-3" id="public-retry" hidden>Reintentar conexión</button>
       <section id="public-selection" aria-label="Selección de cita" hidden></section>
-    </main></div>`;
+    </main><footer class="public-portal-footer"><span>Tu tiempo importa. Tu bienestar, también.</span><span>Reservas con <strong>Citalendar</strong></span></footer></div>`;
   const status = root.querySelector('#public-status');
   const retry = root.querySelector('#public-retry');
   const themeButton = root.querySelector('#public-theme');
@@ -69,6 +67,12 @@ export async function startPublicPortal(slug) {
       const channel = new BroadcastChannel(`citalendar:portal:${slug}`);
       const flow = createPortalBooking(client, { slug, channel, acquireMutation: () => acquirePublicMutation(slug),
         onChange: (state, kind) => {
+          if (state.negocio?.nombre) {
+            root.querySelector('#public-business').textContent = state.negocio.nombre;
+            const category = root.querySelector('#public-category');
+            category.textContent = state.negocio.categoria || '';
+            category.hidden = !state.negocio.categoria;
+          }
           if (state.phase === 'result') {
             root.querySelector('#public-business').textContent = state.result.nombreNegocio;
             document.title = `Reserva pendiente · ${state.result.nombreNegocio}`;

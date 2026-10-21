@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { createPortalSelection, PORTAL_PHASES } from '../src/connected/public/selection.js';
 import { localDate, localTime, validDate } from '../src/connected/public/dates.js';
 import { renderSelection } from '../src/connected/public/selection-view.js';
+import { renderBooking } from '../src/connected/public/booking-view.js';
 
 // Dobles del contrato público real: nunca se consulta el panel ni una base de datos.
 const slug = 'centro';
@@ -69,6 +70,26 @@ async function toDate(controller) {
   await controller.start(); controller.choose('servicioId', 1); await controller.next();
   controller.choose('sucursalId', 2); await controller.next(); controller.choose('personalId', 3); await controller.next();
 }
+
+test('el portal presenta campos públicos opcionales sin convertirlos en reservas', async () => {
+  const { controller } = setup((_path, { query }) => ({ ...catalog(query),
+    negocio: { slug, nombre: 'Centro', categoria: 'Salud' },
+    servicios: [{ ...service, descripcion: '<consulta>' }],
+    sucursales: query.servicioId ? [{ ...branch, telefono: '6140000000', indicaciones: 'Entrada norte' }] : [],
+    profesionales: query.sucursalId ? [{ ...professional, especialidad: 'Medicina' }] : [],
+  }));
+  await controller.start();
+  assert.equal(controller.getState().negocio.categoria, 'Salud');
+  const first = renderBooking(controller.getState());
+  assert.match(first, /public-booking-columns/);
+  assert.match(first, /&lt;consulta&gt;/);
+  assert.doesNotMatch(first, /<consulta>/);
+  controller.choose('servicioId', 1); await controller.next();
+  assert.match(renderBooking(controller.getState()), /Entrada norte/);
+  assert.match(renderBooking(controller.getState()), /6140000000/);
+  controller.choose('sucursalId', 2); await controller.next();
+  assert.match(renderBooking(controller.getState()), /Medicina/);
+});
 
 test('T101: define fases separadas y bloquea avances sin selección válida', async () => {
   const { controller } = setup();

@@ -11,6 +11,7 @@ const invalidResponse = () => new PublicPortalError('protocol', 'El portal devol
 
 export function createPortalSelection(client, { slug, onChange = () => {}, now = () => new Date() } = {}) {
   const state = { phase: 'selection', step: 0,
+    negocio: null,
     selection: { servicioId: null, sucursalId: null, personalId: null, date: '', slot: null },
     options: { servicios: [], sucursales: [], profesionales: [] }, slots: [], timeZone: '',
     query: { status: 'idle', message: '' }, hold: null, form: null, submission: null, result: null };
@@ -53,6 +54,7 @@ export function createPortalSelection(client, { slug, onChange = () => {}, now =
     }
     // Solo se conservan catálogos de etapas alcanzadas; nunca listas posteriores
     // procedentes de una selección anterior o de una respuesta inesperada.
+    state.negocio = data.negocio;
     state.options.servicios = data.servicios;
     state.options.sucursales = state.step >= 1 ? data.sucursales : [];
     state.options.profesionales = state.step >= 2 ? data.profesionales : [];

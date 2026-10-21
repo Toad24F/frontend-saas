@@ -77,3 +77,100 @@ html[data-theme='light'] .public-result-status { background: #fff1ce; color: #76
   /* El último control sigue alcanzable con la zona segura del dispositivo. */
   .public-portal-content { padding-bottom: max(28px, env(safe-area-inset-bottom)); }
 }
+
+/* El portal conectado comparte la composición de la demo y conserva sus
+   estados reales de consulta, apartado y recuperación. */
+.public-portal { display: flex; flex-direction: column; background: var(--canvas); }
+.public-portal-header { min-height: 78px; padding-block: 16px; }
+.public-portal-header img { width: 176px; max-width: 45%; }
+.public-header-caption { color: var(--muted); font-size: 13px; letter-spacing: .02em; }
+.public-portal-content,
+.public-portal-content:has(#public-selection:not([hidden])) { width: min(100%, 1180px); max-width: 1180px; margin: 0 auto; padding: 34px 32px 64px; }
+.public-business-heading { display: flex; align-items: center; gap: 18px; margin-bottom: 29px; }
+.public-business-heading > div { min-width: 0; }
+.public-business-mark { display: grid; place-items: center; width: 54px; height: 54px; flex: none; border-radius: 16px; color: var(--accent); background: var(--surface-soft); font-size: 30px; }
+.public-eyebrow { margin: 0 0 3px; font-size: 11px; letter-spacing: .16em; }
+.public-portal-content h1 { margin: 0; font-size: clamp(24px, 3vw, 31px); line-height: 1.2; letter-spacing: -.04em; }
+#public-business { margin: 4px 0 0; font-size: 15px; color: var(--muted); }
+#public-category { margin: 1px 0 0; color: var(--muted); font-size: 13px; }
+.public-online-tag { margin-left: auto; padding: 7px 12px; border: 1px solid var(--border); border-radius: 999px; color: var(--accent); background: var(--surface); font-size: 12px; white-space: nowrap; }
+.public-progress { border-block: 1px solid var(--border); margin-bottom: 32px; }
+.public-steps { display: flex; justify-content: space-between; gap: 16px; margin: 0; padding: 19px 0; border: 0; }
+.public-steps li { min-width: 0; gap: 9px; white-space: nowrap; }
+.public-steps li > span { width: 28px; height: 28px; background: var(--surface); }
+.public-steps li strong { font-size: 12px; font-weight: 600; }
+.public-steps .is-complete { color: var(--ink); }
+.public-steps .is-complete > span { border-color: var(--accent); color: var(--accent); }
+.public-booking-columns { display: grid; grid-template-columns: minmax(0, 1fr) 306px; gap: 28px; align-items: start; }
+.public-booking-surface { min-width: 0; padding: clamp(22px, 3vw, 34px); border: 1px solid var(--border); border-radius: 16px; background: var(--surface); }
+.public-stage-heading { margin-bottom: 26px; }
+.public-stage-eyebrow { color: var(--accent); font-size: 11px; font-weight: 700; letter-spacing: .16em; }
+.public-stage-heading #selection-title { margin: 9px 0 8px; font-size: clamp(25px, 3vw, 31px); letter-spacing: -.035em; line-height: 1.2; }
+.public-stage-heading p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.6; }
+.public-options { gap: 12px; }
+.public-option { min-height: 94px; padding: 17px 18px; border-radius: 11px; transition: border-color .18s ease, background .18s ease, transform .18s ease; }
+.public-option:hover { transform: translateY(-1px); background: var(--surface-soft); }
+.public-option input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.public-option-symbol { display: grid; place-items: center; width: 45px; height: 45px; flex: none; border-radius: 12px; color: var(--accent); background: var(--surface-soft); font-size: 23px; font-weight: 700; }
+.public-option-copy { min-width: 0; flex: 1; }
+.public-option-copy strong { font-size: 15px; line-height: 1.4; }
+.public-option-description { display: block; margin-top: 5px; color: var(--muted); font-size: 13px; line-height: 1.5; }
+.public-option-copy small { margin-top: 7px; font-size: 12px; }
+.public-option-check { width: 21px; height: 21px; flex: none; border: 1px solid var(--border); border-radius: 50%; }
+.public-option:has(:checked) { background: var(--surface-soft); }
+.public-option:has(:checked) .public-option-check { border: 6px solid var(--accent); }
+.public-option:focus-within { outline: 3px solid var(--accent); outline-offset: 2px; }
+.public-date { max-width: 300px; }
+.public-date-strip { display: flex; gap: 9px; overflow-x: auto; padding: 4px 2px 9px; scrollbar-width: thin; }
+.public-date-chip { display: grid; justify-items: center; gap: 2px; min-width: 66px; min-height: 75px; padding: 9px 7px; border: 1px solid var(--border); border-radius: 10px; color: var(--ink); background: var(--surface); }
+.public-date-chip span, .public-date-chip small { color: var(--muted); font-size: 11px; text-transform: capitalize; }
+.public-date-chip strong { font-size: 19px; line-height: 1; font-variant-numeric: tabular-nums; }
+.public-date-chip:hover, .public-date-chip.selected { border-color: var(--accent); background: var(--surface-soft); }
+.public-date-chip.selected strong { color: var(--accent); }
+.public-slots { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
+.public-slot { border-radius: 9px; font-variant-numeric: tabular-nums; }
+.public-selection-actions { padding-top: 22px; border-top: 1px solid var(--border); }
+.public-booking-aside { min-width: 0; padding: 9px; border-radius: 20px; background: var(--surface-soft); }
+.public-summary-card { padding: 24px; border: 1px solid var(--border); border-radius: 13px; background: var(--surface); }
+.public-summary-kicker { color: var(--accent); font-size: 10px; font-weight: 700; letter-spacing: .16em; }
+.public-summary-card h3 { margin: 8px 0 23px; font-size: 17px; letter-spacing: -.02em; }
+.public-summary-card dl { display: grid; gap: 17px; margin: 0; }
+.public-summary-card dl > div { min-width: 0; }
+.public-summary-card dt { margin-bottom: 3px; color: var(--muted); font-size: 11px; font-weight: 600; }
+.public-summary-card dd { margin: 0; overflow-wrap: anywhere; font-size: 13px; font-weight: 600; line-height: 1.45; }
+.public-summary-price { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin: 23px 0 0; padding-top: 18px; border-top: 1px solid var(--border); }
+.public-summary-price span { color: var(--muted); font-size: 12px; }
+.public-summary-price strong { color: var(--accent); font-size: 20px; white-space: nowrap; }
+.public-summary-price small { font-size: 10px; }
+.public-booking-trust { margin: 16px 10px 9px; color: var(--muted); font-size: 12px; line-height: 1.65; }
+.public-portal-footer { display: flex; justify-content: space-between; gap: 20px; width: min(100%, 1180px); margin: auto auto 0; padding: 22px 32px; border-top: 1px solid var(--border); color: var(--muted); font-size: 12px; }
+html[data-theme='dark'] .public-booking-aside { background: #302c31; }
+html[data-theme='dark'] .public-option:has(:checked) { border-color: var(--accent); }
+@media (max-width: 900px) {
+  .public-booking-columns { grid-template-columns: minmax(0, 1fr); }
+  .public-booking-aside { order: -1; padding: 0; background: transparent; }
+  .public-summary-card { padding: 17px 20px; }
+  .public-summary-card dl { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 11px 18px; }
+  .public-summary-card h3 { margin-bottom: 14px; }
+  .public-booking-trust { display: none; }
+  .public-steps { overflow-x: auto; scrollbar-width: none; }
+  .public-steps::-webkit-scrollbar { display: none; }
+}
+@media (max-width: 575px) {
+  .public-header-caption, .public-online-tag { display: none; }
+  .public-portal-header { min-height: 67px; padding: 12px 18px; }
+  .public-portal-header img { width: 145px; max-width: 52%; }
+  .public-portal-header .theme-toggle { min-height: 42px; padding-inline: 10px; }
+  .public-portal-content, .public-portal-content:has(#public-selection:not([hidden])) { padding: 24px 16px 40px; }
+  .public-business-heading { gap: 12px; margin-bottom: 22px; }
+  .public-business-mark { width: 45px; height: 45px; border-radius: 12px; }
+  .public-steps { display: flex; gap: 20px; padding: 16px 0; }
+  .public-steps li { flex: none; }
+  .public-booking-columns { gap: 17px; }
+  .public-booking-aside { order: 0; }
+  .public-booking-surface { padding: 22px 17px; }
+  .public-summary-card dl { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .public-option { gap: 12px; padding: 15px 12px; }
+  .public-option-symbol { width: 39px; height: 39px; }
+  .public-portal-footer { padding: 20px 16px; flex-wrap: wrap; }
+}

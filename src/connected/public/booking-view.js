@@ -8,7 +8,7 @@ export function clockLabel(ms) {
   const seconds = Math.max(0, Math.ceil(ms / 1000));
   return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
 }
-export function renderBooking(state) {
+function renderBody(state) {
   // La región estable de mountSelection anuncia estos avisos; el texto visible
   // no es otra región viva que compita al reemplazar la pantalla.
   const notice = state.notice ? `<p class="public-hold-notice">${esc(state.notice)}</p>` : '';
@@ -58,6 +58,31 @@ export function renderBooking(state) {
         <button class="btn btn-light" type="submit" data-review-contact ${!active ? 'disabled' : ''}>Revisar datos</button>
         <button class="btn btn-primary" type="button" data-submit-reservation ${!active ? 'disabled' : ''}>Reservar</button></div>
     </form>`;
+}
+
+const stepNames = ['Servicio', 'Sucursal', 'Profesional', 'Fecha y hora', 'Tus datos', 'Confirmación'];
+
+export function renderBooking(state) {
+  const step = state.phase === 'selection' ? state.step : state.phase === 'result' ? 5 : 4;
+  const result = state.phase === 'result' ? state.result : null;
+  const options = state.options || { servicios: [], sucursales: [], profesionales: [] };
+  const chosen = (list, id) => options[list]?.find((item) => item.id === id);
+  const service = chosen('servicios', state.selection?.servicioId);
+  const branch = chosen('sucursales', state.selection?.sucursalId);
+  const professional = chosen('profesionales', state.selection?.personalId);
+  const date = state.selection?.date && state.selection?.slot
+    ? `${dateLabel(state.selection.date)} · ${state.selection.slot.horaInicio}` : '';
+  const summary = [
+    ['Servicio', result?.nombreServicio || service?.nombre || 'Selecciona un servicio'],
+    ['Sucursal', result?.nombreSucursal || branch?.nombre || 'Elige tu sucursal'],
+    ['Profesional', result?.nombreProfesional || professional?.nombre || 'Elige un profesional'],
+    ['Fecha y hora', result ? `${dateLabel(localDate(result.inicioUtc, result.zonaHoraria))} · ${localTime(result.inicioUtc, result.zonaHoraria)}` : date || 'Encuentra tu horario'],
+  ];
+  const price = result?.costoAceptado ?? state.hold?.costoAceptado ?? service?.costo;
+  return `<nav class="public-progress" aria-label="Pasos de reserva"><ol class="public-steps">${stepNames.map((name, index) => `<li class="${index < step ? 'is-complete' : ''}" ${step === index ? 'aria-current="step"' : ''}><span>${index < step ? '✓' : index + 1}</span><strong>${name}</strong></li>`).join('')}</ol></nav>
+    <div class="public-booking-columns"><section class="public-booking-surface">${renderBody(state)}</section>
+      <aside class="public-booking-aside" aria-label="Resumen de la reserva"><div class="public-summary-card"><span class="public-summary-kicker">TU PRÓXIMA VISITA</span><h3>Tu reserva, de un vistazo</h3><dl>${summary.map(([label, value]) => `<div><dt>${label}</dt><dd>${esc(value)}</dd></div>`).join('')}</dl>${price !== undefined ? `<p class="public-summary-price"><span>${service?.duracionMinutos ? `${service.duracionMinutos} minutos` : 'Costo aceptado'}</span><strong>${esc(price)} <small>MXN</small></strong></p>` : ''}</div>
+      <p class="public-booking-trust">${result ? 'Reserva registrada, pendiente de confirmación.' : 'La disponibilidad y el costo se confirman con el servidor antes de registrar tu reserva.'}</p></aside></div>`;
 }
 
 // El contador se actualiza sin recrear inputs, para conservar foco, cursor e IME.
