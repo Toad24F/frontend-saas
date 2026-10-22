@@ -109,16 +109,20 @@ html[data-theme='light'] .public-result-status { background: #fff1ce; color: #76
 .public-stage-heading p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.6; }
 .public-options { gap: 12px; }
 .public-option { min-height: 94px; padding: 17px 18px; border-radius: 11px; transition: border-color .18s ease, background .18s ease, transform .18s ease; }
-.public-option:hover { transform: translateY(-1px); background: var(--surface-soft); }
+.public-option:hover { transform: translateY(-1px); border-color: color-mix(in srgb, var(--border) 55%, var(--muted)); background: var(--surface-soft); }
 .public-option input { position: absolute; width: 1px; height: 1px; opacity: 0; }
 .public-option-symbol { display: grid; place-items: center; width: 45px; height: 45px; flex: none; border-radius: 12px; color: var(--accent); background: var(--surface-soft); font-size: 23px; font-weight: 700; }
+.public-option-symbol .icon { width: 23px; height: 23px; }
 .public-option-copy { min-width: 0; flex: 1; }
 .public-option-copy strong { font-size: 15px; line-height: 1.4; }
 .public-option-description { display: block; margin-top: 5px; color: var(--muted); font-size: 13px; line-height: 1.5; }
 .public-option-copy small { margin-top: 7px; font-size: 12px; }
-.public-option-check { width: 21px; height: 21px; flex: none; border: 1px solid var(--border); border-radius: 50%; }
-.public-option:has(:checked) { background: var(--surface-soft); }
-.public-option:has(:checked) .public-option-check { border: 6px solid var(--accent); }
+.public-option-check { display: grid; place-items: center; width: 21px; height: 21px; flex: none; border: 1px solid var(--border); border-radius: 50%; }
+.public-option-check .icon { width: 13px; height: 13px; opacity: 0; }
+.public-option:has(:checked) { background: var(--accent-soft); box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 12%, transparent); }
+.public-option:has(:checked) .public-option-check { border-color: var(--accent); background: var(--accent); color: #fff; }
+.public-option:has(:checked) .public-option-check .icon { opacity: 1; }
+.public-options:disabled .public-option:hover { transform: none; border-color: var(--border); background: var(--surface); }
 .public-option:focus-within { outline: 3px solid var(--accent); outline-offset: 2px; }
 .public-date { max-width: 300px; }
 .public-date-strip { display: flex; gap: 9px; overflow-x: auto; padding: 4px 2px 9px; scrollbar-width: thin; }
@@ -145,7 +149,7 @@ html[data-theme='light'] .public-result-status { background: #fff1ce; color: #76
 .public-booking-trust { margin: 16px 10px 9px; color: var(--muted); font-size: 12px; line-height: 1.65; }
 .public-portal-footer { display: flex; justify-content: space-between; gap: 20px; width: min(100%, 1180px); margin: auto auto 0; padding: 22px 32px; border-top: 1px solid var(--border); color: var(--muted); font-size: 12px; }
 html[data-theme='dark'] .public-booking-aside { background: #302c31; }
-html[data-theme='dark'] .public-option:has(:checked) { border-color: var(--accent); }
+html[data-theme='dark'] .public-option:has(:checked) { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, var(--surface)); }
 @media (max-width: 900px) {
   .public-booking-columns { grid-template-columns: minmax(0, 1fr); }
   .public-booking-aside { order: -1; padding: 0; background: transparent; }

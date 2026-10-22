@@ -1,5 +1,6 @@
 import { dateLabel, validDate } from './dates.js';
 import { publicAnnouncement, createAnnouncer, focusPublicControl } from './accessibility.js';
+import { icon } from '../../shared/icons.js';
 
 // Escape local para no importar el módulo UI del panel ni sus datos de demo.
 const esc = (value = '') => String(value).replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
@@ -31,7 +32,7 @@ export function renderSelection(state) {
     content = `<fieldset class="public-options" ${!usable ? 'disabled' : ''}><legend class="visually-hidden">${names[step]}</legend>${(usable ? state.options[lists[step]] : []).map((item) => {
       const details = step === 0 ? `${item.duracionMinutos} min · ${money(item.costo)}` : step === 1 ? [item.direccion, item.telefono].filter(Boolean).join(' · ') : item.especialidad;
       const description = step === 0 ? item.descripcion : step === 1 ? item.indicaciones : '';
-      return `<label class="public-option"><input type="radio" name="public-option" data-selection="${keys[step]}" value="${item.id}" ${selection[keys[step]] === item.id ? 'checked' : ''}><span class="public-option-symbol" aria-hidden="true">${step === 0 ? '✳' : step === 1 ? '⌖' : esc(item.nombre.trim().charAt(0))}</span><span class="public-option-copy"><strong>${esc(item.nombre)}</strong>${description ? `<span class="public-option-description">${esc(description)}</span>` : ''}${details ? `<small>${esc(details)}</small>` : ''}</span><span class="public-option-check" aria-hidden="true"></span></label>`;
+      return `<label class="public-option"><input type="radio" name="public-option" data-selection="${keys[step]}" value="${item.id}" ${selection[keys[step]] === item.id ? 'checked' : ''}><span class="public-option-symbol" aria-hidden="true">${step === 0 ? icon('briefcase') : step === 1 ? icon('pin') : esc(item.nombre.trim().charAt(0))}</span><span class="public-option-copy"><strong>${esc(item.nombre)}</strong>${description ? `<span class="public-option-description">${esc(description)}</span>` : ''}${details ? `<small>${esc(details)}</small>` : ''}</span><span class="public-option-check" aria-hidden="true">${icon('check')}</span></label>`;
     }).join('')}</fieldset>`;
   } else {
     const zone = state.timeZone || state.options.sucursales.find((item) => item.id === selection.sucursalId)?.zonaHoraria;
