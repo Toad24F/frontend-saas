@@ -8,12 +8,13 @@ const fields = ['servicioId', 'sucursalId', 'personalId'];
 const lists = ['servicios', 'sucursales', 'profesionales'];
 const id = (value) => Number.isSafeInteger(value) && value > 0;
 const invalidResponse = () => new PublicPortalError('protocol', 'El portal devolvió una respuesta no válida. Reintente la consulta.');
+const addDays = (date, days) => new Date(Date.parse(`${date}T12:00:00Z`) + days * 86400000).toISOString().slice(0, 10);
 
 export function createPortalSelection(client, { slug, onChange = () => {}, now = () => new Date() } = {}) {
   const state = { phase: 'selection', step: 0,
     negocio: null,
     selection: { servicioId: null, sucursalId: null, personalId: null, date: '', slot: null },
-    options: { servicios: [], sucursales: [], profesionales: [] }, slots: [], timeZone: '',
+    options: { servicios: [], sucursales: [], profesionales: [] }, slots: [], availableDates: [], today: '', timeZone: '',
     query: { status: 'idle', message: '' }, hold: null, form: null, submission: null, result: null };
   let revision = 0;
   let pending;
@@ -31,6 +32,8 @@ export function createPortalSelection(client, { slug, onChange = () => {}, now =
     state.selection.date = '';
     state.selection.slot = null;
     state.slots = [];
+    state.availableDates = [];
+    state.today = '';
     state.timeZone = '';
   }
   function ensureSelection() {
@@ -68,36 +71,55 @@ export function createPortalSelection(client, { slug, onChange = () => {}, now =
         Date.parse(slot.inicioUtc) >= Date.parse(slot.finUtc)) throw invalidResponse();
       try {
         const fechaLocal = localDate(slot.inicioUtc, data.zonaHoraria);
-        if (fechaLocal !== query.desde) throw invalidResponse();
+        if (fechaLocal < query.desde || fechaLocal > query.hasta) throw invalidResponse();
         return { inicioUtc: slot.inicioUtc, finUtc: slot.finUtc, fechaLocal,
           horaInicio: localTime(slot.inicioUtc, data.zonaHoraria), horaFin: localTime(slot.finUtc, data.zonaHoraria) };
       } catch { throw invalidResponse(); }
     });
     // Incluso sin ranuras se exige una zona IANA interpretable.
     try { localDate(now(), data.zonaHoraria); } catch { throw invalidResponse(); }
-    state.slots = slots;
+    state.availableDates = [...new Set(slots.map((slot) => slot.fechaLocal))].sort();
+    state.slots = slots.filter((slot) => slot.fechaLocal === state.selection.date);
     state.timeZone = data.zonaHoraria;
   }
-  async function load() {
+  async function load(direction = 0) {
     invalidate();
     const current = revision;
     pending = new AbortController();
     state.selection.slot = null;
     state.slots = [];
+    state.availableDates = [];
     if (state.step === 3 && (!fields.every((key) => id(state.selection[key])) || !validDate(state.selection.date))) {
       state.query = { status: 'invalid', message: 'Seleccione una fecha válida y complete servicio, sucursal y profesional.' }; emit(); return;
     }
     state.query = { status: 'loading', message: 'Consultando opciones disponibles…' }; emit();
     const availability = state.step === 3;
+    const branch = state.options.sucursales.find((item) => item.id === state.selection.sucursalId);
+    const today = availability ? localDate(now(), branch.zonaHoraria) : '';
+    state.today = today;
+    const rangeStart = availability ? [addDays(state.selection.date, -10), today].sort().at(-1) : '';
     const query = availability ? { servicioId: state.selection.servicioId, sucursalId: state.selection.sucursalId,
-      personalId: state.selection.personalId, desde: state.selection.date, hasta: state.selection.date } : {
+      personalId: state.selection.personalId, desde: rangeStart, hasta: addDays(rangeStart, 30) } : {
       ...(state.step >= 1 ? { servicioId: state.selection.servicioId } : {}),
       ...(state.step >= 2 ? { sucursalId: state.selection.sucursalId } : {}),
     };
     try {
       const data = await client.request(availability ? 'disponibilidad' : 'catalogo', { query, signal: pending.signal });
       if (current !== revision) return;
-      if (availability) readAvailability(data, query); else readCatalog(data);
+      if (availability) {
+        readAvailability(data, query);
+        if (direction) {
+          const candidate = direction > 0
+            ? state.availableDates.find((date) => date >= state.selection.date)
+            : state.availableDates.findLast((date) => date <= state.selection.date);
+          if (candidate) {
+            state.selection.date = candidate;
+            state.slots = data.ranuras.filter((slot) => localDate(slot.inicioUtc, data.zonaHoraria) === candidate)
+              .map((slot) => ({ inicioUtc: slot.inicioUtc, finUtc: slot.finUtc, fechaLocal: candidate,
+                horaInicio: localTime(slot.inicioUtc, data.zonaHoraria), horaFin: localTime(slot.finUtc, data.zonaHoraria) }));
+          }
+        }
+      } else readCatalog(data);
       const count = availability ? state.slots.length : state.options[lists[state.step]].length;
       state.query = { status: count ? 'ready' : 'empty', message: count ? '' : availability
         ? 'No hay horarios disponibles en esta fecha. Puede elegir otro día o cambiar sus selecciones.'
@@ -105,6 +127,7 @@ export function createPortalSelection(client, { slug, onChange = () => {}, now =
     } catch (error) {
       if (current !== revision) return;
       state.slots = [];
+      state.availableDates = [];
       state.query = { status: [400, 404, 409].includes(error.status) ? 'invalid' : 'error',
         message: error instanceof PublicPortalError ? error.message : 'No se pudo consultar el portal. Reintente la consulta.' };
     }
@@ -142,6 +165,13 @@ export function createPortalSelection(client, { slug, onChange = () => {}, now =
     async setDate(date) {
       if (state.phase !== 'selection' || state.step !== 3) return;
       state.selection.date = date; await load();
+    },
+    async shiftDate(days) {
+      if (state.phase !== 'selection' || state.step !== 3 || !validDate(state.selection.date) || ![-3, 3].includes(days)) return;
+      const branch = state.options.sucursales.find((item) => item.id === state.selection.sucursalId);
+      const today = localDate(now(), branch.zonaHoraria);
+      state.selection.date = [addDays(state.selection.date, days), today].sort().at(-1);
+      await load(days);
     },
     chooseSlot(start) {
       const slot = state.slots.find((item) => item.inicioUtc === start);

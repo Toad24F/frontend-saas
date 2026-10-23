@@ -13,12 +13,13 @@ const slug = 'centro';
 test('T116: éxito y fallo antiguos no pisan la disponibilidad más reciente', async () => {
   for (const fails of [false, true]) {
     let finish;
+    let availabilityCalls = 0;
     const { controller } = setup((path, { query }) => {
       if (path === 'catalogo') return catalog(query);
-      if (query.desde === '2026-10-21') return new Promise((resolve, reject) => {
+      if (++availabilityCalls === 2) return new Promise((resolve, reject) => {
         finish = () => fails ? reject(Error('respuesta vieja')) : resolve(availability(query));
       });
-      return availability(query, [{ inicioUtc: `${query.desde}T17:00:00.000Z`, finUtc: `${query.desde}T17:30:00.000Z` }]);
+      return availability(query, [{ inicioUtc: '2026-10-22T17:00:00.000Z', finUtc: '2026-10-22T17:30:00.000Z' }]);
     });
     await toDate(controller);
     const pending = controller.setDate('2026-10-21');
@@ -140,10 +141,10 @@ test('T101: una respuesta antigua de catálogo no sobrescribe el paso vigente', 
   assert.deepEqual(controller.getState().options.sucursales, []);
 });
 
-test('T103: fecha real y consulta de un día dentro del límite inclusivo de 31 fechas', async () => {
+test('T103: fecha real y consulta de hasta 31 fechas inclusivas', async () => {
   const { controller, calls } = setup(); await toDate(controller);
   await controller.setDate('2026-10-20');
-  assert.deepEqual(calls.at(-1).query, { servicioId: 1, sucursalId: 2, personalId: 3, desde: '2026-10-20', hasta: '2026-10-20' });
+  assert.deepEqual(calls.at(-1).query, { servicioId: 1, sucursalId: 2, personalId: 3, desde: '2026-10-19', hasta: '2026-11-18' });
   const count = calls.length;
   for (const date of ['', '2026-02-30', '20/10/2026']) {
     await controller.setDate(date);
@@ -152,6 +153,29 @@ test('T103: fecha real y consulta de un día dentro del límite inclusivo de 31 
   assert.equal(calls.length, count);
   assert.equal(validDate('2028-02-29'), true);
   assert.equal(validDate('2026-02-29'), false);
+});
+
+test('la tira oculta días vacíos, conserva el elegido en segunda posición y avanza tres días', async () => {
+  const days = ['2026-10-20', '2026-10-22', '2026-10-25', '2026-10-28', '2026-11-22'];
+  const { controller, calls } = setup((path, { query }) => path === 'catalogo' ? catalog(query) : availability(query,
+    days.filter((day) => day >= query.desde && day <= query.hasta)
+      .map((day) => ({ inicioUtc: `${day}T17:00:00.000Z`, finUtc: `${day}T17:30:00.000Z` }))));
+  await toDate(controller);
+  let html = renderSelection(controller.getState());
+  assert.match(html, /data-selection-date="2026-10-20"/);
+  assert.doesNotMatch(html, /data-selection-date="2026-10-21"/);
+  await controller.setDate('2026-10-22');
+  html = renderSelection(controller.getState());
+  const visible = [...html.matchAll(/data-selection-date="([^"]+)"/g)].map((match) => match[1]);
+  assert.deepEqual(visible.slice(0, 3), ['2026-10-20', '2026-10-22', '2026-10-25']);
+  await controller.shiftDate(3);
+  assert.equal(controller.getState().selection.date, '2026-10-25');
+  await controller.shiftDate(-3);
+  assert.equal(controller.getState().selection.date, '2026-10-22');
+  await controller.setDate('2026-11-21');
+  assert.equal(controller.getState().query.status, 'empty');
+  assert.deepEqual(controller.getState().availableDates, ['2026-11-22']);
+  assert.equal(calls.at(-1).query.hasta, '2026-12-11');
 });
 
 test('T103: solo horarios devueltos, en zona de sucursal, sin conceder apartado', async () => {
@@ -182,9 +206,10 @@ test('T103: vacío, selección inválida y fallo técnico tienen estados diferen
 
 test('T101–T103: respuestas de disponibilidad desordenadas y errores antiguos se descartan', async () => {
   let finish;
+  let availabilityCalls = 0;
   const { controller } = setup((path, { query }) => {
     if (path === 'catalogo') return catalog(query);
-    if (query.desde === '2026-10-21') return new Promise((_resolve, reject) => { finish = () => reject(Error('viejo')); });
+    if (++availabilityCalls === 2) return new Promise((_resolve, reject) => { finish = () => reject(Error('viejo')); });
     return availability(query, []);
   });
   await toDate(controller);
@@ -249,8 +274,9 @@ test('T101: cambiar sucursal y profesional invalida solo las selecciones posteri
 
 test('T101: una disponibilidad tardía no reaparece después de volver', async () => {
   let finish;
+  let availabilityCalls = 0;
   const { controller } = setup((path, { query }) => path === 'catalogo' ? catalog(query)
-    : query.desde === '2026-10-21' ? new Promise((resolve) => { finish = () => resolve(availability(query, [])); }) : availability(query, []));
+    : ++availabilityCalls === 2 ? new Promise((resolve) => { finish = () => resolve(availability(query, [])); }) : availability(query, []));
   await toDate(controller);
   const pending = controller.setDate('2026-10-21');
   await controller.back(); finish(); await pending;
