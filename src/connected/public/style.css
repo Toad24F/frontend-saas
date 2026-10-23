@@ -58,8 +58,13 @@ fieldset:disabled .public-option, fieldset:disabled .public-slot { opacity: .6; 
 .public-selection-actions .btn { min-width: 110px; }
 /* Captura y apartado: errores asociados a cada campo y contador independiente
    del render del formulario. Las superficies usan los mismos tokens por tema. */
-.public-hold-clock { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px; margin-block: 20px; border: 1px solid var(--border); background: var(--surface); border-radius: 10px; }
+.public-hold-clock { padding: 16px; margin-block: 20px; border: 1px solid var(--border); background: var(--surface); border-radius: 10px; }
+.public-hold-clock-line { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
 .public-hold-clock strong { font-variant-numeric: tabular-nums; font-size: 24px; }
+.public-hold-progress { display: block; width: 100%; height: 8px; margin-top: 14px; border: 0; border-radius: 999px; overflow: hidden; appearance: none; background: var(--surface-soft); }
+.public-hold-progress::-webkit-progress-bar { border-radius: 999px; background: var(--surface-soft); }
+.public-hold-progress::-webkit-progress-value { border-radius: 999px; background: var(--accent); }
+.public-hold-progress::-moz-progress-bar { border-radius: 999px; background: var(--accent); }
 .public-hold-notice { padding: 16px; border-inline-start: 3px solid var(--accent); background: var(--surface); line-height: 1.7; }
 .public-contact-field { margin-block: 20px; }
 .public-contact-field label { display: block; font-weight: 600; margin-bottom: 8px; }

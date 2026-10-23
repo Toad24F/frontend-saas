@@ -4,7 +4,7 @@ import { createPortalBooking } from '../src/connected/public/booking.js';
 import { validateContact } from '../src/connected/public/contact.js';
 import { createHoldClock } from '../src/connected/public/hold-clock.js';
 import { bindBookingLifecycle } from '../src/connected/public/booking-lifecycle.js';
-import { renderBooking } from '../src/connected/public/booking-view.js';
+import { renderBooking, updateHoldTime } from '../src/connected/public/booking-view.js';
 import { createPublicClient } from '../src/connected/public/http.js';
 import { memoryStorage } from './fixtures/memory-storage.js';
 
@@ -222,6 +222,24 @@ test('T105–T107: formulario escapado, errores accesibles y envío sujeto a vig
   assert.match(html, /data-submit-reservation/);
   const expired = { ...flow.getState(), remainingMs: 0 };
   assert.match(renderBooking(expired), /disabled[^>]*>Reservar/);
+});
+
+test('el formulario muestra barra de tiempo y deja fecha, zona y costo en el resumen', async () => {
+  const { flow } = setup(); await form(flow);
+  const state = flow.getState();
+  const html = renderBooking(state);
+  assert.match(html, /Completa tus datos/);
+  assert.match(html, /id="public-hold-progress"[^>]*max="300"/);
+  assert.match(html, /America\/Mazatlan/);
+  assert.match(html, /450\.00/);
+  assert.doesNotMatch(html, /<p class="public-summary">|Costo aceptado:/);
+  const timer = { textContent: '' }, progress = { value: 300 };
+  const host = { querySelector: (selector) => selector === '#public-hold-time' ? timer : selector === '#public-hold-progress' ? progress : null };
+  updateHoldTime(host, { remainingMs: 150000 });
+  assert.equal(timer.textContent, '2:30');
+  assert.equal(progress.value, 150);
+  updateHoldTime(host, { remainingMs: 0 });
+  assert.equal(progress.value, 0);
 });
 
 test('T108–T109: eventos de foco, visibilidad y salida se conectan y limpian', async () => {

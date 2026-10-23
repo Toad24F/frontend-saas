@@ -19,7 +19,7 @@ async function chooseSlot(page, offset, index = 0, business = 1, apart = true) {
   const selected = await page.locator('[data-slot]:checked').getAttribute('value');
   if (apart) {
     await page.getByRole('button', { name: 'Apartar este horario' }).click();
-    await expect(page.getByRole('heading', { name: 'Cuéntanos de ti' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Completa tus datos' })).toBeVisible();
   }
   return selected;
 }
@@ -78,7 +78,7 @@ test('T119: teclado, foco y notas HTML se mantienen como texto seguro', async ({
   await page.keyboard.press('Space');
   await page.getByRole('button', { name: 'Apartar este horario' }).focus();
   await page.keyboard.press('Enter');
-  await expect(page.getByRole('heading', { name: 'Cuéntanos de ti' })).toBeFocused();
+  await expect(page.getByRole('heading', { name: 'Completa tus datos' })).toBeFocused();
   await page.getByLabel('Nombre completo').focus();
   await page.keyboard.type('Cliente de teclado');
   await page.keyboard.press('Tab');

@@ -9,6 +9,7 @@ export function clockLabel(ms) {
   const seconds = Math.max(0, Math.ceil(ms / 1000));
   return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
 }
+const progressSeconds = (ms) => Math.min(300, Math.max(0, Math.ceil(ms / 1000)));
 function renderBody(state) {
   // La región estable de mountSelection anuncia estos avisos; el texto visible
   // no es otra región viva que compita al reemplazar la pantalla.
@@ -34,16 +35,15 @@ function renderBody(state) {
       <dt>Horario</dt><dd>${esc(localTime(result.inicioUtc, result.zonaHoraria))}–${esc(localTime(result.finUtc, result.zonaHoraria))}</dd>
       <dt>Zona horaria</dt><dd>${esc(result.zonaHoraria)}</dd><dt>Costo</dt><dd>${esc(result.costoAceptado)} MXN</dd></dl>`;
   }
-  const { contact, contactErrors: errors, hold } = state;
+  const { contact, contactErrors: errors } = state;
   const active = state.holdStatus === 'active' && state.remainingMs > 0;
   const input = (field, title, type = 'text', helper = '') => `<div class="public-contact-field"><label for="contact-${field}">${title}</label>
     <input class="form-control" id="contact-${field}" name="${field}" type="${type}" data-contact-field="${field}" autocomplete="off"
       value="${esc(contact[field])}" aria-invalid="${Boolean(errors[field])}" aria-describedby="contact-${field}-help contact-${field}-error" ${field !== 'notas' ? 'required' : ''}>
     <small id="contact-${field}-help">${helper}</small><p class="public-field-error" id="contact-${field}-error">${esc(errors[field] || '')}</p></div>`;
-  return `<h2 id="selection-title" tabindex="-1">Cuéntanos de ti</h2>
-    <p class="public-summary">${esc(dateLabel(state.selection.date))} · ${esc(localTime(state.selection.slot.inicioUtc, hold.zonaHoraria))} · ${esc(hold.zonaHoraria)}</p>
-    <p class="public-summary">Costo aceptado: ${esc(hold.costoAceptado)} MXN</p>
-    <div class="public-hold-clock">Tiempo restante <strong id="public-hold-time" role="timer" aria-live="off">${clockLabel(state.remainingMs)}</strong></div>
+  return `<h2 id="selection-title" tabindex="-1">Completa tus datos</h2>
+    <div class="public-hold-clock"><div class="public-hold-clock-line"><span>Tiempo restante</span><strong id="public-hold-time" role="timer" aria-live="off">${clockLabel(state.remainingMs)}</strong></div>
+      <progress class="public-hold-progress" id="public-hold-progress" max="300" value="${progressSeconds(state.remainingMs)}" aria-label="Tiempo restante del apartado"></progress></div>
     ${notice}
     <form id="public-contact-form" data-contact-form autocomplete="off" novalidate>
       ${input('nombre', 'Nombre completo', 'text', 'Hasta 150 caracteres.')}
@@ -72,7 +72,7 @@ export function renderBooking(state) {
   const branch = chosen('sucursales', state.selection?.sucursalId);
   const professional = chosen('profesionales', state.selection?.personalId);
   const date = state.selection?.date && state.selection?.slot
-    ? `${dateLabel(state.selection.date)} · ${state.selection.slot.horaInicio}` : '';
+    ? `${dateLabel(state.selection.date)} · ${state.selection.slot.horaInicio}${state.phase === 'form' && state.hold?.zonaHoraria ? ` · ${state.hold.zonaHoraria}` : ''}` : '';
   const summary = [
     ['Servicio', result?.nombreServicio || service?.nombre || 'Selecciona un servicio', 'briefcase', Boolean(result?.nombreServicio || service?.nombre)],
     ['Sucursal', result?.nombreSucursal || branch?.nombre || 'Elige tu sucursal', 'pin', Boolean(result?.nombreSucursal || branch?.nombre)],
@@ -90,6 +90,8 @@ export function renderBooking(state) {
 export function updateHoldTime(host, state) {
   const counter = host.querySelector('#public-hold-time');
   if (counter) counter.textContent = clockLabel(state.remainingMs);
+  const progress = host.querySelector('#public-hold-progress');
+  if (progress) progress.value = progressSeconds(state.remainingMs);
 }
 export function mountBooking(host, flow) {
   const render = mountSelection(host, flow, renderBooking);
