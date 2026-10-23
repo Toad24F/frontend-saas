@@ -1,6 +1,7 @@
 import { renderSelection, mountSelection } from './selection-view.js';
 import { dateLabel, localTime, localDate } from './dates.js';
 import { focusPublicControl } from './accessibility.js';
+import { icon } from '../../shared/icons.js';
 
 // Todo dato personal se escapa antes de generar HTML; no se consulta por teléfono.
 const esc = (value = '') => String(value).replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
@@ -73,15 +74,15 @@ export function renderBooking(state) {
   const date = state.selection?.date && state.selection?.slot
     ? `${dateLabel(state.selection.date)} · ${state.selection.slot.horaInicio}` : '';
   const summary = [
-    ['Servicio', result?.nombreServicio || service?.nombre || 'Selecciona un servicio'],
-    ['Sucursal', result?.nombreSucursal || branch?.nombre || 'Elige tu sucursal'],
-    ['Profesional', result?.nombreProfesional || professional?.nombre || 'Elige un profesional'],
-    ['Fecha y hora', result ? `${dateLabel(localDate(result.inicioUtc, result.zonaHoraria))} · ${localTime(result.inicioUtc, result.zonaHoraria)}` : date || 'Encuentra tu horario'],
+    ['Servicio', result?.nombreServicio || service?.nombre || 'Selecciona un servicio', 'briefcase', Boolean(result?.nombreServicio || service?.nombre)],
+    ['Sucursal', result?.nombreSucursal || branch?.nombre || 'Elige tu sucursal', 'pin', Boolean(result?.nombreSucursal || branch?.nombre)],
+    ['Profesional', result?.nombreProfesional || professional?.nombre || 'Elige un profesional', 'stethoscope', Boolean(result?.nombreProfesional || professional?.nombre)],
+    ['Fecha y hora', result ? `${dateLabel(localDate(result.inicioUtc, result.zonaHoraria))} · ${localTime(result.inicioUtc, result.zonaHoraria)}` : date || 'Encuentra tu horario', 'clock', Boolean(result || date)],
   ];
   const price = result?.costoAceptado ?? state.hold?.costoAceptado ?? service?.costo;
   return `<nav class="public-progress" aria-label="Pasos de reserva"><ol class="public-steps">${stepNames.map((name, index) => `<li class="${index < step ? 'is-complete' : ''}" ${step === index ? 'aria-current="step"' : ''}><span>${index < step ? '✓' : index + 1}</span><strong>${name}</strong></li>`).join('')}</ol></nav>
     <div class="public-booking-columns"><section class="public-booking-surface">${renderBody(state)}</section>
-      <aside class="public-booking-aside" aria-label="Resumen de la reserva"><div class="public-summary-card"><span class="public-summary-kicker">TU PRÓXIMA VISITA</span><h3>Tu reserva, de un vistazo</h3><dl>${summary.map(([label, value]) => `<div><dt>${label}</dt><dd>${esc(value)}</dd></div>`).join('')}</dl>${price !== undefined ? `<p class="public-summary-price"><span>${service?.duracionMinutos ? `${service.duracionMinutos} minutos` : 'Costo aceptado'}</span><strong>${esc(price)} <small>MXN</small></strong></p>` : ''}</div>
+      <aside class="public-booking-aside" aria-label="Resumen de la reserva"><div class="public-summary-card"><div class="public-summary-content"><div class="public-summary-heading">${icon('calendar')}<h3>Resumen de tu cita</h3></div><dl class="public-summary-items">${summary.map(([label, value, symbol, filled]) => `<div class="${filled ? 'is-filled' : ''}"><dt class="visually-hidden">${label}</dt><dd>${icon(symbol)}<span>${esc(value)}</span></dd></div>`).join('')}</dl>${price !== undefined ? `<div class="public-summary-price"><span>${service?.duracionMinutos ? `${service.duracionMinutos} minutos` : 'Costo aceptado'}</span><strong>${esc(price)} <small>MXN</small></strong></div><p class="public-summary-payment">Pago directamente en sucursal.</p>` : ''}</div><span class="public-summary-leaf" aria-hidden="true">${icon('leaf')}</span></div>
       <p class="public-booking-trust">${result ? 'Reserva registrada, pendiente de confirmación.' : 'La disponibilidad y el costo se confirman con el servidor antes de registrar tu reserva.'}</p></aside></div>`;
 }
 

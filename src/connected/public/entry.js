@@ -8,6 +8,9 @@ import { createAttemptStore } from './attempt-store.js';
 import { createPortalBooking } from './booking.js';
 import { mountBooking } from './booking-view.js';
 import { bindBookingLifecycle } from './booking-lifecycle.js';
+import { portalHeaderClock } from './dates.js';
+import { icon } from '../../shared/icons.js';
+import { businessInitials } from './business-identity.js';
 
 // La recuperación con marcador precede a cualquier catálogo o nueva selección.
 // Toda escritura conserva la sesión pública; nunca usa autenticación del panel.
@@ -18,10 +21,10 @@ export async function startPublicPortal(slug) {
   let theme = ['light', 'dark'].includes(savedTheme) ? savedTheme :
     (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
   root.innerHTML = `<div class="public-portal">
-    <header class="public-portal-header"><img width="176" height="42" alt="Citalendar" id="public-brand"><span class="public-header-caption">Un momento para tu bienestar</span>
-      <button type="button" class="theme-toggle" id="public-theme">Cambiar tema</button></header>
+    <header class="public-portal-header"><img width="176" height="42" alt="Citalendar" id="public-brand"><span class="public-header-clock">${icon('calendar')}<span class="visually-hidden">Fecha y hora local: </span><time id="public-clock"></time></span>
+      <button type="button" class="theme-toggle icon-btn" id="public-theme"></button></header>
     <main id="public-main" class="public-portal-content" aria-labelledby="public-title">
-      <div class="public-business-heading"><span class="public-business-mark" aria-hidden="true">✳</span><div><p class="public-eyebrow">PORTAL DE RESERVAS</p><h1 id="public-title">Tu próxima cita</h1><p id="public-business"></p><p id="public-category" hidden></p></div><span class="public-online-tag">Reservas en línea</span></div>
+      <div class="public-business-heading"><span class="public-business-mark" id="public-business-mark" aria-hidden="true"></span><div><p class="public-eyebrow">PORTAL DE RESERVAS</p><h1 id="public-title">Portal de reservas</h1><p id="public-category" hidden></p></div><span class="public-online-tag">Reservas en línea</span></div>
       <div id="public-status" role="status" aria-live="polite" aria-atomic="true"></div>
       <button type="button" class="btn btn-primary mt-3" id="public-retry" hidden>Reintentar conexión</button>
       <section id="public-selection" aria-label="Selección de cita" hidden></section>
@@ -29,11 +32,27 @@ export async function startPublicPortal(slug) {
   const status = root.querySelector('#public-status');
   const retry = root.querySelector('#public-retry');
   const themeButton = root.querySelector('#public-theme');
+  const clock = root.querySelector('#public-clock');
+  function updateBusinessIdentity(name) {
+    root.querySelector('#public-title').textContent = name;
+    root.querySelector('#public-business-mark').textContent = businessInitials(name);
+  }
+  function updateClock() {
+    const current = portalHeaderClock(new Date());
+    clock.dateTime = current.dateTime;
+    clock.textContent = current.label;
+  }
+  updateClock();
+  setInterval(updateClock, 15000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) updateClock(); });
   function applyTheme() {
     document.documentElement.dataset.theme = theme;
     document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'dark' ? '#1f2026' : '#f4f5f6');
     root.querySelector('#public-brand').src = theme === 'dark' ? '/brand/citalendar-logo-light.svg' : '/brand/citalendar-logo.svg';
-    themeButton.textContent = theme === 'dark' ? 'Modo claro' : 'Modo oscuro';
+    themeButton.innerHTML = icon(theme === 'dark' ? 'sun' : 'moon');
+    themeButton.setAttribute('aria-label', `Activar modo ${theme === 'dark' ? 'claro' : 'oscuro'}`);
+    themeButton.setAttribute('title', `Modo ${theme === 'dark' ? 'claro' : 'oscuro'}`);
+    themeButton.setAttribute('aria-pressed', String(theme === 'dark'));
   }
   themeButton.addEventListener('click', () => {
     theme = theme === 'dark' ? 'light' : 'dark';
@@ -58,7 +77,7 @@ export async function startPublicPortal(slug) {
     try {
       const { negocio } = await initializePublicBrowser(slug, client);
       // Los nombres recibidos se insertan como texto para impedir inyección de contenido.
-      root.querySelector('#public-business').textContent = negocio.nombre;
+      updateBusinessIdentity(negocio.nombre);
       document.title = `Reservas · ${negocio.nombre}`;
       status.textContent = '';
       const host = root.querySelector('#public-selection');
@@ -68,13 +87,13 @@ export async function startPublicPortal(slug) {
       const flow = createPortalBooking(client, { slug, channel, acquireMutation: () => acquirePublicMutation(slug),
         onChange: (state, kind) => {
           if (state.negocio?.nombre) {
-            root.querySelector('#public-business').textContent = state.negocio.nombre;
+            updateBusinessIdentity(state.negocio.nombre);
             const category = root.querySelector('#public-category');
             category.textContent = state.negocio.categoria || '';
             category.hidden = !state.negocio.categoria;
           }
           if (state.phase === 'result') {
-            root.querySelector('#public-business').textContent = state.result.nombreNegocio;
+            updateBusinessIdentity(state.result.nombreNegocio);
             document.title = `Reserva pendiente · ${state.result.nombreNegocio}`;
           }
           render(state, kind);
