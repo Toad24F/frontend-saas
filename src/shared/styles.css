@@ -730,7 +730,7 @@ html[data-theme='dark'] .sidebar .brand .brand-logo-on-light { display: none; }
   margin: 0 auto;
   padding: 6px 34px 24px;
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   color: #a8adb4;
   font-size: 10px;
 }
@@ -738,7 +738,7 @@ html[data-theme='dark'] .sidebar .brand .brand-logo-on-light { display: none; }
   font-family: Manrope, sans-serif;
   font-size: 15px;
   font-weight: 800;
-  margin-left: 10px;
+  margin-left: 0;
   color: #949c99;
   letter-spacing: -0.8px;
 }
@@ -1025,9 +1025,6 @@ html[data-theme='dark'] .sidebar .brand .brand-logo-on-light { display: none; }
     gap: 12px;
   }
   .agenda-note > span {
-    display: none;
-  }
-  .app-footer > span:first-child {
     display: none;
   }
   .app-footer {
