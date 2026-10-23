@@ -9,7 +9,7 @@ export function publicAnnouncement(state) {
       const count = items.length;
       const noun = state.step === 3 ? (count === 1 ? 'horario' : 'horarios') : (count === 1 ? 'opción' : 'opciones');
       messages.push(`${count} ${noun} ${count === 1 ? 'disponible' : 'disponibles'}.`);
-      if (state.selection?.slot) messages.push(`Horario seleccionado: ${state.selection.slot.horaInicio}. Aún no está apartado.`);
+      if (state.selection?.slot) messages.push(`Horario seleccionado: ${state.selection.slot.horaInicio}.`);
     }
   } else if (state.phase === 'form') {
     messages.push(...Object.values(state.contactErrors || {}).filter(Boolean));

@@ -178,6 +178,32 @@ test('la tira oculta días vacíos, conserva el elegido en segunda posición y a
   assert.equal(calls.at(-1).query.hasta, '2026-12-11');
 });
 
+test('al consultar otra fecha la tira sigue visible y el horario se presenta sin radio visible ni aviso duplicado', async () => {
+  let resolveAvailability;
+  let availabilityCalls = 0;
+  const { controller } = setup((path, { query }) => {
+    if (path === 'catalogo') return catalog(query);
+    if (++availabilityCalls === 2) return new Promise((resolve) => { resolveAvailability = () => resolve(availability(query, [
+      { inicioUtc: '2026-10-22T17:00:00.000Z', finUtc: '2026-10-22T17:30:00.000Z' },
+    ])); });
+    return availability(query, [
+      { inicioUtc: '2026-10-20T17:00:00.000Z', finUtc: '2026-10-20T17:30:00.000Z' },
+      { inicioUtc: '2026-10-22T17:00:00.000Z', finUtc: '2026-10-22T17:30:00.000Z' },
+    ]);
+  });
+  await toDate(controller);
+  const pending = controller.setDate('2026-10-22');
+  assert.equal(controller.getState().query.status, 'loading');
+  assert.deepEqual(controller.getState().availableDates, ['2026-10-20', '2026-10-22']);
+  assert.match(renderSelection(controller.getState()), /data-selection-date="2026-10-22"/);
+  resolveAvailability(); await pending;
+  controller.chooseSlot('2026-10-22T17:00:00.000Z');
+  const html = renderSelection(controller.getState());
+  assert.match(html, /Horarios disponibles para jueves, 22 de octubre de 2026/);
+  assert.match(html, /Horario seleccionado: 10:00 · America\/Mazatlan/);
+  assert.doesNotMatch(html, /Aún no está apartado/);
+});
+
 test('T103: solo horarios devueltos, en zona de sucursal, sin conceder apartado', async () => {
   const { controller, calls } = setup(); await toDate(controller); await controller.setDate('2026-10-20');
   assert.equal(controller.getState().slots[0].horaInicio, '10:00');

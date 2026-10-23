@@ -145,13 +145,16 @@ html[data-theme='light'] .public-result-status { background: #fff1ce; color: #76
 .public-date-arrow { display: grid; place-items: center; flex: 0 0 40px; min-height: 44px; border: 1px solid var(--border); border-radius: 10px; color: var(--ink); background: var(--surface); }
 .public-date-arrow:hover:not(:disabled), .public-date-arrow:focus-visible { border-color: var(--accent); color: var(--accent); }
 .public-date-arrow:disabled { opacity: .5; }
-.public-date-chip { display: grid; justify-items: center; gap: 2px; min-width: 66px; min-height: 75px; padding: 9px 7px; border: 1px solid var(--border); border-radius: 10px; color: var(--ink); background: var(--surface); }
+.public-date-chip { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 9px; flex: 0 0 72px; min-height: 105px; padding: 12px 9px; border: 1px solid var(--border); border-radius: 9px; color: var(--muted); background: var(--surface); transition: border-color 180ms ease, background-color 180ms ease, color 180ms ease; }
 .public-date-chip span, .public-date-chip small { color: var(--muted); font-size: 11px; text-transform: capitalize; }
-.public-date-chip strong { font-size: 19px; line-height: 1; font-variant-numeric: tabular-nums; }
-.public-date-chip:hover, .public-date-chip.selected { border-color: var(--accent); background: var(--surface-soft); }
+.public-date-chip strong { color: var(--ink); font-size: 20px; font-weight: 500; line-height: 1; font-variant-numeric: tabular-nums; }
+.public-date-chip:hover { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, var(--surface)); }
+.public-date-chip.selected { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 22%, var(--surface)); }
 .public-date-chip.selected strong { color: var(--accent); }
 .public-slots { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
-.public-slot { border-radius: 9px; font-variant-numeric: tabular-nums; }
+.public-slot { position: relative; border-radius: 9px; font-variant-numeric: tabular-nums; }
+.public-slot input { position: absolute; width: 1px; height: 1px; margin: 0; opacity: 0; }
+.public-slot:has(:checked) { background: color-mix(in srgb, var(--accent) 22%, var(--surface)); }
 .public-selection-actions { padding-top: 22px; border-top: 1px solid var(--border); }
 .public-booking-aside { min-width: 0; padding: 9px; border-radius: 20px; background: radial-gradient(circle at 87% 14%, #d8e9da 0, transparent 42%), radial-gradient(circle at 8% 80%, #f7e6d6 0, transparent 52%), #eaf1e9; }
 .public-summary-card { position: relative; overflow: hidden; padding: 24px; border: 1px solid var(--glass-border); border-radius: 16px; background: var(--glass-surface); }

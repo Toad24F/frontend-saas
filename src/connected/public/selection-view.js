@@ -42,10 +42,10 @@ export function renderSelection(state) {
       <input class="form-control public-date" id="public-date" type="date" value="${esc(selection.date)}" aria-invalid="${query.status === 'invalid'}" aria-describedby="public-zone selection-status">
       <p id="public-zone" class="public-zone">Horarios de la sucursal · ${esc(zone)}</p>
       ${dateStrip(selection.date, state.availableDates, busy, state.today)}
-      ${validDate(selection.date) ? `<h3 class="public-day">${esc(dateLabel(selection.date))}</h3>` : ''}
+      <h3 class="public-day">Horarios disponibles${validDate(selection.date) ? ` para ${esc(dateLabel(selection.date))}` : ''}</h3>
       <fieldset class="public-slots" ${!usable ? 'disabled' : ''}><legend class="visually-hidden">Horarios disponibles en la zona ${esc(zone)}</legend>${state.slots.map((slot) =>
         `<label class="public-slot"><input type="radio" name="public-slot" value="${esc(slot.inicioUtc)}" data-slot ${selection.slot?.inicioUtc === slot.inicioUtc ? 'checked' : ''}><span>${esc(slot.horaInicio)}</span></label>`).join('')}</fieldset>
-      ${selection.slot ? `<p class="public-selected">Horario seleccionado: ${esc(selection.slot.horaInicio)} · ${esc(zone)}. Aún no está apartado.</p>` : ''}
+      ${selection.slot ? `<p class="public-selected">Horario seleccionado: ${esc(selection.slot.horaInicio)} · ${esc(zone)}</p>` : ''}
       <p class="public-limit">${state.bookingAvailable ? 'El horario se comprobará de nuevo antes de conceder un apartado de cinco minutos.' : 'La consulta de horarios no garantiza una reserva. El apartado y la captura de datos aún no están disponibles en esta entrega.'}</p>`;
   }
   return `<div class="public-stage-heading"><span class="public-stage-eyebrow" aria-current="step">PASO ${String(step + 1).padStart(2, '0')} DE 06</span><h2 id="selection-title" tabindex="-1">${titles[step]}</h2><p>${['Selecciona el servicio que necesitas.', 'Elige la ubicación más cómoda para ti.', 'Conoce al equipo disponible para tu servicio.', 'Selecciona la fecha y el horario que mejor te convengan.'][step]}</p></div>
@@ -81,6 +81,7 @@ export function mountSelection(host, controller, renderView = renderSelection) {
     else if (event.target.closest('[data-selection-date]')) void controller.setDate(event.target.closest('[data-selection-date]').dataset.selectionDate);
   });
   let lastStep;
+  let lastSelectedDate;
   return (state) => {
     const active = document.activeElement;
     const inside = host.contains(active);
@@ -94,7 +95,10 @@ export function mountSelection(host, controller, renderView = renderSelection) {
     const stepKey = `${state.phase}:${state.step}`;
     const changedStep = lastStep !== stepKey;
     const range = inside && typeof active.selectionStart === 'number' ? [active.selectionStart, active.selectionEnd] : null;
+    const dateScroll = content.querySelector('.public-date-strip')?.scrollLeft || 0;
     content.innerHTML = renderView(state);
+    const dateStrip = content.querySelector('.public-date-strip');
+    if (dateStrip) dateStrip.scrollLeft = lastSelectedDate === state.selection?.date ? dateScroll : 0;
     const strip = host.querySelector('.public-steps');
     const currentStep = strip?.querySelector('[aria-current="step"]');
     if (currentStep && strip.scrollWidth > strip.clientWidth) {
@@ -114,6 +118,7 @@ export function mountSelection(host, controller, renderView = renderSelection) {
       else focusPublicControl(host.querySelector('#selection-title'));
     }
     lastStep = stepKey;
+    lastSelectedDate = state.selection?.date;
     announce(publicAnnouncement(state));
   };
 }

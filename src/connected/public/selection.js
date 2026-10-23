@@ -88,7 +88,6 @@ export function createPortalSelection(client, { slug, onChange = () => {}, now =
     pending = new AbortController();
     state.selection.slot = null;
     state.slots = [];
-    state.availableDates = [];
     if (state.step === 3 && (!fields.every((key) => id(state.selection[key])) || !validDate(state.selection.date))) {
       state.query = { status: 'invalid', message: 'Seleccione una fecha válida y complete servicio, sucursal y profesional.' }; emit(); return;
     }
@@ -164,6 +163,7 @@ export function createPortalSelection(client, { slug, onChange = () => {}, now =
     },
     async setDate(date) {
       if (state.phase !== 'selection' || state.step !== 3) return;
+      if (!state.availableDates.includes(date)) state.availableDates = [];
       state.selection.date = date; await load();
     },
     async shiftDate(days) {

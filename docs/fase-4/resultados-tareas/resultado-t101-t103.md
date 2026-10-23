@@ -46,7 +46,7 @@ Los módulos nuevos y los bloques modificados contienen comentarios sobre su res
 5. **Fecha/hora:** la fecha inicial se toma del reloj del navegador expresado en la zona IANA de la sucursal. Es solo un valor inicial: el servidor decide qué horarios siguen siendo reservables. El usuario puede elegir otra fecha con el selector nativo.
 6. Cada consulta envía únicamente `servicioId`, `sucursalId`, `personalId`, `desde` y `hasta` a `GET disponibilidad`. `desde` y `hasta` son la misma fecha: una petición abarca un día, dentro del máximo inclusivo de 31 fechas. No se inventa un horizonte local ni se envía modalidad manual, negocioId o exclusiones.
 7. La respuesta debe corresponder a los IDs y fecha consultados, indicar modalidad pública, una zona interpretable y una lista de intervalos válidos. Se muestran exclusivamente esas ranuras, convirtiendo sus instantes UTC a hora de sucursal mediante Intl. Un cambio de fecha elimina el horario elegido; no hay resultados parciales si una ranura es inválida.
-8. Elegir una ranura conserva su inicio/fin UTC y sus etiquetas locales en memoria y muestra «Aún no está apartado». El cuarto paso no ofrece continuar a un formulario. La futura concesión/revalidación del apartado corresponde a T104.
+8. Elegir una ranura conserva su inicio/fin UTC y sus etiquetas locales en memoria. El aviso actual muestra la hora y la zona; la advertencia de que la consulta no garantiza la reserva permanece separada. La concesión/revalidación del apartado corresponde a T104.
 
 Cada consulta recibe una revisión y una señal de cancelación. Cambiar selección, fecha, paso o reintentar invalida la revisión previa. Incluso si un transporte ignora la cancelación, una respuesta o error atrasados no pueden cambiar el estado vigente.
 
