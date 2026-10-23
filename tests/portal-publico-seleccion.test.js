@@ -155,23 +155,23 @@ test('T103: fecha real y consulta de hasta 31 fechas inclusivas', async () => {
   assert.equal(validDate('2026-02-29'), false);
 });
 
-test('la tira oculta días vacíos, conserva el elegido en segunda posición y avanza tres días', async () => {
-  const days = ['2026-10-20', '2026-10-22', '2026-10-25', '2026-10-28', '2026-11-22'];
+test('la tira muestra todos los días disponibles de la ventana sin flechas', async () => {
+  const days = ['2026-10-20', '2026-10-22', '2026-10-25', '2026-10-28', '2026-10-29',
+    '2026-10-30', '2026-10-31', '2026-11-01', '2026-11-02', '2026-11-22'];
   const { controller, calls } = setup((path, { query }) => path === 'catalogo' ? catalog(query) : availability(query,
     days.filter((day) => day >= query.desde && day <= query.hasta)
       .map((day) => ({ inicioUtc: `${day}T17:00:00.000Z`, finUtc: `${day}T17:30:00.000Z` }))));
   await toDate(controller);
   let html = renderSelection(controller.getState());
   assert.match(html, /data-selection-date="2026-10-20"/);
+  assert.match(html, /data-selection-date="2026-11-02"/);
   assert.doesNotMatch(html, /data-selection-date="2026-10-21"/);
+  assert.doesNotMatch(html, /data-selection-shift|public-date-arrow/);
   await controller.setDate('2026-10-22');
   html = renderSelection(controller.getState());
   const visible = [...html.matchAll(/data-selection-date="([^"]+)"/g)].map((match) => match[1]);
   assert.deepEqual(visible.slice(0, 3), ['2026-10-20', '2026-10-22', '2026-10-25']);
-  await controller.shiftDate(3);
-  assert.equal(controller.getState().selection.date, '2026-10-25');
-  await controller.shiftDate(-3);
-  assert.equal(controller.getState().selection.date, '2026-10-22');
+  assert.equal(visible.length, 9);
   await controller.setDate('2026-11-21');
   assert.equal(controller.getState().query.status, 'empty');
   assert.deepEqual(controller.getState().availableDates, ['2026-11-22']);

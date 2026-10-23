@@ -139,12 +139,7 @@ html[data-theme='light'] .public-result-status { background: #fff1ce; color: #76
 .public-options:disabled .public-option:hover { transform: none; border-color: var(--border); background: var(--surface); }
 .public-option:focus-within { outline: 3px solid var(--accent); outline-offset: 2px; }
 .public-date { max-width: 300px; }
-.public-date-strip { display: flex; gap: 9px; overflow-x: auto; padding: 4px 2px 9px; scrollbar-width: thin; }
-.public-date-navigation { display: flex; align-items: center; gap: 8px; min-width: 0; }
-.public-date-navigation .public-date-strip { flex: 1; min-width: 0; }
-.public-date-arrow { display: grid; place-items: center; flex: 0 0 40px; min-height: 44px; border: 1px solid var(--border); border-radius: 10px; color: var(--ink); background: var(--surface); }
-.public-date-arrow:hover:not(:disabled), .public-date-arrow:focus-visible { border-color: var(--accent); color: var(--accent); }
-.public-date-arrow:disabled { opacity: .5; }
+.public-date-strip { display: flex; gap: 9px; width: 100%; min-width: 0; overflow-x: auto; padding: 4px 2px 9px; scrollbar-width: thin; }
 .public-date-chip { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 9px; flex: 0 0 72px; min-height: 105px; padding: 12px 9px; border: 1px solid var(--border); border-radius: 9px; color: var(--muted); background: var(--surface); transition: border-color 180ms ease, background-color 180ms ease, color 180ms ease; }
 .public-date-chip span, .public-date-chip small { color: var(--muted); font-size: 11px; text-transform: capitalize; }
 .public-date-chip strong { color: var(--ink); font-size: 20px; font-weight: 500; line-height: 1; font-variant-numeric: tabular-nums; }
@@ -175,7 +170,7 @@ html[data-theme='light'] .public-result-status { background: #fff1ce; color: #76
 .public-summary-leaf { position: absolute; right: -22px; bottom: -27px; opacity: .055; transform: rotate(-25deg); pointer-events: none; }
 .public-summary-leaf .icon { width: 175px; height: 175px; }
 .public-booking-trust { margin: 16px 10px 9px; color: var(--muted); font-size: 12px; line-height: 1.65; }
-.public-portal-footer { display: flex; justify-content: space-between; gap: 20px; width: min(100%, 1180px); margin: auto auto 0; padding: 22px 32px; border-top: 1px solid var(--border); color: var(--muted); font-size: 12px; }
+.public-portal-footer { display: flex; justify-content: flex-end; gap: 20px; width: min(100%, 1180px); margin: auto auto 0; padding: 22px 32px; border-top: 1px solid var(--border); color: var(--muted); font-size: 12px; }
 html[data-theme='dark'] .public-booking-aside { background: radial-gradient(circle at 87% 14%, #46404a, transparent 42%), radial-gradient(circle at 8% 80%, #543b37, transparent 52%), #242329; }
 html[data-theme='dark'] .public-summary-card { background: rgba(33, 32, 39, .9); }
 html[data-theme='dark'] .public-online-tag { background: #343039; border-color: #514951; color: #e3d7d3; }
@@ -204,5 +199,9 @@ html[data-theme='dark'] .public-option:has(:checked) { border-color: var(--accen
   .public-booking-surface { padding: 22px 17px; }
   .public-option { gap: 12px; padding: 15px 12px; }
   .public-option-symbol { width: 39px; height: 39px; }
+  .public-slots { grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); }
   .public-portal-footer { padding: 20px 16px; flex-wrap: wrap; }
+}
+@media (min-width: 340px) and (max-width: 575px) {
+  .public-slots:has(> .public-slot:nth-child(3)) { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }

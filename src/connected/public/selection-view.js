@@ -9,18 +9,14 @@ const titles = ['¿Cómo podemos cuidarte?', 'Encuentra tu sucursal', 'Elige qui
 const keys = ['servicioId', 'sucursalId', 'personalId'];
 const lists = ['servicios', 'sucursales', 'profesionales'];
 const money = (value) => new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(value);
-function dateStrip(selected, availableDates, busy, today) {
+function dateStrip(selected, availableDates) {
   if (!validDate(selected)) return '';
-  const previous = availableDates.filter((date) => date < selected).at(-1);
-  const visible = previous
-    ? [previous, ...availableDates.filter((date) => date >= selected).slice(0, 6)]
-    : availableDates.filter((date) => date >= selected).slice(0, 7);
-  return `<div class="public-date-navigation"><button class="public-date-arrow" type="button" data-selection-shift="-3" aria-label="Retroceder tres días" ${busy || selected <= today ? 'disabled' : ''}>${icon('left')}</button><div class="public-date-strip" aria-label="Días con horarios disponibles">${visible.map((value) => {
+  return `<div class="public-date-strip" aria-label="Días con horarios disponibles">${availableDates.map((value) => {
     const day = new Date(`${value}T12:00:00Z`);
     const shortDay = new Intl.DateTimeFormat('es-MX', { timeZone: 'UTC', weekday: 'short' }).format(day);
     const shortMonth = new Intl.DateTimeFormat('es-MX', { timeZone: 'UTC', month: 'short' }).format(day);
     return `<button class="public-date-chip ${value === selected ? 'selected' : ''}" type="button" data-selection-date="${value}" aria-pressed="${value === selected}" aria-label="Consultar ${esc(dateLabel(value))}"><span>${esc(shortDay)}</span><strong>${day.getUTCDate()}</strong><small>${esc(shortMonth)}</small></button>`;
-  }).join('')}</div><button class="public-date-arrow" type="button" data-selection-shift="3" aria-label="Avanzar tres días" ${busy ? 'disabled' : ''}>${icon('chevron')}</button></div>`;
+  }).join('')}</div>`;
 }
 
 // Radios nativos permiten selección con flechas y Tab. El controlador solo recibe
@@ -41,7 +37,7 @@ export function renderSelection(state) {
     content = `<label class="public-date-label" for="public-date">Fecha de tu cita</label>
       <input class="form-control public-date" id="public-date" type="date" value="${esc(selection.date)}" aria-invalid="${query.status === 'invalid'}" aria-describedby="public-zone selection-status">
       <p id="public-zone" class="public-zone">Horarios de la sucursal · ${esc(zone)}</p>
-      ${dateStrip(selection.date, state.availableDates, busy, state.today)}
+      ${dateStrip(selection.date, state.availableDates)}
       <h3 class="public-day">Horarios disponibles${validDate(selection.date) ? ` para ${esc(dateLabel(selection.date))}` : ''}</h3>
       <fieldset class="public-slots" ${!usable ? 'disabled' : ''}><legend class="visually-hidden">Horarios disponibles en la zona ${esc(zone)}</legend>${state.slots.map((slot) =>
         `<label class="public-slot"><input type="radio" name="public-slot" value="${esc(slot.inicioUtc)}" data-slot ${selection.slot?.inicioUtc === slot.inicioUtc ? 'checked' : ''}><span>${esc(slot.horaInicio)}</span></label>`).join('')}</fieldset>
@@ -77,7 +73,6 @@ export function mountSelection(host, controller, renderView = renderSelection) {
     if (event.target.closest('[data-selection-next]')) void controller.next();
     else if (event.target.closest('[data-selection-back]')) void controller.back();
     else if (event.target.closest('[data-selection-retry]')) void controller.retry();
-    else if (event.target.closest('[data-selection-shift]')) void controller.shiftDate(Number(event.target.closest('[data-selection-shift]').dataset.selectionShift));
     else if (event.target.closest('[data-selection-date]')) void controller.setDate(event.target.closest('[data-selection-date]').dataset.selectionDate);
   });
   let lastStep;
@@ -89,16 +84,24 @@ export function mountSelection(host, controller, renderView = renderSelection) {
     const oldName = inside ? active.getAttribute('name') : '';
     const oldValue = inside ? active.getAttribute('value') : '';
     const oldDate = inside ? active.dataset.selectionDate : '';
-    const oldShift = inside ? active.dataset.selectionShift : '';
-    const actions = ['selection-next', 'selection-back', 'selection-retry', 'selection-shift', 'return-availability', 'check-hold', 'submit-reservation', 'resolve-submission', 'repeat-submission', 'review-contact'];
+    const actions = ['selection-next', 'selection-back', 'selection-retry', 'return-availability', 'check-hold', 'submit-reservation', 'resolve-submission', 'repeat-submission', 'review-contact'];
     const oldAction = inside ? actions.find((key) => active.hasAttribute(`data-${key}`)) : null;
     const stepKey = `${state.phase}:${state.step}`;
     const changedStep = lastStep !== stepKey;
     const range = inside && typeof active.selectionStart === 'number' ? [active.selectionStart, active.selectionEnd] : null;
-    const dateScroll = content.querySelector('.public-date-strip')?.scrollLeft || 0;
+    const previousDateStrip = content.querySelector('.public-date-strip');
+    const dateScroll = previousDateStrip?.scrollLeft || 0;
+    const previousSelected = previousDateStrip?.querySelector('.public-date-chip.selected')?.dataset.selectionDate;
     content.innerHTML = renderView(state);
     const dateStrip = content.querySelector('.public-date-strip');
-    if (dateStrip) dateStrip.scrollLeft = lastSelectedDate === state.selection?.date ? dateScroll : 0;
+    if (dateStrip) {
+      const selectedChip = dateStrip.querySelector('.public-date-chip.selected');
+      const firstChip = dateStrip.querySelector('.public-date-chip');
+      if (selectedChip && firstChip && (lastSelectedDate !== state.selection?.date || previousSelected !== state.selection.date)) {
+        const previousChip = selectedChip.previousElementSibling;
+        dateStrip.scrollLeft = selectedChip.offsetLeft - firstChip.offsetLeft - (previousChip ? previousChip.offsetWidth + 9 : 0);
+      } else dateStrip.scrollLeft = dateScroll;
+    }
     const strip = host.querySelector('.public-steps');
     const currentStep = strip?.querySelector('[aria-current="step"]');
     if (currentStep && strip.scrollWidth > strip.clientWidth) {
@@ -108,8 +111,7 @@ export function mountSelection(host, controller, renderView = renderSelection) {
     }
     if (changedStep) focusPublicControl(host.querySelector('#selection-title'));
     else if (inside) {
-      const target = oldId ? host.querySelector(`#${oldId}`) : oldShift
-        ? host.querySelector(`[data-selection-shift="${oldShift}"]`) : oldDate
+      const target = oldId ? host.querySelector(`#${oldId}`) : oldDate
         ? [...host.querySelectorAll('[data-selection-date]')].find((button) => button.dataset.selectionDate === oldDate)
         : oldName
         ? [...host.querySelectorAll('input')].find((input) => input.name === oldName && input.value === oldValue)

@@ -28,7 +28,7 @@ export async function startPublicPortal(slug) {
       <div id="public-status" role="status" aria-live="polite" aria-atomic="true"></div>
       <button type="button" class="btn btn-primary mt-3" id="public-retry" hidden>Reintentar conexión</button>
       <section id="public-selection" aria-label="Selección de cita" hidden></section>
-    </main><footer class="public-portal-footer"><span>Tu tiempo importa. Tu bienestar, también.</span><span>Reservas con <strong>Citalendar</strong></span></footer></div>`;
+    </main><footer class="public-portal-footer"><span>Reservas con <strong>Citalendar</strong></span></footer></div>`;
   const status = root.querySelector('#public-status');
   const retry = root.querySelector('#public-retry');
   const themeButton = root.querySelector('#public-theme');
