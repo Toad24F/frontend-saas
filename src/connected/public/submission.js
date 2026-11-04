@@ -8,9 +8,12 @@ export function readReservationResult(data) {
   if (!data || data.estado !== 'pendiente' || names.some((key) => typeof data[key] !== 'string' || !data[key].trim()) ||
     !['inicioUtc', 'finUtc'].every((key) => typeof data[key] === 'string' && data[key].endsWith('Z')) ||
     !Number.isFinite(Date.parse(data.inicioUtc)) || !Number.isFinite(Date.parse(data.finUtc)) || Date.parse(data.finUtc) <= Date.parse(data.inicioUtc) ||
-    typeof data.costoAceptado !== 'string' || !/^\d+(?:\.\d{1,2})?$/.test(data.costoAceptado) || !data.zonaHoraria) throw new Error('Resultado no válido.');
+    (data.costo !== undefined && (typeof data.costo !== 'string' || !/^\d+(?:\.\d{1,2})?$/.test(data.costo))) || !data.zonaHoraria) throw new Error('Resultado no válido.');
   localDate(data.inicioUtc, data.zonaHoraria);
-  return Object.fromEntries([...names, 'estado', 'inicioUtc', 'finUtc', 'costoAceptado', 'zonaHoraria'].map((key) => [key, data[key]]));
+  // El resumen HTTP ya proyectó la visibilidad actual; no se rellena desde
+  // catálogo ni se interpreta la omisión como costo cero.
+  return Object.fromEntries([...names, 'estado', 'inicioUtc', 'finUtc', 'zonaHoraria',
+    ...(data.costo === undefined ? [] : ['costo'])].map((key) => [key, data[key]]));
 }
 
 // El contacto normalizado se congela solo en memoria. El marcador se confirma

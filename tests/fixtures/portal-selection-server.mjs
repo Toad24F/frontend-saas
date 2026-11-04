@@ -119,9 +119,11 @@ const server = await createServer({
             return send({ codigo: 'portal_409', mensaje: 'El apartado ya no está disponible.', accion: 'volver' }, 409);
           }
           const inicio = new Date(`${hold.selection.fechaLocal}T${hold.selection.horaInicio}:00-07:00`);
+          // El doble expone el mismo nombre público que la API: costo del
+          // apartado registrado, sin publicar el campo interno costoAceptado.
           attempt.resultado = { folio: `P-${String(nextResult++).padStart(18, '0')}`, estado: 'pendiente',
             inicioUtc: inicio.toISOString(), finUtc: new Date(inicio.getTime() + 30 * 60000).toISOString(), zonaHoraria: hold.zonaHoraria,
-            costoAceptado: hold.costoAceptado, nombreNegocio: negocio.nombre, nombreServicio: hold.selection.servicioId === 4 ? 'Seguimiento guardado' : 'Consulta general guardada',
+            costo: hold.costo, nombreNegocio: negocio.nombre, nombreServicio: hold.selection.servicioId === 4 ? 'Seguimiento guardado' : 'Consulta general guardada',
             nombreSucursal: 'Sucursal Centro guardada', nombreProfesional: 'Profesional guardado' };
           attempt.estado = 'registrado'; attempt.hash = hash; hold.released = true;
           // Se pierden también repeticiones de transporte del navegador; solo
@@ -164,7 +166,7 @@ const server = await createServer({
               return send({ codigo: 'portal_409', mensaje: 'Horario de prueba en conflicto.', accion: 'volver' }, 409);
             }
             hold = { estado: 'concedida', apartadoId: nextHold++, generacion: String(session.generation),
-              expiraEn: new Date(serverTime() + 300000).toISOString(), costoAceptado: body.servicioId === 4 ? '350.00' : '450.00', zonaHoraria: 'America/Mazatlan', selection: body };
+              expiraEn: new Date(serverTime() + 300000).toISOString(), costo: body.servicioId === 4 ? '350.00' : '450.00', zonaHoraria: 'America/Mazatlan', selection: body };
             session.operations.set(body.clave, hold); session.holds.set(hold.apartadoId, hold);
           }
           send({ ...hold, servidorAhora: new Date(serverTime()).toISOString() });

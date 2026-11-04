@@ -1,6 +1,6 @@
 # Tareas — Ajustes de licencias, administración y agenda (frontend)
 
-Estado: desglose propuesto del [plan](plan.md) y la [spec](spec.md). Los RF son **locales a la spec frontend**. T001–T003 tienen [evidencia preparatoria](resultados-tareas/resultado-t001-t003.md); las demás tareas y los RF de producto siguen pendientes.
+Estado: desglose propuesto del [plan](plan.md) y la [spec](spec.md). Los RF son **locales a la spec frontend**. T001–T003 tienen [evidencia preparatoria](resultados-tareas/resultado-t001-t003.md) y T004–T012 tienen [resultados del portal](resultados-tareas/resultado-t004-t012.md); las tareas posteriores siguen pendientes.
 
 Cada tarea se estima en **15 o 25 minutos, incluida su comprobación focalizada**. Las dependencias citadas son obligatorias y aparecen antes de la tarea; las áreas independientes pueden avanzar sin esperar a los contratos externos. Si una tarea requiere 30 minutos o más, dividirla antes de ejecutarla y conservar su casilla pendiente hasta terminar sus subtareas. «Hecho cuando» exige evidencia real en `docs/ajustes-licencias-administracion-agenda/resultados-tareas/` (revisión, archivos, comando o revisión y resultado). No editar `../backend` ni usar su base cotidiana para pruebas.
 
@@ -15,23 +15,23 @@ Cada tarea se estima en **15 o 25 minutos, incluida su comprobación focalizada*
 
 ## 2. Portal: selección y precios
 
-- [ ] **FALA-T004 — Probar acceso por slug y licencia** · 25 min · Depende de: T003 · RF-01–RF-02.
+- [x] **FALA-T004 — Probar acceso por slug y licencia** · 25 min · Depende de: T003 · RF-01–RF-02.
   Hecho cuando: Casos conectados distinguen negocio disponible, slug inválido y rechazo de licencia sin revelar datos privados.
-- [ ] **FALA-T005 — Conservar pasos y selecciones dependientes** · 25 min · Depende de: T004 · RF-03–RF-04.
+- [x] **FALA-T005 — Conservar pasos y selecciones dependientes** · 25 min · Depende de: T004 · RF-03–RF-04.
   Hecho cuando: Cambiar servicio o sucursal invalida las opciones posteriores y el paso visible coincide con la selección actual.
-- [ ] **FALA-T006 — Aislar respuestas atrasadas y estados de consulta** · 25 min · Depende de: T005 · RF-05–RF-08, RF-59.
+- [x] **FALA-T006 — Aislar respuestas atrasadas y estados de consulta** · 25 min · Depende de: T005 · RF-05–RF-08, RF-59.
   Hecho cuando: Una respuesta anterior no sobrescribe la nueva y carga, vacío legítimo y fallo técnico producen estados distintos con reintento.
-- [ ] **FALA-T007 — Verificar zona y naturaleza de ranuras** · 25 min · Depende de: T006 · RF-09–RF-10.
+- [x] **FALA-T007 — Verificar zona y naturaleza de ranuras** · 25 min · Depende de: T006 · RF-09–RF-10.
   Hecho cuando: Horarios se muestran en zona IANA de sucursal y ninguno se anuncia como apartado o reserva antes de concederlo.
-- [ ] **FALA-T008 — Aceptar catálogo con precio omitido** · 15 min · Depende de: T006 · RF-35–RF-36.
+- [x] **FALA-T008 — Aceptar catálogo con precio omitido** · 15 min · Depende de: T006 · RF-35–RF-36.
   Hecho cuando: Un servicio válido sin `costo` pasa la frontera de catálogo y no se convierte en cero ni en error de protocolo.
-- [ ] **FALA-T009 — Presentar precio opcional en selección** · 15 min · Depende de: T008 · RF-35–RF-36.
+- [x] **FALA-T009 — Presentar precio opcional en selección** · 15 min · Depende de: T008 · RF-35–RF-36.
   Hecho cuando: Selección muestra un importe explícito autorizado y omite por completo el importe ausente.
-- [ ] **FALA-T010 — Leer apartado con costo público opcional** · 25 min · Depende de: T008 · RF-15, RF-35–RF-37.
+- [x] **FALA-T010 — Leer apartado con costo público opcional** · 25 min · Depende de: T008 · RF-15, RF-35–RF-37.
   Hecho cuando: La concesión válida acepta `costo` presente u omitido y conserva el precio del apartado visible sin consultar el catálogo de nuevo.
-- [ ] **FALA-T011 — Leer resultado histórico con costo opcional** · 25 min · Depende de: T010 · RF-25–RF-26, RF-34–RF-38.
+- [x] **FALA-T011 — Leer resultado histórico con costo opcional** · 25 min · Depende de: T010 · RF-25–RF-26, RF-34–RF-38.
   Hecho cuando: Registro y resolución aceptan `costo` presente u omitido y el resumen no toma un precio actual como sustituto.
-- [ ] **FALA-T012 — Probar visibilidad y cambios de precio** · 25 min · Depende de: T009–T011 · RF-35–RF-38.
+- [x] **FALA-T012 — Probar visibilidad y cambios de precio** · 25 min · Depende de: T009–T011 · RF-35–RF-38.
   Hecho cuando: Casos cubren visible, oculto, cero explícito, cambio durante apartado y recuperación sin filtración de importes.
 
 ## 3. Portal: contacto, apartado e intento

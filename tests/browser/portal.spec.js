@@ -51,11 +51,52 @@ test('FALA-T003: portal conectado usa exclusivamente la base efímera del runner
   ]);
 });
 
+// FALA-T004 contrasta un slug ausente real con una licencia cerrada simulada
+// en la frontera HTTP; ninguna de las dos situaciones debe abrir selección.
+test('FALA-T004: slug inválido o licencia cerrada impiden reservar', async ({ page }) => {
+  await page.goto(portalUrl().replace('portal-qa-1', 'portal-inexistente'));
+  await expect(page.locator('#public-status')).toContainText(/no disponible|no existe|selección/i);
+  await expect(page.locator('#public-selection')).toBeHidden();
+  await page.route('**/publico/negocios/portal-qa-1/sesion', (route) => route.fulfill({ status: 403,
+    contentType: 'application/json', body: JSON.stringify({ codigo: 'portal_403',
+      mensaje: 'La solicitud no está permitida.', accion: 'corregir' }) }));
+  await page.goto(portalUrl());
+  await expect(page.locator('#public-status')).toContainText('La solicitud no está permitida.');
+  await expect(page.locator('#public-selection')).toBeHidden();
+  await expect(page.getByRole('button', { name: 'Apartar este horario' })).toHaveCount(0);
+});
+
+// FALA-T012 reproduce la proyección de precio oculto sobre respuestas del
+// backend real; el escritor guarda la cita, pero el navegador no recibe importe.
+test('FALA-T012: precio oculto no aparece en catálogo, apartado ni resultado', async ({ page }) => {
+  await page.route('**/publico/negocios/portal-qa-1/**', async (route) => {
+    const response = await route.fetch();
+    if (!response.ok() || response.status() === 204 || route.request().url().endsWith('/sesion')) {
+      await route.fulfill({ response }); return;
+    }
+    const hide = (value) => Array.isArray(value) ? value.map(hide) : value && typeof value === 'object'
+      ? Object.fromEntries(Object.entries(value).filter(([key]) => !['costo', 'costoAceptado'].includes(key))
+        .map(([key, item]) => [key, hide(item)])) : value;
+    await route.fulfill({ response, json: hide(await response.json()) });
+  });
+  await page.goto(portalUrl());
+  await expect(page.getByRole('radio', { name: /Corte QA/ })).toBeVisible();
+  await expect(page.locator('#public-selection')).not.toContainText(/MXN|NaN|Pago directamente/);
+  await chooseSlot(page, 11);
+  await expect(page.locator('#public-selection')).not.toContainText(/MXN|NaN|Pago directamente/);
+  await page.getByLabel('Nombre completo').fill('Cliente precio oculto');
+  await page.getByLabel('Teléfono mexicano').fill('6141234577');
+  await page.getByRole('button', { name: 'Reservar' }).click();
+  await expect(page.getByRole('heading', { name: 'Reserva registrada' })).toBeVisible();
+  await expect(page.locator('#public-selection')).not.toContainText(/MXN|NaN|Pago directamente|Costo/);
+});
+
 // T117 abre el portal conectado contra los servidores y la base efímera del runner.
 test('T117: inicia la página pública con la oferta real de prueba', async ({ page }) => {
   await page.goto(portalUrl());
-  await expect(page.getByRole('heading', { name: 'Tu próxima cita' })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Elige tu servicio' })).toBeVisible();
+  // La portada usa el nombre del negocio y el primer paso del asistente.
+  await expect(page.getByRole('heading', { name: 'Portal QA 1' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '¿Cómo podemos cuidarte?' })).toBeVisible();
   await expect(page.getByRole('radio', { name: /Corte/ })).toBeVisible();
 });
 

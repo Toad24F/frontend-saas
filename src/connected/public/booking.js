@@ -50,14 +50,19 @@ export function createPortalBooking(client, { slug, onChange = () => {}, now,
   function readGrant(data) {
     if (data?.estado !== 'concedida' || !Number.isSafeInteger(data.apartadoId) || data.apartadoId < 1 || !generation(data.generacion) ||
       !Number.isFinite(Date.parse(data.expiraEn)) || !Number.isFinite(Date.parse(data.servidorAhora)) ||
-      typeof data.costoAceptado !== 'string' || !Number.isFinite(Number(data.costoAceptado)) || Number(data.costoAceptado) < 0 || !data.zonaHoraria) throw protocolError();
+      (data.costo !== undefined && (typeof data.costo !== 'string' || !/^\d+(?:\.\d{1,2})?$/.test(data.costo))) || !data.zonaHoraria) throw protocolError();
     try { localDate(new Date(), data.zonaHoraria); } catch { throw protocolError(); }
     return { apartadoId: data.apartadoId, generacion: data.generacion, expiraEn: data.expiraEn,
-      costoAceptado: data.costoAceptado, zonaHoraria: data.zonaHoraria };
+      ...(data.costo === undefined ? {} : { costo: data.costo }), zonaHoraria: data.zonaHoraria };
   }
   function applyOwn(data, hold, started) {
     if (!ownIdentity(data, hold) || !['vigente', 'vencido', 'sustituido', 'liberado'].includes(data.estado) ||
-      Date.parse(data.expiraEn) !== Date.parse(hold.expiraEn) || !Number.isFinite(Date.parse(data.servidorAhora))) throw protocolError();
+      Date.parse(data.expiraEn) !== Date.parse(hold.expiraEn) || !Number.isFinite(Date.parse(data.servidorAhora)) ||
+      (data.costo !== undefined && (typeof data.costo !== 'string' || !/^\d+(?:\.\d{1,2})?$/.test(data.costo)))) throw protocolError();
+    // La lectura propia usa la visibilidad vigente: una omisión retira un
+    // precio entregado antes, sin cambiar el costo histórico del servidor.
+    if (data.costo === undefined) delete booking.hold.costo;
+    else booking.hold.costo = data.costo;
     clock.sync(hold.expiraEn, data.servidorAhora, started);
     booking.remainingMs = clock.remaining();
     booking.holdStatus = data.estado === 'vigente' && booking.remainingMs > 0 ? 'active' : data.estado === 'vencido' || !booking.remainingMs ? 'expired' : 'lost';

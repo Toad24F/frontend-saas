@@ -27,8 +27,8 @@ test('la recuperación muestra el costo aceptado sin inventar duración', () => 
   const html = renderBooking({ phase: 'result', selection: {}, options: { servicios: [], sucursales: [], profesionales: [] },
     result: { folio: 'P-123', estado: 'pendiente', nombreNegocio: 'Unión Salud', nombreServicio: 'Consulta general',
       nombreSucursal: 'Centro', nombreProfesional: 'Ana Ruiz', inicioUtc: '2026-10-22T17:00:00Z',
-      finUtc: '2026-10-22T17:45:00Z', zonaHoraria: 'America/Chihuahua', costoAceptado: '650.00' } });
-  assert.match(html, /Costo aceptado/);
+      finUtc: '2026-10-22T17:45:00Z', zonaHoraria: 'America/Chihuahua', costo: '650.00' } });
+  assert.match(html, /Costo de la reserva/);
   assert.match(html, /650\.00/);
   assert.match(html, /Pago directamente en sucursal/);
   assert.doesNotMatch(html, /45 minutos/);

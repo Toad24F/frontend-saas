@@ -45,7 +45,7 @@ test('T116: contacto sobrevive vencimiento y navegación interna sin persistirse
   base.flow.exit(); assert.deepEqual(base.flow.getState().contact, { nombre: '', telefono: '', notas: '' });
 });
 const result = { folio: 'P-123456789012345678', estado: 'pendiente', inicioUtc: '2026-10-20T17:00:00.000Z',
-  finUtc: '2026-10-20T17:30:00.000Z', zonaHoraria: 'America/Mazatlan', costoAceptado: '450.00',
+  finUtc: '2026-10-20T17:30:00.000Z', zonaHoraria: 'America/Mazatlan', costo: '450.00',
   nombreNegocio: 'Negocio histórico', nombreServicio: 'Servicio guardado', nombreSucursal: 'Sucursal histórica', nombreProfesional: 'Profesional histórico' };
 const deferred = () => { let resolve, reject; const promise = new Promise((yes, no) => { resolve = yes; reject = no; }); return { promise, resolve, reject }; };
 function setup(handler, extra = {}) {
@@ -57,8 +57,8 @@ function setup(handler, extra = {}) {
     if (path === 'catalogo') return { negocio: { slug: 'centro' }, servicios: [{ id: 1, nombre: 'Actual', costo: '999.00', duracionMinutos: 30 }],
       sucursales: options.query.servicioId ? [{ id: 2, nombre: 'Centro', direccion: 'Calle 1', zonaHoraria: 'America/Mazatlan' }] : [], profesionales: options.query.sucursalId ? [{ id: 3, nombre: 'Ana' }] : [] };
     if (path === 'disponibilidad') return { ...options.query, modalidad: 'publica', zonaHoraria: 'America/Mazatlan', ranuras: [{ inicioUtc: result.inicioUtc, finUtc: result.finUtc }] };
-    if (path === 'apartados') return { estado: 'concedida', apartadoId: 8, generacion: '1', costoAceptado: '450.00', zonaHoraria: 'America/Mazatlan', expiraEn: '2026-10-20T16:05:00Z', servidorAhora: '2026-10-20T16:00:00Z' };
-    if (path === 'apartados/8') return extra.ownResponse ? extra.ownResponse() : { apartadoId: 8, generacion: '1', estado: 'vigente', expiraEn: '2026-10-20T16:05:00Z', servidorAhora: '2026-10-20T16:00:00Z' };
+    if (path === 'apartados') return { estado: 'concedida', apartadoId: 8, generacion: '1', costo: '450.00', zonaHoraria: 'America/Mazatlan', expiraEn: '2026-10-20T16:05:00Z', servidorAhora: '2026-10-20T16:00:00Z' };
+    if (path === 'apartados/8') return extra.ownResponse ? extra.ownResponse() : { apartadoId: 8, generacion: '1', estado: 'vigente', costo: '450.00', expiraEn: '2026-10-20T16:05:00Z', servidorAhora: '2026-10-20T16:00:00Z' };
     if (handler) return handler(path, options, store);
     if (path === 'intentos') return { id: marker.clave, apartadoId: 8, estado: 'preparado' };
     if (path.endsWith('/reservar')) return result;
@@ -259,7 +259,7 @@ test('T114: resumen histórico pendiente, escapado y sin enlaces de gestión ni 
 });
 
 test('T114: resultado incompleto nunca muestra éxito ni borra marcador', async () => {
-  for (const bad of [{ estado: 'confirmada' }, { zonaHoraria: 'ZonaInexistente' }, { costoAceptado: null }, { inicioUtc: '2026-10-20T17:00:00' }, { finUtc: '2026-10-20T16:00:00Z' }]) {
+  for (const bad of [{ estado: 'confirmada' }, { zonaHoraria: 'ZonaInexistente' }, { costo: null }, { inicioUtc: '2026-10-20T17:00:00' }, { finUtc: '2026-10-20T16:00:00Z' }]) {
     const { flow, store } = setup((path) => path === 'intentos' ? { id: marker.clave, apartadoId: 8, estado: 'preparado' } : { ...result, ...bad });
     await form(flow); await flow.submitReservation();
     assert.equal(flow.getState().phase, 'uncertain'); assert.deepEqual(store.read().marker, marker);

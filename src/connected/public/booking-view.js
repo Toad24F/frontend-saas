@@ -33,7 +33,7 @@ function renderBody(state) {
       <dt>Profesional</dt><dd>${esc(result.nombreProfesional)}</dd>
       <dt>Fecha</dt><dd>${esc(dateLabel(localDate(result.inicioUtc, result.zonaHoraria)))}</dd>
       <dt>Horario</dt><dd>${esc(localTime(result.inicioUtc, result.zonaHoraria))}–${esc(localTime(result.finUtc, result.zonaHoraria))}</dd>
-      <dt>Zona horaria</dt><dd>${esc(result.zonaHoraria)}</dd><dt>Costo</dt><dd>${esc(result.costoAceptado)} MXN</dd></dl>`;
+      <dt>Zona horaria</dt><dd>${esc(result.zonaHoraria)}</dd>${result.costo === undefined ? '' : `<dt>Costo</dt><dd>${esc(result.costo)} MXN</dd>`}</dl>`;
   }
   const { contact, contactErrors: errors } = state;
   const active = state.holdStatus === 'active' && state.remainingMs > 0;
@@ -79,11 +79,13 @@ export function renderBooking(state) {
     ['Profesional', result?.nombreProfesional || professional?.nombre || 'Elige un profesional', 'stethoscope', Boolean(result?.nombreProfesional || professional?.nombre)],
     ['Fecha y hora', result ? `${dateLabel(localDate(result.inicioUtc, result.zonaHoraria))} · ${localTime(result.inicioUtc, result.zonaHoraria)}` : date || 'Encuentra tu horario', 'clock', Boolean(result || date)],
   ];
-  const price = result?.costoAceptado ?? state.hold?.costoAceptado ?? service?.costo;
+  // Cada fase usa su propia respuesta pública. Un costo antiguo del catálogo
+  // nunca reemplaza una omisión posterior del apartado o resultado histórico.
+  const price = result ? result.costo : state.phase === 'selection' ? service?.costo : state.hold?.costo;
   return `<nav class="public-progress" aria-label="Pasos de reserva"><ol class="public-steps">${stepNames.map((name, index) => `<li class="${index < step ? 'is-complete' : ''}" ${step === index ? 'aria-current="step"' : ''}><span>${index < step ? '✓' : index + 1}</span><strong>${name}</strong></li>`).join('')}</ol></nav>
     <div class="public-booking-columns"><section class="public-booking-surface">${renderBody(state)}</section>
-      <aside class="public-booking-aside" aria-label="Resumen de la reserva"><div class="public-summary-card"><div class="public-summary-content"><div class="public-summary-heading">${icon('calendar')}<h3>Resumen de tu cita</h3></div><dl class="public-summary-items">${summary.map(([label, value, symbol, filled]) => `<div class="${filled ? 'is-filled' : ''}"><dt class="visually-hidden">${label}</dt><dd>${icon(symbol)}<span>${esc(value)}</span></dd></div>`).join('')}</dl>${price !== undefined ? `<div class="public-summary-price"><span>${service?.duracionMinutos ? `${service.duracionMinutos} minutos` : 'Costo aceptado'}</span><strong>${esc(price)} <small>MXN</small></strong></div><p class="public-summary-payment">Pago directamente en sucursal.</p>` : ''}</div><span class="public-summary-leaf" aria-hidden="true">${icon('leaf')}</span></div>
-      <p class="public-booking-trust">${result ? 'Reserva registrada, pendiente de confirmación.' : 'La disponibilidad y el costo se confirman con el servidor antes de registrar tu reserva.'}</p></aside></div>`;
+      <aside class="public-booking-aside" aria-label="Resumen de la reserva"><div class="public-summary-card"><div class="public-summary-content"><div class="public-summary-heading">${icon('calendar')}<h3>Resumen de tu cita</h3></div><dl class="public-summary-items">${summary.map(([label, value, symbol, filled]) => `<div class="${filled ? 'is-filled' : ''}"><dt class="visually-hidden">${label}</dt><dd>${icon(symbol)}<span>${esc(value)}</span></dd></div>`).join('')}</dl>${price !== undefined ? `<div class="public-summary-price"><span>${service?.duracionMinutos ? `${service.duracionMinutos} minutos` : 'Costo de la reserva'}</span><strong>${esc(price)} <small>MXN</small></strong></div><p class="public-summary-payment">Pago directamente en sucursal.</p>` : ''}</div><span class="public-summary-leaf" aria-hidden="true">${icon('leaf')}</span></div>
+      <p class="public-booking-trust">${result ? 'Reserva registrada, pendiente de confirmación.' : price === undefined ? 'La disponibilidad se confirma con el servidor antes de registrar tu reserva.' : 'La disponibilidad y el costo se confirman con el servidor antes de registrar tu reserva.'}</p></aside></div>`;
 }
 
 // El contador se actualiza sin recrear inputs, para conservar foco, cursor e IME.

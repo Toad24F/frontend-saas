@@ -40,7 +40,7 @@ test('T115: fecha inválida y campos tienen etiquetas y referencias de ayuda/err
   assert.match(html, /for="public-date"/);
   assert.match(html, /id="public-date"[^>]*aria-invalid="true"/);
   assert.match(html, /aria-describedby="public-zone selection-status"/);
-  const form = renderBooking({ phase: 'form', selection: { date: '2026-10-20', slot: { inicioUtc: '2026-10-20T17:00:00Z' } }, hold: { zonaHoraria: 'America/Mazatlan', costoAceptado: '450.00' }, holdStatus: 'active', remainingMs: 10000, contact: {}, contactErrors: { telefono: 'Revisa el teléfono' } });
+  const form = renderBooking({ phase: 'form', selection: { date: '2026-10-20', slot: { inicioUtc: '2026-10-20T17:00:00Z' } }, hold: { zonaHoraria: 'America/Mazatlan', costo: '450.00' }, holdStatus: 'active', remainingMs: 10000, contact: {}, contactErrors: { telefono: 'Revisa el teléfono' } });
   for (const field of ['nombre', 'telefono', 'notas']) {
     assert.ok(form.includes(`for="contact-${field}"`));
     assert.ok(form.includes(`id="contact-${field}-error"`));

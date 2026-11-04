@@ -12,8 +12,11 @@ const start = '2026-10-20T17:00:00.000Z';
 const now = '2026-10-20T16:00:00.000Z';
 const expires = '2026-10-20T16:05:00.000Z';
 const granted = (id = 8, gen = '1') => ({ estado: 'concedida', apartadoId: id, generacion: gen,
-  expiraEn: expires, servidorAhora: now, zonaHoraria: 'America/Mazatlan', costoAceptado: '450.00' });
-const own = (id = 8, gen = '1', estado = 'vigente') => ({ apartadoId: id, generacion: gen, estado, expiraEn: expires, servidorAhora: now });
+  expiraEn: expires, servidorAhora: now, zonaHoraria: 'America/Mazatlan', costo: '450.00' });
+// La lectura propia devuelve el costo solo mientras su publicación está activa;
+// esta fixture representa el caso visible y las pruebas ALA cubren la omisión.
+const own = (id = 8, gen = '1', estado = 'vigente') => ({ apartadoId: id, generacion: gen, estado,
+  expiraEn: expires, servidorAhora: now, costo: '450.00' });
 const contact = { nombre: '  María José  ', telefono: '+52 614-123-4567', notas: ' Consulta ' };
 const deferred = () => { let resolve, reject; const promise = new Promise((yes, no) => { resolve = yes; reject = no; }); return { promise, resolve, reject }; };
 

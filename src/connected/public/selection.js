@@ -48,7 +48,10 @@ export function createPortalSelection(client, { slug, onChange = () => {}, now =
   function readCatalog(data) {
     if (data?.negocio?.slug !== slug || !lists.every((key) => Array.isArray(data[key]) &&
       data[key].every((item) => id(item.id) && typeof item.nombre === 'string'))) throw invalidResponse();
-    if (!data.servicios.every((item) => Number.isFinite(Number(item.costo)) && Number(item.costo) >= 0 && id(item.duracionMinutos))) throw invalidResponse();
+    // La publicación de precios elimina la clave, no envía cero ni null.
+    if (!data.servicios.every((item) => (item.costo === undefined ||
+      (typeof item.costo === 'string' && /^\d+(?:\.\d{1,2})?$/.test(item.costo))) &&
+      id(item.duracionMinutos))) throw invalidResponse();
     for (const branch of data.sucursales) {
       if (typeof branch.direccion !== 'string') throw invalidResponse();
       try { localDate(now(), branch.zonaHoraria); } catch { throw invalidResponse(); }
