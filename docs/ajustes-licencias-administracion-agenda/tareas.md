@@ -1,6 +1,6 @@
 # Tareas — Ajustes de licencias, administración y agenda (frontend)
 
-Estado: desglose propuesto del [plan](plan.md) y la [spec](spec.md). Los RF son **locales a la spec frontend**. T001–T003 tienen [evidencia preparatoria](resultados-tareas/resultado-t001-t003.md) y T004–T012 tienen [resultados del portal](resultados-tareas/resultado-t004-t012.md); las tareas posteriores siguen pendientes.
+Estado: desglose propuesto del [plan](plan.md) y la [spec](spec.md). Los RF son **locales a la spec frontend**. T001–T003 tienen [evidencia preparatoria](resultados-tareas/resultado-t001-t003.md) y T004–T012 tienen [resultados del portal](resultados-tareas/resultado-t004-t012.md) y T013–T023 tienen [evidencia de contacto, apartado e intento](resultados-tareas/resultado-t013-t023.md); las tareas posteriores siguen pendientes.
 
 Cada tarea se estima en **15 o 25 minutos, incluida su comprobación focalizada**. Las dependencias citadas son obligatorias y aparecen antes de la tarea; las áreas independientes pueden avanzar sin esperar a los contratos externos. Si una tarea requiere 30 minutos o más, dividirla antes de ejecutarla y conservar su casilla pendiente hasta terminar sus subtareas. «Hecho cuando» exige evidencia real en `docs/ajustes-licencias-administracion-agenda/resultados-tareas/` (revisión, archivos, comando o revisión y resultado). No editar `../backend` ni usar su base cotidiana para pruebas.
 
@@ -36,27 +36,27 @@ Cada tarea se estima en **15 o 25 minutos, incluida su comprobación focalizada*
 
 ## 3. Portal: contacto, apartado e intento
 
-- [ ] **FALA-T013 — Validar contacto sin identificar al cliente por teléfono** · 25 min · Depende de: T003 · RF-11–RF-14.
+- [x] **FALA-T013 — Validar contacto sin identificar al cliente por teléfono** · 25 min · Depende de: T003 · RF-11–RF-14.
   Hecho cuando: Límites de nombre/notas, diez dígitos y `+52` se prueban; ningún campo dispara búsqueda de reservas previas.
-- [ ] **FALA-T014 — Comprobar reloj y vencimiento exacto** · 25 min · Depende de: T010, T013 · RF-15–RF-17.
+- [x] **FALA-T014 — Comprobar reloj y vencimiento exacto** · 25 min · Depende de: T010, T013 · RF-15–RF-17.
   Hecho cuando: Antes de cinco minutos permite continuar y en el límite exacto bloquea reservar sin perder el contacto abierto.
-- [ ] **FALA-T015 — Liberar al volver y reemplazar apartado** · 25 min · Depende de: T014 · RF-18–RF-19.
+- [x] **FALA-T015 — Liberar al volver y reemplazar apartado** · 25 min · Depende de: T014 · RF-18–RF-19.
   Hecho cuando: La vuelta confirma liberación propia y un reemplazo fallido no presenta el apartado anterior como vigente.
-- [ ] **FALA-T016 — Coordinar dos pestañas** · 25 min · Depende de: T015 · RF-20.
+- [x] **FALA-T016 — Coordinar dos pestañas** · 25 min · Depende de: T015 · RF-20.
   Hecho cuando: Una pestaña detecta cambio/liberación y un aviso de generación vieja no altera el apartado nuevo.
-- [ ] **FALA-T017 — Verificar recarga, salida y memoria** · 25 min · Depende de: T015 · RF-21–RF-22.
+- [x] **FALA-T017 — Verificar recarga, salida y memoria** · 25 min · Depende de: T015 · RF-21–RF-22.
   Hecho cuando: Salida intenta liberar, recarga ordinaria reinicia y contacto/notas no aparecen en almacenamiento ni historial del navegador.
-- [ ] **FALA-T018 — Conservar marcador mínimo antes del envío** · 25 min · Depende de: T014 · RF-23–RF-24, RF-27–RF-29, RF-33.
+- [x] **FALA-T018 — Conservar marcador mínimo antes del envío** · 25 min · Depende de: T014 · RF-23–RF-24, RF-27–RF-29, RF-33.
   Hecho cuando: `sessionStorage` guarda solo slug, apartado y clave; una referencia incierta impide otra reserva incompatible.
-- [ ] **FALA-T019 — Repetir mismo envío y mostrar cita pendiente** · 25 min · Depende de: T011, T018 · RF-23–RF-26, RF-34.
+- [x] **FALA-T019 — Repetir mismo envío y mostrar cita pendiente** · 25 min · Depende de: T011, T018 · RF-23–RF-26, RF-34.
   Hecho cuando: Doble clic o repetición recupera mismo folio y el resultado usa el resumen histórico y texto de pendiente.
-- [ ] **FALA-T020 — Resolver respuesta perdida y recarga** · 25 min · Depende de: T018–T019 · RF-27–RF-29.
+- [x] **FALA-T020 — Resolver respuesta perdida y recarga** · 25 min · Depende de: T018–T019 · RF-27–RF-29.
   Hecho cuando: `registrado` muestra resultado, `no_registrado` ordinario permite reiniciar y 503 conserva marcador para reintento.
-- [ ] **FALA-T021 — Manejar rechazo operativo sin cita ficticia** · 25 min · Depende de: T020 · RF-31, RF-58.
+- [x] **FALA-T021 — Manejar rechazo operativo sin cita ficticia** · 25 min · Depende de: T020 · RF-31, RF-58.
   Hecho cuando: Rechazos por oferta, horario, licencia u ocupación explican nueva consulta y no muestran folio ni cita creada.
-- [ ] **FALA-T022 — Reconocer cupo telefónico sin perder incertidumbre** · 25 min · Depende de: T020 · RF-32–RF-33, RF-58.
+- [x] **FALA-T022 — Reconocer cupo telefónico sin perder incertidumbre** · 25 min · Depende de: T020 · RF-32–RF-33, RF-58.
   Hecho cuando: El código `cupo_telefono_excedido` se distingue del 409 genérico y el intento no se borra ni cambia mientras siga incierto.
-- [ ] **FALA-T023 — Conservar marcador con licencia bloqueada** · 15 min · Depende de: T020 · RF-29–RF-30.
+- [x] **FALA-T023 — Conservar marcador con licencia bloqueada** · 15 min · Depende de: T020 · RF-29–RF-30.
   Hecho cuando: Un fallo de CSRF tras recargar conserva la referencia y muestra recuperación pendiente, sin afirmar fracaso ni éxito.
 
 ## 4. Superadministración: licencias y cupos

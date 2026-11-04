@@ -50,7 +50,10 @@ export function createPublicClient(slug, { fetchImpl = globalThis.fetch, timeout
     catch { throw new PublicPortalError('protocol', 'El portal devolvió una respuesta no válida.', { status: response.status }); }
     if (!response.ok) {
       // Solo se muestran mensajes del contrato público, nunca HTML o excepciones internas.
-      const valid = data?.codigo === `portal_${response.status}` && typeof data.mensaje === 'string';
+      // El único código funcional especial es el cupo telefónico. Se admite
+      // solo con 409; los demás errores siguen el contrato portal_<estado>.
+      const valid = (data?.codigo === `portal_${response.status}` ||
+        (response.status === 409 && data?.codigo === 'cupo_telefono_excedido')) && typeof data.mensaje === 'string';
       if (response.status === 401) csrfToken = null;
       throw new PublicPortalError('http', valid ? data.mensaje : 'No se pudo completar la solicitud pública.', {
         status: response.status, code: valid ? data.codigo : 'portal_error',

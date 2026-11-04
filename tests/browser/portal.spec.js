@@ -192,7 +192,8 @@ test('T121: navegadores aislados disputan un horario sin doble ocupación', asyn
     const hold = (await rows(`SELECT b.id FROM bloqueos_temporales b JOIN negocios n ON n.id=b.negocio_id
       WHERE n.slug='portal-qa-1' ORDER BY b.id DESC LIMIT 1`))[0].id;
     await b.goto(portalUrl());
-    await expect(b.getByRole('heading', { name: 'Elige tu servicio' })).toBeVisible();
+    // El primer paso vigente usa este encabezado en la portada conectada.
+    await expect(b.getByRole('heading', { name: '¿Cómo podemos cuidarte?' })).toBeVisible();
     const foreign = await b.evaluate(async (id) => {
       const response = await fetch(`/publico/negocios/portal-qa-1/apartados/${id}`, { credentials: 'same-origin' });
       return response.status;
@@ -237,7 +238,7 @@ test('T122: recarga limpia contacto, salida libera y cookies ausentes bloquean',
     WHERE n.slug='portal-qa-1'`))[0].id;
   await fillContact(page, 'Privado temporal');
   await page.reload();
-  await expect(page.getByRole('heading', { name: 'Elige tu servicio' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '¿Cómo podemos cuidarte?' })).toBeVisible();
   expect(await page.locator('#contact-nombre').count()).toBe(0);
   await expect.poll(async () => (await rows('SELECT liberado_en FROM bloqueos_temporales WHERE id=?', [abandonedId]))[0].liberado_en !== null).toBe(true);
   const context = await browser.newContext();
@@ -278,8 +279,45 @@ test('T123: pérdida anterior al escritor termina sin cita tardía', async ({ pa
   await page.getByRole('button', { name: 'Reservar' }).click();
   await expect(page.getByRole('heading', { name: 'Comprueba tu envío' })).toBeVisible();
   await page.reload();
-  await expect(page.getByRole('heading', { name: 'Elige tu servicio' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '¿Cómo podemos cuidarte?' })).toBeVisible();
   expect(Number((await rows("SELECT COUNT(*) n FROM citas WHERE origen='portal_publico'"))[0].n)).toBe(before);
+});
+
+// FALA-T023 corta la sesión tras dejar un intento incierto. El cliente debe
+// conservar la referencia local aunque no pueda obtener CSRF para resolver.
+test('FALA-T023: licencia bloqueada tras recarga conserva recuperación pendiente', async ({ page }) => {
+  await chooseSlot(page, 13);
+  await fillContact(page, 'Nota que no debe persistir');
+  await page.route('**/intentos/*/reservar', (route) => route.abort('failed'));
+  await page.getByRole('button', { name: 'Reservar' }).click();
+  await expect(page.getByRole('heading', { name: 'Comprueba tu envío' })).toBeVisible();
+  const before = await page.evaluate(() => Object.entries(sessionStorage)
+    .filter(([key]) => key.startsWith('citalendar:public:attempt:')));
+  expect(before).toHaveLength(1);
+  await page.route('**/publico/negocios/portal-qa-1/sesion', (route) => route.fulfill({ status: 403,
+    contentType: 'application/json', body: JSON.stringify({ codigo: 'portal_403',
+      mensaje: 'Portal temporalmente cerrado.', accion: 'reintentar' }) }));
+  await page.reload();
+  await expect(page.locator('#public-status')).toContainText('recuperación pendiente');
+  await expect(page.locator('#public-selection')).toBeHidden();
+  expect(await page.evaluate(() => Object.entries(sessionStorage)
+    .filter(([key]) => key.startsWith('citalendar:public:attempt:')))).toEqual(before);
+  expect(JSON.stringify(before)).not.toContain('Nota que no debe persistir');
+});
+
+// Capturas de revisión del formulario conectado en ambos temas y dos anchos.
+// Las comprobaciones de desborde acompañan la inspección humana de las PNG.
+test('FALA-T013–T023: formulario visible en escritorio y móvil, claro y oscuro', async ({ page }, testInfo) => {
+  await chooseSlot(page, 14);
+  await expect(page.getByRole('button', { name: 'Reservar' })).toBeVisible();
+  await page.screenshot({ path: testInfo.outputPath('form-desktop-light.png'), fullPage: true });
+  await page.getByRole('button', { name: 'Activar modo oscuro' }).click();
+  await page.screenshot({ path: testInfo.outputPath('form-desktop-dark.png'), fullPage: true });
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.screenshot({ path: testInfo.outputPath('form-mobile-dark.png'), fullPage: true });
+  await page.getByRole('button', { name: 'Activar modo claro' }).click();
+  await page.screenshot({ path: testInfo.outputPath('form-mobile-light.png'), fullPage: true });
 });
 
 test('T124: reloj cambiado y pestaña reactivada no prolongan un apartado vencido', async ({ page }) => {

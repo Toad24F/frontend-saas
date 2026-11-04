@@ -38,7 +38,9 @@ export function createPortalBooking(client, { slug, onChange = () => {}, now,
     },
     onAbsent: async () => {
       epoch++; booking.phase = 'selection'; booking.hold = null; booking.holdStatus = 'none'; booking.submission = null; operation = null;
-      booking.notice = 'Se comprobó que el envío no quedó registrado. Puedes elegir un nuevo horario.';
+      // Un rechazo operativo ordinario obliga a consultar oferta y horario
+      // vigentes; el contacto sigue en memoria para la siguiente elección.
+      booking.notice = 'Se comprobó que el envío no quedó registrado. La oferta, el horario, la licencia o la ocupación pueden haber cambiado; consulta disponibilidad vigente y elige otro horario.';
       await selection.reset(); emit();
     },
   });

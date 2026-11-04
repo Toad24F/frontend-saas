@@ -21,8 +21,9 @@ export function readReservationResult(data) {
 export function createSubmission(client, { slug, storage, attemptKey = () => crypto.randomUUID(),
   acquireMutation = async () => ({ release() {} }), onState, onAbsent, onBegin } = {}) {
   const store = createAttemptStore(slug, storage === undefined ? undefined : () => storage);
-  let marker = null, payload = null, inFlight = false, initializing = false, exited = false, lease = null;
-  const publish = (phase, notice, status, extra = {}) => onState({ phase, notice, submission: { status, canRepeat: Boolean(payload) && phase === 'uncertain' }, ...extra });
+  let marker = null, payload = null, inFlight = false, initializing = false, exited = false, lease = null, phoneQuota = false;
+  const publish = (phase, notice, status, extra = {}) => onState({ phase, notice,
+    submission: { status, canRepeat: Boolean(payload) && phase === 'uncertain' && !phoneQuota }, ...extra });
   const releaseLease = () => { lease?.release(); lease = null; };
   const uncertain = (error) => publish('uncertain', `${error instanceof PublicPortalError ? error.message : 'No se pudo determinar el resultado del envío.'} Comprueba este intento antes de iniciar otra reserva.`, 'uncertain');
   async function lock() {
@@ -41,6 +42,14 @@ export function createSubmission(client, { slug, storage, attemptKey = () => cry
     const data = await client.request(`intentos/${marker.clave}/resolver`, { method: 'POST', body: { apartadoId: marker.apartadoId } });
     if (data?.estado === 'registrado') { accept(data.resultado); return; }
     if (data?.estado !== 'no_registrado' || data.resultado !== undefined) throw new Error('Resolución no válida.');
+    if (data.causa === 'cupo_telefono_excedido' && typeof data.puedeCorregir === 'boolean') {
+      // El rechazo es terminal, pero no se crea otro intento: el contrato que
+      // entrega la referencia propia para un sucesor aún está pendiente.
+      phoneQuota = true;
+      publish('uncertain', 'Se confirmó que no se registró la reserva por el límite de citas de este teléfono en esta sucursal. Contacta al negocio para continuar.', 'phone-quota');
+      return;
+    }
+    if (data.causa !== undefined || data.puedeCorregir !== undefined) throw new Error('Resolución no válida.');
     if (!store.clear(marker)) throw new Error('No se pudo limpiar el marcador terminal.');
     marker = null; payload = null; releaseLease();
     if (!exited) await onAbsent();
@@ -68,7 +77,7 @@ export function createSubmission(client, { slug, storage, attemptKey = () => cry
     finally { inFlight = false; }
   }
   async function send() {
-    if (inFlight || exited || !marker || !payload) return;
+    if (inFlight || exited || !marker || !payload || phoneQuota) return;
     inFlight = true; publish('sending', 'Registrando tu reserva. Espera mientras comprobamos el resultado…', 'sending'); onBegin();
     try {
       const prepared = await client.request('intentos', { method: 'POST', body: { clave: marker.clave, apartadoId: marker.apartadoId } });

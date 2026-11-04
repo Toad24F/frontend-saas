@@ -19,9 +19,11 @@ function renderBody(state) {
     ${state.holdStatus === 'request-error' ? '<button class="btn btn-primary" type="button" data-selection-retry>Reintentar el mismo apartado</button>' : '<p>Espera mientras comprobamos el horario. Todavía no se ha creado una cita.</p>'}`;
   // Estas pantallas no dependen del apartado ni del catálogo: una recuperación
   // tras recarga puede no tener selecciones locales o contacto en memoria.
-  if (state.phase === 'sending' || state.phase === 'uncertain') return `<h2 id="selection-title" tabindex="-1">${state.phase === 'sending' ? 'Registrando tu reserva' : 'Comprueba tu envío'}</h2>
-    ${notice}<p class="public-limit">Mantendremos este intento hasta comprobar su resultado. No inicies otra reserva para resolver una espera.</p>
-    ${state.phase === 'uncertain' ? `<div class="public-selection-actions"><button class="btn btn-primary" type="button" data-resolve-submission ${state.submission?.status === 'resolving' ? 'disabled' : ''}>Comprobar resultado</button>
+  if (state.phase === 'sending' || state.phase === 'uncertain') return `<h2 id="selection-title" tabindex="-1">${state.phase === 'sending' ? 'Registrando tu reserva' : state.submission?.status === 'phone-quota' ? 'No se registró la reserva' : 'Comprueba tu envío'}</h2>
+    ${notice}<p class="public-limit">${state.submission?.status === 'phone-quota'
+      ? 'El rechazo ya se comprobó. No se iniciará otra reserva con este intento.'
+      : 'Mantendremos este intento hasta comprobar su resultado. No inicies otra reserva para resolver una espera.'}</p>
+    ${state.phase === 'uncertain' && state.submission?.status !== 'phone-quota' ? `<div class="public-selection-actions"><button class="btn btn-primary" type="button" data-resolve-submission ${state.submission?.status === 'resolving' ? 'disabled' : ''}>Comprobar resultado</button>
     ${state.submission?.canRepeat ? '<button class="btn btn-light" type="button" data-repeat-submission>Reintentar el mismo envío</button>' : ''}</div>` : ''}`;
   if (state.phase === 'result') {
     const result = state.result;
