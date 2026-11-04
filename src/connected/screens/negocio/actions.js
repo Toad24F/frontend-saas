@@ -1,8 +1,11 @@
-import { api, loadBackendData } from '../../backend.js';
+import { api, loadBackendData, user } from '../../backend.js';
 import { state, render } from '../../../shared/app.js';
 import { field, basicForm, errorSlot } from '../../../shared/forms.js';
 import { modal, toast, escape } from '../../../shared/ui.js';
 import { businessDetailData, invalidateBusinessDetail } from './view.js';
+import { createLicenseOperations, validateSuspensionDays } from './license-operations.js';
+
+const licenseOperations = () => createLicenseOperations({ api, actorId: user.id });
 
 async function runBusinessAction(request, message) {
   const result = await request();
@@ -35,6 +38,7 @@ function confirmBusiness(title, description, label, request, success) {
 }
 
 export function businessAction(action, value = null) {
+  if (user?.rol !== 'superadmin') return;
   const id = Number(state.businessId);
   if (!Number.isSafeInteger(id) || id < 1) return;
   const detail = businessDetailData();
@@ -56,17 +60,35 @@ export function businessAction(action, value = null) {
     if (!business.administrador?.id || !business.administrador?.activadoEn) throw new Error('El administrador aún no está activado.');
     return api(`/auth/administradores/${business.administrador.id}/autorizar-recuperacion`, 'POST', {});
   }, 'Recuperación encolada.');
-  if (action === 'suspend') confirmBusiness('Programar suspensión', 'El acceso continuará durante el plazo de 48 horas, salvo que la licencia venza antes. Después se bloquearán las sesiones del negocio.', 'Programar suspensión', async () => {
-    const business = await api(`/negocios/${id}`);
-    return api(`/licencias/${business.licencia.id}/suspender`, 'POST', {});
-  }, 'Suspensión programada.');
-  if (action === 'reactivate') confirmBusiness('Reactivar licencia', 'Se reanudará la licencia con el tiempo conservado. Las cuentas desactivadas no se reactivan por esta acción.', 'Reactivar licencia', async () => {
-    const business = await api(`/negocios/${id}`);
-    return api(`/licencias/${business.licencia.id}/reactivar`, 'POST', {});
-  }, 'Licencia reactivada.');
-  if (action === 'renew') confirmBusiness('Renovar licencia', 'Se añadirá un año calendario. La renovación no elimina una suspensión activa.', 'Renovar un año', async () => {
-    const business = await api(`/negocios/${id}`);
-    return api(`/licencias/${business.licencia.id}/renovar`, 'POST', {});
-  }, 'Licencia renovada.');
+  if (action === 'suspend' && detail?.validity?.estado === 'vigente') {
+    // Se muestra un borrador; el cuerpo exacto queda congelado al primer POST.
+    const dialog = modal('Programar suspensión', `<form id="license-suspension-form" class="dialog-body"><p>El plazo inicia en dos días. Cero bloquea el acceso inmediatamente; el bloqueo programado que responda el servidor será la fecha efectiva.</p><label for="license-delay">Plazo en días</label><input class="form-control" id="license-delay" name="plazoDias" type="number" min="0" max="30" step="1" value="2" required>${errorSlot}<div class="dialog-footer"><button type="button" class="btn btn-light" data-dismiss>Cancelar</button><button type="submit" class="btn btn-primary">Programar suspensión</button></div></form>`);
+    dialog.querySelector('[data-dismiss]').onclick = () => dialog.close();
+    dialog.querySelector('form').onsubmit = async (event) => {
+      event.preventDefault();
+      const submit = dialog.querySelector('[type="submit"]'); submit.disabled = true;
+      try {
+        const days = validateSuspensionDays(Number(dialog.querySelector('#license-delay').value));
+        await runBusinessAction(() => licenseOperations().run('suspender', id, detail.business.licencia.id,
+          { plazoDias: days }), 'Suspensión solicitada. Consulta el historial para comprobar el correo.');
+        dialog.close();
+      } catch (error) {
+        const target = dialog.querySelector('#form-error'); target.textContent = error.message;
+        target.hidden = false; target.focus();
+      } finally { submit.disabled = false; }
+    };
+  }
+  if (action === 'reactivate' && ['suspendida', 'suspension_pendiente'].includes(detail?.validity?.estado))
+    confirmBusiness('Reactivar licencia', 'Se reanudará la licencia con el tiempo conservado. Las cuentas desactivadas no se reactivan por esta acción.', 'Reactivar licencia',
+      () => licenseOperations().run('reactivar', id, detail.business.licencia.id, {}), 'Licencia reactivada. Consulta el historial para comprobar el correo.');
+  if (action === 'renew' && detail?.validity && detail.validity.estado !== 'pendiente')
+    confirmBusiness('Renovar licencia', 'Se añadirá un año calendario. Renovar no elimina una suspensión activa; el nuevo estado lo confirma el servidor.', 'Renovar un año',
+      () => licenseOperations().run('renovar', id, detail.business.licencia.id, {}), 'Renovación registrada. Consulta el historial para comprobar el correo.');
   if (action === 'retry' && typeof value === 'string' && /^\d+$/.test(value)) confirmBusiness('Reintentar correo', `Se volverá a dejar pendiente el envío ${escape(value)} si su código y destinatario siguen vigentes.`, 'Reintentar', () => api(`/negocios/${id}/reintentar-envio`, 'POST', { envioId: value }), 'Correo encolado para reintento.');
+}
+
+export async function retryLicenseOperation() {
+  if (user?.rol !== 'superadmin') return;
+  try { await runBusinessAction(() => licenseOperations().retry(), 'Operación comprobada. Consulta el historial para comprobar el correo.'); }
+  catch (error) { toast(error.message); }
 }

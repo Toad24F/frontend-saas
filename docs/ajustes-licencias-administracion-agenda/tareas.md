@@ -1,6 +1,6 @@
 # Tareas — Ajustes de licencias, administración y agenda (frontend)
 
-Estado: desglose propuesto del [plan](plan.md) y la [spec](spec.md). Los RF son **locales a la spec frontend**. T001–T003 tienen [evidencia preparatoria](resultados-tareas/resultado-t001-t003.md) y T004–T012 tienen [resultados del portal](resultados-tareas/resultado-t004-t012.md) y T013–T023 tienen [evidencia de contacto, apartado e intento](resultados-tareas/resultado-t013-t023.md); las tareas posteriores siguen pendientes.
+Estado: desglose propuesto del [plan](plan.md) y la [spec](spec.md). Los RF son **locales a la spec frontend**. T001–T003 tienen [evidencia preparatoria](resultados-tareas/resultado-t001-t003.md) y T004–T012 tienen [resultados del portal](resultados-tareas/resultado-t004-t012.md) y T013–T023 tienen [evidencia de contacto, apartado e intento](resultados-tareas/resultado-t013-t023.md) y T024–T030 tienen [resultados de licencias](resultados-tareas/resultado-t024-t030.md); las tareas posteriores siguen pendientes.
 
 Cada tarea se estima en **15 o 25 minutos, incluida su comprobación focalizada**. Las dependencias citadas son obligatorias y aparecen antes de la tarea; las áreas independientes pueden avanzar sin esperar a los contratos externos. Si una tarea requiere 30 minutos o más, dividirla antes de ejecutarla y conservar su casilla pendiente hasta terminar sus subtareas. «Hecho cuando» exige evidencia real en `docs/ajustes-licencias-administracion-agenda/resultados-tareas/` (revisión, archivos, comando o revisión y resultado). No editar `../backend` ni usar su base cotidiana para pruebas.
 
@@ -61,19 +61,19 @@ Cada tarea se estima en **15 o 25 minutos, incluida su comprobación focalizada*
 
 ## 4. Superadministración: licencias y cupos
 
-- [ ] **FALA-T024 — Permitir cabecera idempotente privada** · 15 min · Depende de: T002 · RF-43, RF-57.
+- [x] **FALA-T024 — Permitir cabecera idempotente privada** · 15 min · Depende de: T002 · RF-43, RF-57.
   Hecho cuando: El cliente envía `Idempotency-Key` solo a operaciones de licencia previstas sin cambiar el resto de llamadas.
-- [ ] **FALA-T025 — Guardar intento privado antes del POST** · 25 min · Depende de: T024 · RF-42–RF-43.
+- [x] **FALA-T025 — Guardar intento privado antes del POST** · 25 min · Depende de: T024 · RF-42–RF-43.
   Hecho cuando: Acción, negocio/licencia, cuerpo exacto y clave permanecen iguales ante respuesta perdida y repetición.
-- [ ] **FALA-T026 — Mostrar vigencia y suspensión real** · 25 min · Depende de: T002 · RF-39, RF-41–RF-42.
+- [x] **FALA-T026 — Mostrar vigencia y suspensión real** · 25 min · Depende de: T002 · RF-39, RF-41–RF-42.
   Hecho cuando: Vigente, pendiente, suspendida y vencida muestran fechas/efectos recibidos y renovar no se presenta como reactivación.
-- [ ] **FALA-T027 — Editar plazo de suspensión** · 25 min · Depende de: T025–T026 · RF-40–RF-41.
+- [x] **FALA-T027 — Editar plazo de suspensión** · 25 min · Depende de: T025–T026 · RF-40–RF-41.
   Hecho cuando: El formulario admite 0–30 enteros, inicia en 2, explica bloqueo inmediato y no ofrece otro plazo si ya hay suspensión.
-- [ ] **FALA-T028 — Reconciliar operaciones inciertas** · 25 min · Depende de: T025, T027 · RF-42–RF-43, RF-58.
+- [x] **FALA-T028 — Reconciliar operaciones inciertas** · 25 min · Depende de: T025, T027 · RF-42–RF-43, RF-58.
   Hecho cuando: Reintentar usa misma clave/cuerpo, bloquea una segunda renovación incompatible y refresca vigencia tras respuesta conocida.
-- [ ] **FALA-T029 — Distinguir estados de correo** · 15 min · Depende de: T026 · RF-44.
+- [x] **FALA-T029 — Distinguir estados de correo** · 15 min · Depende de: T026 · RF-44.
   Hecho cuando: Pendiente, fallido y enviado se muestran según respuesta y una transición no se anuncia como correo entregado.
-- [ ] **FALA-T030 — Probar licencias e idempotencia en navegador** · 25 min · Depende de: T027–T029 · RF-39–RF-44, RF-47.
+- [x] **FALA-T030 — Probar licencias e idempotencia en navegador** · 25 min · Depende de: T027–T029 · RF-39–RF-44, RF-47.
   Hecho cuando: Casos verifican plazo 0/2/30, suspensión, renovación, respuesta perdida, correo y ausencia de acciones en roles ajenos.
 - [ ] **FALA-T031 — Leer cupos de ambos roles** · 25 min · Depende de: T002 · RF-45, RF-47.
   Hecho cuando: Superadmin ve límites y consumo retornados por `/negocios/:id/cupo-usuarios` sin calcularlos de catálogos locales.

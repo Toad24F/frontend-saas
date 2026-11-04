@@ -10,6 +10,7 @@ const backend = resolve(frontend, '../backend');
 const backendRequire = createRequire(resolve(backend, 'package.json'));
 const { createConnection } = backendRequire('mysql2/promise');
 const dotenv = backendRequire('dotenv');
+const bcrypt = backendRequire('bcrypt');
 const source = dotenv.parse(readFileSync(resolve(backend, '.env')));
 const name = `citas_persistencia_${randomUUID().replaceAll('-', '')}`;
 const delay = (ms) => new Promise((done) => setTimeout(done, ms));
@@ -39,10 +40,18 @@ async function waitFor(url, child) {
 
 async function seed(db) {
   const now = new Date();
+  // Usuarios ficticios solo en la base efímera: permiten probar permisos y
+  // operaciones de licencia desde la interfaz conectada, sin cuentas reales.
+  const passwordHash = await bcrypt.hash('PruebaLicencia2026!', 4);
+  await db.query(`INSERT INTO usuarios (negocio_id,nombre,email,password_hash,rol,activo,activado_en,creado_en)
+    VALUES (NULL,'Superadmin QA','superadmin-qa@example.test',?,'superadmin',1,?,?)`, [passwordHash, now, now]);
   for (const index of [1, 2]) {
     const business = await db.query('INSERT INTO negocios (nombre,slug,email_contacto,activado_en,creado_en) VALUES (?,?,?,?,?)',
       [`Portal QA ${index}`, `portal-qa-${index}`, `qa${index}@example.test`, now, now]);
     const businessId = Number(business.insertId);
+    await db.query(`INSERT INTO usuarios (negocio_id,nombre,email,password_hash,rol,activo,activado_en,creado_en)
+      VALUES (?,'Administrador QA',? ,?,'admin_negocio',1,?,?)`,
+    [businessId, `admin-qa-${index}@example.test`, passwordHash, now, now]);
     await db.query('INSERT INTO licencias (negocio_id,creado_en,habilitada_en,vence_en) VALUES (?,?,?,?)',
       [businessId, now, now, new Date(now.getTime() + 365 * 86400000)]);
     const person = await db.query(`INSERT INTO usuarios

@@ -63,6 +63,13 @@ export async function handleClick(e) {
       if (await availability.handleAvailabilityClick(e)) return;
     }
     if (!isDemo && user.rol === 'superadmin' && state.page === 'negocio') {
+      const licenseRetry = e.target.closest('[data-license-retry]');
+      if (licenseRetry) {
+        licenseRetry.disabled = true;
+        try { await (await import('../connected/screens/negocio/actions.js')).retryLicenseOperation(); }
+        finally { licenseRetry.disabled = false; }
+        return;
+      }
       const businessAction = e.target.closest('[data-business-action]');
       const retryDelivery = e.target.closest('[data-retry-delivery]');
       if (businessAction || retryDelivery) {
