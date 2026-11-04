@@ -28,3 +28,15 @@ export function disableReceptionist(id, request = api) {
   if (!validId(id)) throw new Error('Identificador de recepción no válido.');
   return request(`/recepcionistas/${id}/inhabilitar`, 'POST', {});
 }
+
+// Restaurar recupera la fila operativa sin conceder acceso ni activar oferta.
+// Se verifica la respuesta antes de anunciar éxito o actualizar la vista.
+export async function restoreRetired(type, id, request = api) {
+  ensureType(type);
+  if (!validId(id)) throw new Error('Identificador no válido.');
+  const result = await request(`/${type}/${id}/restaurar`, 'POST', {});
+  if (!result || result.id !== id || result.activo !== false || result.inhabilitadoEn !== null) {
+    throw new Error('La respuesta de restauración no confirmó el estado inactivo. Actualiza la lista.');
+  }
+  return result;
+}

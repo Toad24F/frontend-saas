@@ -78,6 +78,11 @@ async function seed(db) {
     if (index === 2) {
       // El segundo negocio permite probar los cuatro retiros sin alterar la
       // oferta del portal público que usa el primer negocio de la base efímera.
+      const occupied = await db.query(`INSERT INTO usuarios
+        (negocio_id,nombre,email,password_hash,rol,activo,activado_en,creado_en)
+        VALUES (?,'Profesional Cupo Retiro QA','retiro-cupo-qa@example.test',?,'profesional',1,?,?)`,
+      [businessId, passwordHash, now, now]);
+      await db.query('INSERT INTO personal (id,negocio_id) VALUES (?,?)', [occupied.insertId, businessId]);
       await db.query(`INSERT INTO usuarios
         (negocio_id,nombre,email,password_hash,rol,activo,activado_en,creado_en)
         VALUES (?,'Recepción Retiro QA','retiro-recep-qa@example.test',?,'recepcionista',1,?,?)`,
@@ -96,6 +101,18 @@ async function seed(db) {
     for (let day = 0; day < 7; day++) {
       await db.query(`INSERT INTO horarios_personal (negocio_id,personal_id,sucursal_id,dia_semana,orden,inicio_minutos,fin_minutos,activo)
         VALUES (?,?,?,?,0,480,1080,1)`, [businessId, personId, branchId, day]);
+    }
+    if (index === 2) {
+      // Una cita futura ficticia permite comprobar causas reales antes y
+      // después del retiro sin modificarla ni usar la base habitual.
+      const client = await db.query(`INSERT INTO clientes (negocio_id,nombre_completo,telefono)
+        VALUES (?,'Cliente Retiro QA','6145550199')`, [businessId]);
+      const start = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 2, 16));
+      await db.query(`INSERT INTO citas (negocio_id,sucursal_id,personal_id,servicio_id,cliente_id,
+        inicio_utc,fin_utc,zona_horaria_reserva,folio,estado,origen)
+        VALUES (?,?,?,?,?,?,?,'America/Chihuahua','RET-QA-2','pendiente','manual')`,
+      [businessId, branchId, personId, serviceId, client.insertId,
+        start, new Date(start.getTime() + 1800000)]);
     }
   }
 }

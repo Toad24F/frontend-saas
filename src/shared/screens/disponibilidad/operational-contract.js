@@ -1,5 +1,7 @@
 const reasonLabels = {
   cuenta_inactiva: 'Cuenta profesional inactiva', sucursal_inactiva: 'Sucursal inactiva',
+  cuenta_inhabilitada: 'Profesional inhabilitado', sucursal_inhabilitada: 'Sucursal inhabilitada',
+  servicio_inhabilitado: 'Servicio inhabilitado',
   servicio_inactivo: 'Servicio inactivo', servicio_no_seleccionado: 'Servicio no seleccionado por el profesional',
   atencion_inactiva: 'Atención pausada en la sucursal', servicio_no_ofrecido_en_sucursal: 'Servicio no ofrecido en la sucursal',
   fuera_de_horizonte: 'Fuera del horizonte de reservas', anticipacion_insuficiente: 'No cumple la anticipación mínima',

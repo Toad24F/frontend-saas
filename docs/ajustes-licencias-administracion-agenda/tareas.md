@@ -98,11 +98,11 @@ Cada tarea se estima en **15 o 25 minutos, incluida su comprobación focalizada*
   Hecho cuando: La acción llama `inhabilitar` y ya no promete eliminación definitiva ni liberación de cupo por borrar.
 - [x] **FALA-T040 — Consultar inhabilitados autorizados** · 25 min · Depende de: T036–T039 · RF-49, RF-57.
   Hecho cuando: Solo Administrador propio accede a listas/detalles `inhabilitados` y no se mezclan con listados operativos.
-- [ ] **FALA-T041 — Restaurar como inactivo** · 25 min · Depende de: T040 · RF-49–RF-50.
+- [x] **FALA-T041 — Restaurar como inactivo** · 25 min · Depende de: T040 · RF-49–RF-50.
   Hecho cuando: Restaurar cada tipo vuelve al listado habitual inactivo y exige activación separada para operar.
-- [ ] **FALA-T042 — Mostrar afectaciones sin mutar citas** · 25 min · Depende de: T041 · RF-51, RF-56.
+- [x] **FALA-T042 — Mostrar afectaciones sin mutar citas** · 25 min · Depende de: T041 · RF-51, RF-56.
   Hecho cuando: La UI consulta causas disponibles y explica que las citas no fueron canceladas ni reprogramadas automáticamente.
-- [ ] **FALA-T043 — Probar retiro y recuperación** · 25 min · Depende de: T040–T042 · RF-48–RF-51, RF-57–RF-58.
+- [x] **FALA-T043 — Probar retiro y recuperación** · 25 min · Depende de: T040–T042 · RF-48–RF-51, RF-57–RF-58.
   Hecho cuando: Pruebas cubren los cuatro recursos, permisos, restauración inactiva y rechazo de activación con cupo lleno.
 - [ ] **FALA-T044 — Leer publicación global de precios** · 15 min · Depende de: T002 · RF-52, RF-57.
   Hecho cuando: Administrador ve `mostrarPreciosPublicos` desde la ruta autorizada y un error de lectura no se reemplaza por valor supuesto.
