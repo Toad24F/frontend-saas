@@ -4,6 +4,7 @@ import { field, basicForm, errorSlot } from '../../../shared/forms.js';
 import { modal, toast, escape } from '../../../shared/ui.js';
 import { businessDetailData, invalidateBusinessDetail } from './view.js';
 import { createLicenseOperations, validateSuspensionDays } from './license-operations.js';
+import { saveUserLimits } from './user-quota.js';
 
 const licenseOperations = () => createLicenseOperations({ api, actorId: user.id });
 
@@ -51,6 +52,17 @@ export function businessAction(action, value = null) {
   if (action === 'limit') {
     basicForm('Cambiar límite de sucursales', field('Sucursales activas permitidas', 'limit', detail?.quota.limiteSucursalesActivas || 1, 'number', 'required min="1" step="1"'), async (form) => {
       await api(`/negocios/${id}/limite-sucursales`, 'PATCH', { limiteSucursales: Number(form.get('limit')) });
+      invalidateBusinessDetail();
+    });
+  }
+  if (action === 'user-limits' && detail?.userQuota) {
+    // El diálogo conserva el borrador ante 400/409. Nunca sustituye el cupo
+    // leído del servidor por una cuenta calculada desde listas locales.
+    basicForm('Cambiar cupos de usuarios', `<p class="form-intro">El mínimo de cada rol es uno. No puedes reducir un límite por debajo de las cuentas activas.</p>
+      ${field('Límite de profesionales activos', 'professionals', detail.userQuota.profesionales.limite, 'number', 'required min="1" step="1"')}
+      ${field('Límite de recepcionistas activos', 'receptionists', detail.userQuota.recepcionistas.limite, 'number', 'required min="1" step="1"')}`, async (form) => {
+      await saveUserLimits(id, { profesionales: Number(form.get('professionals')),
+        recepcionistas: Number(form.get('receptionists')) }, api);
       invalidateBusinessDetail();
     });
   }

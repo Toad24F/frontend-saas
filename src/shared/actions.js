@@ -54,7 +54,8 @@ export async function handleClick(e) {
     if (!isDemo && user.rol === 'admin_negocio' && state.page === 'profesionales') {
       const professional = e.target.closest('[data-professional-action]');
       if (professional) {
-        (await import('../connected/screens/profesionales/actions.js')).professionalAction(professional.dataset.professionalAction, Number(professional.dataset.professionalId));
+        // El diálogo espera el cupo vigente antes de abrir una reactivación.
+        await (await import('../connected/screens/profesionales/actions.js')).professionalAction(professional.dataset.professionalAction, Number(professional.dataset.professionalId));
         return;
       }
     }
@@ -82,7 +83,8 @@ export async function handleClick(e) {
       const accountAction = e.target.closest('[data-reception-action]');
       if (accountAction) {
         const reception = await import('../connected/screens/recepcionistas/actions.js');
-        reception.receptionistAction(accountAction.dataset.receptionAction, Number(accountAction.dataset.receptionId));
+        // Esperar la lectura del cupo conserva el manejo de errores del clic.
+        await reception.receptionistAction(accountAction.dataset.receptionAction, Number(accountAction.dataset.receptionId));
         return;
       }
     }

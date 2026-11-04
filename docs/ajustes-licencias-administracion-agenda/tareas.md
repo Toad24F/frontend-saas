@@ -75,13 +75,13 @@ Cada tarea se estima en **15 o 25 minutos, incluida su comprobación focalizada*
   Hecho cuando: Pendiente, fallido y enviado se muestran según respuesta y una transición no se anuncia como correo entregado.
 - [x] **FALA-T030 — Probar licencias e idempotencia en navegador** · 25 min · Depende de: T027–T029 · RF-39–RF-44, RF-47.
   Hecho cuando: Casos verifican plazo 0/2/30, suspensión, renovación, respuesta perdida, correo y ausencia de acciones en roles ajenos.
-- [ ] **FALA-T031 — Leer cupos de ambos roles** · 25 min · Depende de: T002 · RF-45, RF-47.
+- [x] **FALA-T031 — Leer cupos de ambos roles** · 25 min · Depende de: T002 · RF-45, RF-47.
   Hecho cuando: Superadmin ve límites y consumo retornados por `/negocios/:id/cupo-usuarios` sin calcularlos de catálogos locales.
-- [ ] **FALA-T032 — Editar límites con errores conservados** · 25 min · Depende de: T031 · RF-45–RF-47.
+- [x] **FALA-T032 — Editar límites con errores conservados** · 25 min · Depende de: T031 · RF-45–RF-47.
   Hecho cuando: El formulario exige mínimo 1, envía ambos límites contratados y conserva borrador ante 400/409.
-- [ ] **FALA-T033 — Informar cupo en altas y activaciones** · 25 min · Depende de: T031 · RF-45–RF-46.
+- [x] **FALA-T033 — Informar cupo en altas y activaciones** · 25 min · Depende de: T031 · RF-45–RF-46.
   Hecho cuando: Formularios de Profesional/Recepción explican el cupo vigente y un rechazo no aparece como alta o activación realizada.
-- [ ] **FALA-T034 — Probar límites por rol y permisos** · 25 min · Depende de: T032–T033 · RF-45–RF-47, RF-57–RF-58.
+- [x] **FALA-T034 — Probar límites por rol y permisos** · 25 min · Depende de: T032–T033 · RF-45–RF-47, RF-57–RF-58.
   Hecho cuando: Casos cubren 5/3, reducción rechazada, activación sin cupo y ausencia de edición para no superadmin.
 
 ## 5. Negocio: recursos, publicación y agenda

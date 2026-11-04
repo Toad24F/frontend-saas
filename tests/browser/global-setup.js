@@ -60,6 +60,21 @@ async function seed(db) {
     [businessId, `Profesional QA ${index}`, `qa-prof-${index}@example.test`, now, now]);
     const personId = Number(person.insertId);
     await db.query('INSERT INTO personal (id,negocio_id) VALUES (?,?)', [personId, businessId]);
+    if (index === 1) {
+      // El segundo profesional y recepción activa/inactiva prueban el 409 real
+      // de reducción y reactivación en la base efímera, sin tocar datos reales.
+      const extra = await db.query(`INSERT INTO usuarios
+        (negocio_id,nombre,email,password_hash,rol,activo,activado_en,creado_en)
+        VALUES (?,'Profesional Cupo QA','cupo-prof-qa@example.test',?,'profesional',1,?,?)`,
+      [businessId, passwordHash, now, now]);
+      await db.query('INSERT INTO personal (id,negocio_id) VALUES (?,?)', [extra.insertId, businessId]);
+      for (const [name, active] of [['Recepción Activa QA', 1], ['Recepción Inactiva QA', 0]]) {
+        await db.query(`INSERT INTO usuarios
+          (negocio_id,nombre,email,password_hash,rol,activo,activado_en,creado_en)
+          VALUES (?,?,?,?, 'recepcionista',?,?,?)`,
+        [businessId, name, `recepcion-${active}-qa@example.test`, passwordHash, active, now, now]);
+      }
+    }
     const branch = await db.query(`INSERT INTO sucursales
       (negocio_id,nombre,direccion,telefono,zona_horaria,activo)
       VALUES (?,?,'Calle ficticia 10','6141234567','America/Chihuahua',1)`,

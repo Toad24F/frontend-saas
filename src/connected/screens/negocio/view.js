@@ -4,6 +4,7 @@ import { icon } from '../../../shared/icons.js';
 import { escape, pageHead, empty } from '../../../shared/ui.js';
 import { createLicenseOperations } from './license-operations.js';
 import { licenseStatusHtml, licenseDeliveryHtml } from './license-presentation.js';
+import { readUserQuota, quotaHtml } from './user-quota.js';
 import './style.css';
 
 let currentId = null;
@@ -16,12 +17,15 @@ const licenseText = (state) => ({ pendiente: 'Pendiente', vigente: 'Vigente', su
 
 async function fetchBusiness(id) {
   const business = await api(`/negocios/${id}`);
-  const [quota, deliveries, validity] = await Promise.all([
+  // El superadmin recibe ambos cupos del servidor junto con el detalle actual;
+  // ningún contador procede de las filas visibles en catálogos.
+  const [quota, userQuota, deliveries, validity] = await Promise.all([
     api(`/negocios/${id}/cupo-sucursales`),
+    readUserQuota(id, api),
     api(`/negocios/${id}/envios`),
     business.licencia ? api(`/licencias/${business.licencia.id}/vigencia`) : null,
   ]);
-  return { business, quota, deliveries, validity };
+  return { business, quota, userQuota, deliveries, validity };
 }
 
 export async function refreshBusinessDetail() {
@@ -65,7 +69,7 @@ export function businessDetail() {
   if (failure) return `${pageHead('Detalle de negocio', 'No pudimos cargar este negocio.')}<section class="surface business-detail-section"><p role="alert">${escape(failure.message)}</p><button class="btn btn-light" data-action="back-platform">Volver al panel</button><button class="btn btn-primary" data-action="retry-business-detail">Reintentar</button></section>`;
   if (!snapshot) return `${pageHead('Detalle de negocio', 'Consultando licencia, cupo e historial de envíos.')}<section class="surface business-detail-section" role="status">Cargando datos del negocio…</section>`;
 
-  const { business, quota, deliveries, validity } = snapshot;
+  const { business, quota, userQuota, deliveries, validity } = snapshot;
   const invited = !business.administrador?.activadoEn;
   const failed = deliveries.filter((delivery) => delivery.estado === 'fallido').length;
   const canRecover = business.administrador?.id && business.administrador?.activadoEn;
@@ -80,5 +84,6 @@ export function businessDetail() {
   ].map(([label, value, caption]) => `<div class="stat-card"><div class="stat-top">${escape(label)}</div><div class="stat-number">${escape(value)}</div><span class="stat-caption">${escape(caption)}</span></div>`).join('')}</div>
   <div class="business-detail-grid"><section class="surface business-detail-section"><div class="section-heading"><div><h2>Datos e invitación</h2><p>La activación crea la cuenta y habilita el primer año de licencia.</p></div></div><div class="business-detail-list"><div><span>Identificador público</span><strong>${escape(business.identificadorPublico)}</strong></div><div><span>Correo del administrador</span><strong>${escape(business.administrador?.email || business.emailContacto || '—')}</strong></div><div><span>Creado</span><strong>${dateText(business.creadoEn)}</strong></div><div><span>Activado</span><strong>${dateText(business.activadoEn)}</strong></div></div><div class="business-detail-actions">${invited ? `<button class="btn btn-light" data-business-action="email">Corregir correo</button><button class="btn btn-light" data-business-action="reissue">Reemitir código</button>` : ''}${canRecover ? `<button class="btn btn-light" data-business-action="recovery">Autorizar recuperación</button>` : ''}</div></section>
   <section class="surface business-detail-section"><div class="section-heading"><div><h2>Licencia y cupo</h2><p>El límite aplica a sucursales activas.</p></div></div>${licenseStatusHtml(validity, licensePending)}<div class="business-detail-actions"><button class="btn btn-light" data-business-action="limit">Cambiar límite</button></div></section></div>
+  <section class="surface business-detail-section"><div class="section-heading"><div><h2>Cupos de usuarios</h2><p>Límites y consumo de cuentas activas que devuelve el servidor.</p></div></div>${quotaHtml(userQuota)}</section>
   <section class="surface business-detail-section"><div class="section-heading"><div><h2>Historial de correos</h2><p>Un envío en cola aún no confirma entrega.</p></div></div>${deliveries.length ? licenseDeliveryHtml(deliveries) : empty('Sin correos registrados', 'Aquí aparecerán los estados de invitaciones y avisos.')}</section>`;
 }
