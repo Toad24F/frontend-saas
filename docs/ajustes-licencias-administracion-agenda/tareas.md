@@ -86,17 +86,17 @@ Cada tarea se estima en **15 o 25 minutos, incluida su comprobación focalizada*
 
 ## 5. Negocio: recursos, publicación y agenda
 
-- [ ] **FALA-T035 — Definir presentación de tres estados** · 15 min · Depende de: T002 · RF-48–RF-50.
+- [x] **FALA-T035 — Definir presentación de tres estados** · 15 min · Depende de: T002 · RF-48–RF-50.
   Hecho cuando: Vistas comparten etiquetas distintas para activo, inactivo e inhabilitado y restaurar no se interpreta como activar.
-- [ ] **FALA-T036 — Sustituir baja de profesionales** · 25 min · Depende de: T035 · RF-48–RF-50.
+- [x] **FALA-T036 — Sustituir baja de profesionales** · 25 min · Depende de: T035 · RF-48–RF-50.
   Hecho cuando: La acción autorizada llama `inhabilitar`, explica recuperación y no llama `DELETE /profesionales/:id`.
-- [ ] **FALA-T037 — Sustituir baja de recepcionistas** · 25 min · Depende de: T035 · RF-48–RF-50.
+- [x] **FALA-T037 — Sustituir baja de recepcionistas** · 25 min · Depende de: T035 · RF-48–RF-50.
   Hecho cuando: La vista ofrece inhabilitar y conserva desactivar/reactivar como acciones distintas cuando el servidor lo permita.
-- [ ] **FALA-T038 — Sustituir baja de servicios** · 25 min · Depende de: T035 · RF-48–RF-50.
+- [x] **FALA-T038 — Sustituir baja de servicios** · 25 min · Depende de: T035 · RF-48–RF-50.
   Hecho cuando: La acción llama `inhabilitar` y ya no promete eliminación definitiva del servicio.
-- [ ] **FALA-T039 — Sustituir baja de sucursales** · 25 min · Depende de: T035 · RF-48–RF-50.
+- [x] **FALA-T039 — Sustituir baja de sucursales** · 25 min · Depende de: T035 · RF-48–RF-50.
   Hecho cuando: La acción llama `inhabilitar` y ya no promete eliminación definitiva ni liberación de cupo por borrar.
-- [ ] **FALA-T040 — Consultar inhabilitados autorizados** · 25 min · Depende de: T036–T039 · RF-49, RF-57.
+- [x] **FALA-T040 — Consultar inhabilitados autorizados** · 25 min · Depende de: T036–T039 · RF-49, RF-57.
   Hecho cuando: Solo Administrador propio accede a listas/detalles `inhabilitados` y no se mezclan con listados operativos.
 - [ ] **FALA-T041 — Restaurar como inactivo** · 25 min · Depende de: T040 · RF-49–RF-50.
   Hecho cuando: Restaurar cada tipo vuelve al listado habitual inactivo y exige activación separada para operar.

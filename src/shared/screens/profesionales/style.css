@@ -47,6 +47,7 @@ html[data-theme='dark'] .professional-field-error { color: #ffb2a8; }
 .professional-status i { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
 .professional-status.is-active { color: #256b47; background: #e9f4eb; }
 .professional-status.is-inactive { color: #7c5452; background: #f8edeb; }
+.professional-status.is-disabled { color: #575d67; background: #e9eaec; }
 .professional-entry-actions { display: flex; align-items: center; justify-content: flex-end; gap: 8px; min-width: 0; }
 .professional-entry-actions button, .professional-availability { font-size: 12px; font-weight: 650; }
 .professional-availability { display: inline-flex; align-items: center; justify-content: center; gap: 5px; min-height: 36px; padding: 6px 10px; border-radius: 7px; background: var(--accent); color: #fff; white-space: nowrap; }
@@ -72,6 +73,7 @@ html[data-theme='dark'] .professional-field-error { color: #ffb2a8; }
 .professional-no-results .empty-state, .professional-workspace > .empty-state { max-width: none; padding: 46px 20px; }
 html[data-theme='dark'] .professional-status.is-active { color: #c1d5ce; background: #30343a; }
 html[data-theme='dark'] .professional-status.is-inactive { color: #e9c5c0; background: #49322f; }
+html[data-theme='dark'] .professional-status.is-disabled { color: #d1d3d8; background: #383b42; }
 html[data-theme='dark'] .professional-more-menu { box-shadow: 0 14px 34px rgba(0, 0, 0, .3); }
 html[data-theme='dark'] .professional-more-menu button:last-child { color: #f2a99e; }
 @media (max-width: 1260px) {

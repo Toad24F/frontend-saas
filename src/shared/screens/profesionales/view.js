@@ -2,6 +2,7 @@ import { state, render } from '../../app.js';
 import { getCatalogView, setCatalogView } from '../catalog-view.js';
 import { list } from '../../data.js';
 import { icon } from '../../icons.js';
+import { resourceStatus } from '../../resource-status.js';
 import { escape as esc, avatar, pageHead, button, empty } from '../../ui.js';
 import './style.css';
 
@@ -22,7 +23,7 @@ function renderPerson(person, management, visible) {
   return `<article class="surface professional-entry" data-professional-id="${person.id}" ${visible ? '' : 'hidden'}>
     <div class="professional-person">${avatar(person.initials, person.color, 'professional-avatar')}<div class="professional-identity"><h2>${esc(person.name)}</h2><p>${esc(person.specialty || 'Sin especialidad')}</p>${person.email ? `<small>${esc(person.email)}</small>` : ''}</div></div>
     <div class="professional-assignment"><span>${icon('pin')}<strong>${person.branchIds.length}</strong> ${person.branchIds.length === 1 ? 'sucursal' : 'sucursales'}</span><span>${icon('briefcase')}<strong>${person.serviceIds.length}</strong> ${person.serviceIds.length === 1 ? 'servicio' : 'servicios'}</span></div>
-    <span class="professional-status ${active ? 'is-active' : 'is-inactive'}"><i></i>${active ? 'Activo' : 'Inactivo'}</span>
+    <span class="professional-status ${resourceStatus(person).className}"><i></i>${resourceStatus(person).label}</span>
     <div class="professional-entry-actions"><a href="/admin/disponibilidad" data-nav="disponibilidad" data-nav-professional="${person.id}" class="professional-availability">Ver disponibilidad ${icon('arrow')}</a><button type="button" class="professional-edit" data-edit-professional="${person.id}">Editar</button>${management(person)}</div>
   </article>`;
 }

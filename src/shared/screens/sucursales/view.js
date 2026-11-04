@@ -3,6 +3,7 @@ import { state, render } from '../../app.js';
 import { getCatalogView, setCatalogView } from '../catalog-view.js';
 import { list } from '../../data.js';
 import { icon } from '../../icons.js';
+import { resourceStatus } from '../../resource-status.js';
 import { escape as esc, pageHead, button, empty } from '../../ui.js';
 import '../profesionales/style.css';
 import './style.css';
@@ -42,7 +43,7 @@ function renderBranch(branch, professionals, own, management, visible) {
   const active = branch.active !== false;
   const people = professionals.filter((person) => person.branchIds.includes(branch.id));
   const map = googleMap(branch);
-  const status = own ? !branch.globalActive ? 'Sucursal inactiva' : active ? 'Atención activa' : 'Atención pausada' : active ? 'Activa' : 'Inactiva';
+  const status = own ? !branch.globalActive ? 'Sucursal inactiva' : active ? 'Atención activa' : 'Atención pausada' : resourceStatus(branch).label === 'Activo' ? 'Activa' : resourceStatus(branch).label === 'Inactivo' ? 'Inactiva' : 'Inhabilitada';
   const toggleLabel = own ? active ? 'Pausar atención' : 'Activar atención' : active ? 'Desactivar' : 'Activar';
   const toggle = `<button type="button" data-toggle-branch="${branch.id}" aria-label="${toggleLabel} ${esc(branch.name)}" ${own && !branch.globalActive ? 'disabled title="Sucursal inactiva en el negocio"' : ''}>${toggleLabel}</button>`;
   const actions = own

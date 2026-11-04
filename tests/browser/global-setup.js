@@ -75,6 +75,14 @@ async function seed(db) {
         [businessId, name, `recepcion-${active}-qa@example.test`, passwordHash, active, now, now]);
       }
     }
+    if (index === 2) {
+      // El segundo negocio permite probar los cuatro retiros sin alterar la
+      // oferta del portal público que usa el primer negocio de la base efímera.
+      await db.query(`INSERT INTO usuarios
+        (negocio_id,nombre,email,password_hash,rol,activo,activado_en,creado_en)
+        VALUES (?,'Recepción Retiro QA','retiro-recep-qa@example.test',?,'recepcionista',1,?,?)`,
+      [businessId, passwordHash, now, now]);
+    }
     const branch = await db.query(`INSERT INTO sucursales
       (negocio_id,nombre,direccion,telefono,zona_horaria,activo)
       VALUES (?,?,'Calle ficticia 10','6141234567','America/Chihuahua',1)`,

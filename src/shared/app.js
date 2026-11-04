@@ -301,7 +301,7 @@ document.addEventListener('toggle', (event) => {
   menu.classList.toggle('is-upward', trigger.getBoundingClientRect().bottom + panel.offsetHeight + 6 > bottomLimit);
 }, true);
 document.addEventListener('click', (event) => {
-  if (!event.target.closest('.professional-more') || event.target.closest('[data-professional-action], [data-reception-action], [data-toggle-service], [data-delete-service], [data-toggle-branch], [data-delete-branch]')) closeProfessionalMenus();
+  if (!event.target.closest('.professional-more') || event.target.closest('[data-professional-action], [data-reception-action], [data-toggle-service], [data-disable-service], [data-toggle-branch], [data-disable-branch]')) closeProfessionalMenus();
 }, true);
 document.addEventListener('click', async (e) => {
   const accountTrigger = e.target.closest('.account-menu-trigger');

@@ -2,9 +2,11 @@ import { state, render } from '../../../shared/app.js';
 import { getCatalogView, setCatalogView } from '../../../shared/screens/catalog-view.js';
 import { list } from '../../../shared/data.js';
 import { icon } from '../../../shared/icons.js';
+import { resourceStatus } from '../../../shared/resource-status.js';
 import { avatar, escape, pageHead, button, empty } from '../../../shared/ui.js';
 import '../../../shared/screens/profesionales/style.css';
 import './style.css';
+import { retiredSection } from '../recursos/retired-view.js';
 
 const ui = { search: '', status: 'all' };
 let tenantId = null;
@@ -27,8 +29,8 @@ function renderPerson(person, visible) {
   return `<article class="surface professional-entry" data-reception-entry="${person.id}" ${visible ? '' : 'hidden'}>
     <div class="professional-person">${avatar(person.initials, 'mint', 'professional-avatar')}<div class="professional-identity"><h2>${escape(person.name)}</h2><p>Cuenta de recepción</p><small>${escape(person.email)}</small></div></div>
     <div class="professional-assignment"><span>${icon('calendar')}${escape(activationLabel(person.activatedAt))}</span></div>
-    <span class="professional-status ${active ? 'is-active' : 'is-inactive'}"><i></i>${active ? 'Activa' : 'Inactiva'}</span>
-    <div class="professional-entry-actions"><button type="button" class="professional-availability reception-status-action ${active ? 'is-deactivate' : ''}" data-reception-action="${active ? 'deactivate' : 'reactivate'}" data-reception-id="${person.id}" aria-label="${active ? 'Desactivar' : 'Reactivar'} a ${escape(person.name)}">${active ? 'Desactivar' : 'Reactivar'}</button><button type="button" class="professional-edit" data-reception-action="reset" data-reception-id="${person.id}">Restablecer clave</button></div>
+    <span class="professional-status ${resourceStatus(person).className}"><i></i>${resourceStatus(person).label === 'Activo' ? 'Activa' : resourceStatus(person).label === 'Inactivo' ? 'Inactiva' : 'Inhabilitada'}</span>
+    <div class="professional-entry-actions"><button type="button" class="professional-availability reception-status-action ${active ? 'is-deactivate' : ''}" data-reception-action="${active ? 'deactivate' : 'reactivate'}" data-reception-id="${person.id}" aria-label="${active ? 'Desactivar' : 'Reactivar'} a ${escape(person.name)}">${active ? 'Desactivar' : 'Reactivar'}</button><button type="button" class="professional-edit" data-reception-action="reset" data-reception-id="${person.id}">Restablecer clave</button><button type="button" class="professional-edit" data-reception-action="disable" data-reception-id="${person.id}" aria-label="Inhabilitar a ${escape(person.name)}">Inhabilitar</button></div>
   </article>`;
 }
 
@@ -48,6 +50,7 @@ export function receptionists() {
     </section>
     <div class="professional-results-heading"><span id="reception-results-count" role="status" aria-live="polite">${visible.length} ${visible.length === 1 ? 'resultado' : 'resultados'}</span></div>
     ${people.length ? `<div class="professional-results professional-view--${resultView}" data-desktop-view="${desktopView}" id="reception-results">${people.map((person) => renderPerson(person, visible.includes(person))).join('')}</div><div class="professional-no-results" id="reception-no-results" ${visible.length ? 'hidden' : ''}>${empty('Sin coincidencias', 'Prueba otra búsqueda o cambia el filtro de estado.', '<button type="button" class="btn btn-light" data-reception-reset>Limpiar filtros</button>')}</div>` : empty('Sin recepcionistas', 'Crea una cuenta para tu equipo de recepción.', '<button type="button" class="btn btn-primary" data-action="new-receptionist">Nueva recepcionista</button>')}
+    ${retiredSection('recepcionistas')}
   </div>`;
 }
 

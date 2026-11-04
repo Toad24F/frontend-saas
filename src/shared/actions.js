@@ -25,6 +25,10 @@ let draftScheduleId = -1;
 
 export async function handleClick(e) {
   try {
+    // Solo los controles de la sección de inhabilitados cargan ese módulo;
+    // navegación y acciones ordinarias conservan su flujo habitual.
+    if (!isDemo && e.target.closest('[data-retired-list], [data-retired-detail]') &&
+      await (await import('../connected/screens/recursos/retired-view.js')).handleRetiredClick(e)) return;
     if (isDemo && state.page === 'disponibilidad') {
       const slot = e.target.closest('[data-availability-slot]');
       const operationalAction = e.target.closest('[data-availability-action]');
@@ -38,16 +42,16 @@ export async function handleClick(e) {
       }
     }
     if (!isDemo && user.rol === 'admin_negocio' && state.page === 'servicios') {
-      const service = e.target.closest('[data-delete-service]');
+      const service = e.target.closest('[data-disable-service]');
       if (service) {
-        (await import('../connected/screens/servicios/actions.js')).confirmServiceDeletion(Number(service.dataset.deleteService));
+        (await import('../connected/screens/servicios/actions.js')).confirmServiceDisable(Number(service.dataset.disableService));
         return;
       }
     }
     if (!isDemo && user.rol === 'admin_negocio' && state.page === 'sucursales') {
-      const branch = e.target.closest('[data-delete-branch]');
+      const branch = e.target.closest('[data-disable-branch]');
       if (branch) {
-        (await import('../connected/screens/sucursales/actions.js')).confirmBranchDeletion(Number(branch.dataset.deleteBranch));
+        (await import('../connected/screens/sucursales/actions.js')).confirmBranchDisable(Number(branch.dataset.disableBranch));
         return;
       }
     }

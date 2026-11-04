@@ -3,6 +3,7 @@ import { state, render } from '../../app.js';
 import { getCatalogView, setCatalogView } from '../catalog-view.js';
 import { list, money } from '../../data.js';
 import { icon } from '../../icons.js';
+import { resourceStatus } from '../../resource-status.js';
 import { escape as esc, pageHead, button, empty } from '../../ui.js';
 import '../profesionales/style.css';
 import './style.css';
@@ -31,7 +32,7 @@ function renderService(service, professionals, own, professional, management, vi
   return `<article class="surface professional-entry service-entry" data-service-entry="${service.id}" ${visible ? '' : 'hidden'}>
     <div class="professional-person"><span class="service-icon ${service.color}">${icon(service.icon)}</span><div class="professional-identity"><h2>${esc(service.name)}</h2><p>${esc(service.description || 'Sin descripción')}</p></div></div>
     <div class="professional-assignment service-details"><span>${icon('clock')}<strong>${service.duration}</strong> min</span><span>${icon('briefcase')}<strong>${money(service.price)}</strong> MXN</span><span>${icon('users')}<strong>${people.length}</strong> ${people.length === 1 ? 'profesional' : 'profesionales'}</span></div>
-    <span class="professional-status ${active ? own && !assigned ? 'is-unselected' : 'is-active' : 'is-inactive'}"><i></i>${active ? own ? assigned ? 'Seleccionado' : 'Sin seleccionar' : 'Activo' : 'Inactivo'}</span>
+    <span class="professional-status ${own && active && !assigned ? 'is-unselected' : resourceStatus(service).className}"><i></i>${own && active ? assigned ? 'Seleccionado' : 'Sin seleccionar' : resourceStatus(service).label}</span>
     <div class="professional-entry-actions">${actions}</div>
   </article>`;
 }

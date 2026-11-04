@@ -1,0 +1,8 @@
+/* La lista retirada permanece fuera de las tarjetas operativas y usa el
+   borde semántico del tema para conservar contraste en claro y oscuro. */
+.retired-list { list-style: none; padding: 0; margin: 1.25rem 0 0; }
+.retired-list li { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .8rem 0; border-top: 1px solid var(--border); }
+.retired-list li strong { display: inline; }
+@media (max-width: 767px) {
+  .retired-list li { align-items: stretch; flex-direction: column; }
+}
