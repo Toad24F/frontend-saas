@@ -38,6 +38,19 @@ async function reserve(page, notes = '') {
   return page.locator('.public-result-folio').innerText();
 }
 
+// FALA-T003 comprueba desde el navegador y una lectura SQL que el runner
+// apunta a su base desechable, nunca a la base cotidiana del backend.
+test('FALA-T003: portal conectado usa exclusivamente la base efímera del runner', async ({ page }) => {
+  const temporaryName = process.env.PORTAL_TEST_DB_NAME;
+  expect(temporaryName).toMatch(/^citas_persistencia_[a-f0-9]{32}$/);
+  expect(await rows('SELECT DATABASE() AS nombre')).toEqual([{ nombre: temporaryName }]);
+  await page.goto(portalUrl());
+  await expect(page.getByRole('radio', { name: /Corte QA/ })).toBeVisible();
+  expect(await rows('SELECT slug FROM negocios ORDER BY slug')).toEqual([
+    { slug: 'portal-qa-1' }, { slug: 'portal-qa-2' },
+  ]);
+});
+
 // T117 abre el portal conectado contra los servidores y la base efímera del runner.
 test('T117: inicia la página pública con la oferta real de prueba', async ({ page }) => {
   await page.goto(portalUrl());

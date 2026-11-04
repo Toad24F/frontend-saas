@@ -1,7 +1,7 @@
 import { spawn, spawnSync } from 'node:child_process';
 import { randomBytes, randomUUID } from 'node:crypto';
 import { createRequire } from 'node:module';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { createServer } from 'node:net';
 import { resolve } from 'node:path';
 
@@ -69,9 +69,18 @@ async function seed(db) {
 }
 
 export default async function globalSetup() {
-  const built = spawnSync(process.execPath, [resolve(backend, 'node_modules/@nestjs/cli/bin/nest.js'), 'build'],
-    { cwd: backend, windowsHide: true, encoding: 'utf8' });
-  if (built.status !== 0) throw new Error(`No compiló el backend de pruebas: ${built.stderr.slice(-1000)}`);
+  // FALA-T003 puede consumir un build ya existente sin escribir en ../backend.
+  // El recorrido normal conserva la compilación previa que usaba este runner.
+  if (process.env.PORTAL_TEST_BACKEND_READ_ONLY === '1') {
+    if (!existsSync(resolve(backend, 'dist/main.js')) ||
+      !existsSync(resolve(backend, 'dist/config/typeorm.datasource.js'))) {
+      throw new Error('Falta un build previo del backend para el modo de solo lectura.');
+    }
+  } else {
+    const built = spawnSync(process.execPath, [resolve(backend, 'node_modules/@nestjs/cli/bin/nest.js'), 'build'],
+      { cwd: backend, windowsHide: true, encoding: 'utf8' });
+    if (built.status !== 0) throw new Error(`No compiló el backend de pruebas: ${built.stderr.slice(-1000)}`);
+  }
   const admin = await createConnection({ host: source.DB_HOST, port: Number(source.DB_PORT), user: source.DB_USER, password: source.DB_PASS });
   let db;
   let api;
