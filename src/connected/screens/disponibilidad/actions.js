@@ -1,22 +1,14 @@
 import { api, loadBackendData, user } from '../../backend.js';
 import { state, render } from '../../../shared/app.js';
-import { list, TODAY, formatDate } from '../../../shared/data.js';
-import { basicForm, field, select, errorSlot } from '../../../shared/forms.js';
-import { modal, toast, escape as esc } from '../../../shared/ui.js';
-import { exceptionPayload, minutesToClock } from './payload.js';
-import { consultAffected, consultAvailability, currentAvailabilityData, findAvailabilityException, invalidateProjection, refreshAvailabilityData, refreshConfiguration, retryTeamExceptions, saveConfiguration, selectSlot, selectedProfessional, setAffectedErrors, setProjection, setQueryErrors, setQueryFilters, validateStart } from './view.js';
-import { getBlockScope } from '../../../shared/screens/disponibilidad/view.js';
+import { list } from '../../../shared/data.js';
+import { basicForm } from '../../../shared/forms.js';
+import { toast, escape as esc } from '../../../shared/ui.js';
+import { consultAffected, consultAvailability, currentAvailabilityData, invalidateProjection, refreshAvailabilityData, refreshConfiguration, saveConfiguration, selectSlot, selectedProfessional, setAffectedErrors, setProjection, setQueryErrors, setQueryFilters, validateStart } from './view.js';
 import { assignmentDraft, clearAssignmentDraft, validateAssignmentSnapshot } from '../../../shared/screens/disponibilidad/branch-assignments.js';
 import { validateInclusiveRange } from '../../../shared/screens/disponibilidad/operational-contract.js';
-import { clearAvailabilityErrors, clearAvailabilityField, exceptionApiErrors, showAvailabilityErrors, showAvailabilityGeneralError, validateException, validateProjection } from '../../../shared/screens/disponibilidad/errors.js';
+import { clearAvailabilityErrors, clearAvailabilityField, showAvailabilityErrors, showAvailabilityGeneralError, validateProjection } from '../../../shared/screens/disponibilidad/errors.js';
 
 const route = (personId = selectedProfessional().id) => `/profesionales/${personId}`;
-const branchOptions = (personId) => {
-  const person = list('professionals', state.tenantId).find((item) => item.id === personId);
-  return list('branches', state.tenantId).filter((branch) => person?.branchIds.includes(branch.id)).map((branch) => ({ id: branch.id, name: branch.name }));
-};
-const markedField = (...args) => field(...args).replace('class="form-field"', `class="form-field" data-availability-field="${args[1]}"`);
-const markedSelect = (...args) => select(...args).replace('class="form-field"', `class="form-field" data-availability-field="${args[1]}"`);
 const checkboxes = (items, selected) => `<div class="offering-checks" data-availability-field="serviceIds" tabindex="-1">${items.map((item) => `<label class="form-check"><input class="form-check-input" type="checkbox" name="serviceIds" value="${item.id}" ${selected.includes(item.id) ? 'checked' : ''} ${item.disabled ? 'disabled' : ''}><span>${esc(item.name)}</span></label>`).join('')}</div>`;
 const serviceFormOptions = {
   onError(error, form) {
@@ -84,95 +76,6 @@ async function toggleAttention(branchId, button) {
   } catch (error) { button.disabled = false; throw error; }
 }
 
-const slotRow = (slot = {}, index = 0) => `<div class="exception-row" data-exception-row data-row-index="${index}" data-id="${slot.id || ''}"><div class="exception-time-field" data-availability-field="slot-${index}-start"><label>Entrada<input class="form-control" type="time" name="start-${index}" required value="${minutesToClock(slot.inicioMinutos)}"></label></div><div class="exception-time-field" data-availability-field="slot-${index}-end"><label>Salida<input class="form-control" type="time" name="end-${index}" required value="${minutesToClock(slot.finMinutos)}"></label></div><div class="exception-break" data-availability-field="slot-${index}-break"><label>Descanso desde<input class="form-control" type="time" name="breakStart-${index}" value="${minutesToClock(slot.descansoInicioMinutos)}"></label><label>Descanso hasta<input class="form-control" type="time" name="breakEnd-${index}" value="${minutesToClock(slot.descansoFinMinutos)}"></label></div><button class="icon-btn" type="button" data-remove-exception-row aria-label="Quitar franja">×</button></div>`;
-
-function editException(existing = null, fixedPersonId = null) {
-  const people = list('professionals', state.tenantId);
-  const scope = getBlockScope();
-  const initialPersonId = fixedPersonId || (scope ? Number(scope) : user.rol === 'admin_negocio' ? null : selectedProfessional().id);
-  const options = branchOptions(initialPersonId);
-  if (initialPersonId && !options.length) throw new Error('Este profesional no tiene sucursales asignadas.');
-  const branch = existing?.sucursalId || options[0]?.id || '';
-  const professionalField = existing
-    ? `<p class="field-hint">Profesional: ${esc(people.find((person) => person.id === initialPersonId)?.name || 'Profesional')}</p>`
-    : markedSelect('Profesional', 'professionalId', [{ id: '', name: 'Selecciona profesional' }, ...people], initialPersonId || '');
-  const branchChoices = options.length ? options : [{ id: '', name: 'Selecciona primero un profesional' }];
-  const initialSlots = existing?.franjas?.length ? existing.franjas : existing ? [] : [{}];
-  const dialog = basicForm(existing ? 'Editar excepción' : 'Nueva excepción', `${professionalField}<div class="form-row-two">${markedField('Fecha', 'date', existing?.fechaLocal || TODAY, 'date', `required ${existing ? 'readonly' : ''}`)}${markedSelect('Sucursal', 'branchId', branchChoices, branch)}</div><label class="form-check"><input class="form-check-input" type="checkbox" id="exception-closed" ${existing && !existing.franjas.length ? 'checked' : ''}><span>Cierre de todo el día</span></label><div id="exception-slots" data-availability-field="slots" tabindex="-1">${initialSlots.map(slotRow).join('')}</div><button type="button" class="btn btn-light" id="add-exception-row">Agregar franja</button><p class="field-hint">Al eliminar la excepción se restablece el horario semanal. Guardar un cierre registra una excepción explícita.</p>`, async (form) => {
-    const date = form.get('date');
-    const personId = existing ? initialPersonId : Number(form.get('professionalId'));
-    const branchId = existing?.sucursalId || Number(form.get('branchId'));
-    const closed = dialog.querySelector('#exception-closed').checked;
-    const rows = closed ? [] : [...dialog.querySelectorAll('[data-exception-row]')].map((row) => ({
-      id: row.dataset.id, start: row.querySelector('[name^="start-"]').value,
-      end: row.querySelector('[name^="end-"]').value,
-      breakStart: row.querySelector('[name^="breakStart-"]').value,
-      breakEnd: row.querySelector('[name^="breakEnd-"]').value,
-    }));
-    await api(`${route(personId)}/excepciones/${date}`, 'PUT', exceptionPayload(branchId, rows));
-    invalidateProjection();
-    await refreshAvailabilityData(true);
-  }, true, {
-    validate(form) {
-      const data = new FormData(form);
-      const personId = existing ? initialPersonId : Number(data.get('professionalId'));
-      const branchId = existing?.sucursalId || Number(data.get('branchId'));
-      if (existing) { data.set('professionalId', String(initialPersonId)); data.set('branchId', String(existing.sucursalId)); }
-      const rows = dialog.querySelector('#exception-closed').checked ? [] : [...dialog.querySelectorAll('[data-exception-row]')].map((row) => ({
-        index: Number(row.dataset.rowIndex),
-        start: row.querySelector('[name^="start-"]').value, end: row.querySelector('[name^="end-"]').value,
-        breakStart: row.querySelector('[name^="breakStart-"]').value, breakEnd: row.querySelector('[name^="breakEnd-"]').value,
-      }));
-      const errors = validateException(data, rows, dialog.querySelector('#exception-closed').checked, branchOptions(personId).some((item) => item.id === branchId));
-      if (!Object.keys(errors).length) { clearAvailabilityErrors(form); return true; }
-      showAvailabilityErrors(form, errors);
-      return false;
-    },
-    onError(error, form) {
-      const rowIndexes = [...form.querySelectorAll('[data-exception-row]')].map((row) => Number(row.dataset.rowIndex));
-      const errors = exceptionApiErrors(error, rowIndexes);
-      if (errors) showAvailabilityErrors(form, errors);
-      else showAvailabilityGeneralError(form, error, '#form-error');
-    },
-  });
-  if (existing) dialog.querySelector('#f-branchId').disabled = true;
-  else dialog.querySelector('#f-professionalId').onchange = (event) => {
-    const branches = branchOptions(Number(event.target.value));
-    const selectBranch = dialog.querySelector('#f-branchId');
-    selectBranch.replaceChildren(...(branches.length ? branches : [{ id: '', name: 'Sin sucursales asignadas' }]).map((item) => new Option(item.name, item.id)));
-  };
-  let nextIndex = initialSlots.length;
-  const slots = dialog.querySelector('#exception-slots');
-  const closed = dialog.querySelector('#exception-closed');
-  const add = dialog.querySelector('#add-exception-row');
-  const sync = () => { slots.hidden = closed.checked; add.hidden = closed.checked; slots.querySelectorAll('input[required]').forEach((input) => input.disabled = closed.checked); };
-  closed.onchange = sync;
-  add.onclick = () => { slots.insertAdjacentHTML('beforeend', slotRow({}, nextIndex++)); slots.querySelector('.exception-row:last-child input')?.focus(); };
-  slots.onclick = (event) => { if (event.target.closest('[data-remove-exception-row]')) event.target.closest('[data-exception-row]').remove(); };
-  const form = dialog.querySelector('#editor-form');
-  form.addEventListener('input', (event) => clearAvailabilityField(form, event.target));
-  form.addEventListener('change', (event) => clearAvailabilityField(form, event.target));
-  sync();
-}
-
-function deleteException(date, branchId, personId) {
-  const dialog = modal('Eliminar excepción', `<div class="dialog-body"><p>Se restaurará el horario semanal del ${esc(formatDate(date))} en esta sucursal.</p>${errorSlot}</div><div class="dialog-footer"><button type="button" class="btn btn-light" data-dismiss>Conservar</button><button type="button" class="btn btn-danger-soft" data-confirm>Eliminar excepción</button></div>`);
-  dialog.querySelector('[data-dismiss]').onclick = () => dialog.close();
-  dialog.querySelector('[data-confirm]').onclick = async (event) => {
-    const button = event.currentTarget;
-    button.disabled = true;
-    try {
-      await api(`${route(personId)}/excepciones/${date}?sucursalId=${branchId}`, 'DELETE');
-      invalidateProjection();
-      dialog.close();
-      await refreshAvailabilityData(true);
-      toast('Excepción eliminada.');
-    } catch (error) {
-      const target = dialog.querySelector('#form-error'); target.textContent = error.message; target.hidden = false; target.focus();
-    } finally { button.disabled = false; }
-  };
-}
-
 export async function handleAvailabilityClick(event) {
   const slot = event.target.closest('[data-availability-slot]');
   if (slot) {
@@ -185,18 +88,12 @@ export async function handleAvailabilityClick(event) {
   button.disabled = true;
   const action = button.dataset.availabilityAction;
   const branchId = Number(button.dataset.branchId);
-  const professionalId = Number(button.dataset.professionalId);
+  // Las rutas de excepción por fecha ya no existen; Bloqueos sigue en su módulo.
   try {
     if (action === 'general') await editGeneral();
     else if (action === 'branch-services') await editBranch(branchId);
     else if (action === 'attention') await toggleAttention(branchId, button);
-    else if (action === 'new-exception') editException();
-    else if (action === 'edit-exception') {
-      const item = findAvailabilityException(professionalId, button.dataset.date, branchId);
-      if (item) editException(item, professionalId);
-    } else if (action === 'delete-exception') deleteException(button.dataset.date, branchId, professionalId);
     else if (action === 'retry') await refreshAvailabilityData(true);
-    else if (action === 'retry-team') retryTeamExceptions();
     else if (action === 'retry-configuration') await refreshConfiguration();
     else if (action === 'retry-query') await consultAvailability();
     else if (action === 'retry-affected') await consultAffected();
@@ -217,7 +114,7 @@ document.addEventListener('submit', async (event) => {
     catch (error) {
       const target = form.querySelector('[data-assignment-error]');
       target.textContent = error.status === 409
-        ? 'No se pudo quitar la sucursal: conserva franjas o excepciones. Revísalas en Horario semanal y Bloqueos antes de reintentar.'
+        ? 'No se pudo quitar la sucursal: conserva horarios u otros ajustes de atención. Revísalos antes de reintentar.'
         : [403, 404].includes(error.status)
           ? 'La asignación o la sucursal ya no está disponible. Actualiza la página y vuelve a intentarlo.'
           : error.message || 'No se pudieron guardar las asignaciones. Inténtalo de nuevo.';

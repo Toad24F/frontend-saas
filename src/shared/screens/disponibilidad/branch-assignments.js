@@ -53,7 +53,7 @@ export function branchAssignmentForm(person, branches, demo = false) {
       const selected = current.selected.includes(branch.id);
       return `<label class="assigned-branch-row" data-assignment-row data-inactive="${!active}"><span class="assigned-branch-name"><strong>${esc(branch.name)}</strong>${!active ? '<small>Sucursal inactiva</small>' : ''}</span><span class="assigned-branch-control"><span data-assignment-status>${selected ? 'Asignada' : active ? 'Sin asignar' : 'Inactiva'}</span><input class="form-check-input" type="checkbox" name="branchIds" value="${branch.id}" ${selected ? 'checked' : ''} ${!active && !initiallyAssigned ? 'disabled' : ''} aria-label="Asignar ${esc(branch.name)}" /></span></label>`;
     }).join('')}</div>
-    <p class="availability-note" data-assignment-warning ${removed.length ? '' : 'hidden'}>Al quitar una asignación se eliminan sus ajustes de servicios. Si conserva horarios o excepciones, primero tendrás que resolverlos.</p>
+    <p class="availability-note" data-assignment-warning ${removed.length ? '' : 'hidden'}>Al quitar una asignación se eliminan sus ajustes de servicios. Si conserva horarios u otros ajustes de atención, primero tendrás que resolverlos.</p>
     <p class="form-error" role="alert" tabindex="-1" data-assignment-error hidden></p>
     <div class="assignment-footer"><span data-assignment-summary aria-live="polite">${changed ? `${added.length} por asignar · ${removed.length} por quitar` : 'Sin cambios pendientes'}</span><button type="submit" class="btn btn-primary" ${changed ? '' : 'disabled'}>Guardar asignaciones</button></div>
     ${demo ? '<p class="availability-note">Los cambios de esta demo se restablecen al recargar.</p>' : ''}

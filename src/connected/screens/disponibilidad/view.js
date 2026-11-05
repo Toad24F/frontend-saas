@@ -2,7 +2,7 @@ import { api, user } from '../../backend.js';
 import { state, render } from '../../../shared/app.js';
 import { list, TODAY, addDays, formatDate } from '../../../shared/data.js';
 import { escape as esc, empty } from '../../../shared/ui.js';
-import { availability as weeklyAvailability, getBlockScope } from '../../../shared/screens/disponibilidad/view.js';
+import { availability as weeklyAvailability } from '../../../shared/screens/disponibilidad/view.js';
 import { branchAssignmentForm } from '../../../shared/screens/disponibilidad/branch-assignments.js';
 import { affectedAppointmentsPanel, availabilityQueryPanel, configurationPanel } from '../../../shared/screens/disponibilidad/operational.js';
 import { minutesToLabel } from './payload.js';
@@ -12,8 +12,6 @@ import { saveAgendaConfiguration } from '../../modules/disponibilidad/configurat
 
 let cache = null;
 let loading = null;
-let teamExceptions = null;
-let teamLoading = null;
 let projection = null;
 let range = { from: TODAY, to: addDays(TODAY, 13) };
 let configuration = { loaded: false, busy: false, data: null, draft: null, errors: {}, error: '' };
@@ -38,45 +36,23 @@ const isTechnical = (error) => !error.status || error.status === 500 || error.st
 const rerender = () => { if (state.page === 'disponibilidad') render(); };
 
 export async function refreshAvailabilityData(force = false) {
-  if (force) teamExceptions = null;
   const person = selectedProfessional();
   if (!person) return;
   const id = person.id;
   if (!force && cache?.id === id) return;
   if (loading?.id === id) return loading.promise;
-  cache = { id, busy: true, error: '', offering: null, exceptions: [] };
-  const promise = Promise.all([
-    api(`/profesionales/${id}/oferta`),
-    api(`/profesionales/${id}/excepciones`),
-  ]).then(([offering, exceptions]) => {
-    if (cache?.id === id) cache = { id, busy: false, error: '', offering, exceptions };
+  cache = { id, busy: true, error: '', offering: null };
+  // La oferta es la única lectura extra del perfil; las rutas de excepción fueron retiradas.
+  const promise = api(`/profesionales/${id}/oferta`).then((offering) => {
+    if (cache?.id === id) cache = { id, busy: false, error: '', offering };
   }).catch((error) => {
-    if (cache?.id === id) cache = { id, busy: false, error: safeError(error), offering: null, exceptions: [] };
+    if (cache?.id === id) cache = { id, busy: false, error: safeError(error), offering: null };
   }).finally(() => {
     if (loading?.id === id) loading = null;
     rerender();
   });
   loading = { id, promise };
   return promise;
-}
-
-function refreshTeamExceptions() {
-  const ids = list('professionals', state.tenantId).map((person) => person.id);
-  const key = `${state.tenantId}:${ids.join(',')}`;
-  if (teamExceptions?.key === key || teamLoading?.key === key) return;
-  teamExceptions = { key, busy: true, error: '', items: [] };
-  const promise = Promise.all(ids.map(async (id) => {
-    const items = await api(`/profesionales/${id}/excepciones`);
-    return items.map((item) => ({ ...item, professionalId: id }));
-  })).then((groups) => {
-    if (teamExceptions?.key === key) teamExceptions = { key, busy: false, error: '', items: groups.flat() };
-  }).catch((error) => {
-    if (teamExceptions?.key === key) teamExceptions = { key, busy: false, error: safeError(error), items: [] };
-  }).finally(() => {
-    if (teamLoading?.key === key) teamLoading = null;
-    rerender();
-  });
-  teamLoading = { key, promise };
 }
 
 export function setProjection(result, from, to) {
@@ -92,7 +68,6 @@ const reasonLabels = {
   atencion_inactiva: 'Atención pausada', servicio_no_ofrecido_en_sucursal: 'No seleccionado en esta sucursal',
 };
 const dateText = (value) => formatDate(value, { day: 'numeric', month: 'short', year: 'numeric' });
-const personName = (id) => list('professionals', state.tenantId).find((p) => p.id === id)?.name || 'Profesional';
 const branchName = (id) => list('branches', state.tenantId).find((b) => b.id === id)?.name || `Sucursal ${id}`;
 
 function offeringSection(person) {
@@ -106,10 +81,6 @@ function assignedBranchesSection(person) {
   const branches = list('branches', state.tenantId);
   return `<section class="surface availability-extra"><div class="section-heading"><div><h2>Sucursales asignadas</h2><p>Elige las sucursales donde puede atender ${esc(person.name)}. Después configura sus horarios y servicios.</p></div></div>
     ${branches.length ? branchAssignmentForm(person, branches) : empty('Sin sucursales disponibles', 'Crea una sucursal en el catálogo antes de asignarla.')}</section>`;
-}
-
-function exceptionsSection(exceptions, team = false) {
-  return `<section class="surface availability-extra"><div class="section-heading"><div><h2>Excepciones por fecha</h2><p>Define una jornada especial o cierra una sucursal solo para una fecha.</p></div><button type="button" class="btn btn-light" data-availability-action="new-exception">Agregar excepción</button></div>${exceptions.length ? `<div class="blocks-list">${exceptions.map((item) => `<div class="block-item"><div><strong>${team ? `${esc(personName(item.professionalId))} · ` : ''}${esc(branchName(item.sucursalId))} · ${esc(dateText(item.fechaLocal))}</strong><small>${item.franjas.length ? item.franjas.map((slot) => `${minutesToLabel(slot.inicioMinutos)}–${minutesToLabel(slot.finMinutos)}`).join(', ') : 'Cierre de todo el día'}</small></div><div class="availability-row-actions"><button type="button" class="btn btn-light" data-availability-action="edit-exception" data-professional-id="${item.professionalId || selectedProfessional().id}" data-branch-id="${item.sucursalId}" data-date="${item.fechaLocal}">Editar</button><button type="button" class="icon-btn" data-availability-action="delete-exception" data-professional-id="${item.professionalId || selectedProfessional().id}" data-branch-id="${item.sucursalId}" data-date="${item.fechaLocal}" aria-label="Eliminar excepción de ${esc(branchName(item.sucursalId))} del ${esc(dateText(item.fechaLocal))}">×</button></div></div>`).join('')}</div>` : empty('Sin excepciones', 'Se aplicará el horario semanal habitual.')}</section>`;
 }
 
 function projectionSection(person) {
@@ -220,8 +191,6 @@ export function availability() {
   const person = selectedProfessional();
   if (!person) return weeklyAvailability({ extraPanels: operational });
   if (cache?.id !== person.id && loading?.id !== person.id) void refreshAvailabilityData();
-  const team = !getBlockScope() && user.rol === 'admin_negocio';
-  if (team) refreshTeamExceptions();
   const extra = cache?.id === person.id ? cache : null;
   const pendingContent = !extra || extra.busy
     ? '<section class="surface availability-extra" aria-busy="true"><p class="availability-note">Cargando datos de disponibilidad…</p></section>'
@@ -229,13 +198,6 @@ export function availability() {
       ? `<section class="surface availability-extra"><p role="alert">${esc(extra.error)}</p><button type="button" class="btn btn-light" data-availability-action="retry">Reintentar</button></section>`
       : null;
   return weeklyAvailability({
-    exceptionContent: team
-      ? teamExceptions?.busy
-        ? '<section class="surface availability-extra" aria-busy="true"><p class="availability-note">Cargando excepciones del equipo…</p></section>'
-        : teamExceptions?.error
-          ? `<section class="surface availability-extra"><p role="alert">${esc(teamExceptions.error)}</p><button type="button" class="btn btn-light" data-availability-action="retry-team">Reintentar</button></section>`
-          : exceptionsSection(teamExceptions?.items || [], true)
-      : pendingContent || exceptionsSection(extra.exceptions.map((item) => ({ ...item, professionalId: person.id }))),
     extraPanels: [
       ...(user.rol === 'admin_negocio' ? [{ id: 'branches', label: 'Sucursales asignadas', content: assignedBranchesSection(person) }] : []),
       { id: 'offering', label: 'Oferta por sucursal', content: pendingContent || offeringSection(person) },
@@ -246,8 +208,3 @@ export function availability() {
 }
 
 export function currentAvailabilityData() { return cache; }
-export function findAvailabilityException(personId, date, branchId) {
-  const items = teamExceptions?.items || (cache?.id === personId ? cache.exceptions : []);
-  return items.find((item) => (item.professionalId || personId) === personId && item.fechaLocal === date && item.sucursalId === branchId);
-}
-export function retryTeamExceptions() { teamExceptions = null; refreshTeamExceptions(); }

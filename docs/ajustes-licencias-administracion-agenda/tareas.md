@@ -118,11 +118,11 @@ Cada tarea se estima en **15 o 25 minutos, incluida su comprobación focalizada*
   Hecho cuando: 400/503 conserva captura y error; la UI solo anuncia guardado cuando el reemplazo completo responde correctamente.
 - [x] **FALA-T050 — Retirar descanso del payload semanal** · 25 min · Depende de: T002 · RF-55.
   Hecho cuando: `PUT /profesionales/:id/horario` no envía campos de descanso y dos franjas representan una pausa.
-- [ ] **FALA-T051 — Retirar campos y rutas de excepción** · 25 min · Depende de: T050 · RF-55.
+- [x] **FALA-T051 — Retirar campos y rutas de excepción** · 25 min · Depende de: T050 · RF-55.
   Hecho cuando: La vista conectada no ofrece descanso incrustado ni consulta/edita/elimina excepciones por fecha; bloqueos siguen disponibles.
-- [ ] **FALA-T052 — Conservar consulta privada por rol** · 25 min · Depende de: T047, T051 · RF-56, RF-58–RF-59.
+- [x] **FALA-T052 — Conservar consulta privada por rol** · 25 min · Depende de: T047, T051 · RF-56, RF-58–RF-59.
   Hecho cuando: Administrador, Recepción y Profesional solo ven consultas permitidas y la modalidad manual no aparece en portal público.
-- [ ] **FALA-T053 — Probar agenda y semana contra API** · 25 min · Depende de: T049–T052 · RF-53–RF-56.
+- [x] **FALA-T053 — Probar agenda y semana contra API** · 25 min · Depende de: T049–T052 · RF-53–RF-56.
   Hecho cuando: Casos cubren 0/5/60, valores inválidos, franjas separadas, bloqueos y ausencia de rutas retiradas.
 
 ## 6. Demo, seguridad y cierre verificable

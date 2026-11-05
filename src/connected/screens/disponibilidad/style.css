@@ -18,9 +18,5 @@
 .projection-filter .form-error { flex-basis: 100%; margin: 0; }
 .projection-results { margin-top: 24px; }
 .projection-results h3:not(:first-child) { margin-top: 24px; }
-.exception-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 2fr) auto; gap: 10px; align-items: end; margin: 12px 0; }
-.exception-row label { display: grid; gap: 5px; font-size: 12px; }
-.exception-break { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-.exception-break .availability-field-error { grid-column: 1 / -1; }
 @media (max-width: 900px) { .offering-grid { grid-template-columns: 1fr; } }
-@media (max-width: 767px) { .offering-branch-head { flex-wrap: wrap; } .availability-extra .block-item { padding: 16px 0; flex-wrap: wrap; } .exception-row { grid-template-columns: repeat(2, minmax(0, 1fr)); } .exception-break { grid-column: 1 / -1; } .exception-row .icon-btn { min-height: 44px; } }
+@media (max-width: 767px) { .offering-branch-head { flex-wrap: wrap; } .availability-extra .block-item { padding: 16px 0; flex-wrap: wrap; } }

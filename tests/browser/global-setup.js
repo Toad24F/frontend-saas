@@ -67,8 +67,9 @@ async function seed(db) {
       [businessId, now, now, new Date(now.getTime() + 365 * 86400000)]);
     const person = await db.query(`INSERT INTO usuarios
       (negocio_id,nombre,email,password_hash,rol,activo,activado_en,creado_en)
-      VALUES (?,?,?,'hash','profesional',1,?,?)`,
-    [businessId, `Profesional QA ${index}`, `qa-prof-${index}@example.test`, now, now]);
+        VALUES (?,?,?,?,'profesional',1,?,?)`,
+    // La cuenta profesional ficticia permite verificar sus consultas privadas.
+    [businessId, `Profesional QA ${index}`, `qa-prof-${index}@example.test`, passwordHash, now, now]);
     const personId = Number(person.insertId);
     await db.query('INSERT INTO personal (id,negocio_id) VALUES (?,?)', [personId, businessId]);
     if (index === 1) {

@@ -16,11 +16,13 @@ export function setBlockScope(value) { blockScope = value === '' ? '' : String(v
 export function scheduleRow(schedule, selected, tenantId, removable = false, blockIndex = 0) {
   const day = days[schedule.day];
   const branches = list('branches', tenantId).filter((branch) => selected.branchIds.includes(branch.id));
+  // El descanso incrustado pertenece solo a la demo; la semana real usa dos franjas.
+  const demoBreak = isDemo ? `<td data-label="Descanso opcional" data-availability-field="schedule-${schedule.id}-break"><div class="time-pair"><input class="form-control form-control-sm" type="time" name="breakStart-${schedule.id}" value="${schedule.breakStart || ''}" aria-label="Inicio de descanso del ${day}" ${schedule.enabled ? '' : 'disabled'}/><span>–</span><input class="form-control form-control-sm" type="time" name="breakEnd-${schedule.id}" value="${schedule.breakEnd || ''}" aria-label="Fin de descanso del ${day}" ${schedule.enabled ? '' : 'disabled'}/></div></td>` : '';
   return `<tr data-schedule-row data-schedule-day="${schedule.day}" data-id="${schedule.id}" class="schedule-day-${schedule.day} ${blockIndex > 0 ? 'schedule-repeat' : ''} ${schedule.enabled ? '' : 'schedule-disabled'}">
     <td><label class="form-check form-switch"><input class="form-check-input" type="checkbox" name="enabled-${schedule.id}" ${schedule.enabled ? 'checked' : ''} aria-label="Activar ${day}"/><span class="schedule-day-label">${day}</span></label></td>
     <td data-label="Sucursal" data-availability-field="schedule-${schedule.id}-branch"><select class="form-select form-select-sm" name="branch-${schedule.id}" aria-label="Sucursal del ${day}" ${schedule.enabled ? '' : 'disabled'}>${!isDemo ? `<option value="" ${schedule.branchId == null ? 'selected' : ''}>Selecciona sucursal</option>` : ''}${branches.map((branch) => `<option value="${branch.id}" ${schedule.branchId === branch.id ? 'selected' : ''}>${esc(branch.name)}</option>`).join('')}</select></td>
     <td data-label="Entrada" data-availability-field="schedule-${schedule.id}-start"><input class="form-control form-control-sm" type="time" name="start-${schedule.id}" value="${schedule.start}" aria-label="Entrada del ${day}" ${schedule.enabled ? '' : 'disabled'}/></td>
-    <td data-label="Descanso opcional" data-availability-field="schedule-${schedule.id}-break"><div class="time-pair"><input class="form-control form-control-sm" type="time" name="breakStart-${schedule.id}" value="${schedule.breakStart || ''}" aria-label="Inicio de descanso del ${day}" ${schedule.enabled ? '' : 'disabled'}/><span>–</span><input class="form-control form-control-sm" type="time" name="breakEnd-${schedule.id}" value="${schedule.breakEnd || ''}" aria-label="Fin de descanso del ${day}" ${schedule.enabled ? '' : 'disabled'}/></div></td>
+    ${demoBreak}
     <td data-label="Salida" data-availability-field="schedule-${schedule.id}-end"><input class="form-control form-control-sm" type="time" name="end-${schedule.id}" value="${schedule.end}" aria-label="Salida del ${day}" ${schedule.enabled ? '' : 'disabled'}/></td>
     <td data-label="Franjas"><div class="schedule-actions"><button type="button" class="btn btn-light schedule-add" data-add-schedule="${schedule.day}" aria-label="Agregar franja al ${day}" title="Agregar franja">+</button>${removable ? `<button type="button" class="icon-btn" data-remove-schedule="${schedule.id}" aria-label="Quitar franja del ${day}" ${schedule.enabled ? '' : 'disabled'}>${icon('x')}</button>` : ''}</div></td>
   </tr>`;
@@ -29,7 +31,7 @@ export function scheduleRow(schedule, selected, tenantId, removable = false, blo
 function scheduleSection(selected, schedules) {
   const rows = schedules.sort((a, b) => (isDemo ? a.day - b.day : (a.day || 7) - (b.day || 7)) || a.start.localeCompare(b.start))
     .map((schedule) => scheduleRow(schedule, selected, state.tenantId, (!isDemo && schedule.id > 0) || schedules.filter((item) => item.day === schedule.day).length > 1, schedules.filter((item) => item.day === schedule.day && item.start < schedule.start).length)).join('');
-  return `<section class="surface availability-main-section"><div class="section-heading"><div><h2>Horario semanal</h2><p>Agrega varias franjas por día; cada una puede tener otra sucursal.</p></div></div><form id="schedule-form"><div class="table-responsive"><table class="table app-table schedule-table align-middle"><thead><tr><th>Día</th><th>Sucursal</th><th>Entrada</th><th>Descanso opcional</th><th>Salida</th><th>Franjas</th></tr></thead><tbody>${rows}</tbody></table></div><p class="schedule-help">Para comer y volver en otra sucursal, termina una franja antes de comer y agrega otra después. Las franjas pueden ser consecutivas si no se empalman.</p><p id="schedule-error" class="form-error availability-general-error" role="alert" tabindex="-1" hidden></p><div class="section-form-footer"><span>${icon('coffee')} Los descansos y huecos entre franjas quedan fuera de las citas disponibles.</span><button class="btn btn-primary" type="submit">${icon('check')}Guardar horario</button></div></form></section>`;
+  return `<section class="surface availability-main-section"><div class="section-heading"><div><h2>Horario semanal</h2><p>Agrega varias franjas por día; cada una puede tener otra sucursal.</p></div></div><form id="schedule-form"><div class="table-responsive"><table class="table app-table schedule-table ${isDemo ? 'schedule-table--demo' : 'schedule-table--connected'} align-middle"><thead><tr><th>Día</th><th>Sucursal</th><th>Entrada</th>${isDemo ? '<th>Descanso opcional</th>' : ''}<th>Salida</th><th>Franjas</th></tr></thead><tbody>${rows}</tbody></table></div><p class="schedule-help">Para comer y volver en otra sucursal, termina una franja antes de comer y agrega otra después. Las franjas pueden ser consecutivas si no se empalman.</p><p id="schedule-error" class="form-error availability-general-error" role="alert" tabindex="-1" hidden></p><div class="section-form-footer"><span>${icon('coffee')} ${isDemo ? 'Los descansos y huecos entre franjas quedan fuera de las citas disponibles.' : 'Los huecos entre franjas quedan fuera de las citas disponibles.'}</span><button class="btn btn-primary" type="submit">${icon('check')}Guardar horario</button></div></form></section>`;
 }
 
 function modeSection(tenant) {
@@ -49,7 +51,7 @@ function professionalContext(people, selected, tabId) {
     : tabId === 'changes' && blockScope ? people.find((item) => String(item.id) === blockScope) || selected : selected;
   const selectedValue = isTeam ? '' : String(person.id);
   const id = { schedule: 'schedule-professional', changes: 'block-professional', offering: 'offering-professional', projection: 'projection-professional' }[tabId];
-  const label = tabId === 'changes' ? 'Ver bloqueos y excepciones de' : tabId === 'offering' ? 'Ver oferta de' : tabId === 'projection' ? 'Ver proyección de' : 'Ver horario de';
+  const label = tabId === 'changes' ? 'Ver bloqueos de' : tabId === 'offering' ? 'Ver oferta de' : tabId === 'projection' ? 'Ver proyección de' : 'Ver horario de';
   const initial = isTeam ? icon('users') : esc(person.name.trim().charAt(0).toUpperCase());
   const name = isTeam ? 'Todo el equipo' : esc(person.name);
   const detail = isTeam ? `${people.length} profesionales` : `${person.branchIds?.length || 0} sucursales asignadas`;
@@ -68,7 +70,7 @@ function tabLayout(tabs, people, selected) {
   return `<div class="availability-workspace">${visible.filter((tab) => tab.context !== false).map((tab) => `<div data-availability-context="${tab.id}" ${tab.id === activeTab ? '' : 'hidden'}>${professionalContext(people, selected, tab.id)}</div>`).join('')}${single ? visible[0].content : `<nav class="availability-tabs" role="tablist" aria-label="Opciones de ${group.label}">${visible.map((tab) => `<button type="button" role="tab" id="availability-tab-${tab.id}" aria-controls="availability-panel-${tab.id}" aria-selected="${tab.id === activeTab}" tabindex="${tab.id === activeTab ? '0' : '-1'}" data-availability-tab="${tab.id}" class="${tab.id === activeTab ? 'is-selected' : ''}">${tab.label}</button>`).join('')}</nav>${visible.map((tab) => `<div role="tabpanel" id="availability-panel-${tab.id}" aria-labelledby="availability-tab-${tab.id}" data-availability-panel="${tab.id}" ${tab.id === activeTab ? '' : 'hidden'}>${tab.content}</div>`).join('')}`}</div>`;
 }
 
-export function availability({ exceptionContent = '', extraPanels = [] } = {}) {
+export function availability({ extraPanels = [] } = {}) {
   const tenant = tenantById(state.tenantId);
   const people = list('professionals', state.tenantId);
   if (blockScope && !people.some((person) => String(person.id) === blockScope)) blockScope = '';
@@ -82,7 +84,8 @@ export function availability({ exceptionContent = '', extraPanels = [] } = {}) {
     }
     tabs.push(
       { id: 'schedule', label: 'Horario semanal', content: scheduleSection(selected, schedules) + (isDemo && !extraPanels.length ? modeSection(tenant) : '') },
-      { id: 'changes', label: exceptionContent ? 'Bloqueos y excepciones' : 'Bloqueos', content: blocksSection() + exceptionContent },
+      // Los cambios por fecha se gestionan con Bloqueos; la pestaña no ofrece excepciones.
+      { id: 'changes', label: 'Bloqueos', content: blocksSection() },
     );
   } else if (state.availabilityGroup === 'equipo') {
     tabs.push({ id: 'team-empty', label: 'Equipo', context: false, content: empty('Agrega a tu primer profesional', user?.rol === 'admin_negocio' || isDemo ? 'Después podrás asignar sucursales y configurar sus horarios.' : 'Pide a administración que configure tu perfil.', user?.rol === 'admin_negocio' || isDemo ? '<a class="btn btn-light" href="/admin/profesionales" data-nav="profesionales">Ir a profesionales</a>' : '') });
