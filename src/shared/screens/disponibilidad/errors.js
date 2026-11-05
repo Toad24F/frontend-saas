@@ -143,7 +143,10 @@ export function validateScheduleRows(rows, branchIds, demo = false) {
     else if (clock.test(row.start) && row.start >= row.end) errors[`${prefix}-end`] = 'La salida debe ser posterior a la entrada.';
     if (demo && clock.test(row.start) && clock.test(row.end) && (row.start < '09:00' || row.end > '18:00'))
       errors[`${prefix}-${row.start < '09:00' ? 'start' : 'end'}`] = 'En la demostración, la atención debe quedar entre 09:00 y 18:00.';
-    if (row.breakStart || row.breakEnd) {
+    if (!demo && (row.breakStart || row.breakEnd)) {
+      // Hasta que T051 retire los controles, se impide perder una pausa capturada.
+      errors[`${prefix}-break`] = 'Representa el descanso con dos franjas separadas.';
+    } else if (row.breakStart || row.breakEnd) {
       if (!clock.test(row.breakStart) || !clock.test(row.breakEnd)) errors[`${prefix}-break`] = 'Indica el inicio y el fin del descanso.';
       else if (row.breakStart < row.start || row.breakStart >= row.breakEnd || row.breakEnd > row.end)
         errors[`${prefix}-break`] = 'El descanso debe quedar dentro de esta franja.';

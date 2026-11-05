@@ -8,6 +8,7 @@ import { affectedAppointmentsPanel, availabilityQueryPanel, configurationPanel }
 import { minutesToLabel } from './payload.js';
 import './style.css';
 import { readConnectedConfiguration } from '../../../shared/screens/disponibilidad/operational-contract.js';
+import { saveAgendaConfiguration } from '../../modules/disponibilidad/configuration.js';
 
 let cache = null;
 let loading = null;
@@ -143,25 +144,16 @@ export async function refreshConfiguration() {
   rerender();
 }
 
-export async function saveConfiguration(values, errors = {}) {
-  configuration = { ...configuration, draft: values, errors };
-  if (Object.keys(errors).length) { rerender(); return false; }
-  configuration = { ...configuration, busy: true, error: '' };
+export async function saveConfiguration(values) {
+  if (user.rol !== 'admin_negocio' || configuration.busy || !configuration.data) return false;
+  // La frontera valida el reemplazo completo y devuelve el borrador ante 400/503.
+  const previous = configuration;
+  configuration = { ...previous, busy: true, draft: values, error: '', errors: {} };
   rerender();
-  try {
-    const data = await api('/disponibilidad/configuracion', 'PUT', values);
-    configuration = { loaded: true, busy: false, data, draft: null, errors: {}, error: '' };
-    rerender();
-    return true;
-  } catch (error) {
-    const fields = {};
-    for (const name of ['modo', 'tiempoEntreCitasMinutos', 'anticipacionMinutos', 'diasFuturos']) {
-      if (error.status === 400 && error.message.includes(name)) fields[name] = error.message;
-    }
-    configuration = { ...configuration, busy: false, errors: fields, error: Object.keys(fields).length ? '' : safeError(error) };
-    rerender();
-    return false;
-  }
+  const result = await saveAgendaConfiguration(previous, values);
+  configuration = result.state;
+  rerender();
+  return result.saved;
 }
 
 export function setQueryFilters(filters) {

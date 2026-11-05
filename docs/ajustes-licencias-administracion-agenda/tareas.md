@@ -112,11 +112,11 @@ Cada tarea se estima en **15 o 25 minutos, incluida su comprobación focalizada*
   Hecho cuando: Alternar el estado cambia respuestas y presentación futuras sin alterar el resumen histórico interno.
 - [x] **FALA-T047 — Adaptar lectura de configuración** · 15 min · Depende de: T002 · RF-53–RF-54.
   Hecho cuando: Se lee y muestra `tiempoEntreCitasMinutos`, incluido 0, sin usar `intervaloMinutos` como dato vigente.
-- [ ] **FALA-T048 — Adaptar formulario de agenda** · 25 min · Depende de: T047 · RF-53–RF-54.
+- [x] **FALA-T048 — Adaptar formulario de agenda** · 25 min · Depende de: T047 · RF-53–RF-54.
   Hecho cuando: El PUT contiene exactamente modo, tiempo entre citas, anticipación y horizonte; valores fuera de 0–60/múltiplos de 5 se señalan.
-- [ ] **FALA-T049 — Conservar borrador ante fallo de agenda** · 15 min · Depende de: T048 · RF-54, RF-58–RF-59.
+- [x] **FALA-T049 — Conservar borrador ante fallo de agenda** · 15 min · Depende de: T048 · RF-54, RF-58–RF-59.
   Hecho cuando: 400/503 conserva captura y error; la UI solo anuncia guardado cuando el reemplazo completo responde correctamente.
-- [ ] **FALA-T050 — Retirar descanso del payload semanal** · 25 min · Depende de: T002 · RF-55.
+- [x] **FALA-T050 — Retirar descanso del payload semanal** · 25 min · Depende de: T002 · RF-55.
   Hecho cuando: `PUT /profesionales/:id/horario` no envía campos de descanso y dos franjas representan una pausa.
 - [ ] **FALA-T051 — Retirar campos y rutas de excepción** · 25 min · Depende de: T050 · RF-55.
   Hecho cuando: La vista conectada no ofrece descanso incrustado ni consulta/edita/elimina excepciones por fecha; bloqueos siguen disponibles.

@@ -5,11 +5,11 @@ import { db } from '../src/shared/data.js';
 import { validateNewPassword } from '../src/connected/modules/auth/password-policy.js';
 import { getBranchQuota } from '../src/connected/modules/sucursales/quota.js';
 
-test('semana completa: conserva IDs, descansos y orden por día; excluye borradores vacíos', () => {
+test('semana completa: conserva IDs y orden por día sin descanso incrustado; excluye borradores vacíos', () => {
   const row = { id: 12, day: 1, branchId: 3, start: '07:00', end: '12:00', breakStart: '09:00', breakEnd: '09:30', enabled: true };
   const result = schedulePayload([row, { ...row, id: -2, branchId: 4, start: '12:00', end: '00:00', breakStart: '', breakEnd: '' }, { ...row, id: 13, day: 2, enabled: false }, { id: -104, day: 4, enabled: false, start: '', end: '' }]);
   assert.equal(result.franjas.length, 3);
-  assert.deepEqual(result.franjas[0], { id: 12, diaSemana: 1, orden: 0, sucursalId: 3, inicioMinutos: 420, finMinutos: 720, descansoInicioMinutos: 540, descansoFinMinutos: 570, activo: true });
+  assert.deepEqual(result.franjas[0], { id: 12, diaSemana: 1, orden: 0, sucursalId: 3, inicioMinutos: 420, finMinutos: 720, activo: true });
   assert.equal(result.franjas[1].id, undefined);
   assert.equal(result.franjas[1].orden, 1);
   assert.equal(result.franjas[1].finMinutos, 1440);

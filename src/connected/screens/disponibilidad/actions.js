@@ -7,7 +7,7 @@ import { exceptionPayload, minutesToClock } from './payload.js';
 import { consultAffected, consultAvailability, currentAvailabilityData, findAvailabilityException, invalidateProjection, refreshAvailabilityData, refreshConfiguration, retryTeamExceptions, saveConfiguration, selectSlot, selectedProfessional, setAffectedErrors, setProjection, setQueryErrors, setQueryFilters, validateStart } from './view.js';
 import { getBlockScope } from '../../../shared/screens/disponibilidad/view.js';
 import { assignmentDraft, clearAssignmentDraft, validateAssignmentSnapshot } from '../../../shared/screens/disponibilidad/branch-assignments.js';
-import { validateConnectedConfiguration, validateInclusiveRange } from '../../../shared/screens/disponibilidad/operational-contract.js';
+import { validateInclusiveRange } from '../../../shared/screens/disponibilidad/operational-contract.js';
 import { clearAvailabilityErrors, clearAvailabilityField, exceptionApiErrors, showAvailabilityErrors, showAvailabilityGeneralError, validateException, validateProjection } from '../../../shared/screens/disponibilidad/errors.js';
 
 const route = (personId = selectedProfessional().id) => `/profesionales/${personId}`;
@@ -229,8 +229,9 @@ document.addEventListener('submit', async (event) => {
   if (form.id === 'agenda-configuration-form') {
     const data = new FormData(form);
     // El contrato conectado usa el tiempo después de cada cita; el campo viejo pertenece solo a la demo.
-    const values = { modo: data.get('modo'), tiempoEntreCitasMinutos: Number(data.get('tiempoEntreCitasMinutos')), anticipacionMinutos: Number(data.get('anticipacionMinutos')), diasFuturos: Number(data.get('diasFuturos')) };
-    const saved = await saveConfiguration(values, validateConnectedConfiguration(values));
+    const numberField = (name) => data.get(name) === null || data.get(name) === '' ? Number.NaN : Number(data.get(name));
+    const values = { modo: data.get('modo'), tiempoEntreCitasMinutos: numberField('tiempoEntreCitasMinutos'), anticipacionMinutos: numberField('anticipacionMinutos'), diasFuturos: numberField('diasFuturos') };
+    const saved = await saveConfiguration(values);
     if (saved) toast('Reglas de agenda guardadas.');
     return;
   }
