@@ -2,6 +2,17 @@ import { api, forgetSession, logout } from '../../backend.js';
 import { validateNewPassword } from '../../modules/auth/password-policy.js';
 import { field, errorSlot } from '../../../shared/forms.js';
 import { modal, toast } from '../../../shared/ui.js';
+import { refreshPricePublication, updatePricePublication } from './view.js';
+
+// Eventos delegados sobreviven a los renderizados de Mi cuenta.
+document.addEventListener('click', (event) => {
+  if (event.target.closest('[data-price-retry]')) void refreshPricePublication();
+});
+document.addEventListener('submit', (event) => {
+  if (event.target.id !== 'price-publication-form') return;
+  event.preventDefault();
+  void updatePricePublication(new FormData(event.target).get('mostrarPreciosPublicos') === 'true');
+});
 
 export function changePassword() {
   const dialog = modal('Cambiar contraseña', `<form id="change-password-form"><div class="dialog-body"><p class="form-intro">Después de guardar tendrás que iniciar sesión de nuevo.</p>${field('Contraseña actual', 'current', '', 'password', 'required autocomplete="current-password"')}${field('Nueva contraseña', 'password', '', 'password', 'required minlength="12" autocomplete="new-password"')}${field('Confirmar nueva contraseña', 'confirm', '', 'password', 'required minlength="12" autocomplete="new-password"')}${errorSlot}</div><div class="dialog-footer"><button type="button" class="btn btn-light" data-dismiss>Cancelar</button><button type="submit" class="btn btn-primary">Guardar contraseña</button></div></form>`);

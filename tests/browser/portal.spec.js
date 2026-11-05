@@ -91,6 +91,45 @@ test('FALA-T012: precio oculto no aparece en catálogo, apartado ni resultado', 
   await expect(page.locator('#public-selection')).not.toContainText(/MXN|NaN|Pago directamente|Costo/);
 });
 
+// La opción se cambia desde la cuenta conectada; el portal consulta respuestas
+// reales y la base temporal confirma que el costo histórico no se reescribe.
+test('FALA-T044–T046: publicación global cambia el portal y conserva el importe histórico', async ({ page, browser }) => {
+  await page.goto(`${process.env.PORTAL_TEST_ORIGIN}/admin/cuenta`);
+  await page.getByLabel('Correo electrónico').fill('admin-qa-1@example.test');
+  await page.locator('#login-password').fill('PruebaLicencia2026!');
+  await page.getByRole('button', { name: 'Entrar' }).click();
+  await expect(page.getByRole('heading', { name: 'Precios en el portal público' })).toBeVisible();
+  await expect(page.getByText('Precios visibles')).toBeVisible();
+
+  const context = await browser.newContext();
+  const portal = await context.newPage();
+  try {
+    await chooseSlot(portal, 15);
+    await fillContact(portal);
+    const folio = await reserve(portal);
+    const before = await rows('SELECT costo_aceptado FROM citas WHERE folio=?', [folio]);
+    expect(Number(before[0].costo_aceptado)).toBe(100);
+
+    await page.getByLabel('Publicar precios').selectOption('false');
+    await page.getByRole('button', { name: 'Guardar publicación' }).click();
+    await expect(page.getByText('Precios ocultos')).toBeVisible();
+    const hiddenResponse = portal.waitForResponse((response) => response.url().includes('/publico/negocios/portal-qa-1/catalogo') && response.ok());
+    await portal.goto(portalUrl());
+    expect((await (await hiddenResponse).json()).servicios[0]).not.toHaveProperty('costo');
+    await expect(portal.getByRole('radio', { name: /Corte QA/ })).toBeVisible();
+    await expect(portal.locator('#public-selection')).not.toContainText('$100');
+    expect(Number((await rows('SELECT costo_aceptado FROM citas WHERE folio=?', [folio]))[0].costo_aceptado)).toBe(100);
+
+    await page.getByLabel('Publicar precios').selectOption('true');
+    await page.getByRole('button', { name: 'Guardar publicación' }).click();
+    await expect(page.getByText('Precios visibles')).toBeVisible();
+    const visibleResponse = portal.waitForResponse((response) => response.url().includes('/publico/negocios/portal-qa-1/catalogo') && response.ok());
+    await portal.goto(portalUrl());
+    expect(Number((await (await visibleResponse).json()).servicios[0].costo)).toBe(100);
+    await expect(portal.locator('#public-selection')).toContainText('$100');
+  } finally { await context.close(); }
+});
+
 // T117 abre el portal conectado contra los servidores y la base efímera del runner.
 test('T117: inicia la página pública con la oferta real de prueba', async ({ page }) => {
   await page.goto(portalUrl());

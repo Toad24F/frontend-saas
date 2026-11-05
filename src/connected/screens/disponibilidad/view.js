@@ -7,6 +7,7 @@ import { branchAssignmentForm } from '../../../shared/screens/disponibilidad/bra
 import { affectedAppointmentsPanel, availabilityQueryPanel, configurationPanel } from '../../../shared/screens/disponibilidad/operational.js';
 import { minutesToLabel } from './payload.js';
 import './style.css';
+import { readConnectedConfiguration } from '../../../shared/screens/disponibilidad/operational-contract.js';
 
 let cache = null;
 let loading = null;
@@ -134,7 +135,7 @@ export async function refreshConfiguration() {
   configuration = { ...configuration, busy: true, error: '' };
   rerender();
   try {
-    const data = await api('/disponibilidad/configuracion');
+    const data = readConnectedConfiguration(await api('/disponibilidad/configuracion'));
     configuration = { loaded: true, busy: false, data, draft: null, errors: {}, error: '' };
   } catch (error) {
     configuration = { ...configuration, loaded: true, busy: false, error: safeError(error) };
@@ -154,7 +155,7 @@ export async function saveConfiguration(values, errors = {}) {
     return true;
   } catch (error) {
     const fields = {};
-    for (const name of ['modo', 'intervaloMinutos', 'anticipacionMinutos', 'diasFuturos']) {
+    for (const name of ['modo', 'tiempoEntreCitasMinutos', 'anticipacionMinutos', 'diasFuturos']) {
       if (error.status === 400 && error.message.includes(name)) fields[name] = error.message;
     }
     configuration = { ...configuration, busy: false, errors: fields, error: Object.keys(fields).length ? '' : safeError(error) };

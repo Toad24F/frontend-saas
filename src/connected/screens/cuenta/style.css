@@ -6,6 +6,11 @@
 
 .account-page .page-heading { margin-bottom: 0; }
 .account-page .surface { min-width: 0; }
+.account-price-publication { display: grid; gap: 14px; }
+.account-price-publication form { display: flex; flex-wrap: wrap; align-items: end; gap: 12px; }
+.account-price-publication form label { width: 100%; font-weight: 700; }
+.account-price-publication form select { flex: 1 1 220px; max-width: 340px; min-height: 44px; }
+.account-price-publication .btn { min-height: 44px; }
 
 .account-identity {
   display: flex;

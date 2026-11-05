@@ -40,6 +40,25 @@ export function validateConfiguration(values) {
   return errors;
 }
 
+// La API conectada exige el nuevo campo y admite cero como separación válida.
+export function validateConnectedConfiguration(values) {
+  const errors = {};
+  if (!['ventana_libre', 'agenda_compacta'].includes(values.modo)) errors.modo = 'Selecciona un modo de agenda.';
+  const gap = values.tiempoEntreCitasMinutos;
+  if (!Number.isSafeInteger(gap) || gap < 0 || gap > 60 || gap % 5 !== 0) errors.tiempoEntreCitasMinutos = 'Usa cero o múltiplos de 5 hasta 60 minutos.';
+  const lead = values.anticipacionMinutos;
+  if (!Number.isSafeInteger(lead) || lead < 0 || lead % 5 !== 0) errors.anticipacionMinutos = 'Usa minutos enteros, no negativos y múltiplos de 5.';
+  const horizon = values.diasFuturos;
+  if (!Number.isSafeInteger(horizon) || horizon < 0) errors.diasFuturos = 'Usa un número entero de días igual o mayor que cero.';
+  return errors;
+}
+
+// Rechaza lecturas antiguas/incompletas para que la vista no seleccione cero por defecto.
+export function readConnectedConfiguration(data) {
+  if (!data || Object.keys(validateConnectedConfiguration(data)).length) throw new Error('La configuración de agenda recibida no es válida.');
+  return data;
+}
+
 export function zonedParts(value, zone) {
   try {
     const parts = new Intl.DateTimeFormat('en-CA', { timeZone: zone, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).formatToParts(new Date(value));

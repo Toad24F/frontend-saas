@@ -7,11 +7,42 @@ import './style.css';
 import { db } from '../../../shared/data.js';
 import { renderAccountPortal, bindAccountPortal } from '../../../shared/account-portal.js';
 import '../../../shared/account-portal.css';
+import { readPricePublication, savePricePublication } from '../../modules/publicacion/precios.js';
+import { pricePublicationPanel } from './price-publication.js';
 
 let licenseUserId = null;
 let license = null;
 let loading = false;
 let error = null;
+let publication = { userId: null, loading: false, busy: false, data: null, draft: null, error: '' };
+
+// La publicación vive en la cuenta del Administrador y se vuelve a leer al cambiar de sesión.
+export async function refreshPricePublication() {
+  if (user?.rol !== 'admin_negocio') return;
+  const userId = user.id;
+  publication = { ...publication, userId, loading: true, draft: null, error: '' };
+  render();
+  try {
+    const data = await readPricePublication();
+    if (publication.userId === userId) publication = { ...publication, loading: false, data, error: '' };
+  } catch (caught) {
+    if (publication.userId === userId) publication = { ...publication, loading: false, data: null, error: caught.message };
+  }
+  render();
+}
+
+export async function updatePricePublication(enabled) {
+  if (user?.rol !== 'admin_negocio' || !publication.data || publication.busy) return;
+  publication = { ...publication, busy: true, draft: enabled, error: '' };
+  render();
+  try {
+    const data = await savePricePublication(enabled);
+    publication = { ...publication, busy: false, data, draft: null, error: '' };
+  } catch (caught) {
+    publication = { ...publication, busy: false, error: caught.message };
+  }
+  render();
+}
 
 const licenseName = (state) => ({
   pendiente: 'Pendiente',
@@ -75,6 +106,7 @@ function licenseContent() {
 
 export function account() {
   bindAccountPortal(document);
+  if (user.rol === 'admin_negocio' && publication.userId !== user.id && !publication.loading) void refreshPricePublication();
   if (user.rol !== 'superadmin' && licenseUserId !== user.id) {
     licenseUserId = user.id;
     license = null;
@@ -103,6 +135,7 @@ export function account() {
     icon('lock') + 'Cambiar contraseña</button>' +
     '<button type="button" class="btn btn-light" data-action="logout-account">Cerrar sesión</button></div></section></div>' +
     renderAccountPortal({ user, tenant: db.tenants.find((tenant) => tenant.id === user.negocioId), origin: location.origin }) +
+    (user.rol === 'admin_negocio' ? pricePublicationPanel(publication) : '') +
     (user.rol === 'superadmin' ? '' :
       '<section class="surface account-section account-license"><div class="account-section-heading">' +
       '<span class="account-section-icon" aria-hidden="true">' + icon('calendar') + '</span>' +

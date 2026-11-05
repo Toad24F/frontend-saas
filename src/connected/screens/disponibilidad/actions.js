@@ -7,7 +7,7 @@ import { exceptionPayload, minutesToClock } from './payload.js';
 import { consultAffected, consultAvailability, currentAvailabilityData, findAvailabilityException, invalidateProjection, refreshAvailabilityData, refreshConfiguration, retryTeamExceptions, saveConfiguration, selectSlot, selectedProfessional, setAffectedErrors, setProjection, setQueryErrors, setQueryFilters, validateStart } from './view.js';
 import { getBlockScope } from '../../../shared/screens/disponibilidad/view.js';
 import { assignmentDraft, clearAssignmentDraft, validateAssignmentSnapshot } from '../../../shared/screens/disponibilidad/branch-assignments.js';
-import { validateConfiguration, validateInclusiveRange } from '../../../shared/screens/disponibilidad/operational-contract.js';
+import { validateConnectedConfiguration, validateInclusiveRange } from '../../../shared/screens/disponibilidad/operational-contract.js';
 import { clearAvailabilityErrors, clearAvailabilityField, exceptionApiErrors, showAvailabilityErrors, showAvailabilityGeneralError, validateException, validateProjection } from '../../../shared/screens/disponibilidad/errors.js';
 
 const route = (personId = selectedProfessional().id) => `/profesionales/${personId}`;
@@ -228,8 +228,9 @@ document.addEventListener('submit', async (event) => {
   }
   if (form.id === 'agenda-configuration-form') {
     const data = new FormData(form);
-    const values = { modo: data.get('modo'), intervaloMinutos: Number(data.get('intervaloMinutos')), anticipacionMinutos: Number(data.get('anticipacionMinutos')), diasFuturos: Number(data.get('diasFuturos')) };
-    const saved = await saveConfiguration(values, validateConfiguration(values));
+    // El contrato conectado usa el tiempo después de cada cita; el campo viejo pertenece solo a la demo.
+    const values = { modo: data.get('modo'), tiempoEntreCitasMinutos: Number(data.get('tiempoEntreCitasMinutos')), anticipacionMinutos: Number(data.get('anticipacionMinutos')), diasFuturos: Number(data.get('diasFuturos')) };
+    const saved = await saveConfiguration(values, validateConnectedConfiguration(values));
     if (saved) toast('Reglas de agenda guardadas.');
     return;
   }

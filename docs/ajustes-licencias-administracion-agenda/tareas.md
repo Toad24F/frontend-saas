@@ -104,13 +104,13 @@ Cada tarea se estima en **15 o 25 minutos, incluida su comprobación focalizada*
   Hecho cuando: La UI consulta causas disponibles y explica que las citas no fueron canceladas ni reprogramadas automáticamente.
 - [x] **FALA-T043 — Probar retiro y recuperación** · 25 min · Depende de: T040–T042 · RF-48–RF-51, RF-57–RF-58.
   Hecho cuando: Pruebas cubren los cuatro recursos, permisos, restauración inactiva y rechazo de activación con cupo lleno.
-- [ ] **FALA-T044 — Leer publicación global de precios** · 15 min · Depende de: T002 · RF-52, RF-57.
+- [x] **FALA-T044 — Leer publicación global de precios** · 15 min · Depende de: T002 · RF-52, RF-57.
   Hecho cuando: Administrador ve `mostrarPreciosPublicos` desde la ruta autorizada y un error de lectura no se reemplaza por valor supuesto.
-- [ ] **FALA-T045 — Guardar publicación y explicar alcance** · 25 min · Depende de: T044 · RF-35–RF-36, RF-52.
+- [x] **FALA-T045 — Guardar publicación y explicar alcance** · 25 min · Depende de: T044 · RF-35–RF-36, RF-52.
   Hecho cuando: El control guarda el booleano confirmado y explica que afecta también servicios creados después.
-- [ ] **FALA-T046 — Probar publicación con portal real** · 25 min · Depende de: T012, T045 · RF-35–RF-38, RF-52.
+- [x] **FALA-T046 — Probar publicación con portal real** · 25 min · Depende de: T012, T045 · RF-35–RF-38, RF-52.
   Hecho cuando: Alternar el estado cambia respuestas y presentación futuras sin alterar el resumen histórico interno.
-- [ ] **FALA-T047 — Adaptar lectura de configuración** · 15 min · Depende de: T002 · RF-53–RF-54.
+- [x] **FALA-T047 — Adaptar lectura de configuración** · 15 min · Depende de: T002 · RF-53–RF-54.
   Hecho cuando: Se lee y muestra `tiempoEntreCitasMinutos`, incluido 0, sin usar `intervaloMinutos` como dato vigente.
 - [ ] **FALA-T048 — Adaptar formulario de agenda** · 25 min · Depende de: T047 · RF-53–RF-54.
   Hecho cuando: El PUT contiene exactamente modo, tiempo entre citas, anticipación y horizonte; valores fuera de 0–60/múltiplos de 5 se señalan.

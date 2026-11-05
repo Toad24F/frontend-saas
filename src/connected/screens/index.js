@@ -8,6 +8,7 @@ import { businessDetail } from './negocio/view.js';
 import { receptionists } from './recepcionistas/view.js';
 import { empty } from '../../shared/ui.js';
 import './disponibilidad/actions.js';
+import './cuenta/actions.js';
 
 const views = {
   profesionales: professionals,

@@ -11,7 +11,18 @@ const backendRequire = createRequire(resolve(backend, 'package.json'));
 const { createConnection } = backendRequire('mysql2/promise');
 const dotenv = backendRequire('dotenv');
 const bcrypt = backendRequire('bcrypt');
-const source = dotenv.parse(readFileSync(resolve(backend, '.env')));
+const production = dotenv.parse(readFileSync(resolve(backend, '.env')));
+const isolated = dotenv.parse(readFileSync(resolve(backend, '.env.test.local')));
+// El runner usa solo las credenciales de test; DB_NAME cotidiano queda como
+// barrera adicional para impedir que la base temporal reutilice ese nombre.
+for (const key of ['TEST_DB_HOST', 'TEST_DB_PORT', 'TEST_DB_USER', 'TEST_DB_PASS', 'TEST_DB_NAME', 'TEST_DB_CONFIRMED']) {
+  if (!isolated[key]) throw new Error(`Falta ${key} en .env.test.local.`);
+}
+if (isolated.TEST_DB_NAME !== isolated.TEST_DB_CONFIRMED || isolated.TEST_DB_NAME === production.DB_NAME) {
+  throw new Error('La base de pruebas no está confirmada o coincide con la cotidiana.');
+}
+const source = { ...production, DB_HOST: isolated.TEST_DB_HOST, DB_PORT: isolated.TEST_DB_PORT,
+  DB_USER: isolated.TEST_DB_USER, DB_PASS: isolated.TEST_DB_PASS };
 const name = `citas_persistencia_${randomUUID().replaceAll('-', '')}`;
 const delay = (ms) => new Promise((done) => setTimeout(done, ms));
 
