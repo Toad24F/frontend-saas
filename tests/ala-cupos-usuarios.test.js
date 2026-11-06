@@ -13,7 +13,7 @@ test('FALA-T031: lectura muestra límites y consumo de los dos roles desde API',
   const result = await readUserQuota(7, async (path) => { paths.push(path); return quota; });
   assert.deepEqual(paths, ['/negocios/7/cupo-usuarios']);
   assert.deepEqual(result, quota);
-  assert.match(quotaHtml(result), /2 \/ 5|1 \/ 3/);
+  assert.match(quotaHtml(result), /2 de 5|1 de 3/);
   await assert.rejects(readUserQuota(7, async () => ({ profesionales: { limite: 5 } })), /respuesta|cupo/i);
 });
 

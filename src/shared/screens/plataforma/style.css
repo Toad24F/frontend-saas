@@ -1,0 +1,56 @@
+.platform-directory { min-width: 0; }
+.platform-metric { display: flex; flex-direction: column; align-items: stretch; text-align: left; width: 100%; color: var(--ink); cursor: default; }
+.platform-metric .stat-top { display: flex; justify-content: space-between; gap: 10px; }
+.platform-metric .stat-number, .platform-metric .stat-caption { display: block; }
+.platform-metric .stat-icon { background: var(--surface-soft); color: var(--accent); }
+.platform-directory :focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+.platform-list { padding: 8px 0 24px; }
+.platform-list h2 { font-size: 18px; font-weight: 650; margin: 0 0 8px; }
+.platform-list > p { color: var(--muted); font-size: 13px; }
+.platform-filters { display: flex; flex-wrap: wrap; align-items: end; gap: 12px; margin: 24px 0; }
+.platform-filters label { display: grid; gap: 6px; font-size: 12px; font-weight: 600; min-width: 0; flex: 1 1 180px; }
+.platform-filters .platform-search { flex: 2 1 240px; }
+.platform-filters :is(select, input, button), .platform-directory .btn { min-height: 44px; }
+.platform-table { min-width: 0; width: 100%; table-layout: fixed; }
+.platform-table th:nth-child(1) { width: 23%; }
+.platform-table th:nth-child(2) { width: 23%; }
+.platform-table th:nth-child(3) { width: 18%; }
+.platform-table th:nth-child(4) { width: 18%; }
+.platform-table th:nth-child(5) { width: 18%; }
+.platform-table :is(td, th) { padding: 16px 12px; overflow-wrap: anywhere; vertical-align: middle; }
+.platform-table thead th { white-space: normal; }
+.platform-table .person-cell { min-width: 0; }
+.platform-table .person-cell > span { min-width: 0; }
+.platform-table .btn { white-space: nowrap; }
+.platform-license { display: inline-block; padding: 6px 9px; border-radius: 7px; font-size: 12px; font-weight: 600; background: var(--surface-soft); color: var(--muted); }
+.platform-license-vigente { background: #e4f1e9; color: #286443; }
+.platform-license-pendiente, .platform-license-suspension_pendiente { background: #fbefcf; color: #805900; }
+.platform-license-suspendida, .platform-license-vencida { background: #fbe5e3; color: #9e302e; }
+html[data-theme='dark'] .platform-license-vigente { background: #253e32; color: #a5ddbb; }
+html[data-theme='dark'] :is(.platform-license-pendiente, .platform-license-suspension_pendiente) { background: #463b24; color: #f0ce87; }
+html[data-theme='dark'] :is(.platform-license-suspendida, .platform-license-vencida) { background: #4e2b2a; color: #ffb6ae; }
+.platform-footer, .platform-footer nav { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+.platform-footer { margin-top: 22px; font-size: 12px; }
+.platform-footer p { margin: 0; color: var(--muted); }
+.platform-empty { padding: 32px 0; color: var(--muted); }
+.platform-empty h3 { color: var(--ink); font-size: 16px; }
+.platform-feedback { padding: 12px 0; }
+.platform-demo-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+@media (max-width: 1000px) {
+  .platform-directory .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .platform-directory .stat-card { padding: 14px; }
+  .platform-directory .stat-caption { font-size: 11px; }
+  .platform-filters label, .platform-filters .platform-search { flex-basis: 100%; }
+  .platform-filters button { flex: 1 1 120px; }
+  .platform-table, .platform-table tbody, .platform-table tr, .platform-table td { display: block; width: 100%; }
+  .platform-table thead { display: none; }
+  .platform-table tr { padding: 16px 0; border-bottom: 1px solid var(--border); }
+  .platform-table td { display: grid; grid-template-columns: 100px minmax(0, 1fr); gap: 12px; border: 0; padding: 8px 0; }
+  .platform-table td::before { content: attr(data-label); color: var(--muted); font-size: 12px; }
+  .platform-table td:first-child { display: block; padding-bottom: 14px; }
+  .platform-table td:first-child::before { display: none; }
+  .platform-table .platform-license { justify-self: start; }
+  .platform-footer nav { width: 100%; }
+}
+
+.platform-directory [data-platform-clear]:disabled { opacity: .45; cursor: default; }

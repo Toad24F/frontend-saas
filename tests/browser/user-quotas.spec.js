@@ -13,9 +13,10 @@ async function login(page, role = 'superadmin') {
 // crea y destruye. Las aserciones consultan el resultado persistido allí.
 test('FALA-T031–T032: 5/3 inicial, edición de dos límites y 409 conserva borrador', async ({ page }) => {
   await login(page);
-  const section = page.locator('section', { has: page.getByRole('heading', { name: 'Cupos de usuarios' }) });
-  await expect(section).toContainText('2 / 5');
-  await expect(section).toContainText('1 / 3');
+  await page.getByRole('tab', { name: 'Límites y uso' }).click();
+  const section = page.locator('section', { has: page.getByRole('heading', { name: 'Usuarios', exact: true }) });
+  await expect(section).toContainText('2 de 5');
+  await expect(section).toContainText('1 de 3');
   await section.getByRole('button', { name: 'Cambiar cupos de usuarios' }).click();
   const dialog = page.getByRole('dialog');
   await dialog.getByLabel('Límite de profesionales activos').fill('0');
@@ -26,12 +27,12 @@ test('FALA-T031–T032: 5/3 inicial, edición de dos límites y 409 conserva bor
   await expect(dialog).toContainText(/menor al consumo activo/i);
   await expect(dialog.getByLabel('Límite de profesionales activos')).toHaveValue('1');
   await expect(dialog.getByLabel('Límite de recepcionistas activos')).toHaveValue('2');
-  await expect(section).toContainText('2 / 5');
+  await expect(section).toContainText('2 de 5');
   await dialog.getByLabel('Límite de profesionales activos').fill('2');
   await dialog.getByRole('button', { name: 'Guardar' }).click();
   await expect(dialog).toHaveCount(0);
-  await expect(section).toContainText('2 / 2');
-  await expect(section).toContainText('1 / 2');
+  await expect(section).toContainText('2 de 2');
+  await expect(section).toContainText('1 de 2');
   const [saved] = await rows('SELECT limite_profesionales_activos, limite_recepcionistas_activos FROM negocios WHERE id=1');
   expect(Number(saved.limite_profesionales_activos)).toBe(2);
   expect(Number(saved.limite_recepcionistas_activos)).toBe(2);
@@ -64,6 +65,7 @@ test('FALA-T033–T034: administrador ve cupos propios y no puede editar límite
 
 test('FALA-T034: activación sin lugar conserva la cuenta inactiva y explica el rechazo', async ({ page, browser }) => {
   await login(page);
+  await page.getByRole('tab', { name: 'Límites y uso' }).click();
   await page.getByRole('button', { name: 'Cambiar cupos de usuarios' }).click();
   await page.getByRole('dialog').getByLabel('Límite de recepcionistas activos').fill('1');
   await page.getByRole('dialog').getByRole('button', { name: 'Guardar' }).click();
@@ -88,12 +90,13 @@ test('FALA-T034: activación sin lugar conserva la cuenta inactiva y explica el 
 // comprueban que el formulario sigue operable sobre la navegación móvil.
 test('FALA-T034: cupos visibles en escritorio y móvil, claro y oscuro', async ({ page }, testInfo) => {
   await login(page);
-  await expect(page.getByRole('heading', { name: 'Cupos de usuarios' })).toBeVisible();
+  await page.getByRole('tab', { name: 'Límites y uso' }).click();
+  await expect(page.getByRole('heading', { name: 'Usuarios', exact: true })).toBeVisible();
   await page.screenshot({ path: testInfo.outputPath('quotas-desktop-light.png'), fullPage: true, animations: 'disabled' });
   await page.getByRole('button', { name: 'Activar modo oscuro' }).click();
   await page.screenshot({ path: testInfo.outputPath('quotas-desktop-dark.png'), fullPage: true, animations: 'disabled' });
   await page.setViewportSize({ width: 390, height: 844 });
-  await expect(page.getByRole('heading', { name: 'Cupos de usuarios' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Usuarios', exact: true })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.screenshot({ path: testInfo.outputPath('quotas-mobile-dark.png'), fullPage: true, animations: 'disabled' });
   await page.getByRole('button', { name: 'Cambiar cupos de usuarios' }).click();

@@ -7,8 +7,133 @@
 .business-detail-list strong { text-align: right; overflow-wrap: anywhere; }
 .business-detail-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
 .business-detail-section .information-note { margin-top: 18px; }
+.business-workspace { min-width: 0; }
+:is(.business-workspace, #license-suspension-form) .business-suspend-button {
+  --bs-btn-bg: #5b151b;
+  --bs-btn-border-color: #b4232f;
+  --bs-btn-color: #fff;
+  --bs-btn-hover-bg: #941c26;
+  --bs-btn-hover-border-color: #941c26;
+  --bs-btn-hover-color: #fff;
+  --bs-btn-active-bg: #791721;
+  --bs-btn-active-border-color: #791721;
+  --bs-btn-active-color: #fff;
+  --bs-btn-disabled-bg: #b4232f;
+  --bs-btn-disabled-border-color: #b4232f;
+  --bs-btn-disabled-color: #fff;
+  background: var(--bs-btn-bg);
+  border-color: var(--bs-btn-border-color);
+  color: #fff;
+}
+html[data-theme='light'] :is(.business-workspace, #license-suspension-form) .business-suspend-button {
+  --bs-btn-bg: #cb4646;
+  --bs-btn-border-color: #c93636;
+  --bs-btn-hover-bg: #a92727;
+  --bs-btn-hover-border-color: #a92727;
+  --bs-btn-active-bg: #8f2020;
+  --bs-btn-active-border-color: #8f2020;
+  --bs-btn-disabled-bg: #c93636;
+  --bs-btn-disabled-border-color: #c93636;
+}
+:is(.business-workspace, #license-suspension-form) .business-suspend-button:is(:hover, :focus-visible):not(:disabled) { background: var(--bs-btn-hover-bg); border-color: var(--bs-btn-hover-border-color); color: #fff; }
+:is(.business-workspace, #license-suspension-form) .business-suspend-button:active:not(:disabled) { background: var(--bs-btn-active-bg); border-color: var(--bs-btn-active-border-color); color: #fff; }
+:is(.business-workspace, #license-suspension-form) .business-suspend-button:focus-visible { outline: 3px solid #d9656d; outline-offset: 3px; box-shadow: none; }
+#license-suspension-form .dialog-footer { background: transparent; border-top: 0; margin-top: 16px; padding: 18px 0 0; }
+.business-workspace [role='tabpanel'][hidden] { display: none !important; }
+.business-workspace :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.business-general { min-width: 0; }
+.business-general-section { padding: 22px 0 30px; border-bottom: 1px solid var(--border); }
+.business-general-section + .business-general-section { padding-top: 30px; }
+.business-general-section h2 { margin: 0; font-size: 18px; font-weight: 650; }
+.business-general-description { color: var(--muted); font-size: 13px; margin: 12px 0 0; }
+.business-license-state { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 14px; font-size: 13px; }
+.business-license-state span { color: var(--muted); }
+.business-license-badge { display: inline-flex; align-items: center; gap: 8px; padding: 7px 12px; border-radius: 8px; background: var(--surface-soft); color: var(--ink); font-size: 14px; font-weight: 650; }
+.business-license-badge::before { content: ''; width: 7px; height: 7px; flex: 0 0 7px; border-radius: 50%; background: currentColor; }
+.business-license-badge-vigente { background: #e4f1e9; color: #286443; }
+.business-license-badge-pendiente, .business-license-badge-suspension_pendiente { background: #fbefcf; color: #805900; }
+.business-license-badge-suspendida, .business-license-badge-vencida { background: #fbe5e3; color: #9e302e; }
+html[data-theme='dark'] .business-license-badge-vigente { background: #253e32; color: #a5ddbb; }
+html[data-theme='dark'] :is(.business-license-badge-pendiente, .business-license-badge-suspension_pendiente) { background: #463b24; color: #f0ce87; }
+html[data-theme='dark'] :is(.business-license-badge-suspendida, .business-license-badge-vencida) { background: #4e2b2a; color: #ffb6ae; }
+.business-limits .quota-meter { width: 100%; }
+.business-mail-section .mail-filters { margin-top: 24px; }
+.business-mail-section > .information-note { margin-top: 18px; }
+.business-workspace .business-detail-actions .btn { min-height: 44px; }
+.business-license-time { --time-color: var(--accent); margin-top: 24px; width: 100%; }
+.business-license-time-warning { --time-color: #956200; }
+.business-license-time-expired { --time-color: #b63838; }
+.business-license-time-heading { display: flex; justify-content: space-between; align-items: end; flex-wrap: wrap; gap: 18px 32px; }
+.business-license-time-heading > div { display: grid; gap: 5px; }
+.business-license-time-heading span, .business-license-time-heading small { color: var(--muted); font-size: 12px; }
+.business-license-time-heading > div:first-child > strong { font-size: clamp(22px, 3vw, 30px); line-height: 1.25; font-weight: 650; font-variant-numeric: tabular-nums; }
+.business-license-expiry { text-align: right; font-size: 13px; }
+.business-license-time progress { appearance: none; display: block; width: 100%; height: 10px; border: none; border-radius: 6px; overflow: hidden; background: var(--surface-soft); color: var(--time-color); margin: 16px 0 9px; }
+.business-license-time progress::-webkit-progress-bar { background: var(--surface-soft); border-radius: 6px; }
+.business-license-time progress::-webkit-progress-value { background: var(--time-color); border-radius: 6px; }
+.business-license-time progress::-moz-progress-bar { background: var(--time-color); border-radius: 6px; }
+.business-license-percentage { font-size: 12px; color: var(--muted); margin: 0; }
+.business-license-notice { color: var(--muted); margin: 16px 0 0; font-size: 13px; max-width: 880px; }
+.business-admin-facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 40px; margin: 24px 0 0; max-width: 1000px; }
+.business-admin-facts > div { min-width: 0; }
+.business-admin-facts dt { color: var(--muted); font-size: 12px; font-weight: 400; margin-bottom: 6px; }
+.business-admin-facts dd { margin: 0; overflow-wrap: anywhere; font-size: 14px; font-weight: 600; }
+.business-general .business-detail-actions .btn { min-height: 44px; }
+html[data-theme='dark'] .business-license-time-warning { --time-color: #e3b85d; }
+html[data-theme='dark'] .business-license-time-expired { --time-color: #f29189; }
+.quota-meter { --meter-color: var(--accent); margin-top: 22px; }
+.quota-meter-warning { --meter-color: #956200; }
+.quota-meter-full { --meter-color: #b63838; }
+.quota-meter-heading, .quota-meter-caption { display: flex; justify-content: space-between; gap: 12px; }
+.quota-meter-heading span, .quota-meter-caption { font-variant-numeric: tabular-nums; }
+.quota-meter-caption { color: var(--muted); font-size: 12px; }
+.quota-meter meter { appearance: none; display: block; width: 100%; height: 15px; border: none; border-radius: 6px;  overflow: hidden; }
+.quota-meter meter::-webkit-meter-bar { background: var(--surface-soft); border: none; border-radius: 6px; }
+.quota-meter meter::-webkit-meter-optimum-value { background: var(--meter-color); border-radius: 6px; }
+.quota-meter meter::-moz-meter-bar { background: var(--meter-color); }
+.mail-filters { display: flex; flex-wrap: wrap; align-items: end; gap: 12px; }
+.mail-filters label { display: grid; gap: 6px; font-size: 12px; font-weight: 600; flex: 1 1 180px; min-width: 0; }
+.mail-filters :is(select, button) { min-height: 44px; }
+.mail-table { width: 100%; min-width: 0; table-layout: fixed; margin-top: 22px; }
+.mail-table th:nth-child(1) { width: 27%; }
+.mail-table th:nth-child(2) { width: 17%; }
+.mail-table th:nth-child(3) { width: 11%; }
+.mail-table :is(td, th) { overflow-wrap: anywhere; }
+.mail-follow-up { display: grid; gap: 7px; justify-items: start; font-size: 12px; }
+.mail-error { color: var(--muted); }
+html[data-theme='light'] .business-workspace .mail-state-enviado { background: #e4f1e9; color: #286443; }
+html[data-theme='light'] .business-workspace .mail-state-fallido { background: #fbe5e3; color: #9e302e; }
+html[data-theme='light'] .business-workspace :is(.mail-state-pendiente, .mail-state-tomado) { background: #fbefcf; color: #805900; }
+.mail-state-descartado { background: var(--surface-soft); color: var(--muted); }
+.mail-footer, .mail-footer nav { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+.mail-footer { margin-top: 20px; }
+.mail-footer p { margin: 0; color: var(--muted); font-size: 12px; }
+.mail-footer nav { font-size: 12px; }
+.mail-footer button, .mail-follow-up button { min-height: 44px; }
+.mail-empty { padding: 32px 0; color: var(--muted); }
+.mail-empty h3 { font-size: 16px; color: var(--ink); }
+html[data-theme='dark'] .quota-meter-warning { --meter-color: #e3b85d; }
+html[data-theme='dark'] .quota-meter-full { --meter-color: #f29189; }
+html[data-theme='dark'] .mail-state-enviado { background: #253e32; color: #a5ddbb; }
+html[data-theme='dark'] .mail-state-fallido { background: #4e2b2a; color: #ffb6ae; }
+html[data-theme='dark'] :is(.mail-state-pendiente, .mail-state-tomado) { background: #463b24; color: #f0ce87; }
 @media (max-width: 900px) { .business-detail-grid { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 767px) {
+  .business-admin-facts { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+  .business-general-section { padding: 18px 0 24px; }
+  .business-license-expiry { text-align: left; }
+  .business-workspace .availability-tabs button { min-height: 44px; }
+  .mail-table, .mail-table tbody, .mail-table tr, .mail-table td { display: block; width: 100%; }
+  .mail-table thead { display: none; }
+  .mail-table tr { padding: 14px 0; border-bottom: 1px solid var(--border); }
+  .mail-table td { display: grid; grid-template-columns: 85px minmax(0, 1fr); gap: 12px; padding: 8px 0; border: 0; }
+  .mail-table td::before { content: attr(data-label); color: var(--muted); font-size: 12px; }
+  .mail-table td:first-child strong { grid-column: 2; }
+  .mail-table .mail-state { justify-self: start; }
+  .mail-footer nav { width: 100%; }
+  .mail-filters label { flex-basis: 100%; }
+  .mail-filters button { flex: 1 1 120px; }
+  .quota-meter-heading { flex-wrap: wrap; }
   .business-detail-section { padding: 18px; }
   .business-detail-list > div { display: grid; gap: 3px; }
   .business-detail-list strong { text-align: left; }

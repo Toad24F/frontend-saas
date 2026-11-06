@@ -74,7 +74,7 @@ export function businessAction(action, value = null) {
   }, 'Recuperación encolada.');
   if (action === 'suspend' && detail?.validity?.estado === 'vigente') {
     // Se muestra un borrador; el cuerpo exacto queda congelado al primer POST.
-    const dialog = modal('Programar suspensión', `<form id="license-suspension-form" class="dialog-body"><p>El plazo inicia en dos días. Cero bloquea el acceso inmediatamente; el bloqueo programado que responda el servidor será la fecha efectiva.</p><label for="license-delay">Plazo en días</label><input class="form-control" id="license-delay" name="plazoDias" type="number" min="0" max="30" step="1" value="2" required>${errorSlot}<div class="dialog-footer"><button type="button" class="btn btn-light" data-dismiss>Cancelar</button><button type="submit" class="btn btn-primary">Programar suspensión</button></div></form>`);
+    const dialog = modal('Programar suspensión', `<form id="license-suspension-form" class="dialog-body"><p>El plazo inicia en dos días. Cero bloquea el acceso inmediatamente; el bloqueo programado que responda el servidor será la fecha efectiva.</p><label for="license-delay">Plazo en días</label><input class="form-control" id="license-delay" name="plazoDias" type="number" min="0" max="30" step="1" value="2" required>${errorSlot}<div class="dialog-footer"><button type="button" class="btn btn-light" data-dismiss>Cancelar</button><button type="submit" class="btn btn-danger business-suspend-button">Programar suspensión</button></div></form>`);
     dialog.querySelector('[data-dismiss]').onclick = () => dialog.close();
     dialog.querySelector('form').onsubmit = async (event) => {
       event.preventDefault();

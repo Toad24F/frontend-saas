@@ -1,3 +1,4 @@
+import { quotaMeter } from './quota-meter.js';
 const integer = (value, minimum = 0) => Number.isSafeInteger(value) && value >= minimum;
 const esc = (value) => String(value).replace(/[&<>"']/g, (char) =>
   ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
@@ -37,10 +38,7 @@ export async function saveUserLimits(businessId, values, request) {
 // permanece separada del cupo histórico de sucursales.
 export function quotaHtml(data) {
   if (!validQuota(data)) throw new Error('La respuesta de cupo de usuarios no es válida.');
-  return `<div class="business-detail-list"><div><span>Profesionales activos</span><strong>${esc(data.profesionales.activos)} / ${esc(data.profesionales.limite)}</strong></div>
-    <div><span>Recepcionistas activos</span><strong>${esc(data.recepcionistas.activos)} / ${esc(data.recepcionistas.limite)}</strong></div>
-    <div><span>Disponibles</span><strong>${esc(data.profesionales.disponibles)} profesionales · ${esc(data.recepcionistas.disponibles)} recepción</strong></div></div>
-    <div class="business-detail-actions"><button type="button" class="btn btn-light" data-business-action="user-limits">Cambiar cupos de usuarios</button></div>`;
+  return `${quotaMeter('Profesionales activos', data.profesionales.activos, data.profesionales.limite, data.profesionales.disponibles)}${quotaMeter('Recepcionistas activos', data.recepcionistas.activos, data.recepcionistas.limite, data.recepcionistas.disponibles)}<div class="business-detail-actions"><button type="button" class="btn btn-light" data-business-action="user-limits">Cambiar cupos de usuarios</button></div>`;
 }
 
 // El Administrador lee solo el cupo de su negocio a través de las rutas de

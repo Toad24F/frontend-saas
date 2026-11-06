@@ -1217,7 +1217,6 @@ html[data-theme='dark'] .sidebar .brand .brand-logo-on-light { display: none; }
 }
 .soft-tag {
   background: #f3f5f6;
-  border: 1px solid #e9ecee;
   border-radius: 5px;
   padding: 5px 9px;
   color: #7b8590;

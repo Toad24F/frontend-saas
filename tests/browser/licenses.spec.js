@@ -9,7 +9,7 @@ async function login(page, role = 'superadmin') {
   await page.getByRole('button', { name: 'Entrar' }).click();
 }
 async function detail(page) {
-  await expect(page.getByRole('heading', { name: 'Licencia y cupo' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Licencia', exact: true })).toBeVisible();
 }
 
 // Todos los cambios van a la base efímera y usan la cuenta superadmin ficticia.
@@ -77,6 +77,7 @@ test('FALA-T029–T030: avisos se muestran por estado y otro rol carece de accio
     body: JSON.stringify(['pendiente', 'fallido', 'enviado'].map((estado, index) => ({ id: index + 1,
       tipo: 'aviso_licencia', estado, intentos: index, confirmadoEn: null, proximoIntentoEn: null }))) }));
   await page.reload(); await detail(page);
+  await page.getByRole('tab', { name: /Historial de correos/ }).click();
   await expect(page.getByRole('heading', { name: 'Historial de correos' })).toBeVisible();
   for (const label of ['Pendiente', 'Fallido', 'Enviado']) await expect(page.locator('.soft-tag', { hasText: label }).first()).toBeVisible();
   const admin = await browser.newContext();
