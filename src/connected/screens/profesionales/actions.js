@@ -28,7 +28,7 @@ export async function professionalAction(action, id) {
     catch { quotaIntro = '<p class="form-intro">No se pudo consultar el cupo vigente. El servidor lo comprobará al reactivar.</p>'; }
   }
   // El retiro conserva historial y no equivale a desactivar ni a borrar.
-  const dialog = modal(operation.title, `<div class="dialog-body">${quotaIntro}<p><strong>${escape(person.name)}</strong>: ${operation.message}</p>${errorSlot}</div><div class="dialog-footer"><button type="button" class="btn btn-light" data-dismiss>Cancelar</button><button type="button" class="btn ${action === 'reactivate' ? 'btn-primary' : 'btn-danger-soft'}" data-confirm>${operation.label}</button></div>`);
+  const dialog = modal(operation.title, `<div class="dialog-body">${quotaIntro}<p><strong>${escape(person.name)}</strong>: ${operation.message}</p>${errorSlot}</div><div class="dialog-footer"><button type="button" class="btn btn-light" data-dismiss>Cancelar</button><button type="button" class="btn ${action === 'reactivate' ? 'btn-primary' : action === 'disable' ? 'action-danger' : 'action-caution'}" data-confirm>${operation.label}</button></div>`);
   dialog.querySelector('[data-dismiss]').onclick = () => dialog.close();
   dialog.querySelector('[data-confirm]').onclick = async (event) => {
     const button = event.currentTarget;

@@ -33,7 +33,7 @@ test('FALA-T035–T040: cuatro retiros recuperables y consultas separadas', asyn
     await page.goto(`${origin()}/admin/${item.type}`);
     const card = page.locator(item.article, { hasText: item.name }).first();
     await expect(card).toBeVisible();
-    if (item.type === 'profesionales' || item.type === 'servicios' || item.type === 'sucursales') {
+    if (['profesionales', 'recepcionistas', 'servicios', 'sucursales'].includes(item.type)) {
       await card.locator('summary').click();
     }
     await card.locator(item.action).click();
@@ -43,13 +43,13 @@ test('FALA-T035–T040: cuatro retiros recuperables y consultas separadas', asyn
     await dialog.getByRole('button', { name: /Inhabilitar/ }).click();
     await expect(dialog).toHaveCount(0);
     await expect(card).toHaveCount(0);
-    const section = page.getByRole('region', { name: `Inhabilitados de ${item.type}` });
-    await section.getByRole('button', { name: 'Consultar inhabilitados' }).click();
+    await page.locator('[data-retired-open]').click();
+    const section = page.getByRole('dialog');
     await expect(section).toContainText(item.name);
     await expect(section).toContainText('Inhabilitado');
     await section.getByRole('button', { name: `Ver detalle de ${item.name}` }).click();
     await expect(page.getByRole('dialog')).toContainText(/Inhabilitado/);
-    await page.getByRole('dialog').locator('[data-dismiss]').click();
+    await page.getByRole('dialog').getByRole('button', { name: 'Volver a inhabilitados' }).click();
     if (item.type === 'servicios') {
       const writes = [];
       page.on('request', (request) => { if (request.method() !== 'GET' && /citas|reservas/.test(request.url())) writes.push(request.url()); });
@@ -71,7 +71,7 @@ test('FALA-T035–T040: cuatro retiros recuperables y consultas separadas', asyn
 test('FALA-T035: la demo conserva sus catálogos sin fingir retiros conectados', async ({ page }) => {
   await page.goto(`${origin()}/admin/profesionales?demo=1`);
   await expect(page.getByRole('heading', { name: 'Profesionales' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Consultar inhabilitados' })).toHaveCount(0);
+  await expect(page.locator('[data-retired-open]')).toHaveCount(0);
   await expect(page.locator('[data-professional-id]').first()).toBeVisible();
 });
 
@@ -98,8 +98,8 @@ test('FALA-T041–T043: restaurar los cuatro deja inactivo y activar respeta cup
   ];
   for (const [type, name, selector] of items) {
     await page.goto(`${origin()}/admin/${type}`);
-    const section = page.getByRole('region', { name: `Inhabilitados de ${type}` });
-    await section.getByRole('button', { name: 'Consultar inhabilitados' }).click();
+    await page.locator('[data-retired-open]').click();
+    const section = page.getByRole('dialog');
     await section.getByRole('button', { name: `Restaurar ${name}` }).click();
     const dialog = page.getByRole('dialog');
     await expect(dialog).toContainText(/inactivo|inactiva/i);
@@ -107,7 +107,7 @@ test('FALA-T041–T043: restaurar los cuatro deja inactivo y activar respeta cup
     await expect(dialog).toHaveCount(0);
     const card = page.locator(selector, { hasText: name }).first();
     await expect(card).toContainText(/Inactivo|Inactiva/);
-    await section.getByRole('button', { name: 'Consultar inhabilitados' }).click();
+    await page.locator('[data-retired-open]').click();
     await expect(section).not.toContainText(name);
   }
   await rows('UPDATE negocios SET limite_profesionales_activos=1 WHERE id=2');
@@ -127,16 +127,17 @@ test('FALA-T040: inhabilitados visibles en escritorio y móvil, claro y oscuro',
   await page.goto(`${origin()}/admin/recepcionistas`);
   // La prueba anterior restauró esta cuenta. Se retira de nuevo en la base
   // efímera para inspeccionar la sección con un resultado real.
+  await page.locator('[data-reception-entry]', { hasText: 'Recepción Retiro QA' }).locator('summary').click();
   await page.getByRole('button', { name: 'Inhabilitar a Recepción Retiro QA' }).click();
   await page.getByRole('dialog').getByRole('button', { name: 'Inhabilitar' }).click();
   await expect(page.getByRole('dialog')).toHaveCount(0);
-  const section = page.getByRole('region', { name: 'Inhabilitados de recepcionistas' });
-  await section.getByRole('button', { name: 'Consultar inhabilitados' }).click();
+  await page.locator('[data-retired-open]').click();
+  const section = page.getByRole('dialog');
   await expect(section).toContainText('Recepción Retiro QA');
   await expect(page.locator('#toast-region .app-toast')).toHaveCount(0);
   await page.evaluate(() => scrollTo(0, 0));
   await page.screenshot({ path: testInfo.outputPath('retired-desktop-light.png'), fullPage: true, animations: 'disabled' });
-  await page.getByRole('button', { name: 'Activar modo oscuro' }).click();
+  await page.evaluate(() => { document.documentElement.dataset.theme = 'dark'; });
   await page.screenshot({ path: testInfo.outputPath('retired-desktop-dark.png'), fullPage: true, animations: 'disabled' });
   await page.setViewportSize({ width: 390, height: 844 });
   await page.evaluate(() => scrollTo(0, 0));
@@ -151,10 +152,10 @@ test('FALA-T040: inhabilitados visibles en escritorio y móvil, claro y oscuro',
   await page.screenshot({ path: testInfo.outputPath('retired-mobile-dark.png'), fullPage: true, animations: 'disabled' });
   await restore.click();
   await page.screenshot({ path: testInfo.outputPath('retired-restore-mobile-dark.png'), animations: 'disabled' });
-  await page.getByRole('dialog').getByRole('button', { name: 'Cancelar' }).click();
+  await page.getByRole('dialog').getByRole('button', { name: 'Volver a inhabilitados' }).click();
   await section.getByRole('button', { name: 'Ver detalle de Recepción Retiro QA' }).click();
   await page.screenshot({ path: testInfo.outputPath('retired-detail-mobile-dark.png'), animations: 'disabled' });
-  await page.getByRole('dialog').locator('[data-dismiss]').click();
-  await page.getByRole('button', { name: 'Activar modo claro' }).click();
+  await page.getByRole('dialog').getByRole('button', { name: 'Volver a inhabilitados' }).click();
+  await page.evaluate(() => { document.documentElement.dataset.theme = 'light'; });
   await page.screenshot({ path: testInfo.outputPath('retired-mobile-light.png'), fullPage: true, animations: 'disabled' });
 });

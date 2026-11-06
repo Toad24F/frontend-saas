@@ -1,3 +1,6 @@
+import { capacityHtml } from '../../../shared/screens/catalog-header.js';
+import { roleCapacity } from '../../modules/catalogos/capacity.js';
+import { catalogHead, clearCatalogButton, hasCatalogFilters } from '../../../shared/screens/catalog-header.js';
 import { state, render } from '../../../shared/app.js';
 import { getCatalogView, setCatalogView } from '../../../shared/screens/catalog-view.js';
 import { list } from '../../../shared/data.js';
@@ -30,7 +33,7 @@ function renderPerson(person, visible) {
     <div class="professional-person">${avatar(person.initials, 'mint', 'professional-avatar')}<div class="professional-identity"><h2>${escape(person.name)}</h2><p>Cuenta de recepción</p><small>${escape(person.email)}</small></div></div>
     <div class="professional-assignment"><span>${icon('calendar')}${escape(activationLabel(person.activatedAt))}</span></div>
     <span class="professional-status ${resourceStatus(person).className}"><i></i>${resourceStatus(person).label === 'Activo' ? 'Activa' : resourceStatus(person).label === 'Inactivo' ? 'Inactiva' : 'Inhabilitada'}</span>
-    <div class="professional-entry-actions"><button type="button" class="professional-availability reception-status-action ${active ? 'is-deactivate' : ''}" data-reception-action="${active ? 'deactivate' : 'reactivate'}" data-reception-id="${person.id}" aria-label="${active ? 'Desactivar' : 'Reactivar'} a ${escape(person.name)}">${active ? 'Desactivar' : 'Reactivar'}</button><button type="button" class="professional-edit" data-reception-action="reset" data-reception-id="${person.id}">Restablecer clave</button><button type="button" class="professional-edit" data-reception-action="disable" data-reception-id="${person.id}" aria-label="Inhabilitar a ${escape(person.name)}">Inhabilitar</button></div>
+    <div class="professional-entry-actions"><button type="button" class="professional-availability reception-status-action ${active ? 'action-caution' : ''}" data-reception-action="${active ? 'deactivate' : 'reactivate'}" data-reception-id="${person.id}" aria-label="${active ? 'Desactivar' : 'Reactivar'} a ${escape(person.name)}">${active ? 'Desactivar' : 'Reactivar'}</button><details class="professional-more"><summary aria-label="Más acciones para ${escape(person.name)}">${icon('more')}</summary><div class="professional-more-menu"><button type="button" data-reception-action="reset" data-reception-id="${person.id}">Restablecer contraseña</button><button type="button" class="action-danger" data-reception-action="disable" data-reception-id="${person.id}" aria-label="Inhabilitar a ${escape(person.name)}">Inhabilitar</button></div></details></div>
   </article>`;
 }
 
@@ -41,16 +44,15 @@ export function receptionists() {
   const active = people.filter((person) => person.active).length;
   const desktopView = getCatalogView();
   const resultView = matchMedia('(max-width: 767px)').matches ? 'cards' : desktopView;
-  return `<div class="professional-workspace reception-workspace">${pageHead('Recepcionistas', 'Gestiona las cuentas de recepción de tu negocio.', button('Nueva recepcionista', 'new-receptionist'))}
+  return `<div class="professional-workspace reception-workspace">${catalogHead('Recepcionistas', 'Gestiona las cuentas de recepción de tu negocio.', retiredSection('recepcionistas') + button('Nueva recepcionista', 'new-receptionist'), capacityHtml('Recepcionistas activos', roleCapacity('recepcionistas')))}
     <div class="professional-overview"><strong>${people.length}</strong> ${people.length === 1 ? 'recepcionista' : 'recepcionistas'}<span aria-hidden="true">·</span><strong>${active}</strong> ${active === 1 ? 'activa' : 'activas'}<span aria-hidden="true">·</span><strong>${people.length - active}</strong> ${people.length - active === 1 ? 'inactiva' : 'inactivas'}</div>
     <section class="professional-toolbar reception-toolbar" aria-label="Buscar y filtrar recepcionistas">
       <label class="professional-search">${icon('search')}<span class="visually-hidden">Buscar recepcionistas</span><input id="reception-search" type="search" placeholder="Buscar por nombre o correo" value="${escape(ui.search)}" autocomplete="off"></label>
-      <div class="professional-filters"><label><span>Estado</span><select data-reception-filter="status"><option value="all">Todas</option><option value="active" ${ui.status === 'active' ? 'selected' : ''}>Activas</option><option value="inactive" ${ui.status === 'inactive' ? 'selected' : ''}>Inactivas</option></select></label></div>
+      <div class="professional-filters"><label><span>Estado</span><select data-reception-filter="status"><option value="all">Todas</option><option value="active" ${ui.status === 'active' ? 'selected' : ''}>Activas</option><option value="inactive" ${ui.status === 'inactive' ? 'selected' : ''}>Inactivas</option></select></label>${clearCatalogButton('reception', ui)}</div>
       <div class="professional-view-switch" role="group" aria-label="Tipo de vista"><button type="button" data-reception-view="list" aria-pressed="${desktopView === 'list'}" class="${desktopView === 'list' ? 'is-selected' : ''}">${icon('menu')}<span>Lista</span></button><button type="button" data-reception-view="cards" aria-pressed="${desktopView === 'cards'}" class="${desktopView === 'cards' ? 'is-selected' : ''}">${icon('grid')}<span>Tarjetas</span></button></div>
     </section>
     <div class="professional-results-heading"><span id="reception-results-count" role="status" aria-live="polite">${visible.length} ${visible.length === 1 ? 'resultado' : 'resultados'}</span></div>
     ${people.length ? `<div class="professional-results professional-view--${resultView}" data-desktop-view="${desktopView}" id="reception-results">${people.map((person) => renderPerson(person, visible.includes(person))).join('')}</div><div class="professional-no-results" id="reception-no-results" ${visible.length ? 'hidden' : ''}>${empty('Sin coincidencias', 'Prueba otra búsqueda o cambia el filtro de estado.', '<button type="button" class="btn btn-light" data-reception-reset>Limpiar filtros</button>')}</div>` : empty('Sin recepcionistas', 'Crea una cuenta para tu equipo de recepción.', '<button type="button" class="btn btn-primary" data-action="new-receptionist">Nueva recepcionista</button>')}
-    ${retiredSection('recepcionistas')}
   </div>`;
 }
 
@@ -73,6 +75,7 @@ export function applyReceptionFilters() {
   if (!root) return;
   ui.search = root.querySelector('#reception-search')?.value.trim() || '';
   ui.status = root.querySelector('[data-reception-filter]')?.value || 'all';
+  root.querySelectorAll('[data-reception-reset]').forEach((button) => { button.disabled = !hasCatalogFilters(ui); });
   const visible = new Set(list('receptionists', state.tenantId).filter(matches).map((person) => String(person.id)));
   root.querySelectorAll('[data-reception-entry]').forEach((entry) => { entry.hidden = !visible.has(entry.dataset.receptionEntry); });
   const count = visible.size;

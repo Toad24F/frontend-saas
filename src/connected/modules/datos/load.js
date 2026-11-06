@@ -1,11 +1,13 @@
 import { replaceData, time } from '../../../shared/data.js';
 import { api, user } from '../auth/session.js';
+import { loadRoleCapacities, clearRoleCapacities } from '../catalogos/capacity.js';
 import { setBranchQuota } from '../sucursales/quota.js';
 
 const initials = (name) => name.split(/\s+/).slice(0, 2).map((part) => part[0]).join('');
 const clock = (value) => value == null ? '' : time(value % 1440);
 export async function loadBackendData() {
   setBranchQuota(null);
+  clearRoleCapacities();
   const tenantId = user.negocioId || 1;
   const next = { tenants: [], professionals: [], receptionists: [], branches: [], services: [], schedules: [], blocks: [], appointments: [], clients: [], holds: [] };
   const businessName = user.nombreNegocio || 'Mi negocio';
@@ -48,6 +50,7 @@ export async function loadBackendData() {
     next.schedules = schedules.map((s) => ({ id: s.id, tenantId, professionalId: user.id, day: s.diaSemana, branchId: s.sucursalId, start: clock(s.inicioMinutos), end: clock(s.finMinutos), enabled: s.activo }));
     next.blocks = blocks.map((b) => ({ id: b.id, tenantId, professionalId: b.personalId, branchId: b.sucursalId, date: b.fechaInicio.slice(0, 10), endDate: b.fechaFin.slice(0, 10), start: clock(b.inicioMinutos), end: clock(b.finMinutos), type: b.tipo, reason: b.motivo }));
   } else if (user.rol === 'admin_negocio') {
+    await loadRoleCapacities(api);
     const [services, branches, quota, professionals, receptionists, blocks] = await Promise.all([api('/servicios'), api('/sucursales'), api('/sucursales/cupo'), api('/profesionales'), api('/recepcionistas'), api('/bloqueos')]);
     setBranchQuota(quota);
     next.receptionists = receptionists.map((r) => ({ id: r.id, tenantId, name: r.nombre, email: r.email, active: r.activo, activatedAt: r.activadoEn, initials: initials(r.nombre) }));

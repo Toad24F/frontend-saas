@@ -3,7 +3,8 @@ import { state, render } from '../../../shared/app.js';
 import { list, TODAY, addDays, formatDate } from '../../../shared/data.js';
 import { escape as esc, empty } from '../../../shared/ui.js';
 import { availability as weeklyAvailability } from '../../../shared/screens/disponibilidad/view.js';
-import { branchAssignmentForm } from '../../../shared/screens/disponibilidad/branch-assignments.js';
+import { offeringPanel } from '../../../shared/screens/disponibilidad/offering.js';
+import { branchAssignmentForm, assignmentLocks } from '../../../shared/screens/disponibilidad/branch-assignments.js';
 import { affectedAppointmentsPanel, availabilityQueryPanel, configurationPanel } from '../../../shared/screens/disponibilidad/operational.js';
 import { minutesToLabel } from './payload.js';
 import './style.css';
@@ -70,17 +71,12 @@ const reasonLabels = {
 const dateText = (value) => formatDate(value, { day: 'numeric', month: 'short', year: 'numeric' });
 const branchName = (id) => list('branches', state.tenantId).find((b) => b.id === id)?.name || `Sucursal ${id}`;
 
-function offeringSection(person) {
-  const offering = cache?.offering;
-  return `<section class="surface availability-extra"><div class="section-heading"><div><h2>Oferta por sucursal</h2><p>Comprueba qué servicios ofrece ${esc(person.name)} y por qué alguno no aparece.</p></div><button type="button" class="btn btn-light" data-availability-action="general">Editar selección general</button></div>
-  ${offering?.sucursales?.length ? `<div class="offering-grid">${offering.sucursales.map((branch) => `<article class="offering-branch"><div class="offering-branch-head"><div><h3>${esc(branch.nombre)}</h3><p>${branch.sucursalActiva ? 'Sucursal activa' : 'Sucursal inactiva'} · ${branch.atencionActiva ? 'Atención activa' : 'Atención pausada'}</p></div><button type="button" class="btn btn-light" data-availability-action="branch-services" data-branch-id="${branch.id}">Editar servicios</button></div><div class="offering-service-list">${branch.servicios.map((service) => `<div class="offering-service"><strong>${esc(service.nombre)}</strong><span class="${service.ofrecido ? 'offering-ok' : 'offering-off'}">${service.ofrecido ? 'Ofrecido' : esc((service.motivosExclusion || []).map((reason) => reasonLabels[reason] || reason).join(' · ') || 'No ofrecido')}</span></div>`).join('') || '<p class="availability-note">No hay servicios en el catálogo.</p>'}</div><button type="button" class="btn btn-light" data-availability-action="attention" data-branch-id="${branch.id}">${branch.atencionActiva ? 'Pausar atención' : 'Activar atención'}</button></article>`).join('')}</div>` : empty('Sin sucursales asignadas', user.rol === 'admin_negocio' ? 'Asigna sucursales en la pestaña Sucursales asignadas.' : 'Pide a administración que te asigne una sucursal.')}
-  <p class="availability-note">La oferta muestra estados y preferencias; no representa horarios libres ni citas disponibles.</p></section>`;
-}
+function offeringSection(person) { return offeringPanel(person, cache?.offering, false, user.rol === 'admin_negocio'); }
 
 function assignedBranchesSection(person) {
   const branches = list('branches', state.tenantId);
   return `<section class="surface availability-extra"><div class="section-heading"><div><h2>Sucursales asignadas</h2><p>Elige las sucursales donde puede atender ${esc(person.name)}. Después configura sus horarios y servicios.</p></div></div>
-    ${branches.length ? branchAssignmentForm(person, branches) : empty('Sin sucursales disponibles', 'Crea una sucursal en el catálogo antes de asignarla.')}</section>`;
+    ${branches.length ? branchAssignmentForm(person, branches, false, assignmentLocks(person, list('schedules', state.tenantId))) : empty('Sin sucursales disponibles', 'Crea una sucursal en el catálogo antes de asignarla.')}</section>`;
 }
 
 function projectionSection(person) {

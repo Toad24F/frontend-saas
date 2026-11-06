@@ -58,6 +58,8 @@ test('FALA-T033–T034: administrador ve cupos propios y no puede editar límite
     expect((await rows("SELECT id FROM usuarios WHERE email='sin-cupo-prof-qa@example.test'")).length).toBe(0);
   }
   await page.getByRole('dialog').getByRole('button', { name: 'Cancelar' }).click();
+  const discard = page.getByRole('button', { name: 'Descartar cambios', exact: true });
+  if (await discard.isVisible()) await discard.click();
   await page.goto(`${origin()}/admin/recepcionistas`);
   await page.getByRole('button', { name: 'Nueva recepcionista' }).first().click();
   await expect(page.getByRole('dialog')).toContainText(`Cupo vigente de recepcionistas: 1 de ${limits.limite_recepcionistas_activos}`);

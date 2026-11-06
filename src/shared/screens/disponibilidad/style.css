@@ -361,3 +361,19 @@ html[data-theme='dark'] .availability-field-error { color: #ffb2a8; }
     background: color-mix(in srgb, var(--schedule-accent) 10%, var(--surface));
   }
 }
+.offering-selector { display: grid; gap: 7px; max-width: 400px; font-size: 13px; }
+.offering-summary { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin: 20px 0; color: var(--muted); font-size: 13px; }
+.offering-summary p { margin: 0; }
+.offering-table { width: 100%; min-width: 0; table-layout: fixed; }
+.offering-table :is(td, th) { white-space: normal; overflow-wrap: anywhere; }
+.offering-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+.offering-workspace [data-offering-branch][hidden] { display: none !important; }
+.schedule-help { max-width: 760px; line-height: 1.6; }
+@media (max-width: 767px) {
+  .offering-table, .offering-table tbody, .offering-table tr, .offering-table td { display: block; width: 100%; }
+  .offering-table thead { display: none; }
+  .offering-table tr { padding: 12px 0; border-bottom: 1px solid var(--border); }
+  .offering-table td { padding: 7px 0; border: 0; }
+  .offering-table td::before { content: attr(data-label) ': '; color: var(--muted); }
+  .offering-actions .btn { width: 100%; white-space: normal; min-height: 44px; }
+}

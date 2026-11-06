@@ -1,7 +1,8 @@
 import { state, render } from '../../../shared/app.js';
 import { addDays, list, tenantById, TODAY } from '../../../shared/data.js';
 import { availability as weeklyAvailability } from '../../../shared/screens/disponibilidad/view.js';
-import { branchAssignmentForm, clearAssignmentDraft } from '../../../shared/screens/disponibilidad/branch-assignments.js';
+import { offeringPanel } from '../../../shared/screens/disponibilidad/offering.js';
+import { branchAssignmentForm, clearAssignmentDraft, assignmentLocks } from '../../../shared/screens/disponibilidad/branch-assignments.js';
 import { affectedAppointmentsPanel, availabilityQueryPanel, configurationPanel } from '../../../shared/screens/disponibilidad/operational.js';
 import { escape as esc, empty, toast } from '../../../shared/ui.js';
 
@@ -31,9 +32,10 @@ export function availability() {
   const data = models();
   const common = { role: 'admin_negocio', professionals: data.professionals, branches: data.branches, services: data.services };
   const person = data.professionals.find((item) => item.id === Number(state.scheduleProfessional)) || data.professionals[0];
-  const branchPanel = person ? `<section class="surface availability-extra"><div class="section-heading"><div><h2>Sucursales asignadas</h2><p>Elige las sucursales donde puede atender ${esc(person.name)}.</p></div></div>${data.branches.length ? branchAssignmentForm(person, data.branches, true) : empty('Sin sucursales disponibles', 'Crea una sucursal antes de asignarla.')}</section>` : '';
+  const branchPanel = person ? `<section class="surface availability-extra"><div class="section-heading"><div><h2>Sucursales asignadas</h2><p>Elige las sucursales donde puede atender ${esc(person.name)}.</p></div></div>${data.branches.length ? branchAssignmentForm(person, data.branches, true, assignmentLocks(person, list('schedules', state.tenantId), list('appointments', state.tenantId))) : empty('Sin sucursales disponibles', 'Crea una sucursal antes de asignarla.')}</section>` : '';
   return weeklyAvailability({ extraPanels: [
     ...(person ? [{ id: 'branches', label: 'Sucursales asignadas', content: branchPanel }] : []),
+    ...(person ? [{ id: 'offering', label: 'Oferta por sucursal', content: offeringPanel(person, { sucursales: data.branches.filter((branch) => person.branchIds.includes(branch.id)).map((branch) => ({ id: branch.id, nombre: branch.name, sucursalActiva: branch.active !== false, atencionActiva: true, servicios: data.services.map((service) => ({ id: service.id, nombre: service.name, ofrecido: person.serviceIds.includes(service.id) && service.active !== false, motivosExclusion: !person.serviceIds.includes(service.id) ? ['servicio_no_seleccionado'] : service.active === false ? ['servicio_inactivo'] : [] })) })) }, true) }] : []),
     { id: 'configuration', label: 'Reglas de agenda', context: false, content: configurationPanel(configuration, true) },
     { id: 'slots', label: 'Horarios disponibles', context: false, content: availabilityQueryPanel({ ...query, ...common }, true) },
     { id: 'affected', label: 'Citas afectadas', context: false, content: affectedAppointmentsPanel({ ...affected, ...common }, true) },

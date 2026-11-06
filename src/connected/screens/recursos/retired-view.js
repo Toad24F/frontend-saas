@@ -13,15 +13,63 @@ const names = { profesionales: 'profesionales', recepcionistas: 'recepcionistas'
 
 // La sección se monta fuera del catálogo operativo. Solo el administrador
 // puede solicitar estas rutas, cuyo negocio procede de su sesión en backend.
+let retiredQuery = '';
+let retiredItems = [];
+let activeType = '';
+let requestVersion = 0;
+
 export function retiredSection(type) {
-  if (!canConsultRetired(user?.rol, type)) return '';
-  return `<section class="surface business-detail-section" aria-label="Inhabilitados de ${names[type]}">
-    <div class="section-heading"><div><h2>Inhabilitados</h2><p>Consulta los ${names[type]} retirados de la operación. Restaurar los devuelve inactivos; activar es otro paso.</p></div></div>
-    <button type="button" class="btn btn-light" data-retired-list="${type}">Consultar inhabilitados</button>
-    <div data-retired-results="${type}" aria-live="polite"></div></section>`;
+  return canConsultRetired(user?.rol, type) ? `<button type="button" class="btn btn-light" data-retired-open="${type}">Inhabilitados</button>` : '';
 }
+function drawer(title, content) {
+  const dialog = modal(title, content);
+  dialog.classList.add('retired-drawer');
+  dialog.onclose = () => document.querySelector(`[data-retired-open="${activeType}"]`)?.focus();
+  return dialog;
+}
+function listRows(type, items) {
+  return items.length ? `<ul class="retired-list">${items.map((item) => `<li><span><strong>${escape(item.nombre)}</strong> <span class="professional-status ${resourceStatus(item).className}">${resourceStatus(item).label}</span></span><div class="retired-actions"><button type="button" class="btn btn-light" data-retired-detail="${item.id}" data-retired-type="${type}">Ver detalle de ${escape(item.nombre)}</button>${type === 'recepcionistas' ? '' : `<button type="button" class="btn btn-light" data-retired-effects="${item.id}" data-retired-type="${type}">Revisar citas afectadas de ${escape(item.nombre)}</button>`}<button type="button" class="btn btn-primary" data-retired-restore="${item.id}" data-retired-type="${type}">Restaurar ${escape(item.nombre)}</button></div><div class="retired-effects-result" data-retired-effects-result></div></li>`).join('')}</ul>` : '<p>No hay coincidencias en los inhabilitados.</p>';
+}
+function filterRows() {
+  const target = document.querySelector('[data-retired-results]');
+  if (!target) return;
+  const query = retiredQuery.trim().toLocaleLowerCase('es');
+  target.innerHTML = retiredItems.length ? listRows(activeType, retiredItems.filter((item) => [item.nombre, item.email, item.correo].join(' ').toLocaleLowerCase('es').includes(query))) : '<p>No hay recursos inhabilitados en este negocio.</p>';
+}
+async function openRetired(type, keepQuery = false) {
+  if (!keepQuery) retiredQuery = '';
+  activeType = type;
+  retiredItems = [];
+  const version = ++requestVersion;
+  const page = state.page;
+  const actor = user.id;
+  const dialog = drawer('Inhabilitados de ' + names[type], `<div class="dialog-body"><p>Restaurar devuelve el recurso como inactivo; activar es una acción aparte.</p><label class="retired-search">Buscar inhabilitados<input class="form-control" type="search" value="${escape(retiredQuery)}" data-retired-search></label><div data-retired-results="${type}" aria-live="polite">Consultando inhabilitados…</div></div>`);
+  const target = dialog.querySelector('[data-retired-results]');
+  try {
+    const items = await readRetiredList(type, api);
+    if (version !== requestVersion || !dialog.open || state.page !== page || user?.id !== actor) return;
+    if (items.some((item) => !Number.isSafeInteger(item?.id) || !item.inhabilitadoEn)) throw Error('La lista de inhabilitados no es válida.');
+    retiredItems = items;
+    filterRows();
+  } catch (error) {
+    if (version === requestVersion && dialog.open && target.isConnected) target.innerHTML = `<p role="alert">${escape(error.message)}</p><button type="button" class="btn btn-light" data-retired-open="${type}">Reintentar</button>`;
+  }
+}
+document.addEventListener('input', (event) => {
+  if (event.target.matches('[data-retired-search]')) { retiredQuery = event.target.value; filterRows(); }
+});
+document.addEventListener('click', (event) => {
+  const back = event.target.closest('[data-retired-back]');
+  if (back && canConsultRetired(user?.rol, activeType) && state.page === activeType) void openRetired(activeType, true);
+});
 
 export async function handleRetiredClick(event) {
+  const open = event.target.closest('[data-retired-open]');
+  if (open) {
+    const type = open.dataset.retiredOpen;
+    if (canConsultRetired(user?.rol, type) && type === state.page) await openRetired(type);
+    return true;
+  }
   const listButton = event.target.closest('[data-retired-list]');
   const detailButton = event.target.closest('[data-retired-detail]');
   const restoreButton = event.target.closest('[data-retired-restore]');
@@ -32,35 +80,14 @@ export async function handleRetiredClick(event) {
   if (!canConsultRetired(user?.rol, type) || type !== state.page) return true;
   const target = document.querySelector(`[data-retired-results="${type}"]`);
   if (!target) return true;
-  if (listButton) {
-    listButton.disabled = true;
-    target.textContent = 'Consultando inhabilitados…';
-    try {
-      const items = await readRetiredList(type, api);
-      // El servidor ya filtra por negocio; aquí se evita que una respuesta
-      // malformada convierta una fila sin marca en un recurso inhabilitado.
-      if (items.some((item) => !Number.isSafeInteger(item?.id) || !item.inhabilitadoEn)) {
-        throw new Error('La lista de inhabilitados no es válida.');
-      }
-      target.innerHTML = items.length ? `<ul class="retired-list">${items.map((item) =>
-        `<li><span><strong>${escape(item.nombre)}</strong> <span class="professional-status ${resourceStatus(item).className}"><i></i>${resourceStatus(item).label}</span></span>
-          <div class="retired-actions"><button type="button" class="btn btn-light" data-retired-detail="${item.id}" data-retired-type="${type}">Ver detalle de ${escape(item.nombre)}</button>
-          ${type === 'recepcionistas' ? '' : `<button type="button" class="btn btn-light" data-retired-effects="${item.id}" data-retired-type="${type}">Revisar citas afectadas de ${escape(item.nombre)}</button>`}
-          <button type="button" class="btn btn-primary" data-retired-restore="${item.id}" data-retired-type="${type}">Restaurar ${escape(item.nombre)}</button></div>
-          <div class="retired-effects-result" data-retired-effects-result></div></li>`).join('')}</ul>`
-        : '<p>No hay recursos inhabilitados en este negocio.</p>';
-    } catch (error) { target.innerHTML = `<p role="alert">${escape(error.message)}</p>`; }
-    finally { listButton.disabled = false; }
-    return true;
-  }
   if (restoreButton) {
     const id = Number(restoreButton.dataset.retiredRestore);
     const name = restoreButton.closest('li')?.querySelector('strong')?.textContent || 'Recurso';
     // La confirmación distingue recuperar la fila de conceder acceso. El
     // servidor debe responder activo=false antes de mostrar el resultado.
-    const dialog = modal('Restaurar recurso', `<div class="dialog-body"><p><strong>${escape(name)}</strong> volverá al listado habitual como inactivo. Para operar, tendrás que activarlo por separado; se volverán a validar cupos y conflictos.</p>${errorSlot}</div>
-      <div class="dialog-footer"><button type="button" class="btn btn-light" data-dismiss>Cancelar</button><button type="button" class="btn btn-primary" data-confirm>Restaurar</button></div>`);
-    dialog.querySelector('[data-dismiss]').onclick = () => dialog.close();
+    const dialog = drawer('Restaurar recurso', `<div class="dialog-body"><p><strong>${escape(name)}</strong> volverá al listado habitual como inactivo. Para operar, tendrás que activarlo por separado; se volverán a validar cupos y conflictos.</p>${errorSlot}</div>
+      <div class="dialog-footer"><button type="button" class="btn btn-light" data-retired-back>Volver a inhabilitados</button><button type="button" class="btn btn-primary" data-confirm>Restaurar</button></div>`);
+
     dialog.querySelector('[data-confirm]').onclick = async (click) => {
       const button = click.currentTarget;
       button.disabled = true;
@@ -97,17 +124,20 @@ export async function handleRetiredClick(event) {
     return true;
   }
   detailButton.disabled = true;
+  const detailVersion = ++requestVersion;
+  const detailDialog = document.querySelector('#app-dialog');
   try {
     const item = await readRetiredDetail(type, Number(detailButton.dataset.retiredDetail), api);
+    if (detailVersion !== requestVersion || !detailDialog.open || state.page !== type) return true;
     // El detalle autorizado confirma la marca; restaurar se ejecuta solo
     // mediante su propio botón y no se confunde con reactivar.
-    const dialog = modal('Detalle inhabilitado', `<div class="dialog-body"><p><strong>${escape(item.nombre)}</strong></p>
+    const dialog = drawer('Detalle inhabilitado', `<div class="dialog-body"><p><strong>${escape(item.nombre)}</strong></p>
       <p>Estado: ${resourceStatus(item).label}. Restaurarlo lo dejará inactivo; activar requiere otra acción.</p>
       ${item.email || item.correo ? `<p>Correo: ${escape(item.email || item.correo)}</p>` : ''}
       <p>Inhabilitado: ${escape(new Date(item.inhabilitadoEn).toLocaleDateString('es-MX'))}</p></div>
-      <div class="dialog-footer"><button type="button" class="btn btn-light" data-dismiss>Cerrar</button></div>`);
-    dialog.querySelector('[data-dismiss]').onclick = () => dialog.close();
-  } catch (error) { target.innerHTML = `<p role="alert">${escape(error.message)}</p>`; }
+      <div class="dialog-footer"><button type="button" class="btn btn-light" data-retired-back>Volver a inhabilitados</button></div>`);
+
+  } catch (error) { if (detailVersion === requestVersion && detailDialog.open && state.page === type) drawer('No se pudo consultar el detalle', `<div class="dialog-body"><p role="alert">${escape(error.message)}</p><button type="button" class="btn btn-light" data-retired-back>Volver a inhabilitados</button></div>`); }
   finally { detailButton.disabled = false; }
   return true;
 }

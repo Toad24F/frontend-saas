@@ -589,7 +589,7 @@ html[data-theme='dark'] .sidebar .brand .brand-logo-on-light { display: none; }
 .account-menu-panel a[aria-current='page'] { background: var(--surface-soft); color: var(--accent-dark); }
 .account-menu-panel :is(a, button):focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
 .account-menu-panel .icon { width: 18px; height: 18px; color: var(--muted); }
-.account-menu-panel button { border-top: 1px solid var(--border); border-radius: 0 0 9px 9px; margin-top: 4px; padding-top: 12px; }
+.account-menu-panel button { margin-top: 4px; }
 .account-menu-panel button:hover,
 .account-menu-panel button:hover .icon { color: var(--accent-dark); }
 @media (max-width: 767px) {
@@ -2132,3 +2132,25 @@ html[data-theme='dark'] .sidebar .brand .brand-logo-on-light { display: none; }
     transition: none !important;
   }
 }
+
+/* Acciones reversibles de precaución y retiros recuperables del catálogo. */
+:root { --action-caution-bg: #fff0c2; --action-caution-hover: #ffe49a; --action-caution-text: #714c00; --action-caution-border: #b88415; --action-danger-bg: #b4232f; --action-danger-hover: #941c26; --action-danger-text: #a52a32; --action-danger-tint: #fbe3e3; }
+html[data-theme='dark'] { --action-caution-bg: #493816; --action-caution-hover: #604a1c; --action-caution-text: #f6d58c; --action-caution-border: #9c7832; --action-danger-bg: #742730; --action-danger-hover: #8d303b; --action-danger-text: #ffb6be; --action-danger-tint: #4e2b30; }
+html[data-theme] .action-caution { background: var(--action-caution-bg); color: var(--action-caution-text); border-color: var(--action-caution-border); }
+html[data-theme] .action-caution:is(:hover, :focus-visible):not(:disabled) { background: var(--action-caution-hover); color: var(--action-caution-text); border-color: var(--action-caution-border); }
+html[data-theme] .btn.action-danger { background: var(--action-danger-bg); color: #fff; border-color: var(--action-danger-bg); }
+html[data-theme] .btn.action-danger:is(:hover, :focus-visible):not(:disabled) { background: var(--action-danger-hover); color: #fff; border-color: var(--action-danger-hover); }
+html[data-theme] .professional-more-menu button.action-danger { background: transparent; color: var(--action-danger-text); }
+html[data-theme] .professional-more-menu button.action-danger:is(:hover, :focus-visible) { background: var(--action-danger-tint); color: var(--action-danger-text); }
+html[data-theme] :is(.action-caution, .action-danger):focus-visible { outline: 2px solid currentColor; outline-offset: 3px; box-shadow: none; }
+html[data-theme] .btn.action-danger:focus-visible { outline-color: var(--action-danger-text); }
+.app-dialog.form-drawer, .app-dialog.form-drawer.wide { position: fixed; inset: 0 0 0 auto; margin: 0; width: min(760px, 100%); max-width: 100%; height: 100dvh; max-height: 100dvh; border-radius: 16px 0 0 16px; }
+.app-dialog.form-drawer[open] { display: flex; flex-direction: column; }
+.form-drawer > .dialog-header { flex: 0 0 auto; }
+.form-drawer #editor-form { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+.form-drawer #editor-form > .dialog-body { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
+.form-drawer #editor-form > .dialog-footer { flex: 0 0 auto; flex-wrap: wrap; padding-bottom: max(18px, env(safe-area-inset-bottom)); }
+.discard-confirm { flex: 1 0 100%; display: flex; flex-wrap: wrap; gap: 8px; padding-bottom: 16px; }
+.discard-confirm p { width: 100%; margin: 0 0 8px; color: var(--ink); }
+.discard-confirm[hidden] { display: none !important; }
+@media (max-width: 767px) { .app-dialog.form-drawer[open], .app-dialog.form-drawer.wide[open] { inset: 0; margin: 0; width: 100%; height: 100dvh; max-height: 100dvh; border-radius: 0; } .form-drawer .dialog-footer > .btn { flex: 1 1 120px; } }

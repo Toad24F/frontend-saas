@@ -41,8 +41,16 @@ export function updateAssignmentDraft(form) {
   return current;
 }
 
-export function branchAssignmentForm(person, branches, demo = false) {
+export function assignmentLocks(person, schedules, appointments = []) {
+  const locks = new Map();
+  schedules.filter((row) => row.professionalId === person.id && row.branchId != null && row.id > 0).forEach((row) => locks.set(row.branchId, 'Conserva franjas de horario, aunque estén inactivas. Revísalas antes de quitar la asignación.'));
+  appointments.filter((item) => item.professionalId === person.id && !['cancelada', 'no_asistio', 'completada'].includes(item.status)).forEach((item) => locks.set(item.branchId, 'Conserva citas activas en esta demostración.'));
+  return locks;
+}
+
+export function branchAssignmentForm(person, branches, demo = false, locks = new Map()) {
   const current = assignmentDraft(person.id, person.branchIds || []);
+  current.selected = sorted([...new Set([...current.selected, ...current.original.filter((id) => locks.has(id))])]);
   const changed = !sameBranchIds(current.original, current.selected);
   const removed = current.original.filter((id) => !current.selected.includes(id));
   const added = current.selected.filter((id) => !current.original.includes(id));
@@ -51,7 +59,9 @@ export function branchAssignmentForm(person, branches, demo = false) {
       const active = branch.active !== false;
       const initiallyAssigned = current.original.includes(branch.id);
       const selected = current.selected.includes(branch.id);
-      return `<label class="assigned-branch-row" data-assignment-row data-inactive="${!active}"><span class="assigned-branch-name"><strong>${esc(branch.name)}</strong>${!active ? '<small>Sucursal inactiva</small>' : ''}</span><span class="assigned-branch-control"><span data-assignment-status>${selected ? 'Asignada' : active ? 'Sin asignar' : 'Inactiva'}</span><input class="form-check-input" type="checkbox" name="branchIds" value="${branch.id}" ${selected ? 'checked' : ''} ${!active && !initiallyAssigned ? 'disabled' : ''} aria-label="Asignar ${esc(branch.name)}" /></span></label>`;
+      const reason = initiallyAssigned && locks.get(branch.id);
+      const reasonId = `assignment-lock-${person.id}-${branch.id}`;
+      return `<label class="assigned-branch-row" data-assignment-row data-inactive="${!active}"><span class="assigned-branch-name"><strong>${esc(branch.name)}</strong>${!active ? '<small>Sucursal inactiva</small>' : ''}${reason ? `<small id="${reasonId}">Asignación requerida: ${esc(reason)}</small>` : ''}</span><span class="assigned-branch-control"><span data-assignment-status>${selected ? 'Asignada' : active ? 'Sin asignar' : 'Inactiva'}</span><input class="form-check-input" type="checkbox" name="branchIds" value="${branch.id}" ${selected ? 'checked' : ''} ${reason || !active && !initiallyAssigned ? 'disabled' : ''} ${reason ? `aria-describedby="${reasonId}"` : ''} aria-label="Asignar ${esc(branch.name)}" />${reason && selected ? `<input type="hidden" name="branchIds" value="${branch.id}">` : ''}</span></label>`;
     }).join('')}</div>
     <p class="availability-note" data-assignment-warning ${removed.length ? '' : 'hidden'}>Al quitar una asignación se eliminan sus ajustes de servicios. Si conserva horarios u otros ajustes de atención, primero tendrás que resolverlos.</p>
     <p class="form-error" role="alert" tabindex="-1" data-assignment-error hidden></p>

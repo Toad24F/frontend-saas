@@ -10,7 +10,7 @@ export function confirmServiceDisable(id) {
   const service = resource('services', id, state.tenantId);
   // El usuario confirma un retiro recuperable. Desactivar sigue disponible
   // como estado operativo distinto en el menú de la tarjeta.
-  const dialog = modal('Inhabilitar servicio', `<div class="dialog-body"><p><strong>${escape(service.name)}</strong> saldrá de los listados operativos. Podrás consultarlo en Inhabilitados y restaurarlo como inactivo más adelante.</p>${errorSlot}</div><div class="dialog-footer"><button type="button" class="btn btn-light" data-dismiss>Cancelar</button><button type="button" class="btn btn-danger-soft" data-confirm>Inhabilitar servicio</button></div>`);
+  const dialog = modal('Inhabilitar servicio', `<div class="dialog-body"><p><strong>${escape(service.name)}</strong> saldrá de los listados operativos. Podrás consultarlo en Inhabilitados y restaurarlo como inactivo más adelante.</p>${errorSlot}</div><div class="dialog-footer"><button type="button" class="btn btn-light" data-dismiss>Cancelar</button><button type="button" class="btn action-danger" data-confirm>Inhabilitar servicio</button></div>`);
   dialog.querySelector('[data-dismiss]').onclick = () => dialog.close();
   dialog.querySelector('[data-confirm]').onclick = async (event) => {
     const button = event.currentTarget;

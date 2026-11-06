@@ -1,6 +1,8 @@
 import { api, loadBackendData } from '../../backend.js';
 import { validateNewPassword } from '../../modules/auth/password-policy.js';
-import { render } from '../../../shared/app.js';
+import { list } from '../../../shared/data.js';
+import { escape } from '../../../shared/ui.js';
+import { render, state } from '../../../shared/app.js';
 import { field, basicForm, errorSlot } from '../../../shared/forms.js';
 import { modal, toast } from '../../../shared/ui.js';
 import { showProfessionalErrors, clearProfessionalErrors, clearProfessionalField } from '../../../shared/screens/profesionales/errors.js';
@@ -13,6 +15,7 @@ const passwordFields = () => markedField('Contraseña', 'password', '', 'passwor
 
 function receptionistForm(title, content, onSubmit, reset = false) {
   const dialog = basicForm(title, content, onSubmit, false, {
+    drawer: !reset,
     validate(form) {
       const errors = validateReceptionist(new FormData(form), reset);
       if (!Object.keys(errors).length) { clearProfessionalErrors(form); return true; }
@@ -62,11 +65,13 @@ export async function receptionistAction(action, id) {
     return;
   }
   if (!['deactivate', 'reactivate', 'disable'].includes(action)) return;
+  const person = list('receptionists', state.tenantId).find((item) => item.id === id);
+  if (!person) return;
   const activating = action === 'reactivate';
   const disabling = action === 'disable';
   // Inhabilitar retira la cuenta de la lista; desactivar conserva la cuenta
   // visible y reactivar sigue sujeto al cupo del servidor.
-  const dialog = modal(activating ? 'Reactivar recepcionista' : disabling ? 'Inhabilitar recepcionista' : 'Desactivar recepcionista', `<div class="dialog-body">${activating ? await quotaIntro() : ''}<p>${activating ? 'Se habilitará de nuevo su cuenta. Tendrá que iniciar sesión.' : disabling ? 'Se retirará de los listados operativos y se cerrarán sus sesiones. Podrás consultarla en Inhabilitados y restaurarla como inactiva más adelante.' : 'Se desactivará la cuenta y se cerrarán sus sesiones.'}</p>${errorSlot}</div><div class="dialog-footer"><button class="btn btn-light" data-dismiss>Cancelar</button><button class="btn ${activating ? 'btn-primary' : 'btn-danger-soft'}" data-confirm>${activating ? 'Reactivar' : disabling ? 'Inhabilitar' : 'Desactivar'}</button></div>`);
+  const dialog = modal(activating ? 'Reactivar recepcionista' : disabling ? 'Inhabilitar recepcionista' : 'Desactivar recepcionista', `<div class="dialog-body">${activating ? await quotaIntro() : ''}<p><strong>${escape(person.name)}</strong>: ${activating ? 'Se habilitará de nuevo su cuenta. Tendrá que iniciar sesión.' : disabling ? 'Se retirará de los listados operativos y se cerrarán sus sesiones. Podrás consultarla en Inhabilitados y restaurarla como inactiva más adelante.' : 'Se desactivará la cuenta y se cerrarán sus sesiones.'}</p>${errorSlot}</div><div class="dialog-footer"><button class="btn btn-light" data-dismiss>Cancelar</button><button class="btn ${activating ? 'btn-primary' : disabling ? 'action-danger' : 'action-caution'}" data-confirm>${activating ? 'Reactivar' : disabling ? 'Inhabilitar' : 'Desactivar'}</button></div>`);
   dialog.querySelector('[data-dismiss]').onclick = () => dialog.close();
   dialog.querySelector('[data-confirm]').onclick = async (event) => {
     const submit = event.currentTarget;

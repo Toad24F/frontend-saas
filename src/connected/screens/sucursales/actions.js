@@ -10,7 +10,7 @@ export function confirmBranchDisable(id) {
   const branch = resource('branches', id, state.tenantId);
   // No se promete que el retiro libere un cupo: la lectura posterior del
   // servidor decide cuántas sucursales activas quedan disponibles.
-  const dialog = modal('Inhabilitar sucursal', `<div class="dialog-body"><p><strong>${escape(branch.name)}</strong> saldrá de los listados operativos. Podrás consultarla en Inhabilitados y restaurarla como inactiva más adelante.</p>${errorSlot}</div><div class="dialog-footer"><button type="button" class="btn btn-light" data-dismiss>Cancelar</button><button type="button" class="btn btn-danger-soft" data-confirm>Inhabilitar sucursal</button></div>`);
+  const dialog = modal('Inhabilitar sucursal', `<div class="dialog-body"><p><strong>${escape(branch.name)}</strong> saldrá de los listados operativos. Podrás consultarla en Inhabilitados y restaurarla como inactiva más adelante.</p>${errorSlot}</div><div class="dialog-footer"><button type="button" class="btn btn-light" data-dismiss>Cancelar</button><button type="button" class="btn action-danger" data-confirm>Inhabilitar sucursal</button></div>`);
   dialog.querySelector('[data-dismiss]').onclick = () => dialog.close();
   dialog.querySelector('[data-confirm]').onclick = async (event) => {
     const button = event.currentTarget;

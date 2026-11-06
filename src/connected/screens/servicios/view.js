@@ -6,5 +6,5 @@ import { retiredSection } from '../recursos/retired-view.js';
 export function services() {
   if (user?.rol !== 'admin_negocio') return sharedServices();
   return `${sharedServices((service) =>
-    `<button type="button" data-disable-service="${service.id}" aria-label="Inhabilitar ${escape(service.name)}">Inhabilitar</button>`)}${retiredSection('servicios')}`;
+    `<button type="button" class="action-danger" data-disable-service="${service.id}" aria-label="Inhabilitar ${escape(service.name)}">Inhabilitar</button>`, { headerActions: retiredSection('servicios') })}`;
 }

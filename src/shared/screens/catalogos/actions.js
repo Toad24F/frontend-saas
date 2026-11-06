@@ -36,6 +36,7 @@ export async function catalog(type, id) {
         }),
       false,
       {
+        drawer: true,
         validate(form) {
           const errors = validateService(new FormData(form), isDemo);
           if (!Object.keys(errors).length) { clearProfessionalErrors(form); return true; }
@@ -73,6 +74,7 @@ export async function catalog(type, id) {
         }),
       false,
       {
+        drawer: true,
         validate(form) {
           const errors = validateBranch(new FormData(form), isDemo);
           if (!Object.keys(errors).length) { clearProfessionalErrors(form); return true; }
@@ -195,6 +197,7 @@ export async function catalog(type, id) {
       },
       true,
       {
+        drawer: true,
         validate(form) {
           const errors = validateProfessional(new FormData(form), { own, existing: Boolean(existing), demo: isDemo });
           if (!Object.keys(errors).length) { clearProfessionalErrors(form); return true; }

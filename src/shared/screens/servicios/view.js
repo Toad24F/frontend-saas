@@ -1,3 +1,4 @@
+import { catalogHead, clearCatalogButton, hasCatalogFilters } from '../catalog-header.js';
 import { isDemo, user } from '../../../connected/backend.js';
 import { state, render } from '../../app.js';
 import { getCatalogView, setCatalogView } from '../catalog-view.js';
@@ -23,7 +24,7 @@ function renderService(service, professionals, own, professional, management, vi
   const people = professionals.filter((person) => person.serviceIds.includes(service.id));
   const canEdit = !own || service.creatorId === user.id;
   const toggleLabel = own ? assigned ? 'Quitar selección' : 'Seleccionar' : active ? 'Desactivar' : 'Activar';
-  const toggle = `<button type="button" data-toggle-service="${service.id}" aria-label="${toggleLabel} ${esc(service.name)}">${toggleLabel}</button>`;
+  const toggle = `<button type="button" class="${!own && active ? 'action-caution' : ''}" data-toggle-service="${service.id}" aria-label="${toggleLabel} ${esc(service.name)}">${toggleLabel}</button>`;
   const edit = canEdit ? `<button type="button" class="${own ? 'professional-edit' : 'professional-availability'}" data-edit-service="${service.id}">Editar${own ? '' : ` ${icon('arrow')}`}</button>` : '';
   const extra = management(service);
   const actions = own
@@ -37,7 +38,7 @@ function renderService(service, professionals, own, professional, management, vi
   </article>`;
 }
 
-export function services(management = () => '') {
+export function services(management = () => '', { headerActions = '' } = {}) {
   if (tenantId !== state.tenantId) { Object.assign(ui, { search: '', status: 'all' }); tenantId = state.tenantId; }
   const own = !isDemo && user?.rol === 'profesional';
   const professional = own ? list('professionals', state.tenantId)[0] : null;
@@ -47,11 +48,11 @@ export function services(management = () => '') {
   const active = services.filter((service) => service.active !== false).length;
   const desktopView = getCatalogView();
   const resultView = matchMedia('(max-width: 767px)').matches ? 'cards' : desktopView;
-  return `<div class="professional-workspace service-workspace">${pageHead('Servicios', own ? 'Los servicios que ofreces a tus clientes.' : 'Gestiona lo que ofrece tu negocio.', button('Nuevo servicio', 'new-service'))}
+  return `<div class="professional-workspace service-workspace">${catalogHead('Servicios', own ? 'Los servicios que ofreces a tus clientes.' : 'Gestiona lo que ofrece tu negocio.', headerActions + button('Nuevo servicio', 'new-service'))}
     <div class="professional-overview"><strong>${services.length}</strong> ${services.length === 1 ? 'servicio' : 'servicios'}<span aria-hidden="true">·</span><strong>${active}</strong> activos<span aria-hidden="true">·</span><strong>${services.length - active}</strong> inactivos</div>
     <section class="professional-toolbar service-toolbar" aria-label="Buscar y filtrar servicios">
       <label class="professional-search">${icon('search')}<span class="visually-hidden">Buscar servicios</span><input id="service-search" type="search" placeholder="Buscar por nombre o descripción" value="${esc(ui.search)}" autocomplete="off"></label>
-      <div class="professional-filters"><label><span>Estado</span><select data-service-filter="status"><option value="all">Todos</option><option value="active" ${ui.status === 'active' ? 'selected' : ''}>Activos</option><option value="inactive" ${ui.status === 'inactive' ? 'selected' : ''}>Inactivos</option></select></label></div>
+      <div class="professional-filters"><label><span>Estado</span><select data-service-filter="status"><option value="all">Todos</option><option value="active" ${ui.status === 'active' ? 'selected' : ''}>Activos</option><option value="inactive" ${ui.status === 'inactive' ? 'selected' : ''}>Inactivos</option></select></label>${clearCatalogButton('service', ui)}</div>
       <div class="professional-view-switch" role="group" aria-label="Tipo de vista"><button type="button" data-service-view="list" aria-pressed="${desktopView === 'list'}" class="${desktopView === 'list' ? 'is-selected' : ''}">${icon('menu')}<span>Lista</span></button><button type="button" data-service-view="cards" aria-pressed="${desktopView === 'cards'}" class="${desktopView === 'cards' ? 'is-selected' : ''}">${icon('grid')}<span>Tarjetas</span></button></div>
     </section>
     <div class="professional-results-heading"><span id="service-results-count" role="status" aria-live="polite">${visible.length} ${visible.length === 1 ? 'resultado' : 'resultados'}</span></div>
@@ -79,6 +80,7 @@ export function applyServiceFilters() {
   if (!root) return;
   ui.search = root.querySelector('#service-search')?.value.trim() || '';
   ui.status = root.querySelector('[data-service-filter]')?.value || 'all';
+  root.querySelectorAll('[data-service-reset]').forEach((button) => { button.disabled = !hasCatalogFilters(ui); });
   const visible = new Set(list('services', state.tenantId).filter(matches).map((service) => String(service.id)));
   root.querySelectorAll('[data-service-entry]').forEach((entry) => { entry.hidden = !visible.has(entry.dataset.serviceEntry); });
   const count = visible.size;

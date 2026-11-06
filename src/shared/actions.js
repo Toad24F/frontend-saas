@@ -27,7 +27,7 @@ export async function handleClick(e) {
   try {
     // Solo los controles de la sección de inhabilitados cargan ese módulo;
     // navegación y acciones ordinarias conservan su flujo habitual.
-    if (!isDemo && e.target.closest('[data-retired-list], [data-retired-detail], [data-retired-restore], [data-retired-effects]') &&
+    if (!isDemo && e.target.closest('[data-retired-open], [data-retired-list], [data-retired-detail], [data-retired-restore], [data-retired-effects]') &&
       await (await import('../connected/screens/recursos/retired-view.js')).handleRetiredClick(e)) return;
     if (isDemo && state.page === 'disponibilidad') {
       const slot = e.target.closest('[data-availability-slot]');

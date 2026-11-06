@@ -1,3 +1,4 @@
+import { catalogHead, capacityHtml, clearCatalogButton, hasCatalogFilters } from '../catalog-header.js';
 import { isDemo, user } from '../../../connected/backend.js';
 import { state, render } from '../../app.js';
 import { getCatalogView, setCatalogView } from '../catalog-view.js';
@@ -32,6 +33,8 @@ function googleMap(branch) {
 }
 
 function quotaBar(branches, own, quota) {
+  if (!isDemo && !own && !quota) return '<p class="catalog-quota-error">Cupo de sucursales no disponible.</p>';
+  if (quota) return capacityHtml('Sucursales activas', { activos: Number(quota.sucursalesActivas), limite: Number(quota.limiteSucursalesActivas), disponibles: Number(quota.disponibles) });
   const active = branches.filter((branch) => branch.active !== false).length;
   const limit = quota && Number.isFinite(Number(quota.limiteSucursalesActivas)) ? Number(quota.limiteSucursalesActivas) : branches.length;
   const used = quota ? Number(quota.sucursalesActivas) || 0 : active;
@@ -45,7 +48,7 @@ function renderBranch(branch, professionals, own, management, visible) {
   const map = googleMap(branch);
   const status = own ? !branch.globalActive ? 'Sucursal inactiva' : active ? 'Atención activa' : 'Atención pausada' : resourceStatus(branch).label === 'Activo' ? 'Activa' : resourceStatus(branch).label === 'Inactivo' ? 'Inactiva' : 'Inhabilitada';
   const toggleLabel = own ? active ? 'Pausar atención' : 'Activar atención' : active ? 'Desactivar' : 'Activar';
-  const toggle = `<button type="button" data-toggle-branch="${branch.id}" aria-label="${toggleLabel} ${esc(branch.name)}" ${own && !branch.globalActive ? 'disabled title="Sucursal inactiva en el negocio"' : ''}>${toggleLabel}</button>`;
+  const toggle = `<button type="button" class="${active ? 'action-caution' : ''}" data-toggle-branch="${branch.id}" aria-label="${toggleLabel} ${esc(branch.name)}" ${own && !branch.globalActive ? 'disabled title="Sucursal inactiva en el negocio"' : ''}>${toggleLabel}</button>`;
   const actions = own
     ? `<button type="button" class="professional-availability" data-toggle-branch="${branch.id}" aria-label="${toggleLabel} ${esc(branch.name)}" ${!branch.globalActive ? 'disabled title="Sucursal inactiva en el negocio"' : ''}>${toggleLabel} ${icon('arrow')}</button>`
     : `<button type="button" class="professional-availability" data-edit-branch="${branch.id}">Editar ${icon('arrow')}</button><details class="professional-more"><summary aria-label="Más acciones para ${esc(branch.name)}">${icon('more')}</summary><div class="professional-more-menu">${toggle}${management(branch)}</div></details>`;
@@ -58,7 +61,7 @@ function renderBranch(branch, professionals, own, management, visible) {
   </article>`;
 }
 
-export function branches({ quota = null, management = () => '' } = {}) {
+export function branches({ quota = null, management = () => '', headerActions = '' } = {}) {
   const own = !isDemo && user?.rol === 'profesional';
   const currentScope = `${state.tenantId}:${own ? user.id : 'admin'}`;
   if (scope !== currentScope) { Object.assign(ui, { search: '', status: 'all' }); scope = currentScope; }
@@ -69,12 +72,11 @@ export function branches({ quota = null, management = () => '' } = {}) {
   const visible = branches.filter(matches);
   const desktopView = getCatalogView();
   const resultView = matchMedia('(max-width: 767px)').matches ? 'cards' : desktopView;
-  return `<div class="professional-workspace branch-workspace">${pageHead('Sucursales', own ? 'Consulta y activa la disponibilidad de tus sucursales asignadas.' : 'Gestiona las ubicaciones de tu negocio.', own ? '' : button('Nueva sucursal', 'new-branch'))}
+  return `<div class="professional-workspace branch-workspace">${catalogHead('Sucursales', own ? 'Consulta y activa la disponibilidad de tus sucursales asignadas.' : 'Gestiona las ubicaciones de tu negocio.', headerActions + (own ? '' : button('Nueva sucursal', 'new-branch')), quotaBar(branches, own, quota))}
     <div class="professional-overview"><strong>${branches.length}</strong> ${branches.length === 1 ? 'sucursal' : 'sucursales'}<span aria-hidden="true">·</span><strong>${active}</strong> activas<span aria-hidden="true">·</span><strong>${branches.length - active}</strong> inactivas</div>
-    ${quotaBar(branches, own, quota)}
     <section class="professional-toolbar branch-toolbar" aria-label="Buscar y filtrar sucursales">
       <label class="professional-search">${icon('search')}<span class="visually-hidden">Buscar sucursales</span><input id="branch-search" type="search" placeholder="Buscar por nombre, dirección o teléfono" value="${esc(ui.search)}" autocomplete="off"></label>
-      <div class="professional-filters"><label><span>Estado</span><select data-branch-filter="status"><option value="all">Todas</option><option value="active" ${ui.status === 'active' ? 'selected' : ''}>Activas</option><option value="inactive" ${ui.status === 'inactive' ? 'selected' : ''}>Inactivas</option></select></label></div>
+      <div class="professional-filters"><label><span>Estado</span><select data-branch-filter="status"><option value="all">Todas</option><option value="active" ${ui.status === 'active' ? 'selected' : ''}>Activas</option><option value="inactive" ${ui.status === 'inactive' ? 'selected' : ''}>Inactivas</option></select></label>${clearCatalogButton('branch', ui)}</div>
       <div class="professional-view-switch" role="group" aria-label="Tipo de vista"><button type="button" data-branch-view="list" aria-pressed="${desktopView === 'list'}" class="${desktopView === 'list' ? 'is-selected' : ''}">${icon('menu')}<span>Lista</span></button><button type="button" data-branch-view="cards" aria-pressed="${desktopView === 'cards'}" class="${desktopView === 'cards' ? 'is-selected' : ''}">${icon('grid')}<span>Tarjetas</span></button></div>
     </section>
     <div class="professional-results-heading"><span id="branch-results-count" role="status" aria-live="polite">${visible.length} ${visible.length === 1 ? 'resultado' : 'resultados'}</span></div>
@@ -103,6 +105,7 @@ export function applyBranchFilters() {
   ui.status = root.querySelector('[data-branch-filter]')?.value || 'all';
   const own = !isDemo && user?.rol === 'profesional';
   const professional = own ? list('professionals', state.tenantId)[0] : null;
+  root.querySelectorAll('[data-branch-reset]').forEach((button) => { button.disabled = !hasCatalogFilters(ui); });
   const visible = new Set(list('branches', state.tenantId).filter((branch) => (!own || professional?.branchIds.includes(branch.id)) && matches(branch)).map((branch) => String(branch.id)));
   root.querySelectorAll('[data-branch-entry]').forEach((entry) => { entry.hidden = !visible.has(entry.dataset.branchEntry); });
   const count = visible.size;

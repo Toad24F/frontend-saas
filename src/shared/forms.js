@@ -24,11 +24,40 @@ export function basicForm(title, content, onSubmit, wide = false, options = {}) 
   );
   el.querySelector('[data-dismiss]').onclick = () => el.close();
   const form = el.querySelector('form');
+  let submitting = false;
+  if (options.drawer) {
+    el.classList.add('form-drawer');
+    const snapshot = () => JSON.stringify([...form.elements].filter((input) => input.name).map((input) => [input.name, input.type === 'checkbox' || input.type === 'radio' ? input.checked : input.value]));
+    // No almacenamiento: el borrador y su comparación existen solo en este formulario.
+    const original = snapshot();
+    const footer = form.querySelector('.dialog-footer');
+    footer.insertAdjacentHTML('afterbegin', '<div class="discard-confirm" data-discard-confirm role="group" aria-label="Cambios sin guardar" hidden><p>Tienes cambios sin guardar. ¿Quieres descartarlos?</p><button type="button" class="btn btn-light" data-keep-editing>Seguir editando</button><button type="button" class="btn action-danger" data-discard>Descartar cambios</button></div>');
+    const warning = footer.querySelector('[data-discard-confirm]');
+    let closeOrigin;
+    const requestClose = () => {
+      if (submitting) return;
+      if (snapshot() === original) { el.close(); return; }
+      closeOrigin = document.activeElement;
+      warning.hidden = false;
+      warning.querySelector('[data-keep-editing]').focus();
+    };
+    el.querySelector('[data-close]').onclick = requestClose;
+    el.querySelector('[data-dismiss]').onclick = requestClose;
+    el.oncancel = (event) => { event.preventDefault(); requestClose(); };
+    el.onclick = (event) => {
+      if (event.target !== el) return;
+      const rect = el.getBoundingClientRect();
+      if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) requestClose();
+    };
+    warning.querySelector('[data-keep-editing]').onclick = () => { warning.hidden = true; closeOrigin?.focus(); };
+    warning.querySelector('[data-discard]').onclick = () => { if (!submitting) el.close(); };
+  }
   if (options.validate) form.noValidate = true;
   form.onsubmit = async (e) => {
     e.preventDefault();
     if (options.validate && !options.validate(e.target)) return;
     const submit = e.target.querySelector('[type="submit"]');
+    submitting = true;
     submit.disabled = true;
     try {
       await onSubmit(new FormData(e.target));
@@ -41,7 +70,7 @@ export function basicForm(title, content, onSubmit, wide = false, options = {}) 
     } catch (error) {
       if (options.onError) options.onError(error, e.target);
       else formError(error);
-    } finally { submit.disabled = false; }
+    } finally { submit.disabled = false; submitting = false; }
   };
   return el;
 }

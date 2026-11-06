@@ -106,12 +106,19 @@ labels.plataforma = 'Negocios';
 labels.negocio = 'Detalle de negocio';
 labels.cuenta = 'Mi cuenta';
 labels.recepcionistas = 'Recepcionistas';
+labels.profesionales = 'Profesionales';
 let animateNextRoute = true;
 let availabilityMenuOpen = null;
+let usersMenuOpen = null;
 const availabilityPath = (group) => `/admin/disponibilidad/${group}`;
 const selectedAvailabilityGroup = () => resolveAvailabilityGroup(state.availabilityGroup, isDemo, user?.rol);
 function navItem(item) {
   if (item.length === 2) return `<div class="nav-section">${item[1]}</div>`;
+  if (item[0] === 'usuarios') {
+    const selected = ['profesionales', 'recepcionistas'].includes(state.page);
+    const open = usersMenuOpen ?? selected;
+    return `<div class="nav-disclosure"><button type="button" class="nav-item nav-disclosure-trigger ${selected ? 'active' : ''}" data-users-menu aria-expanded="${open}" aria-controls="users-sidebar-submenu">${icon('users')}<span>Usuarios</span>${icon('chevron', 'nav-disclosure-arrow')}</button><div class="nav-submenu" id="users-sidebar-submenu" ${open ? '' : 'hidden'}>${[['profesionales', 'Profesionales'], ...(!isDemo && user?.rol === 'admin_negocio' ? [['recepcionistas', 'Recepcionistas']] : [])].map(([page, label]) => `<a href="/admin/${page}" data-nav="${page}" class="nav-subitem ${state.page === page ? 'is-current' : ''}" ${state.page === page ? 'aria-current="page"' : ''}>${label}</a>`).join('')}</div></div>`;
+  }
   if (item[0] === 'disponibilidad') {
     const open = availabilityMenuOpen ?? state.page === 'disponibilidad';
     const children = allowedAvailabilityGroups(isDemo, user?.rol).map((group) => `<a href="${availabilityPath(group.id)}" data-availability-group="${group.id}" class="nav-subitem ${state.page === 'disponibilidad' && selectedAvailabilityGroup() === group.id ? 'is-current' : ''}" ${state.page === 'disponibilidad' && selectedAvailabilityGroup() === group.id ? 'aria-current="page"' : ''}>${group.label}</a>`).join('');
@@ -160,6 +167,7 @@ export function navigate(page, id = null) {
   }
   history.pushState({}, '', modeUrl(page === 'disponibilidad' ? availabilityPath(state.availabilityGroup) : `/admin/${page}${page === 'negocio' ? `/${id}` : ''}`));
   state.page = page;
+  if (['profesionales', 'recepcionistas'].includes(page)) usersMenuOpen = true;
   state.businessId = page === 'negocio' ? Number(id) : null;
   state.search = '';
   animateNextRoute = true;
@@ -192,9 +200,7 @@ export function renderShell(content) {
   const visibleNav = isDemo ? nav : [
     ['connected', user.rol === 'superadmin' ? 'PLATAFORMA' : user.rol === 'recepcionista' ? 'MI CUENTA' : 'MI NEGOCIO'],
     ...(user.rol === 'superadmin' ? [['plataforma', 'grid', 'Negocios']] : [
-      ...nav.filter((item) => item.length === 3 && availablePage(item[0]) && item[0] === 'profesionales'),
-      ...(user.rol === 'admin_negocio' ? [['recepcionistas', 'users', 'Recepcionistas']] : []),
-      ...nav.filter((item) => item.length === 3 && availablePage(item[0]) && item[0] !== 'profesionales'),
+      ...(user.rol === 'admin_negocio' ? [['servicios', 'briefcase', 'Servicios'], ['sucursales', 'pin', 'Sucursales'], ['usuarios', 'users', 'Usuarios'], ['disponibilidad', 'clock', 'Disponibilidad']] : [...nav.filter((item) => item.length === 3 && item[0] !== 'usuarios' && availablePage(item[0])), ...(availablePage('profesionales') ? [['profesionales', 'stethoscope', 'Profesionales']] : [])]),
     ]),
   ];
   const workspaceName = !isDemo && user.rol === 'superadmin' ? 'Plataforma' : tenant.name;
@@ -310,6 +316,13 @@ document.addEventListener('click', async (e) => {
     return;
   }
   setAccountMenuOpen(false);
+  const usersMenu = e.target.closest('[data-users-menu]');
+  if (usersMenu) {
+    usersMenuOpen = usersMenu.getAttribute('aria-expanded') !== 'true';
+    usersMenu.setAttribute('aria-expanded', String(usersMenuOpen));
+    document.querySelector('#users-sidebar-submenu').hidden = !usersMenuOpen;
+    return;
+  }
   const availabilityMenu = e.target.closest('[data-availability-menu]');
   if (availabilityMenu) {
     availabilityMenuOpen = availabilityMenu.getAttribute('aria-expanded') !== 'true';
