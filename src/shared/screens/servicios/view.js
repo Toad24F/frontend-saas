@@ -1,3 +1,4 @@
+import { configureCatalogPaging, catalogPagination, updateCatalogPage } from '../catalog-pagination.js';
 import { catalogHead, clearCatalogButton, hasCatalogFilters } from '../catalog-header.js';
 import { isDemo, user } from '../../../connected/backend.js';
 import { state, render } from '../../app.js';
@@ -45,6 +46,7 @@ export function services(management = () => '', { headerActions = '' } = {}) {
   const services = list('services', state.tenantId);
   const professionals = list('professionals', state.tenantId);
   const visible = services.filter(matches);
+  const page = configureCatalogPaging('service', state.tenantId, services, () => list('services', state.tenantId).filter(matches), (service) => renderService(service, professionals, own, professional, management, true), 'servicios');
   const active = services.filter((service) => service.active !== false).length;
   const desktopView = getCatalogView();
   const resultView = matchMedia('(max-width: 767px)').matches ? 'cards' : desktopView;
@@ -56,7 +58,7 @@ export function services(management = () => '', { headerActions = '' } = {}) {
       <div class="professional-view-switch" role="group" aria-label="Tipo de vista"><button type="button" data-service-view="list" aria-pressed="${desktopView === 'list'}" class="${desktopView === 'list' ? 'is-selected' : ''}">${icon('menu')}<span>Lista</span></button><button type="button" data-service-view="cards" aria-pressed="${desktopView === 'cards'}" class="${desktopView === 'cards' ? 'is-selected' : ''}">${icon('grid')}<span>Tarjetas</span></button></div>
     </section>
     <div class="professional-results-heading"><span id="service-results-count" role="status" aria-live="polite">${visible.length} ${visible.length === 1 ? 'resultado' : 'resultados'}</span></div>
-    ${services.length ? `<div class="professional-results professional-view--${resultView}" data-desktop-view="${desktopView}" id="service-results">${services.map((service) => renderService(service, professionals, own, professional, management, visible.includes(service))).join('')}</div><div class="professional-no-results" id="service-no-results" ${visible.length ? 'hidden' : ''}>${empty('Sin coincidencias', 'Prueba otra búsqueda o cambia el filtro de estado.', '<button type="button" class="btn btn-light" data-service-reset>Limpiar filtros</button>')}</div>` : empty('Aún no hay servicios', 'Crea el primer servicio para organizar tu oferta.', '<button type="button" class="btn btn-primary" data-action="new-service">Nuevo servicio</button>')}
+    ${services.length ? `<div class="professional-results professional-view--${resultView}" data-desktop-view="${desktopView}" id="service-results">${page.rows.map((service) => renderService(service, professionals, own, professional, management, true)).join('')}</div>${catalogPagination('service', page)}<div class="professional-no-results" id="service-no-results" ${visible.length ? 'hidden' : ''}>${empty('Sin coincidencias', 'Prueba otra búsqueda o cambia el filtro de estado.', '<button type="button" class="btn btn-light" data-service-reset>Limpiar filtros</button>')}</div>` : empty('Aún no hay servicios', 'Crea el primer servicio para organizar tu oferta.', '<button type="button" class="btn btn-primary" data-action="new-service">Nuevo servicio</button>')}
     <div class="information-note">${icon('info')} La duración de cada servicio determina los horarios disponibles en tu portal. El precio es informativo; no se realizan cobros en línea.</div>
   </div>`;
 }
@@ -82,7 +84,7 @@ export function applyServiceFilters() {
   ui.status = root.querySelector('[data-service-filter]')?.value || 'all';
   root.querySelectorAll('[data-service-reset]').forEach((button) => { button.disabled = !hasCatalogFilters(ui); });
   const visible = new Set(list('services', state.tenantId).filter(matches).map((service) => String(service.id)));
-  root.querySelectorAll('[data-service-entry]').forEach((entry) => { entry.hidden = !visible.has(entry.dataset.serviceEntry); });
+  updateCatalogPage('service', true);
   const count = visible.size;
   root.querySelector('#service-results-count').textContent = `${count} ${count === 1 ? 'resultado' : 'resultados'}`;
   const noResults = root.querySelector('#service-no-results');

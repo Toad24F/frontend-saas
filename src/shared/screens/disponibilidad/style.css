@@ -377,3 +377,14 @@ html[data-theme='dark'] .availability-field-error { color: #ffb2a8; }
   .offering-table td::before { content: attr(data-label) ': '; color: var(--muted); }
   .offering-actions .btn { width: 100%; white-space: normal; min-height: 44px; }
 }
+.block-filters { display: flex; flex-wrap: wrap; align-items: end; gap: 12px; }
+.block-directory > .block-filters { margin: 0 24px; }
+.block-directory > .availability-note { margin: 16px 24px; }
+.block-directory .local-pagination { margin: 22px 24px; }
+.block-directory [role="alert"] { margin: 16px 24px; color: var(--danger, #b42318); }
+.block-filters label { display: grid; gap: 6px; flex: 1 1 130px; min-width: 0; font-size: 12px; }
+.block-filters label:first-child { flex: 2 1 190px; }
+.block-filters :is(input, select, button) { min-height: 44px; }
+.block-directory [data-block-clear]:disabled { opacity: .45; }
+.block-directory .block-item small { display: block; overflow-wrap: anywhere; }
+@media (max-width: 767px) { .block-filters label, .block-filters label:first-child { flex-basis: 100%; } .block-filters > button { width: 100%; } }

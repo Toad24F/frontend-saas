@@ -66,6 +66,21 @@ Este es un documento nuevo para la entrega del administrador. La documentación 
 - **Días disponibles para reservar:** sustituye la etiqueta Horizonte futuro. Con 20 se permiten fechas desde hoy hasta 20 días en el futuro; con cero, únicamente hoy si existen horarios válidos. El campo y contrato HTTP siguen siendo `diasFuturos`.
 - La demo conserva su intervalo configurable y advierte que su consulta de ejemplo no reproduce el motor real ni su redondeo. No se modifica la lógica de disponibilidad del backend ni el simulador para aparentar una capacidad conectada.
 
+## Paginación local de catálogos y Bloqueos
+
+- Servicios, Sucursales, Profesionales y Recepcionistas tienen páginas independientes de diez registros. Primero se aplican los filtros existentes sobre todos los datos cargados y después se obtiene la página. Se conserva el orden del catálogo.
+- El pie muestra el intervalo y el total filtrado. Anterior, Siguiente y Página X de Y aparecen únicamente cuando hay más de diez coincidencias. El estado sin coincidencias conserva la limpieza de filtros y no muestra navegación.
+- Buscar, cambiar un filtro o limpiar vuelve a la primera página. Cambiar entre lista y tarjetas, reducir el ancho o volver a renderizar conserva la página válida. Si desaparece el último registro de una página, se ajusta a la última disponible.
+- Solo se renderizan los registros de la página actual. Resúmenes, cupos y cantidades de asignaciones siguen utilizando todos los datos cargados. Una alta que no coincide con los filtros conservados muestra un aviso para encontrarla al limpiarlos.
+- Cambiar de página lleva el foco y desplaza al inicio de los resultados. Se mantienen tarjetas en móvil, selector lista/tarjetas en escritorio, botones táctiles y colores del tema actual.
+- Bloqueos añade búsqueda por motivo, tipo, sucursal y fechas Desde/Hasta. El rango opcional incluye bloqueos que se superponen con cualquier día del intervalo, incluso si comienzan antes. Las fechas invertidas o inválidas muestran un error y no ofrecen paginación.
+- La selección de profesional incluye los bloqueos de todo el equipo que le corresponden. El filtro de sucursal incluye los aplicables a todas las sucursales. Limpiar filtros restablece solo los filtros locales de Bloqueos y mantiene el profesional seleccionado; se deshabilita si no hay filtros locales.
+- Bloqueos se ordena por fecha de inicio descendente y por identificador descendente en empates. Cambiar el profesional reinicia su página; editar o eliminar mantiene una página válida. Las acciones y restricciones del rol Profesional permanecen intactas.
+- El patrón compartido también se aplica a los catálogos y Bloqueos de la demo que existen; Recepcionistas sigue siendo una pantalla conectada.
+- Todo sucede sobre las colecciones ya cargadas. No se añaden parámetros, rutas ni contratos de paginación al backend. La descarga inicial completa y su costo permanecen; no se plantea migrar a paginación de servidor.
+
+Archivos añadidos: `src/shared/screens/local-pagination.js`, `catalog-pagination.js`, `src/shared/screens/disponibilidad/block-directory.js` y `block-filters.js`. Se adaptan las cuatro vistas de catálogo, Disponibilidad y sus estilos. Pruebas: `tests/local-pagination.test.js` y `tests/browser-local-pagination.mjs`.
+
 ## Archivos principales
 
 - `src/shared/app.js`, `src/shared/styles.css`, `src/shared/forms.js` y `src/shared/ui.js`: navegación Usuarios, uniformidad del menú de cuenta, colores semánticos y formularios laterales con confirmación de descarte.
@@ -86,10 +101,11 @@ Se leyeron el servicio de profesionales (asignación de sucursales y oferta), la
 npm test
 npm run build
 node tests/browser-admin-review.mjs
+node tests/browser-local-pagination.mjs
 git diff --check
 ```
 
-Resultados: 202 pruebas unitarias aprobadas y compilación correcta. Cuatro pruebas nuevas cubren asignación bloqueada/preservación de valor, estado de filtros, validación/fallo de cupos y separación de estados/causas de oferta. La revisión de espacios no reportó errores.
+Resultados: 206 pruebas unitarias aprobadas y compilación correcta. Las pruebas previas cubren asignación bloqueada/preservación de valor, estado de filtros, validación/fallo de cupos y separación de estados/causas de oferta. La revisión de espacios no reportó errores.
 
 La prueba de navegador usa Edge con sesión ficticia e intercepta toda la API. Solo permite dos escrituras simuladas en memoria: restauración de un servicio y modificación de asignaciones para comprobar que se conserva el ID bloqueado. No escribe en la API ni base de datos reales. Comprueba:
 
@@ -108,5 +124,7 @@ La prueba de navegador usa Edge con sesión ficticia e intercepta toda la API. S
 - Ausencia de errores JavaScript y de desbordamiento horizontal del documento.
 
 Se generan 102 capturas en `test-results/admin-review/` (ignorado por Git): cuatro catálogos y panel lateral a 1366, 1159, 390 y 320px en claro/oscuro; asignaciones, oferta, horario y reglas a 1366, 390 y 320px en ambos temas; se añaden altas de los cuatro catálogos a los cuatro anchos y creación de bloqueos a los tres anchos. Se revisaron visualmente capturas representativas de escritorio y móvil en los dos temas. El tema se persiste en la sesión del navegador de prueba antes de recargar cada vista para no etiquetar incorrectamente capturas.
+
+La ampliación de paginación añade cuatro pruebas unitarias sobre límites 0/1/10/11/21, página inválida, ajuste al desaparecer el último registro, filtros de bloqueos globales, solapamiento y validación de fechas. La prueba específica de navegador verifica los cuatro catálogos con 21 registros, diez resultados sin controles, once con controles, búsqueda sin coincidencias, conservación de página lista/tarjetas/móvil, contadores globales y ajuste tras inhabilitar. En Bloqueos comprueba alcance por profesional/sucursal, fechas superpuestas, errores de rango y limpieza conservando contexto. Confirma que las acciones locales no realizan consultas de API. La única escritura de esta prueba es un retiro interceptado en memoria; no alcanza el backend. Genera 40 capturas en `test-results/local-pagination/` a 1366, 1159, 390 y 320px en ambos temas; se revisaron capturas representativas de escritorio y móvil. La demo de Servicios también tiene una comprobación con menos de diez registros.
 
 No se ejecutó la suite `npm run test:browser`: su preparación modifica una base efímera y queda fuera del alcance de solo lectura del backend de esta tarea. Sus pasos de inhabilitados se actualizaron, pero no se afirma ejecución contra API real. La validación con API simulada no certifica entrega de correos, persistencia real ni conflictos de excepciones no cargadas. Nginx y contratos de despliegue no cambian.

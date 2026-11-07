@@ -1,3 +1,4 @@
+import { configureCatalogPaging, catalogPagination, updateCatalogPage } from '../catalog-pagination.js';
 import { catalogHead, capacityHtml, clearCatalogButton, hasCatalogFilters } from '../catalog-header.js';
 import { isDemo, user } from '../../../connected/backend.js';
 import { state, render } from '../../app.js';
@@ -70,6 +71,7 @@ export function branches({ quota = null, management = () => '', headerActions = 
   const professionals = list('professionals', state.tenantId);
   const active = branches.filter((branch) => branch.active !== false).length;
   const visible = branches.filter(matches);
+  const page = configureCatalogPaging('branch', state.tenantId, branches, () => list('branches', state.tenantId).filter((branch) => (!own || professional?.branchIds.includes(branch.id)) && matches(branch)), (branch) => renderBranch(branch, professionals, own, management, true), 'sucursales');
   const desktopView = getCatalogView();
   const resultView = matchMedia('(max-width: 767px)').matches ? 'cards' : desktopView;
   return `<div class="professional-workspace branch-workspace">${catalogHead('Sucursales', own ? 'Consulta y activa la disponibilidad de tus sucursales asignadas.' : 'Gestiona las ubicaciones de tu negocio.', headerActions + (own ? '' : button('Nueva sucursal', 'new-branch')), quotaBar(branches, own, quota))}
@@ -80,7 +82,7 @@ export function branches({ quota = null, management = () => '', headerActions = 
       <div class="professional-view-switch" role="group" aria-label="Tipo de vista"><button type="button" data-branch-view="list" aria-pressed="${desktopView === 'list'}" class="${desktopView === 'list' ? 'is-selected' : ''}">${icon('menu')}<span>Lista</span></button><button type="button" data-branch-view="cards" aria-pressed="${desktopView === 'cards'}" class="${desktopView === 'cards' ? 'is-selected' : ''}">${icon('grid')}<span>Tarjetas</span></button></div>
     </section>
     <div class="professional-results-heading"><span id="branch-results-count" role="status" aria-live="polite">${visible.length} ${visible.length === 1 ? 'resultado' : 'resultados'}</span></div>
-    ${branches.length ? `<div class="professional-results professional-view--${resultView}" data-desktop-view="${desktopView}" id="branch-results">${branches.map((branch) => renderBranch(branch, professionals, own, management, visible.includes(branch))).join('')}</div><div class="professional-no-results" id="branch-no-results" ${visible.length ? 'hidden' : ''}>${empty('Sin coincidencias', 'Prueba otra búsqueda o cambia el filtro de estado.', '<button type="button" class="btn btn-light" data-branch-reset>Limpiar filtros</button>')}</div>` : empty('Aún no hay sucursales', own ? 'Tu negocio todavía no te asigna una sucursal.' : 'Crea una sucursal para empezar a organizar la atención.', own ? '' : '<button type="button" class="btn btn-primary" data-action="new-branch">Nueva sucursal</button>')}
+    ${branches.length ? `<div class="professional-results professional-view--${resultView}" data-desktop-view="${desktopView}" id="branch-results">${page.rows.map((branch) => renderBranch(branch, professionals, own, management, true)).join('')}</div>${catalogPagination('branch', page)}<div class="professional-no-results" id="branch-no-results" ${visible.length ? 'hidden' : ''}>${empty('Sin coincidencias', 'Prueba otra búsqueda o cambia el filtro de estado.', '<button type="button" class="btn btn-light" data-branch-reset>Limpiar filtros</button>')}</div>` : empty('Aún no hay sucursales', own ? 'Tu negocio todavía no te asigna una sucursal.' : 'Crea una sucursal para empezar a organizar la atención.', own ? '' : '<button type="button" class="btn btn-primary" data-action="new-branch">Nueva sucursal</button>')}
   </div>`;
 }
 
@@ -107,7 +109,7 @@ export function applyBranchFilters() {
   const professional = own ? list('professionals', state.tenantId)[0] : null;
   root.querySelectorAll('[data-branch-reset]').forEach((button) => { button.disabled = !hasCatalogFilters(ui); });
   const visible = new Set(list('branches', state.tenantId).filter((branch) => (!own || professional?.branchIds.includes(branch.id)) && matches(branch)).map((branch) => String(branch.id)));
-  root.querySelectorAll('[data-branch-entry]').forEach((entry) => { entry.hidden = !visible.has(entry.dataset.branchEntry); });
+  updateCatalogPage('branch', true);
   const count = visible.size;
   root.querySelector('#branch-results-count').textContent = `${count} ${count === 1 ? 'resultado' : 'resultados'}`;
   const noResults = root.querySelector('#branch-no-results');

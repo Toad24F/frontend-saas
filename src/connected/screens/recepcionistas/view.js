@@ -1,3 +1,4 @@
+import { configureCatalogPaging, catalogPagination, updateCatalogPage } from '../../../shared/screens/catalog-pagination.js';
 import { capacityHtml } from '../../../shared/screens/catalog-header.js';
 import { roleCapacity } from '../../modules/catalogos/capacity.js';
 import { catalogHead, clearCatalogButton, hasCatalogFilters } from '../../../shared/screens/catalog-header.js';
@@ -41,6 +42,7 @@ export function receptionists() {
   if (tenantId !== state.tenantId) { Object.assign(ui, { search: '', status: 'all' }); tenantId = state.tenantId; }
   const people = list('receptionists', state.tenantId);
   const visible = people.filter(matches);
+  const page = configureCatalogPaging('reception', state.tenantId, people, () => list('receptionists', state.tenantId).filter(matches), (person) => renderPerson(person, true), 'recepcionistas');
   const active = people.filter((person) => person.active).length;
   const desktopView = getCatalogView();
   const resultView = matchMedia('(max-width: 767px)').matches ? 'cards' : desktopView;
@@ -52,7 +54,7 @@ export function receptionists() {
       <div class="professional-view-switch" role="group" aria-label="Tipo de vista"><button type="button" data-reception-view="list" aria-pressed="${desktopView === 'list'}" class="${desktopView === 'list' ? 'is-selected' : ''}">${icon('menu')}<span>Lista</span></button><button type="button" data-reception-view="cards" aria-pressed="${desktopView === 'cards'}" class="${desktopView === 'cards' ? 'is-selected' : ''}">${icon('grid')}<span>Tarjetas</span></button></div>
     </section>
     <div class="professional-results-heading"><span id="reception-results-count" role="status" aria-live="polite">${visible.length} ${visible.length === 1 ? 'resultado' : 'resultados'}</span></div>
-    ${people.length ? `<div class="professional-results professional-view--${resultView}" data-desktop-view="${desktopView}" id="reception-results">${people.map((person) => renderPerson(person, visible.includes(person))).join('')}</div><div class="professional-no-results" id="reception-no-results" ${visible.length ? 'hidden' : ''}>${empty('Sin coincidencias', 'Prueba otra búsqueda o cambia el filtro de estado.', '<button type="button" class="btn btn-light" data-reception-reset>Limpiar filtros</button>')}</div>` : empty('Sin recepcionistas', 'Crea una cuenta para tu equipo de recepción.', '<button type="button" class="btn btn-primary" data-action="new-receptionist">Nueva recepcionista</button>')}
+    ${people.length ? `<div class="professional-results professional-view--${resultView}" data-desktop-view="${desktopView}" id="reception-results">${page.rows.map((person) => renderPerson(person, true)).join('')}</div>${catalogPagination('reception', page)}<div class="professional-no-results" id="reception-no-results" ${visible.length ? 'hidden' : ''}>${empty('Sin coincidencias', 'Prueba otra búsqueda o cambia el filtro de estado.', '<button type="button" class="btn btn-light" data-reception-reset>Limpiar filtros</button>')}</div>` : empty('Sin recepcionistas', 'Crea una cuenta para tu equipo de recepción.', '<button type="button" class="btn btn-primary" data-action="new-receptionist">Nueva recepcionista</button>')}
   </div>`;
 }
 
@@ -77,7 +79,7 @@ export function applyReceptionFilters() {
   ui.status = root.querySelector('[data-reception-filter]')?.value || 'all';
   root.querySelectorAll('[data-reception-reset]').forEach((button) => { button.disabled = !hasCatalogFilters(ui); });
   const visible = new Set(list('receptionists', state.tenantId).filter(matches).map((person) => String(person.id)));
-  root.querySelectorAll('[data-reception-entry]').forEach((entry) => { entry.hidden = !visible.has(entry.dataset.receptionEntry); });
+  updateCatalogPage('reception', true);
   const count = visible.size;
   root.querySelector('#reception-results-count').textContent = `${count} ${count === 1 ? 'resultado' : 'resultados'}`;
   const noResults = root.querySelector('#reception-no-results');

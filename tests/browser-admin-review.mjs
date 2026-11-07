@@ -1,5 +1,5 @@
 // Con Vite activo. Toda la API está interceptada; ninguna escritura llega al backend.
-import { chromium } from '@playwright/test';
+import { chromium, expect } from '@playwright/test';
 import assert from 'node:assert/strict';
 import { mkdir } from 'node:fs/promises';
 const origin = process.env.BUSINESS_UI_URL || 'http://localhost:5173';
@@ -80,7 +80,7 @@ try {
           const caution = page.locator('.reception-status-action.action-caution');
           assert.equal(await caution.evaluate((el) => getComputedStyle(el).backgroundColor), theme === 'dark' ? 'rgb(73, 56, 22)' : 'rgb(255, 240, 194)');
           await caution.hover();
-          assert.equal(await caution.evaluate((el) => getComputedStyle(el).backgroundColor), theme === 'dark' ? 'rgb(96, 74, 28)' : 'rgb(255, 228, 154)');
+          await expect(caution).toHaveCSS('background-color', theme === 'dark' ? 'rgb(96, 74, 28)' : 'rgb(255, 228, 154)');
         }
         const action = { profesionales: 'new-professional', recepcionistas: 'new-receptionist', servicios: 'new-service', sucursales: 'new-branch' }[screen];
         await page.locator('[data-action="' + action + '"]').first().click();

@@ -1,3 +1,4 @@
+import { configureCatalogPaging, catalogPagination, updateCatalogPage } from '../catalog-pagination.js';
 import { catalogHead, clearCatalogButton, hasCatalogFilters } from '../catalog-header.js';
 import { state, render } from '../../app.js';
 import { getCatalogView, setCatalogView } from '../catalog-view.js';
@@ -35,6 +36,7 @@ export function professionals(management = () => '', { headerActions = '', capac
   const branches = list('branches', state.tenantId);
   const services = list('services', state.tenantId);
   const visible = people.filter(matches);
+  const page = configureCatalogPaging('professional', state.tenantId, people, () => list('professionals', state.tenantId).filter(matches), (person) => renderPerson(person, management, true), 'profesionales');
   const active = people.filter((person) => person.active !== false).length;
   const desktopView = getCatalogView();
   const resultView = matchMedia('(max-width: 767px)').matches ? 'cards' : desktopView;
@@ -46,7 +48,7 @@ export function professionals(management = () => '', { headerActions = '', capac
       <div class="professional-view-switch" role="group" aria-label="Tipo de vista"><button type="button" data-professional-view="list" aria-pressed="${desktopView === 'list'}" class="${desktopView === 'list' ? 'is-selected' : ''}">${icon('menu')}<span>Lista</span></button><button type="button" data-professional-view="cards" aria-pressed="${desktopView === 'cards'}" class="${desktopView === 'cards' ? 'is-selected' : ''}">${icon('grid')}<span>Tarjetas</span></button></div>
     </section>
     <div class="professional-results-heading"><span id="professional-results-count" role="status" aria-live="polite">${visible.length} ${visible.length === 1 ? 'resultado' : 'resultados'}</span></div>
-    ${people.length ? `<div class="professional-results professional-view--${resultView}" data-desktop-view="${desktopView}" id="professional-results">${people.map((person) => renderPerson(person, management, visible.includes(person))).join('')}</div><div class="professional-no-results" id="professional-no-results" ${visible.length ? 'hidden' : ''}>${empty('Sin coincidencias', 'Prueba otra búsqueda o quita alguno de los filtros.', '<button type="button" class="btn btn-light" data-professional-reset>Limpiar filtros</button>')}</div>` : empty('Aún no hay profesionales', 'Crea el primer perfil para comenzar a organizar tu equipo.', '<button type="button" class="btn btn-primary" data-action="new-professional">Nuevo profesional</button>')}
+    ${people.length ? `<div class="professional-results professional-view--${resultView}" data-desktop-view="${desktopView}" id="professional-results">${page.rows.map((person) => renderPerson(person, management, true)).join('')}</div>${catalogPagination('professional', page)}<div class="professional-no-results" id="professional-no-results" ${visible.length ? 'hidden' : ''}>${empty('Sin coincidencias', 'Prueba otra búsqueda o quita alguno de los filtros.', '<button type="button" class="btn btn-light" data-professional-reset>Limpiar filtros</button>')}</div>` : empty('Aún no hay profesionales', 'Crea el primer perfil para comenzar a organizar tu equipo.', '<button type="button" class="btn btn-primary" data-action="new-professional">Nuevo profesional</button>')}
   </div>`;
 }
 
@@ -71,7 +73,7 @@ export function applyProfessionalFilters() {
   root.querySelectorAll('[data-professional-filter]').forEach((select) => { ui[select.dataset.professionalFilter] = select.value; });
   root.querySelectorAll('[data-professional-reset]').forEach((button) => { button.disabled = !hasCatalogFilters(ui); });
   const visible = new Set(list('professionals', state.tenantId).filter(matches).map((person) => String(person.id)));
-  root.querySelectorAll('.professional-entry').forEach((entry) => { entry.hidden = !visible.has(entry.dataset.professionalId); });
+  updateCatalogPage('professional', true);
   const count = visible.size;
   const label = root.querySelector('#professional-results-count');
   if (label) label.textContent = `${count} ${count === 1 ? 'resultado' : 'resultados'}`;
