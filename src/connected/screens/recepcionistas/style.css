@@ -3,7 +3,6 @@
 .reception-workspace .professional-assignment > span { white-space: normal; }
 .reception-workspace .professional-entry-actions .professional-availability { border: 0; }
 .reception-workspace .professional-view--cards .professional-entry-actions { gap: 8px; }
-.reception-workspace .professional-more.is-reactivate .professional-more-menu button { color: var(--ink); }
 @media (max-width: 1260px) {
   .reception-toolbar { grid-template-columns: minmax(180px, 1fr) auto; }
 }

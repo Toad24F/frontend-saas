@@ -1,9 +1,10 @@
 import { api } from '../auth/session.js';
 
 export async function submitProfessionalAction(id, action, request = api) {
-  if (!Number.isSafeInteger(id) || id < 1 || !['deactivate', 'reactivate', 'delete'].includes(action)) {
+  if (!Number.isSafeInteger(id) || id < 1 || !['deactivate', 'reactivate', 'disable'].includes(action)) {
     throw new Error('Acción de profesional no válida.');
   }
-  if (action === 'delete') return request(`/profesionales/${id}`, 'DELETE');
+  // El retiro recuperable reemplaza a DELETE; desactivar permanece separado.
+  if (action === 'disable') return request(`/profesionales/${id}/inhabilitar`, 'POST', {});
   return request(`/profesionales/${id}/${action === 'deactivate' ? 'desactivar' : 'reactivar'}`, 'POST', {});
 }

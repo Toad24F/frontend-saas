@@ -1,16 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { exceptionPayload, minutesToClock, minutesToLabel, validateProjectionRange } from '../src/connected/screens/disponibilidad/payload.js';
+import { minutesToClock, minutesToLabel, validateProjectionRange } from '../src/connected/screens/disponibilidad/payload.js';
 
-test('la excepción conserva IDs y representa cierre explícito sin franjas', () => {
-  assert.deepEqual(exceptionPayload(8, []), { sucursalId: 8, franjas: [] });
-  assert.deepEqual(exceptionPayload(8, [
-    { id: 12, start: '09:00', end: '12:00', breakStart: '', breakEnd: '' },
-    { start: '13:00', end: '00:00', breakStart: '17:00', breakEnd: '17:30' },
-  ]), { sucursalId: 8, franjas: [
-    { id: 12, orden: 0, inicioMinutos: 540, finMinutos: 720, descansoInicioMinutos: null, descansoFinMinutos: null },
-    { orden: 1, inicioMinutos: 780, finMinutos: 1440, descansoInicioMinutos: 1020, descansoFinMinutos: 1050 },
-  ] });
+test('la proyección conserva etiquetas de minutos sin rutas de excepción', () => {
   assert.equal(minutesToClock(1440), '00:00');
   assert.equal(minutesToLabel(1440), '24:00');
 });

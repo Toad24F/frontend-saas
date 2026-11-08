@@ -1,15 +1,21 @@
 import { replaceData, time } from '../../../shared/data.js';
 import { api, user } from '../auth/session.js';
+import { loadRoleCapacities, clearRoleCapacities } from '../catalogos/capacity.js';
 import { setBranchQuota } from '../sucursales/quota.js';
 
 const initials = (name) => name.split(/\s+/).slice(0, 2).map((part) => part[0]).join('');
 const clock = (value) => value == null ? '' : time(value % 1440);
 export async function loadBackendData() {
   setBranchQuota(null);
+  clearRoleCapacities();
   const tenantId = user.negocioId || 1;
   const next = { tenants: [], professionals: [], receptionists: [], branches: [], services: [], schedules: [], blocks: [], appointments: [], clients: [], holds: [] };
   const businessName = user.nombreNegocio || 'Mi negocio';
-  next.tenants = [{ id: tenantId, name: user.rol === 'superadmin' ? 'Plataforma' : businessName, slug: '', initials: initials(user.rol === 'superadmin' ? 'Plataforma' : businessName), mode: null }];
+  // Login y perfil entregan el identificador público del negocio reconstruido
+  // en servidor. Una respuesta antigua/inválida no reutiliza otro enlace.
+  const identifier = user.identificadorPublico;
+  const slug = user.rol !== 'superadmin' && typeof identifier === 'string' && identifier.length <= 80 && /^[a-z0-9]+(-[a-z0-9]+)*$/.test(identifier) ? identifier : '';
+  next.tenants = [{ id: tenantId, name: user.rol === 'superadmin' ? 'Plataforma' : businessName, slug, initials: initials(user.rol === 'superadmin' ? 'Plataforma' : businessName), mode: null }];
   if (user.rol === 'superadmin') {
     const businesses = await api('/negocios');
     next.tenants = await Promise.all(businesses.map(async (b) => {
@@ -40,9 +46,11 @@ export async function loadBackendData() {
         notes: detail?.notasLlegada || '', active: branch.atencionActiva,
         globalActive: branch.sucursalActiva, color: 'orange' };
     });
-    next.schedules = schedules.map((s) => ({ id: s.id, tenantId, professionalId: user.id, day: s.diaSemana, branchId: s.sucursalId, start: clock(s.inicioMinutos), end: clock(s.finMinutos), breakStart: clock(s.descansoInicioMinutos), breakEnd: clock(s.descansoFinMinutos), enabled: s.activo }));
+    // La semana conectada lee solo franjas completas; los descansos históricos no son editables.
+    next.schedules = schedules.map((s) => ({ id: s.id, tenantId, professionalId: user.id, day: s.diaSemana, branchId: s.sucursalId, start: clock(s.inicioMinutos), end: clock(s.finMinutos), enabled: s.activo }));
     next.blocks = blocks.map((b) => ({ id: b.id, tenantId, professionalId: b.personalId, branchId: b.sucursalId, date: b.fechaInicio.slice(0, 10), endDate: b.fechaFin.slice(0, 10), start: clock(b.inicioMinutos), end: clock(b.finMinutos), type: b.tipo, reason: b.motivo }));
   } else if (user.rol === 'admin_negocio') {
+    await loadRoleCapacities(api);
     const [services, branches, quota, professionals, receptionists, blocks] = await Promise.all([api('/servicios'), api('/sucursales'), api('/sucursales/cupo'), api('/profesionales'), api('/recepcionistas'), api('/bloqueos')]);
     setBranchQuota(quota);
     next.receptionists = receptionists.map((r) => ({ id: r.id, tenantId, name: r.nombre, email: r.email, active: r.activo, activatedAt: r.activadoEn, initials: initials(r.nombre) }));
@@ -51,7 +59,7 @@ export async function loadBackendData() {
     await Promise.all(professionals.map(async (p, index) => {
       const [branchIds, services, schedules] = await Promise.all([api(`/profesionales/${p.id}/sucursales`), api(`/profesionales/${p.id}/servicios`), api(`/profesionales/${p.id}/horario`)]);
       next.professionals.push({ id: p.id, tenantId, name: p.nombre, email: p.correo, active: p.activo, specialty: p.especialidad || '', initials: initials(p.nombre), color: ['peach', 'mint', 'blue'][index % 3], branchIds, serviceIds: services.filter((s) => s.seleccionado).map((s) => s.id) });
-      next.schedules.push(...schedules.map((s) => ({ id: s.id, tenantId, professionalId: p.id, day: s.diaSemana, branchId: s.sucursalId, start: clock(s.inicioMinutos), end: clock(s.finMinutos), breakStart: clock(s.descansoInicioMinutos), breakEnd: clock(s.descansoFinMinutos), enabled: s.activo })));
+      next.schedules.push(...schedules.map((s) => ({ id: s.id, tenantId, professionalId: p.id, day: s.diaSemana, branchId: s.sucursalId, start: clock(s.inicioMinutos), end: clock(s.finMinutos), enabled: s.activo })));
     }));
     next.professionals.sort((a, b) => a.id - b.id);
     next.blocks = blocks.map((b) => ({ id: b.id, tenantId, professionalId: b.personalId, branchId: b.sucursalId, date: b.fechaInicio.slice(0, 10), endDate: b.fechaFin.slice(0, 10), start: clock(b.inicioMinutos), end: clock(b.finMinutos), type: b.tipo, reason: b.motivo }));

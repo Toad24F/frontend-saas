@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { blockApiErrors, exceptionApiErrors, scheduleApiErrors, validateBlock, validateException, validateProjection, validateScheduleRows } from '../src/shared/screens/disponibilidad/errors.js';
+import { blockApiErrors, scheduleApiErrors, validateBlock, validateProjection, validateScheduleRows } from '../src/shared/screens/disponibilidad/errors.js';
 
 test('bloqueos señalan motivo, fechas y horas por separado', () => {
   const data = new FormData();
@@ -14,19 +14,6 @@ test('bloqueos señalan motivo, fechas y horas por separado', () => {
   assert.deepEqual(blockApiErrors(new Error('fechaFin debe ser posterior · finMinutos: intervalo inválido')), {
     endDate: 'La fecha final debe ser igual o posterior a la fecha inicial.',
     end: 'Revisa la hora final; debe ser posterior a la inicial.',
-  });
-});
-
-test('excepciones ubican los errores en la franja correspondiente', () => {
-  const data = new FormData();
-  data.set('professionalId', '4'); data.set('branchId', '8'); data.set('date', '2026-10-20');
-  const errors = validateException(data, [{ index: 3, start: '12:00', end: '11:00', breakStart: '10:00', breakEnd: '10:30' }], false, true);
-  assert.deepEqual(errors, {
-    'slot-3-end': 'La salida debe ser posterior a la entrada.',
-    'slot-3-break': 'El descanso debe quedar dentro de la franja.',
-  });
-  assert.deepEqual(exceptionApiErrors(new Error('fila 2, descansoInicioMinutos: fuera de franja')), {
-    'slot-2-break': 'El descanso debe quedar dentro de la franja.',
   });
 });
 

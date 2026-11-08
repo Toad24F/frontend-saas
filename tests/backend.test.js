@@ -5,11 +5,11 @@ import { db } from '../src/shared/data.js';
 import { validateNewPassword } from '../src/connected/modules/auth/password-policy.js';
 import { getBranchQuota } from '../src/connected/modules/sucursales/quota.js';
 
-test('semana completa: conserva IDs, descansos y orden por día; excluye borradores vacíos', () => {
+test('semana completa: conserva IDs y orden por día sin descanso incrustado; excluye borradores vacíos', () => {
   const row = { id: 12, day: 1, branchId: 3, start: '07:00', end: '12:00', breakStart: '09:00', breakEnd: '09:30', enabled: true };
   const result = schedulePayload([row, { ...row, id: -2, branchId: 4, start: '12:00', end: '00:00', breakStart: '', breakEnd: '' }, { ...row, id: 13, day: 2, enabled: false }, { id: -104, day: 4, enabled: false, start: '', end: '' }]);
   assert.equal(result.franjas.length, 3);
-  assert.deepEqual(result.franjas[0], { id: 12, diaSemana: 1, orden: 0, sucursalId: 3, inicioMinutos: 420, finMinutos: 720, descansoInicioMinutos: 540, descansoFinMinutos: 570, activo: true });
+  assert.deepEqual(result.franjas[0], { id: 12, diaSemana: 1, orden: 0, sucursalId: 3, inicioMinutos: 420, finMinutos: 720, activo: true });
   assert.equal(result.franjas[1].id, undefined);
   assert.equal(result.franjas[1].orden, 1);
   assert.equal(result.franjas[1].finMinutos, 1440);
@@ -38,8 +38,26 @@ test('API interpreta 204 y errores de validación sin ocultarlos', async () => {
     global.fetch = async () => new Response(null, { status: 204 });
     assert.equal(await api('/bloqueos/1', 'DELETE'), null);
     global.fetch = async () => Response.json({ message: ['Horario solapado', 'Sucursal no asignada'] }, { status: 400 });
-    await assert.rejects(api('/profesionales/2/horario', 'PUT', { franjas: [] }), /Horario solapado · Sucursal no asignada/);
+    await assert.rejects(api('/profesionales/2/horario', 'PUT', { franjas: [] }), (error) => {
+      assert.match(error.message, /Horario solapado · Sucursal no asignada/);
+      assert.equal(error.status, 400);
+      return true;
+    });
   } finally { global.fetch = original; }
+});
+
+test('Recepción accede a disponibilidad privada y conserva cuenta', async () => {
+  const original = global.fetch;
+  const storage = global.sessionStorage;
+  global.sessionStorage = { setItem() {}, removeItem() {} };
+  try {
+    global.fetch = async () => Response.json({ accessToken: 'reception-token', usuario: { id: 8, nombre: 'Recepción', rol: 'recepcionista', negocioId: 7 } });
+    await login('recepcion@example.com', 'test-password');
+    assert.equal(defaultPage(), 'disponibilidad');
+    assert.equal(availablePage('disponibilidad'), true);
+    assert.equal(availablePage('cuenta'), true);
+    assert.equal(availablePage('profesionales'), false);
+  } finally { global.fetch = original; global.sessionStorage = storage; }
 });
 
 test('carga datos reales aislados del negocio, sin inventar citas, y envía autorización', async () => {
@@ -48,8 +66,8 @@ test('carga datos reales aislados del negocio, sin inventar citas, y envía auto
   const requests = [];
   global.sessionStorage = { setItem() {}, removeItem() {} };
   const responses = {
-    '/auth/login': { accessToken: 'test-token', usuario: { id: 2, nombre: 'Admin', rol: 'admin_negocio', negocioId: 7 } },
-    '/auth/profile': { user: { sub: 2, nombre: 'Admin', rol: 'admin_negocio', negocioId: 7 }, nombreNegocio: 'Clínica Central' },
+    '/auth/login': { accessToken: 'test-token', usuario: { id: 2, nombre: 'Admin', rol: 'admin_negocio', negocioId: 7, identificadorPublico: 'clinica-central' } },
+    '/auth/profile': { user: { sub: 2, nombre: 'Admin', rol: 'admin_negocio', negocioId: 7, identificadorPublico: 'clinica-central' }, nombreNegocio: 'Clínica Central' },
     '/servicios': [{ id: 10, nombre: 'Consulta', costo: '500.00', duracionMinutos: 45, activo: true }],
     '/sucursales': [{ id: 20, nombre: 'Centro', direccion: 'Calle 1', telefono: '6141234567', zonaHoraria: 'America/Chihuahua', activo: true }],
     '/sucursales/cupo': { negocioId: 7, limiteSucursalesActivas: 3, sucursalesActivas: 1, disponibles: 2 },
@@ -74,6 +92,7 @@ test('carga datos reales aislados del negocio, sin inventar citas, y envía auto
     assert.equal(availablePage('agenda'), false);
     assert.equal(await loadBackendData(), 7);
     assert.equal(db.tenants[0].name, 'Clínica Central');
+    assert.equal(db.tenants[0].slug, 'clinica-central');
     assert.deepEqual(getBranchQuota(), responses['/sucursales/cupo']);
     assert.deepEqual(db.professionals[0].branchIds, [20]);
     assert.deepEqual(db.professionals[0].serviceIds, [10]);

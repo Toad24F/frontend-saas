@@ -17,30 +17,49 @@ import { modal, toast, escape as esc } from './ui.js';
 import { reportState } from '../demo/screens/reportes/state.js';
 import { appointmentTable } from './screens/agenda/table.js';
 import { scheduleRow, setBlockScope } from './screens/disponibilidad/view.js';
+import { readScheduleRows, setScheduleRowEnabled } from './screens/disponibilidad/schedule-rows.js';
 import { appointmentCovered } from '../demo/schedule.js';
 import { clearAvailabilityErrors, clearAvailabilityField, showAvailabilityErrors, showAvailabilityGeneralError, validateScheduleRows, scheduleApiErrors } from './screens/disponibilidad/errors.js';
+import { validateConfiguration, validateInclusiveRange } from './screens/disponibilidad/operational-contract.js';
 let draftScheduleId = -1;
 
 export async function handleClick(e) {
   try {
+    // Solo los controles de la sección de inhabilitados cargan ese módulo;
+    // navegación y acciones ordinarias conservan su flujo habitual.
+    if (!isDemo && e.target.closest('[data-retired-open], [data-retired-list], [data-retired-detail], [data-retired-restore], [data-retired-effects]') &&
+      await (await import('../connected/screens/recursos/retired-view.js')).handleRetiredClick(e)) return;
+    if (isDemo && state.page === 'disponibilidad') {
+      const slot = e.target.closest('[data-availability-slot]');
+      const operationalAction = e.target.closest('[data-availability-action]');
+      if (slot) {
+        (await import('../demo/screens/disponibilidad/view.js')).demoSelectSlot(slot.dataset.slotDate, slot.dataset.slotTime);
+        return;
+      }
+      if (operationalAction?.dataset.availabilityAction === 'switch-manual') {
+        (await import('../demo/screens/disponibilidad/view.js')).demoSwitchManual();
+        return;
+      }
+    }
     if (!isDemo && user.rol === 'admin_negocio' && state.page === 'servicios') {
-      const service = e.target.closest('[data-delete-service]');
+      const service = e.target.closest('[data-disable-service]');
       if (service) {
-        (await import('../connected/screens/servicios/actions.js')).confirmServiceDeletion(Number(service.dataset.deleteService));
+        (await import('../connected/screens/servicios/actions.js')).confirmServiceDisable(Number(service.dataset.disableService));
         return;
       }
     }
     if (!isDemo && user.rol === 'admin_negocio' && state.page === 'sucursales') {
-      const branch = e.target.closest('[data-delete-branch]');
+      const branch = e.target.closest('[data-disable-branch]');
       if (branch) {
-        (await import('../connected/screens/sucursales/actions.js')).confirmBranchDeletion(Number(branch.dataset.deleteBranch));
+        (await import('../connected/screens/sucursales/actions.js')).confirmBranchDisable(Number(branch.dataset.disableBranch));
         return;
       }
     }
     if (!isDemo && user.rol === 'admin_negocio' && state.page === 'profesionales') {
       const professional = e.target.closest('[data-professional-action]');
       if (professional) {
-        (await import('../connected/screens/profesionales/actions.js')).professionalAction(professional.dataset.professionalAction, Number(professional.dataset.professionalId));
+        // El diálogo espera el cupo vigente antes de abrir una reactivación.
+        await (await import('../connected/screens/profesionales/actions.js')).professionalAction(professional.dataset.professionalAction, Number(professional.dataset.professionalId));
         return;
       }
     }
@@ -49,6 +68,13 @@ export async function handleClick(e) {
       if (await availability.handleAvailabilityClick(e)) return;
     }
     if (!isDemo && user.rol === 'superadmin' && state.page === 'negocio') {
+      const licenseRetry = e.target.closest('[data-license-retry]');
+      if (licenseRetry) {
+        licenseRetry.disabled = true;
+        try { await (await import('../connected/screens/negocio/actions.js')).retryLicenseOperation(); }
+        finally { licenseRetry.disabled = false; }
+        return;
+      }
       const businessAction = e.target.closest('[data-business-action]');
       const retryDelivery = e.target.closest('[data-retry-delivery]');
       if (businessAction || retryDelivery) {
@@ -58,12 +84,11 @@ export async function handleClick(e) {
       }
     }
     if (!isDemo && user.rol === 'admin_negocio' && state.page === 'recepcionistas') {
-      const detail = e.target.closest('[data-reception-detail]');
       const accountAction = e.target.closest('[data-reception-action]');
-      if (detail || accountAction) {
+      if (accountAction) {
         const reception = await import('../connected/screens/recepcionistas/actions.js');
-        if (detail) await reception.receptionistDetail(Number(detail.dataset.receptionDetail));
-        else reception.receptionistAction(accountAction.dataset.receptionAction, Number(accountAction.dataset.receptionId));
+        // Esperar la lectura del cupo conserva el manejo de errores del clic.
+        await reception.receptionistAction(accountAction.dataset.receptionAction, Number(accountAction.dataset.receptionId));
         return;
       }
     }
@@ -115,7 +140,12 @@ export async function handleClick(e) {
     const removeSchedule = e.target.closest('[data-remove-schedule]');
     if (removeSchedule) {
       const row = removeSchedule.closest('[data-schedule-row]');
-      if (document.querySelectorAll(`[data-schedule-row][data-schedule-day="${row.dataset.scheduleDay}"]`).length > 1) row.remove();
+      const siblings = document.querySelectorAll(`[data-schedule-row][data-schedule-day="${row.dataset.scheduleDay}"]`);
+      if (!isDemo && siblings.length === 1 && Number(row.dataset.id) > 0) {
+        const selected = resource('professionals', document.querySelector('#schedule-professional').value, state.tenantId);
+        row.insertAdjacentHTML('afterend', scheduleRow({ id: draftScheduleId--, day: Number(row.dataset.scheduleDay), branchId: selected.branchIds[0] || null, enabled: false, start: '', end: '', breakStart: '', breakEnd: '' }, selected, state.tenantId));
+      }
+      if (!isDemo || siblings.length > 1) row.remove();
       return;
     }
     const action = e.target.closest('[data-action]')?.dataset.action;
@@ -310,6 +340,42 @@ document.addEventListener('change', (e) => {
 });
 document.addEventListener('submit', async (e) => {
   const form = e.target;
+  if (isDemo && state.page === 'disponibilidad' && form.id === 'branch-assignments-form') {
+    e.preventDefault();
+    const submit = form.querySelector('[type="submit"]');
+    if (submit.disabled) return;
+    submit.disabled = true;
+    try {
+      const branchIds = [...new FormData(form).getAll('branchIds')].map(Number);
+      (await import('../demo/screens/disponibilidad/view.js')).saveDemoAssignedBranches(Number(form.dataset.personId), branchIds);
+    } catch (error) {
+      const target = form.querySelector('[data-assignment-error]');
+      target.textContent = error.message;
+      target.hidden = false;
+      target.focus();
+    } finally { submit.disabled = false; }
+    return;
+  }
+  if (isDemo && state.page === 'disponibilidad' && ['agenda-configuration-form', 'availability-query-form', 'availability-validation-form', 'affected-appointments-form'].includes(form.id)) {
+    e.preventDefault();
+    const demo = await import('../demo/screens/disponibilidad/view.js');
+    const data = new FormData(form);
+    if (form.id === 'agenda-configuration-form') {
+      const values = { modo: data.get('modo'), intervaloMinutos: Number(data.get('intervaloMinutos')), anticipacionMinutos: Number(data.get('anticipacionMinutos')), diasFuturos: Number(data.get('diasFuturos')) };
+      if (demo.demoSaveConfiguration(values, validateConfiguration(values))) toast('Reglas guardadas en esta demostración.');
+    } else if (form.id === 'availability-query-form') {
+      const values = { personalId: Number(data.get('personalId')), sucursalId: Number(data.get('sucursalId')), servicioId: Number(data.get('servicioId')), from: data.get('from'), to: data.get('to'), modalidad: data.get('modalidad') };
+      const errors = validateInclusiveRange(values.from, values.to);
+      for (const key of ['personalId', 'sucursalId', 'servicioId']) if (!Number.isSafeInteger(values[key]) || values[key] <= 0) errors[key] = 'Selecciona un identificador válido.';
+      demo.demoQuery(values, errors);
+    } else if (form.id === 'availability-validation-form') {
+      demo.demoValidate({ personalId: Number(data.get('personalId')), sucursalId: Number(data.get('sucursalId')), servicioId: Number(data.get('servicioId')), fechaLocal: data.get('fechaLocal'), horaInicio: data.get('horaInicio'), modalidad: data.get('modalidad') });
+    } else {
+      const values = { personalId: data.get('personalId') ? Number(data.get('personalId')) : '', sucursalId: data.get('sucursalId') ? Number(data.get('sucursalId')) : '', from: data.get('from'), to: data.get('to') };
+      demo.demoAffected(values, validateInclusiveRange(values.from, values.to));
+    }
+    return;
+  }
   if (
     !['schedule-form', 'business-form', 'notification-form'].includes(form.id)
   )
@@ -338,15 +404,7 @@ document.addEventListener('submit', async (e) => {
     if (form.id === 'schedule-form') {
       const p = Number(document.querySelector('#schedule-professional').value);
       const professional = resource('professionals', p, state.tenantId);
-      const updates = [...form.querySelectorAll('[data-schedule-row]')].map((row) => {
-        const id = Number(row.dataset.id);
-        return {
-          id, tenantId: state.tenantId, professionalId: p, day: Number(row.dataset.scheduleDay),
-          enabled: f.has(`enabled-${id}`), branchId: Number(f.get(`branch-${id}`)),
-          start: f.get(`start-${id}`), end: f.get(`end-${id}`),
-          breakStart: f.get(`breakStart-${id}`), breakEnd: f.get(`breakEnd-${id}`),
-        };
-      });
+      const updates = readScheduleRows(form, state.tenantId, p);
       scheduleRows = updates;
       const scheduleErrors = validateScheduleRows(updates, professional.branchIds, isDemo);
       if (Object.keys(scheduleErrors).length) {
@@ -384,5 +442,10 @@ document.addEventListener('input', (event) => {
   if (event.target.closest('#schedule-form')) clearAvailabilityField(event.target.form, event.target);
 });
 document.addEventListener('change', (event) => {
-  if (event.target.closest('#schedule-form')) clearAvailabilityField(event.target.form, event.target);
+  if (event.target.closest('#schedule-form')) {
+    if (event.target.matches('input[type="checkbox"][name^="enabled-"]')) {
+      setScheduleRowEnabled(event.target.closest('[data-schedule-row]'), event.target.checked);
+    }
+    clearAvailabilityField(event.target.form, event.target);
+  }
 });

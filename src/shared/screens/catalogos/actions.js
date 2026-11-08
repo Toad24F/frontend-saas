@@ -9,6 +9,7 @@ import { validateProfessional, professionalError, showProfessionalErrors, clearP
 import { validateService, serviceError } from '../servicios/errors.js';
 import { validateBranch, branchError } from '../sucursales/errors.js';
 import { MEXICO_TIMEZONES } from '../sucursales/timezones.js';
+import { readOwnRoleQuota, ownQuotaNotice } from '../../../connected/screens/negocio/user-quota.js';
 
 const professionalField = (...args) => field(...args).replace('class="form-field"', `class="form-field" data-professional-field="${args[1]}"`);
 const professionalSelect = (...args) => select(...args).replace('class="form-field"', `class="form-field" data-professional-field="${args[1]}"`);
@@ -35,6 +36,7 @@ export async function catalog(type, id) {
         }),
       false,
       {
+        drawer: true,
         validate(form) {
           const errors = validateService(new FormData(form), isDemo);
           if (!Object.keys(errors).length) { clearProfessionalErrors(form); return true; }
@@ -72,6 +74,7 @@ export async function catalog(type, id) {
         }),
       false,
       {
+        drawer: true,
         validate(form) {
           const errors = validateBranch(new FormData(form), isDemo);
           if (!Object.keys(errors).length) { clearProfessionalErrors(form); return true; }
@@ -104,10 +107,17 @@ export async function catalog(type, id) {
       return;
     }
     const own = !isDemo && user.rol === 'profesional';
+    let quotaIntro = '';
+    if (!isDemo && !existing && user.rol === 'admin_negocio') {
+      // El alta muestra el cupo de la ruta propia; una lectura fallida no se
+      // convierte en un límite local supuesto.
+      try { quotaIntro = ownQuotaNotice('profesionales', await readOwnRoleQuota('profesionales', api)); }
+      catch { quotaIntro = '<p class="form-intro">No se pudo consultar el cupo vigente. El servidor lo comprobará al guardar.</p>'; }
+    }
     let liveId = existing?.id;
     const dialog = basicForm(
       existing ? 'Editar profesional' : 'Nuevo profesional',
-      `${professionalField('Nombre completo', 'name', existing?.name, 'text', own ? 'readonly' : 'required maxlength="150"')}${own ? '' : professionalField('Especialidad', 'specialty', existing?.specialty, 'text', 'required maxlength="150"')}${professionalField('Correo', 'email', existing?.email, 'email', own ? 'readonly' : 'required maxlength="150"')}${isDemo || own ? '' : professionalField(existing ? 'Nueva contraseña (opcional)' : 'Contraseña', 'password', '', 'password', existing ? 'autocomplete="new-password" minlength="12"' : 'required autocomplete="new-password" minlength="12"')}<div class="form-field professional-choice-group" data-professional-field="services" role="group" aria-labelledby="professional-services-label" tabindex="-1"><span class="form-label" id="professional-services-label">Servicios que ofrece</span><div class="checkbox-list">${(existing?.catalogServices || list(
+      `${quotaIntro}${professionalField('Nombre completo', 'name', existing?.name, 'text', own ? 'readonly' : 'required maxlength="150"')}${own ? '' : professionalField('Especialidad', 'specialty', existing?.specialty, 'text', 'required maxlength="150"')}${professionalField('Correo', 'email', existing?.email, 'email', own ? 'readonly' : 'required maxlength="150"')}${isDemo || own ? '' : professionalField(existing ? 'Nueva contraseña (opcional)' : 'Contraseña', 'password', '', 'password', existing ? 'autocomplete="new-password" minlength="12"' : 'required autocomplete="new-password" minlength="12"')}${isDemo ? `<div class="form-field professional-choice-group" data-professional-field="services" role="group" aria-labelledby="professional-services-label" tabindex="-1"><span class="form-label" id="professional-services-label">Servicios que ofrece</span><div class="checkbox-list">${(existing?.catalogServices || list(
         'services',
         state.tenantId,
       ))
@@ -125,21 +135,16 @@ export async function catalog(type, id) {
           (b) =>
             `<label><input type="checkbox" class="form-check-input" name="branches" value="${b.id}" ${own ? 'disabled' : ''} ${existing?.branchIds.includes(b.id) ? 'checked' : ''}/> ${esc(b.name)}</label>`,
         )
-        .join('')}</div></div>`,
+        .join('')}</div></div>` : '<p class="field-hint">Después de guardar, abre Ver disponibilidad para asignar sucursales y configurar servicios.</p>'}`,
       async (f) => {
-        const serviceIds = f.getAll('services').map(Number),
-          branchIds = f.getAll('branches').map(Number);
         if (!isDemo) {
-          if (user.rol === 'profesional') { await api(`/profesionales/${liveId}/servicios`, 'PUT', { servicioIds: serviceIds }); return; }
           const identity = { nombre: f.get('name').trim(), correo: f.get('email').trim(), especialidad: f.get('specialty').trim(), ...(f.get('password') ? { password: f.get('password') } : {}) };
           const saved = await api(liveId ? `/profesionales/${liveId}` : '/profesionales', liveId ? 'PATCH' : 'POST', identity);
           liveId = saved.id;
-          try { await api(`/profesionales/${liveId}/sucursales`, 'PUT', { sucursalIds: branchIds }); }
-          catch (error) { throw assignmentError('branches', 'La cuenta se guardó, pero no se actualizaron las sucursales. Reintenta guardar. ' + error.message); }
-          try { await api(`/profesionales/${liveId}/servicios`, 'PUT', { servicioIds: serviceIds }); }
-          catch (error) { throw assignmentError('services', 'La cuenta y las sucursales se guardaron, pero no se actualizaron los servicios. Reintenta guardar. ' + error.message); }
           return;
         }
+        const serviceIds = f.getAll('services').map(Number),
+          branchIds = f.getAll('branches').map(Number);
         serviceIds.forEach((id) => resource('services', id, state.tenantId));
         branchIds.forEach((id) => resource('branches', id, state.tenantId));
         if (existing) {
@@ -192,6 +197,7 @@ export async function catalog(type, id) {
       },
       true,
       {
+        drawer: true,
         validate(form) {
           const errors = validateProfessional(new FormData(form), { own, existing: Boolean(existing), demo: isDemo });
           if (!Object.keys(errors).length) { clearProfessionalErrors(form); return true; }

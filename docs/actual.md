@@ -138,7 +138,7 @@ El `:id` de estas rutas identifica el perfil profesional (`personal.id`); en la 
 
 Las asignaciones administrativas indican en qué sucursales puede atender el Profesional. El horario semanal guarda día y franja dentro de esas asignaciones; el interruptor individual de atención no elimina horarios ni selecciones. Los IDs ajenos dan **404**, el perfil de otro Profesional o un rol insuficiente **403**, un cuerpo inválido **400** y un estado u horario incompatible **409**.
 
-## Horarios y excepciones
+## Horarios semanales
 
 Todas las rutas de esta sección admiten **AN** del negocio o **P** sobre su propio perfil. `:id` identifica el perfil profesional, no una sucursal ni un usuario arbitrario. `:fecha`, `desde` y `hasta` son fechas civiles `AAAA-MM-DD`; el servicio comprueba que existan en el calendario. Los minutos se cuentan desde las 00:00 de la zona horaria de cada sucursal: el inicio admite 0–1439 y el fin 1–1440.
 
@@ -146,16 +146,13 @@ Todas las rutas de esta sección admiten **AN** del negocio o **P** sobre su pro
 | --- | --- | --- |
 | `GET /profesionales/:id/horario` | — | **200**, arreglo completo de franjas semanales, incluidas las inactivas, ordenado por `diaSemana`, `orden` e `id`. |
 | `PUT /profesionales/:id/horario` | `franjas`: arreglo completo de franjas semanales; acepta `[]` | **200**, arreglo guardado. Reemplaza la semana completa; cada `id` enviado debe pertenecer al horario actual del perfil y los omitidos se retiran. Valida asignación a sucursal y empalmes antes de guardar. |
-| `GET /profesionales/:id/excepciones` | — | **200**, arreglo de excepciones por fecha y sucursal, incluidas las de cierre sin franjas. |
-| `PUT /profesionales/:id/excepciones/:fecha` | `sucursalId`, `franjas`: arreglo completo; acepta `[]` | **200**, excepción de esa fecha y sucursal. Reemplaza sus franjas; `[]` registra un cierre explícito. Los `id` de franjas enviados deben pertenecer a esa excepción. |
-| `DELETE /profesionales/:id/excepciones/:fecha?sucursalId=...` | `sucursalId` en la consulta, entero positivo | **204**. Retira la excepción de esa sucursal y fecha, restaurando la semana habitual si no genera empalmes. |
-| `GET /profesionales/:id/atencion?desde=...&hasta=...` | Ambas fechas en la consulta, intervalo inclusivo de hasta 366 días | **200**: `desde`, `hasta`, `personalId`, `intervalos` y `omisiones`. Proyecta tramos de horario después de excepciones, descansos y bloqueos, en sucursales globalmente activas. |
+| `GET /profesionales/:id/atencion?desde=...&hasta=...` | Ambas fechas en la consulta, intervalo inclusivo de hasta 366 días | **200**: `desde`, `hasta`, `personalId`, `intervalos` y `omisiones`. Proyecta tramos de horario semanal y bloqueos, en sucursales globalmente activas. |
 
-Una franja semanal acepta `id?`, `diaSemana` (0 domingo–6 sábado), `orden` (entero no negativo), `sucursalId?`, `inicioMinutos?`, `finMinutos?`, `descansoInicioMinutos?`, `descansoFinMinutos?` y `activo` (booleano). Los campos opcionales de sucursal y minutos admiten `null` en borradores inactivos; al activar son obligatorios sucursal, inicio y fin. El descanso, si se usa, exige ambos extremos dentro de la franja. La respuesta contiene esos campos y el `id` asignado.
+Una franja semanal acepta `id?`, `diaSemana` (0 domingo–6 sábado), `orden` (entero no negativo), `sucursalId?`, `inicioMinutos?`, `finMinutos?` y `activo` (booleano). Los campos opcionales de sucursal y minutos admiten `null` en borradores inactivos; al activar son obligatorios sucursal, inicio y fin. Un descanso se representa con dos franjas y un hueco entre ambas. La respuesta contiene esos campos y el `id` asignado. El PUT ya no admite `descansoInicioMinutos` ni `descansoFinMinutos`.
 
-Una franja de excepción acepta `id?`, `orden`, `inicioMinutos`, `finMinutos`, `descansoInicioMinutos?` y `descansoFinMinutos?`. La vista de excepción devuelve `id`, `sucursalId`, `fechaLocal` y `franjas` con sus IDs. Una sucursal debe estar asignada al profesional. Las franjas se validan contra los horarios de las otras sucursales usando sus zonas horarias, también ante solicitudes simultáneas.
+Las rutas `GET/PUT/DELETE /profesionales/:id/excepciones` fueron retiradas y responden **404**. Para impedir atención en fechas concretas se usan los bloqueos. Los horarios históricos con descansos o excepciones pueden requerir una transición en el backend antes de volver a operar; la UI no ofrece una migración automática.
 
-Cada `intervalo` de la consulta de atención contiene `fecha`, `sucursalId`, `inicioMinutos`, `finMinutos`, `inicioUtc` y `finUtc`. Cada `omision` contiene `fecha`, `sucursalId` y `motivo` cuando una hora local de jornada o descanso resulta inválida. Esta proyección no aplica la selección de servicios ni el interruptor individual de atención por sucursal; tampoco ofrece espacios de cita.
+Cada `intervalo` de la consulta de atención contiene `fecha`, `sucursalId`, `inicioMinutos`, `finMinutos`, `inicioUtc` y `finUtc`. Cada `omision` contiene `fecha`, `sucursalId` y `motivo` cuando una hora local de jornada resulta inválida. Esta proyección no aplica la selección de servicios ni el interruptor individual de atención por sucursal; tampoco ofrece espacios de cita.
 
 ## Bloqueos temporales
 

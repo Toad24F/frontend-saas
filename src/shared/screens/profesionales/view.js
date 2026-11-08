@@ -1,7 +1,10 @@
+import { configureCatalogPaging, catalogPagination, updateCatalogPage } from '../catalog-pagination.js';
+import { catalogHead, clearCatalogButton, hasCatalogFilters } from '../catalog-header.js';
 import { state, render } from '../../app.js';
 import { getCatalogView, setCatalogView } from '../catalog-view.js';
 import { list } from '../../data.js';
 import { icon } from '../../icons.js';
+import { resourceStatus } from '../../resource-status.js';
 import { escape as esc, avatar, pageHead, button, empty } from '../../ui.js';
 import './style.css';
 
@@ -22,29 +25,30 @@ function renderPerson(person, management, visible) {
   return `<article class="surface professional-entry" data-professional-id="${person.id}" ${visible ? '' : 'hidden'}>
     <div class="professional-person">${avatar(person.initials, person.color, 'professional-avatar')}<div class="professional-identity"><h2>${esc(person.name)}</h2><p>${esc(person.specialty || 'Sin especialidad')}</p>${person.email ? `<small>${esc(person.email)}</small>` : ''}</div></div>
     <div class="professional-assignment"><span>${icon('pin')}<strong>${person.branchIds.length}</strong> ${person.branchIds.length === 1 ? 'sucursal' : 'sucursales'}</span><span>${icon('briefcase')}<strong>${person.serviceIds.length}</strong> ${person.serviceIds.length === 1 ? 'servicio' : 'servicios'}</span></div>
-    <span class="professional-status ${active ? 'is-active' : 'is-inactive'}"><i></i>${active ? 'Activo' : 'Inactivo'}</span>
+    <span class="professional-status ${resourceStatus(person).className}"><i></i>${resourceStatus(person).label}</span>
     <div class="professional-entry-actions"><a href="/admin/disponibilidad" data-nav="disponibilidad" data-nav-professional="${person.id}" class="professional-availability">Ver disponibilidad ${icon('arrow')}</a><button type="button" class="professional-edit" data-edit-professional="${person.id}">Editar</button>${management(person)}</div>
   </article>`;
 }
 
-export function professionals(management = () => '') {
+export function professionals(management = () => '', { headerActions = '', capacity = '' } = {}) {
   if (tenantId !== state.tenantId) { Object.assign(ui, { search: '', status: 'all', branch: 'all', service: 'all' }); tenantId = state.tenantId; }
   const people = list('professionals', state.tenantId);
   const branches = list('branches', state.tenantId);
   const services = list('services', state.tenantId);
   const visible = people.filter(matches);
+  const page = configureCatalogPaging('professional', state.tenantId, people, () => list('professionals', state.tenantId).filter(matches), (person) => renderPerson(person, management, true), 'profesionales');
   const active = people.filter((person) => person.active !== false).length;
   const desktopView = getCatalogView();
   const resultView = matchMedia('(max-width: 767px)').matches ? 'cards' : desktopView;
-  return `<div class="professional-workspace">${pageHead('Profesionales', 'Gestiona a quienes atienden en tu negocio.', button('Nuevo profesional', 'new-professional'))}
+  return `<div class="professional-workspace">${catalogHead('Profesionales', 'Gestiona a quienes atienden en tu negocio.', headerActions + button('Nuevo profesional', 'new-professional'), capacity)}
     <div class="professional-overview"><strong>${people.length}</strong> ${people.length === 1 ? 'profesional' : 'profesionales'}<span aria-hidden="true">·</span><strong>${active}</strong> activos<span aria-hidden="true">·</span><strong>${people.length - active}</strong> inactivos</div>
     <section class="professional-toolbar" aria-label="Buscar y filtrar profesionales">
       <label class="professional-search">${icon('search')}<span class="visually-hidden">Buscar profesionales</span><input id="professional-search" type="search" placeholder="Buscar por nombre, especialidad o correo" value="${esc(ui.search)}" autocomplete="off"></label>
-      <div class="professional-filters"><label><span>Estado</span><select data-professional-filter="status"><option value="all">Todos</option><option value="active" ${ui.status === 'active' ? 'selected' : ''}>Activos</option><option value="inactive" ${ui.status === 'inactive' ? 'selected' : ''}>Inactivos</option></select></label><label><span>Sucursal</span><select data-professional-filter="branch"><option value="all">Todas</option>${branches.map((branch) => `<option value="${branch.id}" ${String(ui.branch) === String(branch.id) ? 'selected' : ''}>${esc(branch.name)}</option>`).join('')}</select></label><label><span>Servicio</span><select data-professional-filter="service"><option value="all">Todos</option>${services.map((service) => `<option value="${service.id}" ${String(ui.service) === String(service.id) ? 'selected' : ''}>${esc(service.name)}</option>`).join('')}</select></label></div>
+      <div class="professional-filters"><label><span>Estado</span><select data-professional-filter="status"><option value="all">Todos</option><option value="active" ${ui.status === 'active' ? 'selected' : ''}>Activos</option><option value="inactive" ${ui.status === 'inactive' ? 'selected' : ''}>Inactivos</option></select></label><label><span>Sucursal</span><select data-professional-filter="branch"><option value="all">Todas</option>${branches.map((branch) => `<option value="${branch.id}" ${String(ui.branch) === String(branch.id) ? 'selected' : ''}>${esc(branch.name)}</option>`).join('')}</select></label><label><span>Servicio</span><select data-professional-filter="service"><option value="all">Todos</option>${services.map((service) => `<option value="${service.id}" ${String(ui.service) === String(service.id) ? 'selected' : ''}>${esc(service.name)}</option>`).join('')}</select></label>${clearCatalogButton('professional', ui)}</div>
       <div class="professional-view-switch" role="group" aria-label="Tipo de vista"><button type="button" data-professional-view="list" aria-pressed="${desktopView === 'list'}" class="${desktopView === 'list' ? 'is-selected' : ''}">${icon('menu')}<span>Lista</span></button><button type="button" data-professional-view="cards" aria-pressed="${desktopView === 'cards'}" class="${desktopView === 'cards' ? 'is-selected' : ''}">${icon('grid')}<span>Tarjetas</span></button></div>
     </section>
     <div class="professional-results-heading"><span id="professional-results-count" role="status" aria-live="polite">${visible.length} ${visible.length === 1 ? 'resultado' : 'resultados'}</span></div>
-    ${people.length ? `<div class="professional-results professional-view--${resultView}" data-desktop-view="${desktopView}" id="professional-results">${people.map((person) => renderPerson(person, management, visible.includes(person))).join('')}</div><div class="professional-no-results" id="professional-no-results" ${visible.length ? 'hidden' : ''}>${empty('Sin coincidencias', 'Prueba otra búsqueda o quita alguno de los filtros.', '<button type="button" class="btn btn-light" data-professional-reset>Limpiar filtros</button>')}</div>` : empty('Aún no hay profesionales', 'Crea el primer perfil para comenzar a organizar tu equipo.', '<button type="button" class="btn btn-primary" data-action="new-professional">Nuevo profesional</button>')}
+    ${people.length ? `<div class="professional-results professional-view--${resultView}" data-desktop-view="${desktopView}" id="professional-results">${page.rows.map((person) => renderPerson(person, management, true)).join('')}</div>${catalogPagination('professional', page)}<div class="professional-no-results" id="professional-no-results" ${visible.length ? 'hidden' : ''}>${empty('Sin coincidencias', 'Prueba otra búsqueda o quita alguno de los filtros.', '<button type="button" class="btn btn-light" data-professional-reset>Limpiar filtros</button>')}</div>` : empty('Aún no hay profesionales', 'Crea el primer perfil para comenzar a organizar tu equipo.', '<button type="button" class="btn btn-primary" data-action="new-professional">Nuevo profesional</button>')}
   </div>`;
 }
 
@@ -67,8 +71,9 @@ export function applyProfessionalFilters() {
   if (!root) return;
   ui.search = root.querySelector('#professional-search')?.value.trim() || '';
   root.querySelectorAll('[data-professional-filter]').forEach((select) => { ui[select.dataset.professionalFilter] = select.value; });
+  root.querySelectorAll('[data-professional-reset]').forEach((button) => { button.disabled = !hasCatalogFilters(ui); });
   const visible = new Set(list('professionals', state.tenantId).filter(matches).map((person) => String(person.id)));
-  root.querySelectorAll('.professional-entry').forEach((entry) => { entry.hidden = !visible.has(entry.dataset.professionalId); });
+  updateCatalogPage('professional', true);
   const count = visible.size;
   const label = root.querySelector('#professional-results-count');
   if (label) label.textContent = `${count} ${count === 1 ? 'resultado' : 'resultados'}`;

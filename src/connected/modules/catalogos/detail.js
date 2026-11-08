@@ -12,14 +12,8 @@ export async function loadEditableResource(type, existing, request = api) {
     return { ...existing, name: branch.nombre, address: branch.direccion, phone: branch.telefono, timezone: branch.zonaHoraria, maps: branch.urlGoogleMaps || '', notes: branch.notasLlegada || '', active: branch.activo };
   }
   if (type === 'professionals') {
-    const [person, branchIds, services, catalogServices, catalogBranches] = await Promise.all([
-      request(`/profesionales/${id}`),
-      request(`/profesionales/${id}/sucursales`),
-      request(`/profesionales/${id}/servicios`),
-      request('/servicios'),
-      request('/sucursales'),
-    ]);
-    return { ...existing, name: person.nombre, email: person.correo, specialty: person.especialidad || '', active: person.activo, branchIds, serviceIds: services.filter((service) => service.seleccionado).map((service) => service.id), catalogServices: catalogServices.map((service) => ({ id: service.id, name: service.nombre, active: service.activo })), catalogBranches: catalogBranches.map((branch) => ({ id: branch.id, name: branch.nombre })) };
+    const person = await request(`/profesionales/${id}`);
+    return { ...existing, name: person.nombre, email: person.correo, specialty: person.especialidad || '', active: person.activo };
   }
   throw new Error('Tipo de registro no válido.');
 }

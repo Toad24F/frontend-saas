@@ -1,16 +1,21 @@
 import { api, loadBackendData } from '../../backend.js';
 import { validateNewPassword } from '../../modules/auth/password-policy.js';
-import { render } from '../../../shared/app.js';
+import { list } from '../../../shared/data.js';
+import { escape } from '../../../shared/ui.js';
+import { render, state } from '../../../shared/app.js';
 import { field, basicForm, errorSlot } from '../../../shared/forms.js';
-import { modal, toast, escape } from '../../../shared/ui.js';
+import { modal, toast } from '../../../shared/ui.js';
 import { showProfessionalErrors, clearProfessionalErrors, clearProfessionalField } from '../../../shared/screens/profesionales/errors.js';
 import { validateReceptionist, receptionistError } from './errors.js';
+import { readOwnRoleQuota, ownQuotaNotice } from '../negocio/user-quota.js';
+import { disableReceptionist } from '../../modules/recursos/retired.js';
 
 const markedField = (...args) => field(...args).replace('class="form-field"', `class="form-field" data-professional-field="${args[1]}"`);
 const passwordFields = () => markedField('Contraseña', 'password', '', 'password', 'required minlength="12" autocomplete="new-password"');
 
 function receptionistForm(title, content, onSubmit, reset = false) {
   const dialog = basicForm(title, content, onSubmit, false, {
+    drawer: !reset,
     validate(form) {
       const errors = validateReceptionist(new FormData(form), reset);
       if (!Object.keys(errors).length) { clearProfessionalErrors(form); return true; }
@@ -35,20 +40,22 @@ function receptionistForm(title, content, onSubmit, reset = false) {
   return dialog;
 }
 
-export function newReceptionist() {
-  receptionistForm('Nueva recepcionista', `${markedField('Nombre completo', 'name', '', 'text', 'required maxlength="150"')}${markedField('Correo', 'email', '', 'email', 'required maxlength="150" autocomplete="email"')}${passwordFields()}`, async (form) => {
+async function quotaIntro() {
+  // Alta y reactivación comparten la lectura autorizada del negocio de sesión.
+  // Si falla la lectura, la operación final aún deja validar el cupo al backend.
+  try { return ownQuotaNotice('recepcionistas', await readOwnRoleQuota('recepcionistas', api)); }
+  catch { return '<p class="form-intro">No se pudo consultar el cupo vigente. El servidor lo comprobará al guardar.</p>'; }
+}
+
+export async function newReceptionist() {
+  receptionistForm('Nueva recepcionista', `${await quotaIntro()}${markedField('Nombre completo', 'name', '', 'text', 'required maxlength="150"')}${markedField('Correo', 'email', '', 'email', 'required maxlength="150" autocomplete="email"')}${passwordFields()}`, async (form) => {
     const password = form.get('password');
     validateNewPassword(password);
     await api('/recepcionistas', 'POST', { nombre: form.get('name').trim(), emailRecepcionista: form.get('email').trim(), password });
   });
 }
 
-export async function receptionistDetail(id) {
-  const person = await api(`/recepcionistas/${id}`);
-  modal('Detalle de recepcionista', `<div class="dialog-body"><div class="business-detail-list"><div><span>Nombre</span><strong>${escape(person.nombre)}</strong></div><div><span>Correo</span><strong>${escape(person.email)}</strong></div><div><span>Estado</span><strong>${person.activo ? 'Activa' : 'Inactiva'}</strong></div><div><span>Activada</span><strong>${person.activadoEn ? new Intl.DateTimeFormat('es-MX', { dateStyle: 'medium' }).format(new Date(person.activadoEn)) : '—'}</strong></div></div><p class="form-intro mt-3">Los datos de identidad no tienen edición en la API actual.</p></div>`);
-}
-
-export function receptionistAction(action, id) {
+export async function receptionistAction(action, id) {
   if (action === 'reset') {
     receptionistForm('Restablecer contraseña', `${passwordFields()}<p class="form-intro">Se cerrarán las sesiones de esta recepcionista.</p>`, async (form) => {
       const password = form.get('password');
@@ -57,20 +64,26 @@ export function receptionistAction(action, id) {
     }, true);
     return;
   }
-  if (!['deactivate', 'reactivate'].includes(action)) return;
+  if (!['deactivate', 'reactivate', 'disable'].includes(action)) return;
+  const person = list('receptionists', state.tenantId).find((item) => item.id === id);
+  if (!person) return;
   const activating = action === 'reactivate';
-  const dialog = modal(activating ? 'Reactivar recepcionista' : 'Desactivar recepcionista', `<div class="dialog-body"><p>${activating ? 'Se habilitará de nuevo su cuenta. Tendrá que iniciar sesión.' : 'Se desactivará la cuenta y se cerrarán sus sesiones.'}</p>${errorSlot}</div><div class="dialog-footer"><button class="btn btn-light" data-dismiss>Cancelar</button><button class="btn ${activating ? 'btn-primary' : 'btn-danger-soft'}" data-confirm>${activating ? 'Reactivar' : 'Desactivar'}</button></div>`);
+  const disabling = action === 'disable';
+  // Inhabilitar retira la cuenta de la lista; desactivar conserva la cuenta
+  // visible y reactivar sigue sujeto al cupo del servidor.
+  const dialog = modal(activating ? 'Reactivar recepcionista' : disabling ? 'Inhabilitar recepcionista' : 'Desactivar recepcionista', `<div class="dialog-body">${activating ? await quotaIntro() : ''}<p><strong>${escape(person.name)}</strong>: ${activating ? 'Se habilitará de nuevo su cuenta. Tendrá que iniciar sesión.' : disabling ? 'Se retirará de los listados operativos y se cerrarán sus sesiones. Podrás consultarla en Inhabilitados y restaurarla como inactiva más adelante.' : 'Se desactivará la cuenta y se cerrarán sus sesiones.'}</p>${errorSlot}</div><div class="dialog-footer"><button class="btn btn-light" data-dismiss>Cancelar</button><button class="btn ${activating ? 'btn-primary' : disabling ? 'action-danger' : 'action-caution'}" data-confirm>${activating ? 'Reactivar' : disabling ? 'Inhabilitar' : 'Desactivar'}</button></div>`);
   dialog.querySelector('[data-dismiss]').onclick = () => dialog.close();
   dialog.querySelector('[data-confirm]').onclick = async (event) => {
     const submit = event.currentTarget;
     submit.disabled = true;
     try {
-      await api(`/recepcionistas/${id}/${activating ? 'reactivar' : 'desactivar'}`, 'POST', {});
+      if (disabling) await disableReceptionist(id);
+      else await api(`/recepcionistas/${id}/${activating ? 'reactivar' : 'desactivar'}`, 'POST', {});
       try { await loadBackendData(); }
       catch (error) { toast('Cambio guardado. No se pudo actualizar la lista: ' + error.message); }
       dialog.close();
       render();
-      toast(activating ? 'Recepcionista reactivada.' : 'Recepcionista desactivada.');
+      toast(activating ? 'Recepcionista reactivada.' : disabling ? 'Recepcionista inhabilitada.' : 'Recepcionista desactivada.');
     } catch (error) {
       const target = dialog.querySelector('#form-error');
       target.textContent = error.message;

@@ -1,6 +1,7 @@
 import { api } from '../auth/session.js';
 
-export function deleteService(id, request = api) {
+export function disableService(id, request = api) {
   if (!Number.isSafeInteger(id) || id < 1) throw new Error('Servicio no válido.');
-  return request(`/servicios/${id}`, 'DELETE');
+  // Inhabilitar retira el servicio del catálogo operativo sin borrarlo.
+  return request(`/servicios/${id}/inhabilitar`, 'POST', {});
 }

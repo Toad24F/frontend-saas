@@ -1,14 +1,16 @@
 import { loadBackendData, user } from '../../backend.js';
-import { deleteBranch } from '../../modules/sucursales/operations.js';
+import { disableBranch } from '../../modules/sucursales/operations.js';
 import { render, state } from '../../../shared/app.js';
 import { resource } from '../../../shared/data.js';
 import { errorSlot } from '../../../shared/forms.js';
 import { escape, modal, toast } from '../../../shared/ui.js';
 
-export function confirmBranchDeletion(id) {
+export function confirmBranchDisable(id) {
   if (user?.rol !== 'admin_negocio' || state.page !== 'sucursales') return;
   const branch = resource('branches', id, state.tenantId);
-  const dialog = modal('Eliminar sucursal', `<div class="dialog-body"><p><strong>${escape(branch.name)}</strong> se eliminará definitivamente si no tiene uso ni historial que impidan la baja. Esta acción no se puede deshacer.</p><p class="field-hint">Si hay vínculos o historial, la sucursal se conservará y verás el motivo. Puedes desactivarla para liberar cupo sin borrar sus datos.</p>${errorSlot}</div><div class="dialog-footer"><button type="button" class="btn btn-light" data-dismiss>Cancelar</button><button type="button" class="btn btn-danger-soft" data-confirm>Eliminar sucursal</button></div>`);
+  // No se promete que el retiro libere un cupo: la lectura posterior del
+  // servidor decide cuántas sucursales activas quedan disponibles.
+  const dialog = modal('Inhabilitar sucursal', `<div class="dialog-body"><p><strong>${escape(branch.name)}</strong> saldrá de los listados operativos. Podrás consultarla en Inhabilitados y restaurarla como inactiva más adelante.</p>${errorSlot}</div><div class="dialog-footer"><button type="button" class="btn btn-light" data-dismiss>Cancelar</button><button type="button" class="btn action-danger" data-confirm>Inhabilitar sucursal</button></div>`);
   dialog.querySelector('[data-dismiss]').onclick = () => dialog.close();
   dialog.querySelector('[data-confirm]').onclick = async (event) => {
     const button = event.currentTarget;
@@ -16,10 +18,10 @@ export function confirmBranchDeletion(id) {
     button.disabled = true;
     button.textContent = 'Procesando…';
     try {
-      await deleteBranch(branch.id);
+      await disableBranch(branch.id);
       dialog.close();
-      try { await loadBackendData(); render(); toast('Sucursal eliminada.'); }
-      catch (error) { toast(`Sucursal eliminada. No se pudo actualizar la lista y el cupo: ${error.message}`); }
+      try { await loadBackendData(); render(); toast('Sucursal inhabilitada.'); }
+      catch (error) { toast(`Sucursal inhabilitada. No se pudo actualizar la lista y el cupo: ${error.message}`); }
     } catch (error) {
       const target = dialog.querySelector('#form-error');
       target.textContent = error.message;

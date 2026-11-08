@@ -98,40 +98,6 @@ export function blockApiErrors(error) {
   return Object.keys(errors).length ? errors : null;
 }
 
-export function validateException(data, rows, closed, validBranch) {
-  const errors = {};
-  if (!Number(data.get('professionalId')) && data.has('professionalId')) errors.professionalId = 'Selecciona un profesional.';
-  if (!Number(data.get('branchId')) || !validBranch) errors.branchId = 'Selecciona una sucursal asignada al profesional.';
-  if (!validDate(String(data.get('date') || ''))) errors.date = 'Selecciona una fecha válida.';
-  if (!closed && !rows.length) errors.slots = 'Agrega una franja o marca cierre de todo el día.';
-  if (!closed) rows.forEach((row, index) => {
-    const key = row.index ?? index;
-    if (!clock.test(row.start)) errors[`slot-${key}-start`] = 'Indica la hora de entrada.';
-    if (!clock.test(row.end)) errors[`slot-${key}-end`] = 'Indica la hora de salida.';
-    else if (clock.test(row.start) && row.start >= row.end && row.end !== '00:00')
-      errors[`slot-${key}-end`] = 'La salida debe ser posterior a la entrada.';
-    if (Boolean(row.breakStart) !== Boolean(row.breakEnd)) {
-      if (!row.breakStart) errors[`slot-${key}-break`] = 'Indica el inicio y el fin del descanso.';
-      else errors[`slot-${key}-break`] = 'Indica el inicio y el fin del descanso.';
-    } else if (row.breakStart && (row.breakStart < row.start || row.breakStart >= row.breakEnd || (row.end !== '00:00' && row.breakEnd > row.end)))
-      errors[`slot-${key}-break`] = 'El descanso debe quedar dentro de la franja.';
-  });
-  return errors;
-}
-
-export function exceptionApiErrors(error, rowIndexes = []) {
-  const message = String(error.message || '');
-  const rowMatch = message.match(/fila(?:s)?\s+(\d+)/i);
-  const apiIndex = Number(rowMatch?.[1] || 0);
-  const index = rowIndexes[apiIndex] ?? apiIndex;
-  if (/sucursalId|sucursal/i.test(message)) return { branchId: 'Selecciona una sucursal asignada al profesional.' };
-  if (/fecha/i.test(message)) return { date: 'Selecciona una fecha válida.' };
-  if (/descanso/i.test(message)) return { [`slot-${index}-break`]: 'El descanso debe quedar dentro de la franja.' };
-  if (/finMinutos/i.test(message)) return { [`slot-${index}-end`]: 'La salida debe ser posterior a la entrada.' };
-  if (/inicioMinutos|empalme/i.test(message)) return { [`slot-${index}-start`]: 'Esta franja se empalma con otra. Ajusta la hora de entrada.' };
-  return null;
-}
-
 export function validateScheduleRows(rows, branchIds, demo = false) {
   const errors = {};
   for (const row of rows) {
@@ -143,7 +109,10 @@ export function validateScheduleRows(rows, branchIds, demo = false) {
     else if (clock.test(row.start) && row.start >= row.end) errors[`${prefix}-end`] = 'La salida debe ser posterior a la entrada.';
     if (demo && clock.test(row.start) && clock.test(row.end) && (row.start < '09:00' || row.end > '18:00'))
       errors[`${prefix}-${row.start < '09:00' ? 'start' : 'end'}`] = 'En la demostración, la atención debe quedar entre 09:00 y 18:00.';
-    if (row.breakStart || row.breakEnd) {
+    if (!demo && (row.breakStart || row.breakEnd)) {
+      // Hasta que T051 retire los controles, se impide perder una pausa capturada.
+      errors[`${prefix}-break`] = 'Representa el descanso con dos franjas separadas.';
+    } else if (row.breakStart || row.breakEnd) {
       if (!clock.test(row.breakStart) || !clock.test(row.breakEnd)) errors[`${prefix}-break`] = 'Indica el inicio y el fin del descanso.';
       else if (row.breakStart < row.start || row.breakStart >= row.breakEnd || row.breakEnd > row.end)
         errors[`${prefix}-break`] = 'El descanso debe quedar dentro de esta franja.';

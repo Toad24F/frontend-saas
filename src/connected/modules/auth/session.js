@@ -4,21 +4,29 @@ const base = (import.meta.env?.VITE_API_URL || 'http://localhost:3000').replace(
 let token = typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('cita-session') : null;
 export let user = null;
 export const roleLabel = (role) => ({ admin_negocio: 'Administración', superadmin: 'Superadministración', profesional: 'Profesional', recepcionista: 'Recepción' })[role] || '';
-export async function api(path, method = 'GET', body) {
+export async function api(path, method = 'GET', body, options = {}) {
   let response;
   try {
     response = await fetch(`${base}${path}`, {
-      method, headers: { ...(body === undefined ? {} : { 'Content-Type': 'application/json' }), ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+      // Cabeceras adicionales solo se pasan cuando la llamada las solicita;
+      // los demás consumidores conservan exactamente sus cabeceras previas.
+      method, headers: { ...(body === undefined ? {} : { 'Content-Type': 'application/json' }), ...(token ? { Authorization: `Bearer ${token}` } : {}), ...options.headers },
       ...(body === undefined ? {} : { body: JSON.stringify(body) }),
     });
-  } catch { throw new Error('No se pudo conectar con el backend. Comprueba que esté iniciado y revisa VITE_API_URL.'); }
+  } catch {
+    const error = new Error('No se pudo conectar con el backend. Comprueba que esté iniciado y revisa VITE_API_URL.');
+    error.status = 0;
+    throw error;
+  }
   const data = response.status === 204 ? null : await response.json().catch(() => null);
   if (!response.ok) {
     if (response.status === 401 && !['/auth/login', '/auth/activar-administrador', '/auth/recuperar-contrasena'].includes(path)) {
       clearSession();
       if (typeof window !== 'undefined') window.dispatchEvent(new Event('cita-session-expired'));
     }
-    throw new Error(Array.isArray(data?.message) ? data.message.join(' · ') : data?.message || `Error del servidor (${response.status}).`);
+    const error = new Error(Array.isArray(data?.message) ? data.message.join(' · ') : data?.message || `Error del servidor (${response.status}).`);
+    error.status = response.status;
+    throw error;
   }
   return data;
 }

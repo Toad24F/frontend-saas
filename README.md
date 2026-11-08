@@ -17,19 +17,41 @@ Conecta el teléfono y esta computadora a la misma red Wi-Fi y ejecuta `npm run 
 
 El botón de luna o sol del encabezado cambia entre modo claro y oscuro; la elección se recuerda en ese navegador. En pantallas estrechas, la agenda inicia en vista diaria y las franjas del horario semanal se presentan como tarjetas.
 
-La versión conectada requiere la API del backend y una cuenta activa. La demo (`?demo=1`) lee datos ficticios mediante `fetch('/data/demo.json')`, sin credenciales ni API. Cada modo tiene su propia entrada en `src/connected/` o `src/demo/`; las pantallas y estilos comunes viven en `src/shared/`. Ambas versiones navegan con History API. El servidor que publique `dist/` debe resolver rutas desconocidas a `index.html` (fallback de SPA).
+El panel conectado requiere la API del backend y una cuenta activa. La entrada pública `/reservas/:slug` inicia una sesión anónima sin login administrativo y permite seleccionar oferta/horario, conceder un apartado, capturar contacto y enviar una reserva pendiente a la API, con recuperación de envíos inciertos (T098–T114). Requiere la API y su configuración de mismo origen; no utiliza datos de demo ante fallos. La demo (`?demo=1`) lee datos ficticios mediante `fetch('/data/demo.json')`, sin credenciales ni API. Las entradas se eligen en `src/entry-router.js`; las pantallas y estilos comunes viven en `src/shared/`. El servidor que publique `dist/` debe resolver rutas desconocidas a `index.html` (fallback de SPA).
 
 ## Integración con el backend actual
 
 - La ruta sin parámetros abre la versión conectada. Inicia sesión con una cuenta del backend.
 - Configura `VITE_API_URL` en `.env` si la API no está en `http://localhost:3000`. No agregues `/api`: el backend actual no utiliza ese prefijo. Reinicia Vite al cambiar esta variable.
 - Para comparar, usa **Ver demo** en el encabezado o agrega `?demo=1` a cualquier ruta. El enlace **Prototipo** vuelve a la versión conectada. El modo se conserva al navegar y recargar.
-- Administración: profesionales (identidad, contraseña y asignaciones), servicios, sucursales, semana completa con múltiples franjas y descansos, y creación/eliminación de bloqueos.
+- Administración: profesionales (identidad, contraseña y asignaciones), servicios, sucursales, semana completa con múltiples franjas donde una pausa se representa con dos franjas separadas, y creación/eliminación de bloqueos.
 - Profesional: sus servicios, horarios y bloqueos. La API restringe el catálogo de sucursales a administración; en este rol se muestran los IDs de las sucursales presentes en su horario.
 - Superadministración: negocios, registro con RFC y límite de sucursales, suspensión/reactivación y renovación de licencias según el servidor.
-- Agenda/citas, clientes, reportes, WhatsApp, portal público, datos generales del negocio, especialidad, descripción de servicios y modos libre/compacto muestran **Aún no forma parte de esta entrega** en la versión conectada. Permanecen disponibles en la demo.
+- Agenda/citas, clientes, reportes, WhatsApp, datos generales del negocio, especialidad y descripción de servicios muestran **Aún no forma parte de esta entrega** en la versión conectada. Permanecen disponibles en la demo. La configuración conectada de reglas de agenda está en Disponibilidad, con modo y tiempo entre citas vigentes del backend. El acceso al portal desde el panel está en Mi cuenta; su entrada `/reservas/:slug` permite consultar oferta, apartar, enviar y recuperar el resultado propio de una reserva pendiente.
 - El selector del espacio permite cerrar sesión. El token se guarda solo en la sesión de esta pestaña; los errores de la API se muestran en los formularios.
 - La carpeta del backend se conserva como fuente de consulta: esta integración solo modifica el frontend.
+
+### Entrada pública conectada: T098–T124
+
+En el panel, administración dispone de **Mi cuenta → Tu portal de reservas → Abrir portal / Copiar enlace**. Requiere el backend actualizado con `identificadorPublico` en login/perfil; al recargar se obtiene el dato con la sesión vigente. Si falta un identificador válido, se informa y se deshabilitan las acciones. [Contrato, pruebas y evidencia del acceso](docs/fase-4/resultados-tareas/resultado-acceso-portal-perfil.md).
+
+T115 añade avisos accesibles en una región estable, restauración de foco visible y ajustes móviles. T116 amplía las pruebas de invalidación, respuestas fuera de orden, contacto en memoria e incertidumbre. Detalle y evidencia: [T115–T116](docs/fase-4/resultados-tareas/resultado-t115-t116.md). T117–T124 agregan pruebas Playwright del portal y API reales contra una base MariaDB temporal; ejecuta `npm run test:browser` con el backend, MariaDB y Microsoft Edge disponibles. El usuario de base de datos configurado en `../backend/.env` necesita poder crear y eliminar bases temporales. [Flujo y resultados del runner](docs/fase-4/resultados-tareas/resultado-t117-t124.md).
+
+El cliente público llama exclusivamente a `/publico/negocios/:slug/...` bajo el mismo origen del frontend, con cookie HttpOnly y protección CSRF. No usa el JWT del panel ni llama directamente a `VITE_API_URL`. En desarrollo, `vite.config.js` dirige `/publico` hacia `VITE_API_URL` (por defecto `http://localhost:3000`) sin cambiar el encabezado Origin ni la ruta de la cookie.
+
+La API debe tener configurados `PORTAL_PUBLICO_ORIGEN` con el origen exacto de Vite y `PORTAL_CSRF_SECRET` con un secreto de servidor válido. Esta entrega no modifica esas variables en el backend; nunca deben trasladarse a variables `VITE_*`. Se necesitan HTTPS o localhost, Web Locks, BroadcastChannel y cookies habilitadas. Una dirección HTTP de red local puede no ofrecer las APIs de contexto seguro.
+
+El proxy anterior es solo de desarrollo: `dist/` y `npm run preview` requieren un proxy de mismo origen externo para una sesión conectada. La configuración de Nginx sigue pendiente de acordar dominio, HTTPS y ubicación de la API. Evidencia y límites: [resultado T098–T100](docs/fase-4/resultados-tareas/resultado-t098-t100.md) y [resultado T101–T103](docs/fase-4/resultados-tareas/resultado-t101-t103.md).
+
+La selección invalida las opciones posteriores cuando cambia un dato y descarta respuestas antiguas. El selector de fecha consulta un día por petición, sin imponer un horizonte diferente del servidor, y muestra las horas en la zona IANA devuelta por la API. Una consulta fallida ofrece reintento y no se presenta como agenda vacía. Elegir un horario aún no lo aparta.
+
+**Apartar este horario** solicita una concesión al servidor con una clave estable para sus reintentos. Solo abre contacto después de verificar el apartado propio. El contador usa la hora y vencimiento del servidor y no se amplía por actividad. Las pestañas se avisan con BroadcastChannel y consultan la vigencia al reenfocar. Volver confirma la liberación del ID/generación propios; salir o recargar intenta liberarlo con `fetch` y `keepalive`. La salida no garantiza entrega y sigue aplicando el vencimiento del servidor.
+
+Nombre, teléfono y notas se conservan únicamente en memoria durante la navegación interna. **Revisar datos** valida localmente. **Reservar** confirma primero en sessionStorage un marcador con solo negocio, apartado y clave de intento, prepara ese intento y envía el contacto normalizado. Un reintento conserva clave y contenido; ante incertidumbre no se inicia otra reserva ni se libera el apartado al salir.
+
+Una recarga con marcador consulta el resolutor antes de cargar catálogos: muestra el resultado guardado o reinicia solo después de una ausencia terminal comprobada. Sin marcador, la recarga reinicia y no restaura el formulario. El resumen usa folio, nombres, fecha/hora/zona y costo guardados, siempre con estado pendiente. Evidencia: [T104–T109](docs/fase-4/resultados-tareas/resultado-t104-t109.md) y [T110–T114](docs/fase-4/resultados-tareas/resultado-t110-t114.md).
+
+Límite actual del backend: obtener CSRF al recargar depende de la inicialización pública, que exige licencia para nuevas reservas. Si la licencia impide esa inicialización, se conserva el marcador y se informa de recuperación pendiente; el frontend no puede recuperar por sí solo el resultado en ese escenario. El ajuste necesario de la sesión existente se describe en el resultado T110–T114 y no se implementó en el backend. Las pruebas de este lote utilizan API ficticia/dobles, sin validar una base real.
 
 ## Pantallas de la demo
 
@@ -60,9 +82,9 @@ La versión conectada requiere la API del backend y una cuenta activa. La demo (
 7. Cambia de espacio de trabajo con el selector lateral para explorar Espacio Mente.
 8. En **Reportes**, aplica un rango y usa **Guardar como PDF**; selecciona ese destino en la impresión del navegador.
 
-## Alcance exacto
+## Alcance de la demo
 
-La última nota del usuario limita el trabajo a un **prototipo de pantallas**. El PDF y el SQL originales son material de referencia, no órdenes de conectar servicios reales.
+Las reglas siguientes describen exclusivamente `?demo=1`. La integración del panel y del portal conectado se detalla arriba; el SQL de referencia de este repositorio no se ejecuta contra el backend.
 
 - Todos los datos y cambios son ficticios y permanecen **solo en la memoria de esta pestaña**. Recargar restablece la demostración. No se usa almacenamiento del navegador para datos de pacientes.
 - Fecha de ejemplo: **8 de septiembre de 2026**. La línea horaria de la agenda es una referencia visual a las 11:20, no un reloj en vivo. Se pueden explorar otros días.
@@ -78,7 +100,8 @@ La última nota del usuario limita el trabajo a un **prototipo de pantallas**. E
 
 ```text
 src/
-  main.js              # Selecciona la entrada según ?demo=1
+  main.js              # Delega al selector de entradas
+  entry-router.js      # Separa portal público, panel conectado y demo explícita
   demo/                # Datos ficticios, reservas y horarios en memoria
     entry.js
     data.js
@@ -94,6 +117,7 @@ src/
       reservas/        # booking.js y style.css
   connected/           # Integración con el backend
     entry.js
+    public/            # Entrada pública aislada, HTTP y coordinación del navegador
     backend.js         # Fachada para las vistas comunes
     mode.js
     screens/index.js   # Registro de pantallas conectadas

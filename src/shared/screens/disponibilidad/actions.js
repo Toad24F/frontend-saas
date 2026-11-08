@@ -48,6 +48,7 @@ function blockForm(existing = null) {
       if (editing) Object.assign(resource('blocks', existing.id, state.tenantId), block);
       else db.blocks.push({ id: Math.max(0, ...db.blocks.map((item) => item.id)) + 1, tenantId: state.tenantId, ...block });
     }, true, {
+      drawer: true,
       validate(form) {
         const errors = validateBlock(new FormData(form));
         if (!Object.keys(errors).length) { clearAvailabilityErrors(form); return true; }

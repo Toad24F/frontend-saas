@@ -20,22 +20,16 @@ test('edición de catálogos abre con la ficha individual reciente', async () =>
   assert.equal(branch.color, 'orange');
 });
 
-test('edición de profesional refresca perfil y asignaciones del mismo ID', async () => {
+test('edición de profesional refresca solo el perfil', async () => {
   const calls = [];
   const responses = {
     '/profesionales/9': { nombre: 'María actual', correo: 'maria@example.com', especialidad: 'Medicina', activo: true },
-    '/profesionales/9/sucursales': [8],
-    '/profesionales/9/servicios': [{ id: 7, seleccionado: true }, { id: 10, seleccionado: false }],
-    '/servicios': [{ id: 7, nombre: 'Consulta', activo: true }],
-    '/sucursales': [{ id: 8, nombre: 'Norte' }],
   };
   const person = await loadEditableResource('professionals', { id: 9, name: 'María anterior', branchIds: [2], serviceIds: [10] }, async (path) => { calls.push(path); return responses[path]; });
-  assert.deepEqual(calls, ['/profesionales/9', '/profesionales/9/sucursales', '/profesionales/9/servicios', '/servicios', '/sucursales']);
+  assert.deepEqual(calls, ['/profesionales/9']);
   assert.equal(person.name, 'María actual');
-  assert.deepEqual(person.branchIds, [8]);
-  assert.deepEqual(person.serviceIds, [7]);
-  assert.deepEqual(person.catalogServices, [{ id: 7, name: 'Consulta', active: true }]);
-  assert.deepEqual(person.catalogBranches, [{ id: 8, name: 'Norte' }]);
+  assert.deepEqual(person.branchIds, [2]);
+  assert.deepEqual(person.serviceIds, [10]);
 });
 
 test('la edición rechaza IDs inválidos y propaga una ficha eliminada', async () => {

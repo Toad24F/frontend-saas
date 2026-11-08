@@ -12,7 +12,7 @@ Ya se conectaron las operaciones de alta, edición, activación, desactivación 
 
 | Endpoint | Estado | Criterio |
 | --- | --- | --- |
-| `GET /profesionales/:id` | Conectado al abrir Editar profesional como AN. | Se refrescan perfil, asignaciones y opciones de catálogo antes de mostrar el formulario. |
+| `GET /profesionales/:id` | Conectado al abrir Editar profesional como AN. | Se refresca el perfil. Las sucursales se consultan al abrir su editor en Disponibilidad; los servicios se editan en Oferta por sucursal. |
 | `GET /sucursales/:id` | Conectado al abrir Editar sucursal. | Evita editar los campos de una ficha anterior a los cambios de otra sesión. |
 | `GET /servicios/:id` | Conectado al abrir Editar servicio. | Evita editar los campos y verificar autoría desde una ficha antigua. |
 | `GET /profesionales/:id/sucursales/:sucursalId/atencion` | Sin llamada directa; cubierta por `GET /profesionales/:id/oferta`. | La oferta ya aporta `atencionActiva` y se refresca tras cambiar el interruptor. |

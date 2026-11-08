@@ -1,0 +1,20 @@
+/* La lista retirada permanece fuera de las tarjetas operativas y usa el
+   borde semántico del tema para conservar contraste en claro y oscuro. */
+.retired-list { list-style: none; padding: 0; margin: 1.25rem 0 0; }
+.retired-list li { display: grid; grid-template-columns: minmax(220px, 1fr) minmax(0, 2fr); align-items: center; gap: 1rem; padding: .8rem 0; border-top: 1px solid var(--border); }
+.retired-list li strong { display: inline; }
+.retired-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .5rem; }
+.retired-effects-result { grid-column: 1 / -1; }
+.retired-effects-result:not(:empty) { border-top: 1px solid var(--border); padding-top: .75rem; }
+.retired-effects-result ul { margin: .5rem 0 0; padding-left: 1.25rem; }
+@media (max-width: 767px) {
+  .retired-list li { grid-template-columns: 1fr; align-items: stretch; }
+  .retired-effects-result { grid-column: auto; }
+  .retired-actions { flex-direction: column; }
+}
+.app-dialog.retired-drawer { position: fixed; inset: 0 0 0 auto; margin: 0; width: min(760px, 100%); max-width: 100%; height: 100dvh; max-height: 100dvh; border-radius: 16px 0 0 16px; }
+.retired-drawer .retired-list li { grid-template-columns: minmax(0, 1fr); }
+.retired-drawer .retired-actions { justify-content: flex-start; }
+.retired-search { display: grid; gap: 7px; font-size: 13px; margin: 20px 0; }
+.retired-drawer :focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+@media (max-width: 767px) { .app-dialog.retired-drawer { width: 100%; border-radius: 0; } .retired-drawer .dialog-body { padding-bottom: calc(24px + env(safe-area-inset-bottom)); } }
