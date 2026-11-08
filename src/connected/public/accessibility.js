@@ -3,6 +3,7 @@
 export function publicAnnouncement(state) {
   const messages = [state.notice];
   if (state.phase === 'selection') {
+    if (state.automaticSteps?.length && state.query.status !== 'loading') messages.push(`${state.automaticSteps.map((step) => step === 1 ? 'Sucursal' : 'Profesional').join(' y ')}: selección automática por ser la única opción disponible.`);
     if (state.query.message) messages.push(state.query.message);
     else if (state.query.status === 'ready') {
       const items = state.step === 3 ? state.slots : state.options[['servicios', 'sucursales', 'profesionales'][state.step]];

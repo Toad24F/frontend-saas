@@ -2,6 +2,8 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import '../../shared/styles.css';
 import '../../shared/theme.css';
 import './style.css';
+import '../../shared/public/options.css';
+import { publicSkeleton } from '../../shared/public/options.js';
 import { createPublicClient, PublicPortalError } from './http.js';
 import { initializePublicBrowser, acquirePublicMutation } from './browser-session.js';
 import { createAttemptStore } from './attempt-store.js';
@@ -26,6 +28,7 @@ export async function startPublicPortal(slug) {
     <main id="public-main" class="public-portal-content" aria-labelledby="public-title">
       <div class="public-business-heading"><span class="public-business-mark" id="public-business-mark" aria-hidden="true"></span><div><p class="public-eyebrow">PORTAL DE RESERVAS</p><h1 id="public-title">Portal de reservas</h1><p id="public-category" hidden></p></div><span class="public-online-tag">Reservas en línea</span></div>
       <div id="public-status" role="status" aria-live="polite" aria-atomic="true"></div>
+      <div id="public-initial-skeleton" aria-hidden="true">${publicSkeleton()}</div>
       <button type="button" class="btn btn-primary mt-3" id="public-retry" hidden>Reintentar conexión</button>
       <section id="public-selection" aria-label="Selección de cita" hidden></section>
     </main><footer class="public-portal-footer"><span>Reservas con <strong>Citalendar</strong></span></footer></div>`;
@@ -63,6 +66,7 @@ export async function startPublicPortal(slug) {
   document.title = 'Reservas · Citalendar';
   if (!slug) {
     status.textContent = 'El enlace del portal no es válido. Compruebe la dirección del negocio.';
+    root.querySelector('#public-initial-skeleton').hidden = true;
     return;
   }
   const client = createPublicClient(slug);
@@ -71,6 +75,7 @@ export async function startPublicPortal(slug) {
   async function initialize() {
     if (initializing) return;
     initializing = true;
+    root.querySelector('#public-initial-skeleton').hidden = false;
     retry.hidden = true;
     root.querySelector('#public-main').setAttribute('aria-busy', 'true');
     status.textContent = 'Conectando con el portal del negocio…';
@@ -80,6 +85,7 @@ export async function startPublicPortal(slug) {
       updateBusinessIdentity(negocio.nombre);
       document.title = `Reservas · ${negocio.nombre}`;
       status.textContent = '';
+      root.querySelector('#public-initial-skeleton').hidden = true;
       const host = root.querySelector('#public-selection');
       host.hidden = false;
       let render;
@@ -108,6 +114,7 @@ export async function startPublicPortal(slug) {
       retry.hidden = !pending && error.kind === 'http' && [403, 404].includes(error.status);
     } finally {
       initializing = false;
+      root.querySelector('#public-initial-skeleton').hidden = true;
       root.querySelector('#public-main').setAttribute('aria-busy', 'false');
     }
   }

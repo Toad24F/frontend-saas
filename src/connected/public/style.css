@@ -182,7 +182,7 @@ html[data-theme='dark'] .public-online-tag { background: #343039; border-color: 
 html[data-theme='dark'] .public-option:has(:checked) { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, var(--surface)); }
 @media (max-width: 900px) {
   .public-booking-columns { grid-template-columns: minmax(0, 1fr); }
-  .public-booking-aside { order: -1; }
+  .public-booking-aside { order: 0; }
   .public-summary-card { padding: 17px 20px; }
   .public-booking-trust { display: none; }
   .public-steps { overflow-x: auto; scrollbar-width: none; }
@@ -209,4 +209,12 @@ html[data-theme='dark'] .public-option:has(:checked) { border-color: var(--accen
 }
 @media (min-width: 340px) and (max-width: 575px) {
   .public-slots:has(> .public-slot:nth-child(3)) { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+.public-summary-disclosure > summary { padding: 14px; font-weight: 600; cursor: pointer; min-height: 44px; }
+.public-portal .btn-primary:disabled { --bs-btn-disabled-bg: var(--accent); --bs-btn-disabled-border-color: var(--accent); opacity: .45; box-shadow: none; }
+.public-summary-disclosure > summary:focus-visible { outline: 3px solid var(--accent); }
+@media (min-width: 901px) { .public-booking-aside { position: sticky; top: 24px; } .public-summary-disclosure > summary { display: none; } }
+@media (max-width: 575px) {
+  .public-booking-surface:has(.public-selection-actions) .public-selection-actions { position: sticky; bottom: 0; z-index: 2; padding: 14px 0 max(14px, env(safe-area-inset-bottom)); background: var(--surface); box-shadow: 0 -8px 12px var(--surface); }
 }

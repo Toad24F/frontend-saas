@@ -1,4 +1,6 @@
 import './style.css';
+import '../../../shared/public/options.css';
+import { browseDefaults, optionPage, optionToolbar, optionPagination, periodSlots } from '../../../shared/public/options.js';
 import {
   db,
   list,
@@ -34,6 +36,9 @@ let booking = {
   confirmed: null,
 };
 let lastRenderedStepKey = '';
+let browse = Array.from({ length: 3 }, browseDefaults);
+let automaticSteps = [];
+let period = 'all';
 const stepNames = [
   'Servicio',
   'Sucursal',
@@ -43,10 +48,10 @@ const stepNames = [
   'Confirmación',
 ];
 const stepTitles = [
-  '¿Cómo podemos cuidarte?',
-  'Encuentra tu sucursal',
-  'Elige quién te acompaña',
-  'Un espacio en tu día',
+  'Elige un servicio',
+  'Elige una sucursal',
+  'Elige un profesional',
+  'Elige fecha y hora',
   'Completa tus datos',
   // La cita simulada nace pendiente, igual que el resultado del portal conectado.
   'Tu cita está pendiente',
@@ -71,6 +76,7 @@ function options() {
   };
 }
 function reset(id) {
+  browse = Array.from({ length: 3 }, browseDefaults); automaticSteps = []; period = 'all';
   if (booking.hold) releaseHold(booking.hold.id);
   booking = {
     tenantId: id,
@@ -104,7 +110,7 @@ export function renderPortal(slug) {
   const animateStep = stepKey !== lastRenderedStepKey;
   lastRenderedStepKey = stepKey;
   document.querySelector('#app').innerHTML =
-    `<div class="booking-layout"><header class="portal-topbar"><a class="brand portal-brand" href="/reservas/${tenant.slug}" data-book-reset aria-label="Citalendar: reiniciar reserva"><img class="brand-logo-on-light" src="/brand/citalendar-logo.svg" alt=""/><img class="brand-logo-on-dark" src="/brand/citalendar-logo-light.svg" alt=""/></a><span class="portal-topbar-caption">Un momento para tu bienestar</span><a class="text-button" href="/admin/agenda" data-nav="agenda">${icon('left')} Volver al panel <span class="demo-pill">Demo</span></a></header><main class="booking-main"><div class="booking-business">${avatar(tenant.initials, 'mint', 'avatar-large')}<div><h1>${esc(tenant.name)}</h1><p>${esc(tenant.category)} <span>·</span> Chihuahua, México</p></div><span class="soft-tag">Reservas en línea</span></div><nav class="booking-steps" aria-label="Pasos de reserva">${stepNames.map((name, i) => `<div class="booking-step ${booking.step === i + 1 ? 'current' : ''} ${booking.step > i + 1 ? 'done' : ''}" ${booking.step === i + 1 ? 'aria-current="step"' : ''}><span>${booking.step > i + 1 ? icon('check') : i + 1}</span><strong>${name}</strong></div>`).join('')}</nav><div class="booking-columns"><section class="booking-surface ${booking.step === 6 ? 'confirmation-surface' : ''} ${animateStep ? 'motion-enter' : ''}"><div class="booking-title"><span class="eyebrow">${booking.step === 6 ? 'NOS VEMOS PRONTO' : `PASO ${String(booking.step).padStart(2, '0')} DE 06`}</span><h2>${stepTitles[booking.step - 1]}</h2><p>${stepDescriptions[booking.step - 1]}</p></div>${stepContent()}${booking.step < 5 ? `<div class="booking-controls"><button class="btn btn-subtle" data-book-back ${booking.step === 1 ? 'disabled' : ''}>${icon('left')}Atrás</button><button class="btn btn-primary" data-book-next ${canContinue() ? '' : 'disabled'}>Continuar ${icon('arrow')}</button></div>` : ''}</section><aside class="booking-aside">${booking.step === 6 ? visitNote(tenant) : summary(tenant)}<div class="booking-trust">${icon('shield')}<p>Este es un prototipo. Usa datos ficticios; no se realiza una reserva real ni se envían mensajes.</p></div></aside></div></main><footer class="portal-footer"><span>Reservas con <strong>Citalendar</strong></span></footer></div>`;
+    `<div class="booking-layout"><header class="portal-topbar"><a class="brand portal-brand" href="/reservas/${tenant.slug}" data-book-reset aria-label="Citalendar: reiniciar reserva"><img class="brand-logo-on-light" src="/brand/citalendar-logo.svg" alt=""/><img class="brand-logo-on-dark" src="/brand/citalendar-logo-light.svg" alt=""/></a><span class="portal-topbar-caption">Un momento para tu bienestar</span><a class="text-button" href="/admin/agenda" data-nav="agenda">${icon('left')} Volver al panel <span class="demo-pill">Demo</span></a></header><main class="booking-main"><div class="booking-business">${avatar(tenant.initials, 'mint', 'avatar-large')}<div><h1>${esc(tenant.name)}</h1><p>${esc(tenant.category)} <span>·</span> Chihuahua, México</p></div><span class="soft-tag">Reservas en línea</span></div><nav class="booking-steps" aria-label="Pasos de reserva">${stepNames.map((name, i) => `<div class="booking-step ${booking.step === i + 1 ? 'current' : ''} ${booking.step > i + 1 ? 'done' : ''}" ${booking.step === i + 1 ? 'aria-current="step"' : ''}><span>${booking.step > i + 1 ? icon('check') : i + 1}</span><strong>${name}</strong></div>`).join('')}</nav><div class="booking-columns"><section class="booking-surface ${booking.step === 6 ? 'confirmation-surface' : ''} ${animateStep ? 'motion-enter' : ''}"><div class="booking-title"><span class="eyebrow">${booking.step === 6 ? 'NOS VEMOS PRONTO' : `PASO ${String(booking.step).padStart(2, '0')} DE 06`}</span><h2>${stepTitles[booking.step - 1]}</h2><p>${stepDescriptions[booking.step - 1]}</p></div>${stepContent()}${booking.step < 5 ? `<div class="booking-controls"><button class="btn btn-subtle" data-book-back ${booking.step === 1 ? 'disabled' : ''}>${icon('left')}Atrás</button><button class="btn btn-primary" data-book-next ${canContinue() ? '' : 'disabled'}>Continuar ${icon('arrow')}</button></div>` : ''}</section><aside class="booking-aside"><details class="demo-summary-disclosure" ${matchMedia('(min-width: 768px)').matches ? 'open' : ''}><summary>Ver resumen de tu cita</summary>${booking.step === 6 ? visitNote(tenant) : summary(tenant)}<div class="booking-trust">${icon('shield')}<p>Este es un prototipo. Usa datos ficticios; no se realiza una reserva real ni se envían mensajes.</p></div></details></aside></div></main><footer class="portal-footer"><span>Reservas con <strong>Citalendar</strong></span></footer></div>`;
   mountThemeToggle();
   const stepStrip = document.querySelector('.booking-steps');
   const activeStep = stepStrip?.querySelector('.booking-step.current');
@@ -129,58 +135,31 @@ function canContinue() {
 function choice(id, kind, content, selected) {
   return `<button class="booking-choice ${selected === id ? 'selected' : ''}" data-book-choice="${kind}" data-value="${id}" aria-pressed="${selected === id}">${content}<span class="choice-radio">${selected === id ? icon('check') : ''}</span></button>`;
 }
+function demoOptions(step) {
+  const people = list('professionals', booking.tenantId).filter((p) => p.active !== false && p.serviceIds.includes(booking.serviceId));
+  if (step === 1) return list('services', booking.tenantId).filter((s) => s.active !== false).map((s) => ({ id: s.id, nombre: s.name, descripcion: s.description, duracionMinutos: s.duration, entity: s }));
+  if (step === 2) return list('branches', booking.tenantId).filter((b) => b.active !== false && people.some((p) => p.branchIds.includes(b.id))).map((b) => ({ id: b.id, nombre: b.name, direccion: b.address, entity: b }));
+  return people.filter((p) => p.branchIds.includes(booking.branchId)).map((p) => ({ id: p.id, nombre: p.name, especialidad: p.specialty, entity: p }));
+}
+function demoCatalog() {
+  const index = booking.step - 1, items = demoOptions(booking.step), result = optionPage(items, index, browse[index]);
+  browse[index].page = result.page;
+  const key = ['serviceId', 'branchId', 'professionalId'][index];
+  const selected = items.find((item) => item.id === booking[key]);
+  return `${optionToolbar(items, index, browse[index])}<div id="public-option-results" tabindex="-1"><div class="booking-choices">${result.rows.map(({ entity: item, id, nombre }) => choice(id, key, `<span class="service-icon orange">${icon(index === 0 ? 'briefcase' : index === 1 ? 'pin' : 'stethoscope')}</span><span class="choice-content"><strong>${esc(nombre)}</strong><p>${esc(index === 0 ? item.description : index === 1 ? item.address : item.specialty)}</p>${index === 0 ? `<small>${item.duration} min · ${money(item.price)} MXN</small>` : ''}</span>`, booking[key])).join('') || empty(items.length ? 'No encontramos coincidencias' : 'No hay opciones disponibles', 'Prueba otra búsqueda o cambia tu selección.')}</div>${optionPagination(result, true)}</div>${selected ? `<p class="public-action-selection">Seleccionado: <strong>${esc(selected.nombre)}</strong></p>` : ''}${automaticSteps.length ? '<p class="public-auto-note">Se seleccionaron automáticamente las etapas con una única opción disponible.</p>' : ''}`;
+}
 function stepContent() {
   const t = tenantById(booking.tenantId);
-  if (booking.step === 1)
-    return `<div class="booking-choices service-choices">${
-      list('services', t.id)
-        .map((s) =>
-          choice(
-            s.id,
-            'serviceId',
-            `<span class="service-icon ${s.color}">${icon(s.icon)}</span><span class="choice-content"><strong>${esc(s.name)}</strong><p>${esc(s.description)}</p><span class="choice-meta">${icon('clock')}${s.duration} min <i></i>${money(s.price)} MXN</span></span>`,
-            booking.serviceId,
-          ),
-        )
-        .join('') ||
-      empty('Próximamente', 'El negocio aún está preparando su catálogo.')
-    }</div>`;
-  if (booking.step === 2) {
-    const branches = list('branches', t.id).filter((b) =>
-      list('professionals', t.id).some(
-        (p) =>
-          p.serviceIds.includes(booking.serviceId) &&
-          p.branchIds.includes(b.id),
-      ),
-    );
-    return `<div class="booking-choices">${branches.map((b) => choice(b.id, 'branchId', `<span class="service-icon orange">${icon('pin')}</span><span class="choice-content"><strong>${esc(b.name)}</strong><p>${esc(b.address)}</p><small>${esc(b.notes)}</small></span>`, booking.branchId)).join('') || empty('Sin sucursales disponibles', 'El negocio aún no asigna este servicio a un profesional.')}</div>`;
-  }
-  if (booking.step === 3) {
-    return `<div class="booking-choices">${list('professionals', t.id)
-      .filter(
-        (p) =>
-          p.serviceIds.includes(booking.serviceId) &&
-          p.branchIds.includes(booking.branchId),
-      )
-      .map((p) =>
-        choice(
-          p.id,
-          'professionalId',
-          `${avatar(p.initials, p.color, 'avatar-large')}<span class="choice-content"><strong>${esc(p.name)}</strong><p>${esc(p.specialty)}</p><span class="professional-available">${icon('circleCheck')} Agenda disponible</span></span>`,
-          booking.professionalId,
-        ),
-      )
-      .join('')}</div>`;
-  }
+  if (booking.step <= 3) return demoCatalog();
   if (booking.step === 4) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(booking.day)) return '<label for="demo-book-date">Fecha de tu cita</label><input type="date" class="form-control" id="demo-book-date" aria-invalid="true" aria-describedby="demo-date-error"><p id="demo-date-error" role="alert">Elige una fecha válida para consultar horarios.</p>';
     let dates = nextDates({ ...options(), from: TODAY }, 45);
     if (t.mode === 'compact') dates = dates.slice(0, 1);
-    if (!dates.some((d) => d.day === booking.day)) {
-      booking.day = dates[0]?.day || TODAY;
-      booking.start = null;
-    }
+
     const available = dates.find((d) => d.day === booking.day)?.slots || [];
-    return `<div class="date-picker-heading"><h3>${formatDate(booking.day, { month: 'long', year: 'numeric' })}</h3><span>${icon('clock')} Hora de Chihuahua</span></div><div class="booking-date-strip">${dates
+    const shown = periodSlots(available.map((horaInicio) => ({ horaInicio })), period).map((slot) => slot.horaInicio);
+    const nextDay = dates.find((d) => d.day > booking.day)?.day;
+    return `<label for="demo-book-date">Fecha de tu cita</label><input type="date" class="form-control" id="demo-book-date" value="${booking.day}"><div class="date-picker-heading"><h3>${formatDate(booking.day, { month: 'long', year: 'numeric' })}</h3><span>${icon('clock')} Hora de Chihuahua</span></div><div class="booking-date-strip">${dates
       .slice(0, 14)
       .map(
         (d) =>
@@ -188,7 +167,7 @@ function stepContent() {
       )
       .join(
         '',
-      )}</div>${t.mode === 'compact' ? '<div class="information-note compact-note">Mostramos el primer día disponible y horarios contiguos para aprovechar mejor la jornada.</div>' : ''}<h3 class="slot-heading">Horarios disponibles</h3><div class="booking-slot-grid">${available.map((time) => `<button class="booking-slot ${booking.start === time ? 'selected' : ''}" data-book-time="${time}" aria-pressed="${booking.start === time}">${time}</button>`).join('')}</div>${available.length ? '' : empty('No hay espacios disponibles', 'Prueba con otro profesional o sucursal. La búsqueda cubre los próximos 45 días.')}<p class="field-hint mt-4">${icon('info')} Tu horario se apartará durante 5 minutos en el siguiente paso.</p>`;
+      )}</div>${t.mode === 'compact' ? '<div class="information-note compact-note">Mostramos el primer día disponible y horarios contiguos para aprovechar mejor la jornada.</div>' : ''}<h3 class="slot-heading">Horarios disponibles</h3><div class="public-periods" role="group" aria-label="Filtrar horarios por parte del día">${[['all', 'Todos'], ['morning', 'Mañana'], ['afternoon', 'Tarde']].map(([value, label]) => `<button class="btn btn-light" type="button" data-public-period="${value}" aria-pressed="${period === value}">${label} (${periodSlots(available.map((horaInicio) => ({ horaInicio })), value).length})</button>`).join('')}</div><div class="booking-slot-grid">${shown.map((time) => `<button class="booking-slot ${booking.start === time ? 'selected' : ''}" data-book-time="${time}" aria-pressed="${booking.start === time}">${time}</button>`).join('')}</div>${booking.start ? `<p class="public-selected">Horario seleccionado: ${booking.start} · Hora de Chihuahua</p>` : ''}${available.length && !shown.length ? empty('No hay horarios en esta parte del día', 'Consulta todos los horarios o elige otra fecha.') : ''}${available.length ? '' : empty('No hay horarios disponibles para esta fecha', 'Elige otro día para consultar horarios. La búsqueda simulada cubre los próximos 45 días.', nextDay ? `<button type="button" class="btn btn-light" data-book-date="${nextDay}">Ver siguiente día disponible</button>` : '')}<p class="field-hint mt-4">${icon('info')} Tu horario se apartará durante 5 minutos en el siguiente paso.</p>`;
   }
   if (booking.step === 5)
     return `<form id="contact-form"><div class="hold-notice">${icon('lock')}<span>Estamos guardando tu horario.<br/><small>Completa tus datos en <strong id="hold-timer">05:00</strong></small></span><progress class="hold-progress" id="hold-progress" max="300" value="300" aria-label="Tiempo restante del apartado"></progress></div><div class="form-field"><label class="form-label" for="contact-name">Nombre completo <span>*</span></label><input class="form-control" id="contact-name" name="name" required maxlength="150" placeholder="Tu nombre y apellidos" value="${esc(booking.contact.name)}" autocomplete="off"/></div><div class="form-field"><label class="form-label" for="contact-phone">Teléfono de WhatsApp <span>*</span></label><div class="phone-input"><span>MX +52</span><input class="form-control" id="contact-phone" name="phone" type="tel" inputmode="numeric" pattern="[0-9]{10}" minlength="10" maxlength="10" required placeholder="614 000 0000" value="${esc(booking.contact.phone)}" autocomplete="off"/></div><p class="field-hint">10 dígitos, sin espacios ni código de país.</p></div><div class="form-field"><label class="form-label" for="contact-reason">Motivo de consulta <span class="optional">(opcional)</span></label><textarea class="form-control" id="contact-reason" name="reason" rows="3" maxlength="500" placeholder="¿Hay algo que debamos saber?">${esc(booking.contact.reason)}</textarea></div><p class="privacy-note">Usa información ficticia. Tus datos solo se conservarán mientras esta demostración esté abierta.</p><p class="form-error" id="booking-error" role="alert" hidden></p><div class="booking-controls"><button type="button" class="btn btn-subtle" data-book-back>${icon('left')}Atrás</button><button type="submit" class="btn btn-primary">Confirmar mi cita ${icon('check')}</button></div></form>`;
@@ -229,6 +208,16 @@ function visitNote(t) {
 const redraw = () => renderPortal(tenantById(booking.tenantId).slug);
 document.addEventListener('click', (e) => {
   if (!location.pathname.startsWith('/reservas/') || !booking.tenantId) return;
+  const pageControl = e.target.closest('[data-public-page]');
+  const clear = e.target.closest('[data-public-clear]');
+  if ((pageControl || clear) && booking.step <= 3) {
+    if (pageControl?.disabled || clear?.disabled) return;
+    if (clear) browse[booking.step - 1] = browseDefaults();
+    else browse[booking.step - 1].page = Number(pageControl.dataset.publicPage);
+    redraw(); document.querySelector('#public-option-results')?.focus(); return;
+  }
+  const periodControl = e.target.closest('[data-public-period]');
+  if (periodControl) { period = periodControl.dataset.publicPeriod; redraw(); return; }
   const resetEl = e.target.closest('[data-book-reset]');
   if (resetEl) {
     e.preventDefault();
@@ -250,8 +239,9 @@ document.addEventListener('click', (e) => {
     booking[key] = id;
     if (key === 'serviceId') {
       booking.branchId = booking.professionalId = null;
+      browse[1] = browseDefaults(); browse[2] = browseDefaults(); automaticSteps = [];
     }
-    if (key === 'branchId') booking.professionalId = null;
+    if (key === 'branchId') { booking.professionalId = null; browse[2] = browseDefaults(); automaticSteps = automaticSteps.filter((step) => step < 3); }
     booking.start = null;
     redraw();
     return;
@@ -259,6 +249,7 @@ document.addEventListener('click', (e) => {
   const dateEl = e.target.closest('[data-book-date]');
   if (dateEl) {
     booking.day = dateEl.dataset.bookDate;
+    period = 'all';
     booking.start = null;
     redraw();
     return;
@@ -274,7 +265,7 @@ document.addEventListener('click', (e) => {
       releaseHold(booking.hold.id);
       booking.hold = null;
     }
-    booking.step = Math.max(1, booking.step - 1);
+    do { booking.step = Math.max(1, booking.step - 1); } while (booking.step > 1 && automaticSteps.includes(booking.step));
     redraw();
     return;
   }
@@ -283,6 +274,11 @@ document.addEventListener('click', (e) => {
     try {
       if (booking.step === 4) booking.hold = holdSlot(options(), booking.start);
       booking.step++;
+      while ([2, 3].includes(booking.step) && demoOptions(booking.step).length === 1) {
+        booking[booking.step === 2 ? 'branchId' : 'professionalId'] = demoOptions(booking.step)[0].id;
+        if (!automaticSteps.includes(booking.step)) automaticSteps.push(booking.step);
+        booking.step++;
+      }
       redraw();
     } catch (error) {
       booking.start = null;
@@ -297,12 +293,26 @@ document.addEventListener('click', (e) => {
       .then(() => toast('Folio copiado.'))
       .catch(() => toast(`Tu folio: ${booking.confirmed.folio}`));
 });
+document.addEventListener('change', (e) => {
+  if (!location.pathname.startsWith('/reservas/') || !booking.tenantId) return;
+  if (e.target.id === 'demo-book-date') { booking.day = e.target.value; booking.start = null; period = 'all'; redraw(); }
+  if (e.target.matches('select[data-public-browse]') && booking.step <= 3) { browse[booking.step - 1].filter = e.target.value; browse[booking.step - 1].page = 1; redraw(); document.querySelector('#public-filter')?.focus(); }
+});
 document.addEventListener('input', (e) => {
+  if (e.target.id === 'public-search' && booking.step <= 3 && !e.isComposing) {
+    browse[booking.step - 1].search = e.target.value; browse[booking.step - 1].page = 1;
+    const cursor = e.target.selectionStart; redraw(); const input = document.querySelector('#public-search'); input?.focus(); input?.setSelectionRange(cursor, cursor); return;
+  }
   if (
     e.target.closest('#contact-form') &&
     ['name', 'phone', 'reason'].includes(e.target.name)
   )
     booking.contact[e.target.name] = e.target.value;
+});
+document.addEventListener('compositionend', (e) => {
+  if (e.target.id !== 'public-search' || booking.step > 3) return;
+  browse[booking.step - 1].search = e.target.value; browse[booking.step - 1].page = 1;
+  redraw(); document.querySelector('#public-search')?.focus();
 });
 document.addEventListener('submit', (e) => {
   if (e.target.id !== 'contact-form') return;

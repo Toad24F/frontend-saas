@@ -54,7 +54,7 @@ const branch = { id: 2, nombre: 'Centro', direccion: 'Calle 1', zonaHoraria: 'Am
 const professional = { id: 3, nombre: 'Ana' };
 const catalog = (query = {}) => ({ negocio: { slug, nombre: 'Centro' },
   servicios: [service, { ...service, id: 4, nombre: 'Seguimiento' }],
-  sucursales: query.servicioId ? [branch] : [], profesionales: query.sucursalId ? [professional] : [] });
+  sucursales: query.servicioId ? [branch, { ...branch, id: 5 }] : [], profesionales: query.sucursalId ? [professional, { ...professional, id: 6 }] : [] });
 const availability = (query, ranuras = [{ inicioUtc: '2026-10-20T17:00:00.000Z', finUtc: '2026-10-20T17:30:00.000Z' }]) => ({
   ...query, modalidad: 'publica', zonaHoraria: branch.zonaHoraria, calculadoEn: '2026-10-20T14:00:00Z', ranuras, omisiones: [],
 });
@@ -76,8 +76,8 @@ test('el portal presenta campos públicos opcionales sin convertirlos en reserva
   const { controller } = setup((_path, { query }) => ({ ...catalog(query),
     negocio: { slug, nombre: 'Centro', categoria: 'Salud' },
     servicios: [{ ...service, descripcion: '<consulta>' }],
-    sucursales: query.servicioId ? [{ ...branch, telefono: '6140000000', indicaciones: 'Entrada norte' }] : [],
-    profesionales: query.sucursalId ? [{ ...professional, especialidad: 'Medicina' }] : [],
+    sucursales: query.servicioId ? [{ ...branch, telefono: '6140000000', indicaciones: 'Entrada norte' }, { ...branch, id: 5 }] : [],
+    profesionales: query.sucursalId ? [{ ...professional, especialidad: 'Medicina' }, { ...professional, id: 6 }] : [],
   }));
   await controller.start();
   assert.equal(controller.getState().negocio.categoria, 'Salud');

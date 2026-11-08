@@ -1,5 +1,6 @@
 import { PublicPortalError } from './http.js';
 import { localDate, localTime, validDate } from './dates.js';
+import { browseDefaults, optionPage } from '../../shared/public/options.js';
 
 // Las fases futuras tienen espacio propio; T101–T103 solo activan selección.
 // Apartado, formulario, envío y resultado no se simulan ni se persisten aquí.
@@ -15,7 +16,7 @@ export function createPortalSelection(client, { slug, onChange = () => {}, now =
     negocio: null,
     selection: { servicioId: null, sucursalId: null, personalId: null, date: '', slot: null },
     options: { servicios: [], sucursales: [], profesionales: [] }, slots: [], availableDates: [], timeZone: '',
-    query: { status: 'idle', message: '' }, hold: null, form: null, submission: null, result: null };
+    query: { status: 'idle', message: '' }, browse: Array.from({ length: 3 }, browseDefaults), period: 'all', automaticSteps: [], hold: null, form: null, submission: null, result: null };
   let revision = 0;
   let pending;
   const snapshot = () => structuredClone(state);
@@ -25,9 +26,12 @@ export function createPortalSelection(client, { slug, onChange = () => {}, now =
   // abort(). La revisión también descarta errores atrasados, no solo éxitos.
   function invalidate() { revision++; pending?.abort(); pending = null; }
   function clearAfter(index) {
+    state.automaticSteps = state.automaticSteps.filter((step) => step <= index);
+    state.period = 'all';
     for (let i = index + 1; i < fields.length; i++) {
       state.selection[fields[i]] = null;
       state.options[lists[i]] = [];
+      state.browse[i] = browseDefaults();
     }
     state.selection.date = '';
     state.selection.slot = null;
@@ -64,6 +68,7 @@ export function createPortalSelection(client, { slug, onChange = () => {}, now =
     state.options.sucursales = state.step >= 1 ? data.sucursales : [];
     state.options.profesionales = state.step >= 2 ? data.profesionales : [];
     ensureSelection();
+    state.automaticSteps = state.automaticSteps.filter((step) => state.options[lists[step]].length === 1 && state.selection[fields[step]] === state.options[lists[step]][0].id);
   }
   function readAvailability(data, query) {
     if (!data || fields.some((key) => data[key] !== query[key]) || data.desde !== query.desde || data.hasta !== query.hasta ||
@@ -84,7 +89,13 @@ export function createPortalSelection(client, { slug, onChange = () => {}, now =
     state.slots = slots.filter((slot) => slot.fechaLocal === state.selection.date);
     state.timeZone = data.zonaHoraria;
   }
-  async function load() {
+  function prepareDate() {
+    if (state.step === 3 && !state.selection.date) {
+      const branch = state.options.sucursales.find((item) => item.id === state.selection.sucursalId);
+      if (branch) { state.timeZone = branch.zonaHoraria; state.selection.date = localDate(now(), branch.zonaHoraria); }
+    }
+  }
+  async function load(autoAdvance = true) {
     invalidate();
     const current = revision;
     pending = new AbortController();
@@ -93,7 +104,7 @@ export function createPortalSelection(client, { slug, onChange = () => {}, now =
     if (state.step === 3 && (!fields.every((key) => id(state.selection[key])) || !validDate(state.selection.date))) {
       state.query = { status: 'invalid', message: 'Seleccione una fecha válida y complete servicio, sucursal y profesional.' }; emit(); return;
     }
-    state.query = { status: 'loading', message: 'Consultando opciones disponibles…' }; emit();
+    state.query = { status: 'loading', message: state.step === 3 ? 'Buscando horarios disponibles…' : 'Consultando opciones disponibles…' }; emit();
     const availability = state.step === 3;
     const branch = state.options.sucursales.find((item) => item.id === state.selection.sucursalId);
     const today = availability ? localDate(now(), branch.zonaHoraria) : '';
@@ -107,24 +118,48 @@ export function createPortalSelection(client, { slug, onChange = () => {}, now =
       const data = await client.request(availability ? 'disponibilidad' : 'catalogo', { query, signal: pending.signal });
       if (current !== revision) return;
       if (availability) readAvailability(data, query); else readCatalog(data);
+      if (!availability) {
+        const missing = fields.findIndex((field, index) => index < state.step && !state.selection[field]);
+        if (missing !== -1) { state.step = missing; return load(false); }
+        state.browse[state.step].page = optionPage(state.options[lists[state.step]], state.step, state.browse[state.step]).page;
+        if (autoAdvance && state.step > 0 && state.options[lists[state.step]].length === 1) {
+          state.selection[fields[state.step]] = state.options[lists[state.step]][0].id;
+          clearAfter(state.step);
+          if (!state.automaticSteps.includes(state.step)) state.automaticSteps.push(state.step);
+          state.step++; prepareDate(); return load();
+        }
+      }
       const count = availability ? state.slots.length : state.options[lists[state.step]].length;
       state.query = { status: count ? 'ready' : 'empty', message: count ? '' : availability
-        ? 'No hay horarios disponibles en esta fecha. Puede elegir otro día o cambiar sus selecciones.'
+        ? 'No hay horarios disponibles para esta fecha. Elige otro día para consultar horarios.'
         : 'No hay opciones disponibles para esta selección. Puede volver y elegir otra opción.' };
     } catch (error) {
       if (current !== revision) return;
       state.slots = [];
       state.availableDates = [];
       state.query = { status: [400, 404, 409].includes(error.status) ? 'invalid' : 'error',
-        message: error instanceof PublicPortalError ? error.message : 'No se pudo consultar el portal. Reintente la consulta.' };
+        message: error instanceof PublicPortalError ? error.message : availability ? 'No pudimos consultar los horarios. Reintenta para comprobar la disponibilidad.' : 'No se pudo consultar el portal. Reintente la consulta.' };
     }
     if (current === revision) emit();
   }
   return {
-    getState: snapshot, start: load, retry: load,
+    getState: snapshot, start: () => load(), retry: () => load(),
+    setBrowse(field, value) {
+      if (state.step >= 3 || state.query.status !== 'ready') return;
+      if (field === 'clear') state.browse[state.step] = browseDefaults();
+      else if (['search', 'filter', 'page'].includes(field)) {
+        state.browse[state.step][field] = field === 'page' ? Number(value) : String(value);
+        if (field !== 'page') state.browse[state.step].page = 1;
+      } else return;
+      const browse = state.browse[state.step];
+      browse.page = optionPage(state.options[lists[state.step]], state.step, browse).page;
+      emit();
+    },
+    setPeriod(value) { if (['all', 'morning', 'afternoon'].includes(value)) { state.period = value; emit(); } },
     // Solo se reinicia después de que el resolutor confirme ausencia terminal.
     async reset() {
       invalidate(); state.step = 0;
+      state.browse = Array.from({ length: 3 }, browseDefaults);
       state.selection.servicioId = null; state.options.servicios = []; clearAfter(0);
       await load();
     },
@@ -138,21 +173,18 @@ export function createPortalSelection(client, { slug, onChange = () => {}, now =
     async next() {
       if (state.phase !== 'selection' || state.step >= 3 || state.query.status !== 'ready' || !state.selection[fields[state.step]]) return;
       state.step++;
-      if (state.step === 3 && !state.selection.date) {
-        const branch = state.options.sucursales.find((item) => item.id === state.selection.sucursalId);
-        state.timeZone = branch.zonaHoraria;
-        state.selection.date = localDate(now(), branch.zonaHoraria);
-      }
+      prepareDate();
       await load();
     },
     async back() {
       if (state.phase !== 'selection' || state.step === 0) return;
-      state.step--; await load();
+      do { state.step--; } while (state.step > 0 && state.automaticSteps.includes(state.step));
+      await load(false);
     },
     async setDate(date) {
       if (state.phase !== 'selection' || state.step !== 3) return;
       if (!state.availableDates.includes(date)) state.availableDates = [];
-      state.selection.date = date; await load();
+      state.selection.date = date; state.period = 'all'; await load();
     },
     chooseSlot(start) {
       const slot = state.slots.find((item) => item.inicioUtc === start);

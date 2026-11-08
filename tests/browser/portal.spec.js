@@ -9,10 +9,7 @@ async function chooseSlot(page, offset, index = 0, business = 1, apart = true) {
   await page.goto(portalUrl(business));
   await page.getByRole('radio', { name: /Corte QA/ }).check();
   await page.getByRole('button', { name: 'Continuar' }).click();
-  await page.getByRole('radio', { name: /Sucursal QA/ }).check();
-  await page.getByRole('button', { name: 'Continuar' }).click();
-  await page.getByRole('radio', { name: /Profesional QA/ }).check();
-  await page.getByRole('button', { name: 'Continuar' }).click();
+  await expect(page.getByRole('heading', { name: 'Elige fecha y hora' })).toBeVisible();
   await page.getByLabel('Fecha de tu cita').fill(dateAt(offset));
   await expect(page.locator('[data-slot]').nth(index)).toBeEnabled();
   await page.locator('[data-slot]').nth(index).check();
@@ -135,7 +132,7 @@ test('T117: inicia la página pública con la oferta real de prueba', async ({ p
   await page.goto(portalUrl());
   // La portada usa el nombre del negocio y el primer paso del asistente.
   await expect(page.getByRole('heading', { name: 'Portal QA 1' })).toBeVisible();
-  await expect(page.getByRole('heading', { name: '¿Cómo podemos cuidarte?' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Elige un servicio' })).toBeVisible();
   await expect(page.getByRole('radio', { name: /Corte/ })).toBeVisible();
 });
 
@@ -159,7 +156,7 @@ test('T118: móvil corrige contacto y confirma exactamente una cita pendiente', 
 
 test('T119: teclado, foco y notas HTML se mantienen como texto seguro', async ({ page }) => {
   await page.goto(portalUrl());
-  for (const name of [/Corte QA/, /Sucursal QA/, /Profesional QA/]) {
+  for (const name of [/Corte QA/]) {
     await page.getByRole('radio', { name }).focus();
     await page.keyboard.press('Space');
     await page.getByRole('button', { name: 'Continuar' }).focus();
@@ -214,7 +211,7 @@ test('T120: pestañas hermanas comparten sesión y avisan al sustituir el aparta
       await chooseSlot(challenger, 11, 0, 1, false);
       await chooseSlot(outsiderPage, 11, 0);
       await challenger.getByRole('button', { name: 'Apartar este horario' }).click();
-      await expect(challenger.getByRole('heading', { name: 'Un espacio en tu día' })).toBeVisible();
+      await expect(challenger.getByRole('heading', { name: 'Elige fecha y hora' })).toBeVisible();
       await expect(second.locator('.public-hold-notice')).toContainText('ya no está disponible');
       const previous = await rows('SELECT liberado_en FROM bloqueos_temporales WHERE id=?', [previousId]);
       expect(previous[0].liberado_en).not.toBeNull();
@@ -232,7 +229,7 @@ test('T121: navegadores aislados disputan un horario sin doble ocupación', asyn
       WHERE n.slug='portal-qa-1' ORDER BY b.id DESC LIMIT 1`))[0].id;
     await b.goto(portalUrl());
     // El primer paso vigente usa este encabezado en la portada conectada.
-    await expect(b.getByRole('heading', { name: '¿Cómo podemos cuidarte?' })).toBeVisible();
+    await expect(b.getByRole('heading', { name: 'Elige un servicio' })).toBeVisible();
     const foreign = await b.evaluate(async (id) => {
       const response = await fetch(`/publico/negocios/portal-qa-1/apartados/${id}`, { credentials: 'same-origin' });
       return response.status;
@@ -240,10 +237,7 @@ test('T121: navegadores aislados disputan un horario sin doble ocupación', asyn
     expect(foreign).toBe(404);
     await b.getByRole('radio', { name: /Corte QA/ }).check();
     await b.getByRole('button', { name: 'Continuar' }).click();
-    await b.getByRole('radio', { name: /Sucursal QA/ }).check();
-    await b.getByRole('button', { name: 'Continuar' }).click();
-    await b.getByRole('radio', { name: /Profesional QA/ }).check();
-    await b.getByRole('button', { name: 'Continuar' }).click();
+    await expect(b.getByRole('heading', { name: 'Elige fecha y hora' })).toBeVisible();
     await b.getByLabel('Fecha de tu cita').fill(dateAt(6));
     await expect(b.locator('[data-slot]').first()).toBeVisible();
     // La disponibilidad descarta un apartado ajeno ya confirmado.
@@ -251,7 +245,7 @@ test('T121: navegadores aislados disputan un horario sin doble ocupación', asyn
     await chooseSlot(b, 12, 0, 1, false);
     await chooseSlot(a, 12, 0);
     await b.getByRole('button', { name: 'Apartar este horario' }).click();
-    await expect(b.getByRole('heading', { name: 'Un espacio en tu día' })).toBeVisible();
+    await expect(b.getByRole('heading', { name: 'Elige fecha y hora' })).toBeVisible();
     const matching = await rows(`SELECT COUNT(*) n FROM bloqueos_temporales b JOIN negocios n ON n.id=b.negocio_id
       WHERE n.slug='portal-qa-1' AND b.liberado_en IS NULL AND b.expira_en > UTC_TIMESTAMP()`);
     expect(Number(matching[0].n)).toBe(1);
@@ -277,7 +271,7 @@ test('T122: recarga limpia contacto, salida libera y cookies ausentes bloquean',
     WHERE n.slug='portal-qa-1'`))[0].id;
   await fillContact(page, 'Privado temporal');
   await page.reload();
-  await expect(page.getByRole('heading', { name: '¿Cómo podemos cuidarte?' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Elige un servicio' })).toBeVisible();
   expect(await page.locator('#contact-nombre').count()).toBe(0);
   await expect.poll(async () => (await rows('SELECT liberado_en FROM bloqueos_temporales WHERE id=?', [abandonedId]))[0].liberado_en !== null).toBe(true);
   const context = await browser.newContext();
@@ -318,7 +312,7 @@ test('T123: pérdida anterior al escritor termina sin cita tardía', async ({ pa
   await page.getByRole('button', { name: 'Reservar' }).click();
   await expect(page.getByRole('heading', { name: 'Comprueba tu envío' })).toBeVisible();
   await page.reload();
-  await expect(page.getByRole('heading', { name: '¿Cómo podemos cuidarte?' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Elige un servicio' })).toBeVisible();
   expect(Number((await rows("SELECT COUNT(*) n FROM citas WHERE origen='portal_publico'"))[0].n)).toBe(before);
 });
 

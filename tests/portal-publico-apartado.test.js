@@ -42,8 +42,8 @@ function setup(handler, extra = {}) {
   return { flow, calls, messages, channel, setMono: (value) => { mono = value; } };
 }
 async function select(flow) {
-  await flow.start(); flow.choose('servicioId', 1); await flow.next(); flow.choose('sucursalId', 2);
-  await flow.next(); flow.choose('personalId', 3); await flow.next(); flow.chooseSlot(start);
+  await flow.start(); flow.choose('servicioId', 1); await flow.next(); if (flow.getState().step === 1) flow.choose('sucursalId', 2);
+  await flow.next(); if (flow.getState().step === 2) flow.choose('personalId', 3); await flow.next(); flow.chooseSlot(start);
 }
 async function form(flow) { await select(flow); await flow.reserveSelected(); }
 
