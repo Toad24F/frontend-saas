@@ -25,6 +25,9 @@ let draftScheduleId = -1;
 
 export async function handleClick(e) {
   try {
+    // La agenda real usa sus propias lecturas; nunca abre diálogos de escritura de la demo.
+    if (!isDemo && state.page === 'agenda' &&
+      (await import('../connected/screens/agenda/view.js')).handleAgendaClick(e)) return;
     // Solo los controles de la sección de inhabilitados cargan ese módulo;
     // navegación y acciones ordinarias conservan su flujo habitual.
     if (!isDemo && e.target.closest('[data-retired-open], [data-retired-list], [data-retired-detail], [data-retired-restore], [data-retired-effects]') &&

@@ -1,5 +1,7 @@
 # Estado actual del backend y rutas HTTP
 
+> **Referencia histórica:** el inventario siguiente describe el 9 de octubre y no debe usarse para deducir las rutas actuales. Desde M4-T088–T092 el frontend conecta consulta de Agenda, detalle e historial contra los controladores actuales de citas/clientes. Véanse [alcance, contratos y resultados](Fase-5-modulo-4/resultados-tareas/m4-t088-t092.md) y [seguimiento del frontend](Fase-5-modulo-4/tareas.md). La pantalla del directorio y las escrituras privadas siguen pendientes de sus tareas posteriores.
+
 Documentación del código presente al **9 de octubre de 2026**. Describe lo que registran los controladores importados por `AppModule`, no todo lo previsto en las especificaciones. Las reglas de producto están en [`AGENTS.md`](../AGENTS.md); los antecedentes de autenticación están en [`spec-auth.md`](fase-1-auth/spec/spec-auth.md) y [`plan-auth.md`](fase-1-auth/plan-auth.md). Para el módulo 1, véanse el [antecedente](fase-2-modulo-1/spec-modulo-1.md) y el [fix vigente](Fix-modulo-1/spec-fix.md); la [evidencia del fix](Fix-modulo-1/tareas.md) se distingue de las pruebas históricas.
 
 ## Convenciones generales

@@ -53,7 +53,8 @@ test('Recepción accede a disponibilidad privada y conserva cuenta', async () =>
   try {
     global.fetch = async () => Response.json({ accessToken: 'reception-token', usuario: { id: 8, nombre: 'Recepción', rol: 'recepcionista', negocioId: 7 } });
     await login('recepcion@example.com', 'test-password');
-    assert.equal(defaultPage(), 'disponibilidad');
+    // M4-T088 incorpora Agenda como inicio sin retirar las capacidades anteriores.
+    assert.equal(defaultPage(), 'agenda');
     assert.equal(availablePage('disponibilidad'), true);
     assert.equal(availablePage('cuenta'), true);
     assert.equal(availablePage('profesionales'), false);
@@ -87,9 +88,9 @@ test('carga datos reales aislados del negocio, sin inventar citas, y envía auto
     };
     await login('test@example.com', 'test-password');
     await restoreSession();
-    assert.equal(defaultPage(), 'profesionales');
+    assert.equal(defaultPage(), 'agenda');
     assert.equal(availablePage('servicios'), true);
-    assert.equal(availablePage('agenda'), false);
+    assert.equal(availablePage('agenda'), true);
     assert.equal(await loadBackendData(), 7);
     assert.equal(db.tenants[0].name, 'Clínica Central');
     assert.equal(db.tenants[0].slug, 'clinica-central');
@@ -125,7 +126,7 @@ test('el profesional ve sus sucursales asignadas y la autoría real de servicios
   try {
     global.fetch = async (url) => Response.json(responses[new URL(url).pathname]);
     await login('ana@example.com', 'test-password');
-    assert.equal(defaultPage(), 'servicios');
+    assert.equal(defaultPage(), 'agenda');
     assert.equal(availablePage('profesionales'), false);
     assert.equal(availablePage('cuenta'), true);
     await loadBackendData();

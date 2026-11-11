@@ -124,7 +124,7 @@ function navItem(item) {
     const children = allowedAvailabilityGroups(isDemo, user?.rol).map((group) => `<a href="${availabilityPath(group.id)}" data-availability-group="${group.id}" class="nav-subitem ${state.page === 'disponibilidad' && selectedAvailabilityGroup() === group.id ? 'is-current' : ''}" ${state.page === 'disponibilidad' && selectedAvailabilityGroup() === group.id ? 'aria-current="page"' : ''}>${group.label}</a>`).join('');
     return `<div class="nav-disclosure"><button type="button" class="nav-item nav-disclosure-trigger ${state.page === 'disponibilidad' ? 'active' : ''}" data-availability-menu aria-expanded="${open}" aria-controls="availability-sidebar-submenu">${icon('clock')}<span>Disponibilidad</span>${icon('chevron', 'nav-disclosure-arrow')}</button><div class="nav-submenu" id="availability-sidebar-submenu" ${open ? '' : 'hidden'}>${children}</div></div>`;
   }
-  return `<a href="/admin/${item[0]}" data-nav="${item[0]}" class="nav-item ${state.page === item[0] ? 'active' : ''}" ${state.page === item[0] ? 'aria-current="page"' : ''}>${icon(item[1])}<span>${item[2]}</span>${item[0] === 'agenda' ? `<span class="nav-count">${list('appointments', state.tenantId).filter((a) => a.date === TODAY).length}</span>` : ''}</a>`;
+  return `<a href="/admin/${item[0]}" data-nav="${item[0]}" class="nav-item ${state.page === item[0] ? 'active' : ''}" ${state.page === item[0] ? 'aria-current="page"' : ''}>${icon(item[1])}<span>${item[2]}</span>${isDemo && item[0] === 'agenda' ? `<span class="nav-count">${list('appointments', state.tenantId).filter((a) => a.date === TODAY).length}</span>` : ''}</a>`;
 }
 function setMobileMenuOpen(isOpen) {
   const layout = document.querySelector('.admin-layout');
@@ -200,6 +200,8 @@ export function renderShell(content) {
   const visibleNav = isDemo ? nav : [
     ['connected', user.rol === 'superadmin' ? 'PLATAFORMA' : user.rol === 'recepcionista' ? 'MI CUENTA' : 'MI NEGOCIO'],
     ...(user.rol === 'superadmin' ? [['plataforma', 'grid', 'Negocios']] : [
+      // La administración usa un menú propio; incluir aquí las nuevas lecturas M4.
+      ...(user.rol === 'admin_negocio' ? [['agenda', 'calendar', 'Agenda'], ['clientes', 'users', 'Clientes']] : []),
       ...(user.rol === 'admin_negocio' ? [['servicios', 'briefcase', 'Servicios'], ['sucursales', 'pin', 'Sucursales'], ['usuarios', 'users', 'Usuarios'], ['disponibilidad', 'clock', 'Disponibilidad']] : [...nav.filter((item) => item.length === 3 && item[0] !== 'usuarios' && availablePage(item[0])), ...(availablePage('profesionales') ? [['profesionales', 'stethoscope', 'Profesionales']] : [])]),
     ]),
   ];
@@ -217,9 +219,9 @@ export function renderShell(content) {
   ];
   const roleTabs = {
     superadmin: [['plataforma', 'grid', 'Negocios']],
-    admin_negocio: [['profesionales', 'stethoscope', 'Equipo'], ['servicios', 'briefcase', 'Servicios'], ['sucursales', 'pin', 'Sucursales']],
-    profesional: [['servicios', 'briefcase', 'Servicios'], ['sucursales', 'pin', 'Sucursales'], ['disponibilidad', 'clock', 'Horario']],
-    recepcionista: [['disponibilidad', 'clock', 'Disponibilidad'], ['cuenta', 'user', 'Mi cuenta']],
+    admin_negocio: [['agenda', 'calendar', 'Agenda'], ['clientes', 'users', 'Clientes'], ['profesionales', 'stethoscope', 'Equipo']],
+    profesional: [['agenda', 'calendar', 'Agenda'], ['servicios', 'briefcase', 'Servicios'], ['disponibilidad', 'clock', 'Horario']],
+    recepcionista: [['agenda', 'calendar', 'Agenda'], ['clientes', 'users', 'Clientes'], ['disponibilidad', 'clock', 'Disponibilidad'], ['cuenta', 'user', 'Mi cuenta']],
   };
   const primaryTabs = isDemo ? demoTabs : roleTabs[user.rol] || [['cuenta', 'user', 'Mi cuenta']];
   const moreIsCurrent = !primaryTabs.some(([page]) => page === state.page);
@@ -280,7 +282,7 @@ export function render() {
   renderShell(
     !isDemo && !availablePage(state.page)
       ? pageHead(labels[state.page] || 'Agenda', '') + empty(pending, 'Puedes comparar esta pantalla con la demo.', `<a class="btn btn-light" href="${modeUrl(location.pathname, true)}">Ver demo</a>`)
-      : state.page === 'agenda'
+      : isDemo && state.page === 'agenda'
       ? agendaView()
       : extraViews
         ? extraViews.renderView(state.page)
