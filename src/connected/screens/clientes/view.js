@@ -7,11 +7,13 @@ import { createCustomerClient } from '../../modules/clientes/client.js';
 import { createAgendaStore } from '../../modules/agenda/store.js';
 import { openCustomer, openCustomerEditor } from './panels.js';
 import '../../../shared/screens/clientes/style.css';
+import { privateError } from '../../modules/agenda/errors.js';
 
 const client = createCustomerClient(api),
   store = createAgendaStore(client.list);
 let identity = '',
   filters = { busqueda: '', pagina: 1 };
+let pendingPageFocus = null;
 const scope = () =>
   user ? `${user.negocioId}:${user.id}:${user.sesionId || ''}` : '';
 function reset() {
@@ -31,12 +33,20 @@ async function load(force = false) {
       focused = input === document.activeElement;
     const draft = input?.value,
       selection = input?.selectionStart;
+    const restorePage = document.activeElement === document.body ? pendingPageFocus : null;
+    pendingPageFocus = null;
     render();
     const next = document.querySelector('#connected-directory-search');
     if (next && draft != null) next.value = draft;
     if (focused) {
       next?.focus();
       if (selection != null) next?.setSelectionRange(selection, selection);
+    }
+    // Los controles de página se reconstruyen tras la consulta: conservar la dirección usada con teclado.
+    if (restorePage && !document.querySelector('#app-dialog')?.open) {
+      const button = document.querySelector(`[data-directory-page="${filters.pagina + restorePage}"]:not(:disabled)`);
+      const fallback = document.querySelector('.directory-pages button:not(:disabled), #connected-directory-search');
+      (button || fallback)?.focus();
     }
   }
 }
@@ -61,8 +71,10 @@ export function clients() {
   if (model.busy)
     content =
       '<div class="directory-loading" role="status" aria-label="Cargando clientes"><span class="skeleton-fill"></span><span class="skeleton-fill"></span><p>Consultando clientes…</p></div>';
-  else if (model.error)
-    content = `<div class="directory-loading" role="alert"><p>${esc(model.error.message)}</p><button class="btn btn-light" data-directory-retry>Reintentar consulta</button></div>`;
+  else if (model.error) {
+    const info = privateError(model.error);
+    content = `<div class="directory-loading" role="alert"><strong>${info.title}</strong><p>${esc(info.message)}</p>${info.retry ? '<button class="btn btn-light" data-directory-retry>Reintentar consulta</button>' : ''}</div>`;
+  }
   else if (model.data) {
     const rows = model.data.clientes;
     content = rows.length
@@ -88,12 +100,14 @@ document.addEventListener('submit', (event) => {
   )
     return;
   event.preventDefault();
+  const focusedSearch = document.activeElement?.id === 'connected-directory-search';
   filters = {
     busqueda: new FormData(event.target).get('busqueda').trim(),
     pagina: 1,
   };
   void load(true);
   render();
+  if (focusedSearch) document.querySelector('#connected-directory-search')?.focus();
 });
 document.addEventListener('click', (event) => {
   const target = event.target.closest(
@@ -114,8 +128,10 @@ document.addEventListener('click', (event) => {
     void openCustomer(Number(target.dataset.directoryOpen), reloadDirectory);
     return;
   }
-  if (target.hasAttribute('data-directory-page'))
+  if (target.hasAttribute('data-directory-page')) {
+    pendingPageFocus = Number(target.dataset.directoryPage) > filters.pagina ? 1 : -1;
     filters.pagina = Number(target.dataset.directoryPage);
+  }
   void load(true);
   render();
 });

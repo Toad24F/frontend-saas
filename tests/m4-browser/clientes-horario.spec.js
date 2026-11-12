@@ -341,7 +341,7 @@ test('T099: cerrar durante el envío no habilita otro POST y un 400 permite corr
   await panel
     .getByRole('button', { name: 'Guardar ficha', exact: true })
     .click();
-  await expect(panel.locator('[data-customer-error]')).toContainText('Rechazo');
+  await expect(panel.locator('[data-customer-error]')).toContainText('Entrada inválida');
   await expect(
     panel.getByRole('button', { name: 'Guardar ficha', exact: true }),
   ).toBeEnabled();

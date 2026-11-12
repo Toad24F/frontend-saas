@@ -18,6 +18,8 @@ import './style.css';
 import '../../../shared/screens/agenda/polish.css';
 import { agendaLegend, calendarSkeleton } from '../../../shared/screens/agenda/presentation.js';
 import { agendaPanel as modal } from '../../../shared/screens/agenda/panels.js';
+import { registerLiveRefresh, watchRecord } from './live.js';
+import { privateError } from '../../modules/agenda/errors.js';
 
 const client = createAgendaClient(api);
 const store = createAgendaStore(client.list);
@@ -26,13 +28,7 @@ let choices = { branches: new Map(), people: new Map() };
 let detailGeneration = 0;
 let appointmentReturnFocus;
 const historical = (value) => value == null ? 'Sin registro histórico' : String(value);
-const errorMessage = (error) => {
-  if (error.status === 401) return 'Tu sesión o licencia ya no permite consultar estos datos.';
-  if ([403, 404].includes(error.status)) return 'La consulta o el recurso no está disponible para tu cuenta.';
-  if (error.status >= 500 || error.status === 0) return 'No se pudo consultar la agenda. Reintenta en unos momentos.';
-  return error.message;
-};
-const errorPanel = (error, action) => `<div class="m4-error" data-m4-error role="alert"><p>${esc(errorMessage(error))}</p><button class="btn btn-light" ${action}>Reintentar consulta</button></div>`;
+const errorPanel = (error, action) => { const info = privateError(error); return `<div class="m4-error" data-m4-error role="alert"><strong>${info.title}</strong><p>${esc(info.message)}</p>${info.retry ? `<button class="btn btn-light" ${action}>Reintentar consulta</button>` : ''}</div>`; };
 
 // La sesión forma parte de la caché: ninguna lectura de una cuenta se reutiliza al entrar con otra.
 function reset() {
@@ -53,11 +49,12 @@ function rememberOptions(data) {
   for (const item of list('branches', state.tenantId)) choices.branches.set(item.id, item.name);
   for (const item of list('professionals', state.tenantId)) choices.people.set(item.id, item.name);
 }
-async function load(force = false) {
+async function load(force = false, background = false) {
   const query = filters();
   if (!force && store.state.key === JSON.stringify(query)) return;
   const currentIdentity = identity;
-  if (await store.load(query)) {
+  const previous = store.state.data;
+  if (await store.load(query, { background })) {
     if (!user || currentIdentity !== identity) return;
     rememberOptions(store.state.data);
     if (state.page === 'agenda') {
@@ -66,11 +63,27 @@ async function load(force = false) {
       const draft = form ? new FormData(form) : null;
       const focused = document.activeElement;
       const focusName = focused?.name;
+      const selection = focused && 'selectionStart' in focused ? [focused.selectionStart, focused.selectionEnd] : null;
       const control = focused?.outerHTML;
+      const scroller = document.querySelector('.m4-agenda .calendar-scroll, .m4-agenda .month-scroll');
+      const position = scroller && { left: scroller.scrollLeft, top: scroller.scrollTop, focused: focused === scroller };
       render();
+      // Reconstruir el calendario no cambia la columna/hora que se estaba explorando con teclado o en móvil.
+      const nextScroller = document.querySelector('.m4-agenda .calendar-scroll, .m4-agenda .month-scroll');
+      if (position && nextScroller) {
+        nextScroller.scrollLeft = position.left; nextScroller.scrollTop = position.top;
+        if (position.focused) nextScroller.focus({ preventScroll: true });
+      }
       const nextForm = document.querySelector('#m4-agenda-filters');
       for (const [key, value] of draft || []) if (nextForm?.elements[key]) nextForm.elements[key].value = value;
-      if (focusName) nextForm?.elements[focusName]?.focus();
+      if (document.querySelector('#app-dialog')?.open) {
+        if (background && previous && store.state.data && JSON.stringify(previous) !== JSON.stringify(store.state.data)) window.dispatchEvent(new Event('m4-agenda-updated'));
+        return;
+      }
+      if (focusName) {
+        const next = nextForm?.elements[focusName]; next?.focus();
+        if (selection?.[0] != null && next?.setSelectionRange) next.setSelectionRange(...selection);
+      }
       else if (control) {
         // Buscar el mismo control por sus atributos propios, sin insertar HTML de la respuesta.
         const attr = [...(focused?.attributes || [])].find((item) => item.name.startsWith('data-m4-'));
@@ -78,8 +91,13 @@ async function load(force = false) {
         else if (focused?.type === 'submit') nextForm?.querySelector('[type="submit"]')?.focus();
       }
     }
+    if (background && previous && store.state.data && JSON.stringify(previous) !== JSON.stringify(store.state.data)) window.dispatchEvent(new Event('m4-agenda-updated'));
   }
 }
+// La actualización periódica usa los filtros aplicados; no convierte texto aún sin aplicar en otra consulta.
+registerLiveRefresh(() => {
+  if (user && state.page === 'agenda' && !store.state.busy && !store.state.refreshing) return load(true, true);
+});
 // Mismos filtros compactos e iconos que la demo; cambian únicamente los nombres del contrato HTTP.
 const select = (name, label, allLabel, options, value, image) => `<label class="filter-select">${icon(image)}<select name="${name}" aria-label="${label}"><option value="all">${allLabel}</option>${[...options].map(([id, text]) => `<option value="${esc(id)}" ${String(id) === String(value) ? 'selected' : ''}>${esc(text)}</option>`).join('')}</select>${icon('down')}</label>`;
 
@@ -99,7 +117,7 @@ export function agenda() {
   const portal = (tenant?.slug ? `<a class="btn btn-light" href="/reservas/${esc(tenant.slug)}" target="_blank" rel="noopener">${icon('external')}Portal de reservas</a>` : '') +
     (canManageAppointments(user?.rol) ? `<button type="button" class="btn btn-primary" data-m4-new>${icon('plus')}${hasPendingManual(user) ? 'Comprobar envío pendiente' : 'Nueva cita'}</button>` : '');
   const zones = [...new Set((model.data?.citas || []).map((item) => item.zonaHoraria))];
-  return `${pageHead('Agenda', 'Organiza tu día. Conecta con tus pacientes.', portal)}${renderMetrics(model.data?.citas, state.date, model.busy)}<section class="calendar-panel m4-agenda agenda-calendar" aria-label="Agenda conectada"><div class="calendar-toolbar agenda-toolbar"><div class="calendar-date"><h2>${esc(calendarTitle(state.calendarView, state.date))}</h2><div class="date-arrows"><button class="icon-btn" data-m4-move="-1" aria-label="Periodo anterior">${icon('left')}</button><button class="icon-btn" data-m4-move="1" aria-label="Periodo siguiente">${icon('chevron')}</button></div><button class="btn btn-today" data-m4-today>Hoy</button></div>${agendaLegend()}<div class="segmented" aria-label="Vista del calendario">${[['day', 'Día'], ['week', 'Semana'], ['month', 'Mes']].map(([view, text]) => `<button data-m4-view="${view}" aria-pressed="${state.calendarView === view}" class="${state.calendarView === view ? 'selected' : ''}">${text}</button>`).join('')}</div></div><form id="m4-agenda-filters" class="calendar-filters"><div class="filter-group">${select('sucursalId', 'Sucursal', 'Todas las sucursales', choices.branches, state.branch, 'pin')}${user.rol !== 'profesional' ? select('personalId', 'Profesional', 'Todos los profesionales', choices.people, state.professional, 'users') : ''}${select('estado', 'Estado', 'Todos los estados', new Map(Object.entries(statuses)), state.status, 'circleCheck')}</div><label class="search-field">${icon('search')}<input type="search" name="busqueda" maxlength="150" placeholder="Buscar paciente..." aria-label="Buscar paciente" value="${esc(state.search)}"></label><button type="submit" class="visually-hidden" tabindex="-1">Aplicar filtros</button></form><div aria-live="polite" aria-busy="${model.busy}">${model.busy ? calendarSkeleton(state.calendarView) : model.error ? errorPanel(model.error, 'data-m4-retry') : model.data ? calendar(model.data) : ''}</div><div class="calendar-footer"><span class="timezone" title="${esc(zones.join(' · '))}">${zones.length === 1 ? esc(zones[0]) : 'Zona local de cada cita'}</span></div></section><div class="agenda-note">${icon('info')} Los horarios se muestran en la zona guardada de cada cita.${user.rol === 'recepcionista' ? '<span title="Los filtros incluyen sucursales y profesionales de los periodos consultados.">Filtros de citas consultadas</span>' : ''}</div>`;
+  return `${pageHead('Agenda', 'Organiza tu día. Conecta con tus pacientes.', portal)}${renderMetrics(model.data?.citas, state.date, model.busy)}<section class="calendar-panel m4-agenda agenda-calendar" aria-label="Agenda conectada"><div class="calendar-toolbar agenda-toolbar"><div class="calendar-date"><h2>${esc(calendarTitle(state.calendarView, state.date))}</h2><div class="date-arrows"><button class="icon-btn" data-m4-move="-1" aria-label="Periodo anterior">${icon('left')}</button><button class="icon-btn" data-m4-move="1" aria-label="Periodo siguiente">${icon('chevron')}</button></div><button class="btn btn-today" data-m4-today>Hoy</button></div>${agendaLegend()}<div class="segmented" aria-label="Vista del calendario">${[['day', 'Día'], ['week', 'Semana'], ['month', 'Mes']].map(([view, text]) => `<button data-m4-view="${view}" aria-pressed="${state.calendarView === view}" class="${state.calendarView === view ? 'selected' : ''}">${text}</button>`).join('')}</div></div><form id="m4-agenda-filters" class="calendar-filters"><div class="filter-group">${select('sucursalId', 'Sucursal', 'Todas las sucursales', choices.branches, state.branch, 'pin')}${user.rol !== 'profesional' ? select('personalId', 'Profesional', 'Todos los profesionales', choices.people, state.professional, 'users') : ''}${select('estado', 'Estado', 'Todos los estados', new Map(Object.entries(statuses)), state.status, 'circleCheck')}</div><label class="search-field">${icon('search')}<input type="search" name="busqueda" maxlength="150" placeholder="Buscar paciente..." aria-label="Buscar paciente" value="${esc(state.search)}"></label><button type="submit" class="visually-hidden" tabindex="-1">Aplicar filtros</button></form><div aria-live="polite" aria-busy="${model.busy}">${model.refreshError ? `<div class="m4-error" data-live-warning role="status"><strong>Agenda sin actualizar</strong><p>Se muestra la última consulta confirmada. ${esc(privateError(model.refreshError).message)}</p><button class="btn btn-light" data-m4-retry>Reintentar consulta</button></div>` : ''}${model.busy ? calendarSkeleton(state.calendarView) : model.error ? errorPanel(model.error, 'data-m4-retry') : model.data ? calendar(model.data) : ''}</div><div class="calendar-footer"><span class="timezone" title="${esc(zones.join(' · '))}">${zones.length === 1 ? esc(zones[0]) : 'Zona local de cada cita'}</span></div></section><div class="agenda-note">${icon('info')} Los horarios se muestran en la zona guardada de cada cita.${user.rol === 'recepcionista' ? '<span title="Los filtros incluyen sucursales y profesionales de los periodos consultados.">Filtros de citas consultadas</span>' : ''}</div>`;
 }
 
 // Detalle e historial se consultan por separado: errores de eventos no ocultan el snapshot autorizado.
@@ -112,23 +130,25 @@ const valueLabels = { estado: 'Estado', version: 'Versión', origen: 'Origen', f
 const valuesMarkup = (values) => values == null ? '<p>Sin valores registrados.</p>' : `<dl>${Object.entries(values).filter(([key]) => valueLabels[key]).map(([key, value]) => `<div><dt>${valueLabels[key]}</dt><dd>${esc(historical(value))}</dd></div>`).join('')}</dl>`;
 export async function openAppointment(id) {
   const generation = ++detailGeneration;
+  const openedScope = `${user?.negocioId}:${user?.id}:${user?.sesionId || ''}`;
   if (!document.querySelector('#app-dialog')?.open) appointmentReturnFocus = document.activeElement;
   const dialog = modal('Detalle de la cita', '<div class="dialog-body"><p role="status">Consultando detalle…</p></div>', true);
   // Una relectura reemplaza controles del panel; devolver el foco a la cita vigente al cerrar.
-  dialog.onclose = () => (appointmentReturnFocus?.isConnected ? appointmentReturnFocus : document.querySelector(`[data-m4-appointment="${id}"]`))?.focus();
+  dialog.onclose = () => (appointmentReturnFocus?.isConnected ? appointmentReturnFocus : document.querySelector(`[data-m4-appointment="${id}"]`) || document.querySelector('[data-m4-today]'))?.focus();
   // Un historial largo necesita una superficie opaca para mantener legible el texto al desplazarlo.
   dialog.classList.add('m4-appointment-dialog');
   dialog.addEventListener('close', () => { if (generation === detailGeneration) detailGeneration++; }, { once: true });
-  const active = () => dialog.open && generation === detailGeneration && Boolean(user);
+  const isCurrent = () => Boolean(user) && openedScope === `${user.negocioId}:${user.id}:${user.sesionId || ''}`;
+  const active = () => dialog.open && generation === detailGeneration && isCurrent();
   try {
     const detail = await client.detail(id);
     if (!active()) return;
     if (!detail || detail.id !== id || !detail.zonaHoraria) throw new Error('El detalle recibido no es válido.');
     dialog.querySelector('.dialog-body').innerHTML = `${detailMarkup(detail)}<section class="m4-history" aria-label="Historial de la cita"><h3>Historial de la cita</h3><div data-m4-history></div></section>`;
     // Estado e historial conservan su autoridad de servidor; solo los roles de gestión reciben editor.
-    attachStateEditor(dialog, detail, { role: user.rol, scope: `${user.negocioId}:${user.id}:${user.sesionId || ""}`, request: api,
+    attachStateEditor(dialog, detail, { role: user.rol, scope: openedScope, request: api, isCurrent,
       onReload: () => openAppointment(id),
-      onChanged: async () => { await load(true); await openAppointment(id); },
+      onChanged: async () => { await load(true); if (active()) await openAppointment(id); },
     });
     const sessionScope = `${user.negocioId}:${user.id}:${user.sesionId || ''}`;
     attachScheduleEditor(dialog, detail, { role: user.rol, scope: sessionScope, request: api,
@@ -140,6 +160,7 @@ export async function openAppointment(id) {
         await load(true); if (active()) await openAppointment(id);
       },
     });
+    watchRecord(dialog.querySelector('.dialog-body'), { version: detail.version, read: () => client.detail(id), active });
     let historyGeneration = 0;
     async function showHistory(page = 1) {
       const revision = ++historyGeneration, target = dialog.querySelector('[data-m4-history]');
@@ -157,14 +178,14 @@ export async function openAppointment(id) {
       } catch (error) {
         if (!active() || revision !== historyGeneration) return;
         target.innerHTML = errorPanel(error, 'data-history-retry');
-        target.querySelector('[data-history-retry]').onclick = () => void showHistory(page);
+        target.querySelector('[data-history-retry]')?.addEventListener('click', () => void showHistory(page));
       }
     }
     await showHistory();
   } catch (error) {
     if (!active()) return;
     dialog.querySelector('.dialog-body').innerHTML = errorPanel(error, 'data-detail-retry');
-    dialog.querySelector('[data-detail-retry]').onclick = () => void openAppointment(id);
+    dialog.querySelector('[data-detail-retry]')?.addEventListener('click', () => void openAppointment(id));
   }
 }
 

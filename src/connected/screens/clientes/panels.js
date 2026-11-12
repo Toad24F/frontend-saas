@@ -13,6 +13,8 @@ import {
 } from '../../modules/clientes/client.js';
 import { createVersionedMutation } from '../../modules/agenda/versioned-mutation.js';
 import { canManageAppointments } from '../../modules/agenda/manual-contract.js';
+import { watchRecord } from '../agenda/live.js';
+import { privateError } from '../../modules/agenda/errors.js';
 import '../../../shared/screens/agenda/polish.css';
 import '../agenda/style.css';
 
@@ -42,15 +44,14 @@ function panel(title, body) {
           (el) => el.dataset.directoryOpen === id && el.offsetParent,
         )
       : document.querySelector('[data-directory-new]');
-    (returnTarget?.isConnected ? returnTarget : target)?.focus();
+    (returnTarget?.isConnected ? returnTarget : target || document.querySelector('[data-directory-new]'))?.focus();
   };
   const heading = dialog.querySelector('h2');
   heading.tabIndex = -1;
   heading.focus();
   return dialog;
 }
-const errorMarkup = (error) =>
-  `<p role="alert">${esc(error.message || 'No se pudo realizar la consulta.')}</p><button class="btn btn-light" data-customer-retry>Reintentar consulta</button>`;
+const errorMarkup = (error) => { const info = privateError(error); return `<div role="alert"><strong>${info.title}</strong><p>${esc(info.message)}</p></div>${info.retry ? '<button class="btn btn-light" data-customer-retry>Reintentar consulta</button>' : ''}`; };
 function pages(number, hasMore) {
   return `<div class="m4-history-pages"><button class="btn btn-light" data-customer-previous ${number === 1 ? 'disabled' : ''}>Página anterior</button><span>Página ${number}</span><button class="btn btn-light" data-customer-next ${!hasMore ? 'disabled' : ''}>Siguiente página</button></div>`;
 }
@@ -111,16 +112,16 @@ export async function openCustomer(id, onChanged) {
       } catch (error) {
         if (!active() || current !== historyGeneration) return;
         target.innerHTML = errorMarkup(error);
-        target.querySelector('[data-customer-retry]').onclick = () =>
-          void history(number);
+        target.querySelector('[data-customer-retry]')?.addEventListener('click', () =>
+          void history(number)
+        );
       }
     }
     await history();
   } catch (error) {
     if (!active()) return;
     dialog.querySelector('.dialog-body').innerHTML = errorMarkup(error);
-    dialog.querySelector('[data-customer-retry]').onclick = () =>
-      void openCustomer(id, onChanged);
+    dialog.querySelector('[data-customer-retry]')?.addEventListener('click', () => void openCustomer(id, onChanged));
   }
 }
 export function openCustomerEditor(ficha, onChanged) {
@@ -183,6 +184,12 @@ export function openCustomerEditor(ficha, onChanged) {
   );
   form.elements.nombreCompleto.focus();
   form.oninput = remember;
+  // Una ficha abierta no cambia de versión silenciosamente: preserva lo escrito y exige relectura explícita.
+  form.addEventListener('m4-record-obsolete', (event) => {
+    mutation.state.stale = true; remember();
+    sync(event.detail.kind === 'stale' ? 'La ficha cambió en otra sesión. Conservamos tu borrador; relee antes de guardar.' : 'No se pudo comprobar la versión vigente. Relee la ficha antes de guardar.');
+  });
+  if (ficha) watchRecord(form, { version: ficha.version, read: () => client.detail(ficha.id), active });
   dialog.addEventListener(
     'close',
     () => {
@@ -234,9 +241,7 @@ export function openCustomerEditor(ficha, onChanged) {
     }
     remember();
     sync(
-      mutation.state.error?.status === 400
-        ? mutation.state.error.message
-        : 'Hay un conflicto o no se pudo confirmar el guardado. Conservamos tu borrador.',
+      `${privateError(mutation.state.error).title}. ${privateError(mutation.state.error).message} Conservamos tu borrador.`,
     );
     errorBox.focus();
   };

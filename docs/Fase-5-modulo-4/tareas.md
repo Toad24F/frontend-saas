@@ -1,6 +1,6 @@
 # Módulo 4 — seguimiento del frontend
 
-Alcance implementado en frontend: **M4-T088–M4-T099**. Fecha: 2026-11-12. Este seguimiento pertenece al frontend; el [plan original del backend](../../../backend/docs/fase-5-modulo-4/tareas.md) se consultó en modo de solo lectura.
+Alcance implementado en frontend: **M4-T088–M4-T103**. Fecha: 2026-11-12. Este seguimiento pertenece al frontend; el [plan original del backend](../../../backend/docs/fase-5-modulo-4/tareas.md) se consultó en modo de solo lectura.
 
 Evidencia: [archivos, flujo, tests primero, verificaciones y límites](resultados-tareas/m4-t088-t092.md).
 
@@ -25,4 +25,11 @@ Refinamiento visual solicitado después del lote: [skeleton, leyenda superior, m
 
 Evidencia del lote: [archivos, contratos, flujo, tests primero y resultados T097–T099](resultados-tareas/m4-t097-t099.md). La precisión sobre la versión del alta está explicada en ese informe: el servidor la asigna y rechaza que el cliente la envíe.
 
-**Punto de parada: T099.** T100 y posteriores siguen pendientes. No se incorpora actualización automática ni se cierra el módulo. Las pruebas M4 de navegador usan API interceptada; no acreditan integración contra API/base real de T104 y posteriores. Este lote no modifica el backend ni su base de datos.
+- [x] **M4-T100 — Actualizar agenda abierta y avisar obsolescencia.** Sondeo visible cada 30 segundos y al recuperar foco; versiones observadas inmutables, aviso y bloqueo antes de guardar datos obsoletos. Se conservan borradores y se invalida selección manual sin tocar envíos pendientes.
+- [x] **M4-T101 — Mostrar vacío y errores por separado.** Categorías de entrada, sesión, permiso, recurso, conflicto, red y técnica con mensajes propios. Un fallo técnico de refresco muestra snapshot con aviso; una denegación lo retira. No hay respaldo ficticio.
+- [x] **M4-T102 — Ajustar móvil, teclado y foco.** Cursor y desplazamiento conservados, foco en paginación/cierre y alternativa si desaparece una cita; objetivos táctiles y acciones visibles en paneles, ambos temas y tamaños verificados.
+- [x] **M4-T103 — Probar estado del frontend con Node.** Suite completa de 258 tests aprobados, incluidos ocho nuevos de refresco/versiones/errores y la regresión independiente de demo de filtros, respuestas fuera de orden y recuperación manual.
+
+Evidencia del lote: [archivos, flujo, tests primero y resultados T100–T103](resultados-tareas/m4-t100-t103.md). Suite M4 de navegador: 59 aprobados, usando HTTP interceptado.
+
+**Punto de parada: T103.** T104 y posteriores siguen pendientes. No se cierra el módulo ni se acredita integración contra API/base real de T104 y posteriores. Este lote no modifica el backend ni su base de datos.

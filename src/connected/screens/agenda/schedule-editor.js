@@ -10,6 +10,7 @@ import {
   scheduleChange,
 } from '../../modules/agenda/schedule-change.js';
 import { createVersionedMutation } from '../../modules/agenda/versioned-mutation.js';
+import { privateError } from '../../modules/agenda/errors.js';
 
 // Proponer un horario no cambia la tarjeta: la disponibilidad y duración histórica las verifica el servidor.
 export function attachScheduleEditor(
@@ -82,6 +83,11 @@ export function attachScheduleEditor(
       : '',
   );
   form.oninput = remember;
+  // Mantener el horario escrito, pero impedir guardarlo cuando la versión comprobada ya no coincide.
+  form.addEventListener('m4-record-obsolete', (event) => {
+    mutation.state.stale = true; remember();
+    sync(event.detail.kind === 'stale' ? 'La cita cambió en otra sesión. Conservamos tu horario propuesto; relee antes de guardar.' : 'No se pudo comprobar la versión vigente. Relee el horario antes de guardar.');
+  });
   dialog.addEventListener(
     'close',
     () => {
@@ -121,9 +127,7 @@ export function attachScheduleEditor(
     }
     remember();
     sync(
-      mutation.state.error?.status === 400
-        ? mutation.state.error.message
-        : 'Hay un conflicto o no se pudo confirmar el cambio. El horario anterior sigue visible; relee antes de guardar.',
+      `${privateError(mutation.state.error).title}. ${privateError(mutation.state.error).message}${mutation.state.stale ? ' El horario anterior sigue visible; relee antes de guardar.' : ''}`,
     );
     errorBox.focus();
   };

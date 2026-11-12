@@ -6,6 +6,7 @@ import { formatZoned } from '../../../shared/screens/disponibilidad/operational-
 import { createAgendaClient } from '../../modules/agenda/client.js';
 import { canManageAppointments, createManualClient, manualSelection, manualSlots } from '../../modules/agenda/manual-contract.js';
 import { createManualOperation } from '../../modules/agenda/manual-operation.js';
+import { privateError } from '../../modules/agenda/errors.js';
 
 const client = createManualClient(api), directory = createAgendaClient(api);
 const storage = () => { try { return sessionStorage; } catch { return { getItem() { throw new Error('Almacenamiento no disponible.'); } }; } };
@@ -35,7 +36,7 @@ export async function openManualAppointment({ day, catalogs, onSaved, onCleared 
   let generation = 0, customerGeneration = 0, slots = [], availability = null, queryIdentity = '', searchPage = 1, searchTerm = '', savedNotified = false, customerChoices = [];
   const active = () => dialog.open && form.isConnected && user?.id === actor.id && user?.negocioId === actor.negocioId;
   const queryValues = () => ({ personalId: form.elements.personalId.value, sucursalId: form.elements.sucursalId.value, servicioId: form.elements.servicioId.value, fechaLocal: form.elements.fechaLocal.value });
-  const fail = (error) => { if (!active()) return; errorBox.textContent = error.message; errorBox.hidden = false; errorBox.focus(); };
+  const fail = (error) => { if (!active()) return; const info = privateError(error); errorBox.textContent = typeof error.status === 'number' ? `${info.title}. ${info.message}` : error.message; errorBox.hidden = false; errorBox.focus(); };
   const clearError = () => { errorBox.hidden = true; errorBox.textContent = ''; };
   const close = () => { if (!operation.state.busy) dialog.close(); };
   dialog.querySelector('[data-close]').onclick = close;
@@ -59,6 +60,15 @@ export async function openManualAppointment({ day, catalogs, onSaved, onCleared 
     form.querySelector('[data-manual-query]').disabled = false;
     form.querySelector('[data-manual-availability]').textContent = ''; submit.disabled = true;
   }
+  // Una selección manual no tiene versión propia: un cambio externo invalida sus ranuras, nunca su envío pendiente.
+  const onAgendaUpdated = () => {
+    if (!active() || operation.state.status !== 'idle' || operation.state.busy) return;
+    invalidateSlots(); paint();
+    errorBox.textContent = 'La agenda cambió en otra sesión. Conservamos tus datos; consulta los horarios nuevamente antes de confirmar.';
+    errorBox.hidden = false;
+  };
+  window.addEventListener('m4-agenda-updated', onAgendaUpdated);
+  dialog.addEventListener('close', () => window.removeEventListener('m4-agenda-updated', onAgendaUpdated), { once: true });
   function paint() {
     const state = operation.state, idle = state.status === 'idle';
     fields.disabled = !idle; fields.hidden = state.status === 'registered';
@@ -69,7 +79,7 @@ export async function openManualAppointment({ day, catalogs, onSaved, onCleared 
     if (state.busy) panel.innerHTML = '<p role="status">Comprobando el envío de la cita…</p>';
     else if (state.status === 'registered') panel.innerHTML = `<div class="information-note"><strong>Cita registrada · ${esc(state.result.folio)}</strong><p>${esc(formatZoned(state.result.inicioUtc, state.result.zonaHoraria))} · ${esc(state.result.zonaHoraria)}</p><p>Costo aceptado: ${esc(state.result.costoAceptado)}</p><button type="button" class="btn btn-primary" data-manual-done>Volver a la agenda</button></div>`;
     else if (state.status === 'not_registered') panel.innerHTML = '<p>No se registró la cita. Puedes corregir los datos y consultar otro horario.</p><button type="button" class="btn btn-light" data-manual-edit>Corregir datos</button>';
-    else if (state.status === 'uncertain') panel.innerHTML = `<p role="status">Hay un envío pendiente de comprobar. Comprueba el resultado antes de crear otra cita.</p>${state.error ? `<p>${esc(state.error.message)}</p>` : ''}<button type="button" class="btn btn-primary" data-manual-resolve>Comprobar resultado</button>`;
+    else if (state.status === 'uncertain') panel.innerHTML = `<p role="status">Hay un envío pendiente de comprobar. Comprueba el resultado antes de crear otra cita.</p>${state.error ? `<p>${esc(typeof state.error.status === 'number' ? `${privateError(state.error).title}. ${privateError(state.error).message}` : state.error.message)}</p>` : ''}<button type="button" class="btn btn-primary" data-manual-resolve>Comprobar resultado</button>`;
     else if (state.status === 'storage_error') panel.innerHTML = `<p role="alert">${esc(state.error.message)}</p>`;
     else panel.innerHTML = '';
     panel.querySelector('[data-manual-resolve]')?.addEventListener('click', () => void perform(() => operation.resolve()));
@@ -98,7 +108,7 @@ export async function openManualAppointment({ day, catalogs, onSaved, onCleared 
       slotsSelect.innerHTML = '<option value="">Selecciona un horario</option>' + slots.map((slot, index) => `<option value="${index}">${esc(formatZoned(slot.inicioUtc, response.zonaHoraria))} – ${esc(formatZoned(slot.finUtc, response.zonaHoraria))}</option>`).join('');
       slotsSelect.disabled = !slots.length;
       form.querySelector('[data-manual-availability]').textContent = slots.length ? `${slots.length} horarios · ${response.zonaHoraria}` : 'Sin horarios disponibles para esta combinación y fecha.';
-    } catch (error) { if (active() && current === generation) { form.querySelector('[data-manual-availability]').textContent = ''; fail(new Error(`No se pudo consultar la disponibilidad. ${error.message}`)); } }
+    } catch (error) { if (active() && current === generation) { form.querySelector('[data-manual-availability]').textContent = ''; fail(new Error(`No se pudo consultar la disponibilidad. ${privateError(error).title}. ${privateError(error).message}`)); } }
     finally { if (active() && current === generation) { button.disabled = false; paint(); } }
   };
   async function searchCustomers(page = 1) {

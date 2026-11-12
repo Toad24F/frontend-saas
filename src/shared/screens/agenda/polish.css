@@ -58,3 +58,14 @@ html[data-theme] .app-dialog.agenda-drawer.glass-effect { background: var(--surf
 @media (prefers-reduced-motion: reduce) {
   .skeleton-fill, .app-dialog.agenda-drawer[open] { animation: none; }
 }
+/* Mantener objetivos táctiles y foco visibles en formularios/paginadores sin alterar las tarjetas densas del calendario. */
+.agenda-drawer :is(.btn, .form-control, .form-select), .directory-pages .btn { min-height: 44px; }
+.agenda-drawer :is(input, select, textarea, button):focus-visible,
+.client-directory :is(input, button):focus-visible { outline: 2px solid var(--accent, #bd492b); outline-offset: 3px; }
+.agenda-drawer :is(.form-error, .field-hint, dd), .m4-error { overflow-wrap: anywhere; }
+.agenda-drawer .m4-history-pages { flex-wrap: wrap; gap: .6rem; }
+.agenda-drawer .form-row-two > * { min-width: 0; }
+@media (max-width: 767px) {
+  .agenda-drawer .dialog-footer { flex-wrap: wrap; }
+  .agenda-drawer .dialog-footer > .btn { flex: 1; white-space: normal; }
+}
