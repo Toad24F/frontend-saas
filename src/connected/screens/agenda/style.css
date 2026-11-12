@@ -17,6 +17,17 @@
 .m4-history summary { cursor: pointer; min-height: 44px; padding-top: 10px; }
 .m4-history-pages { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-top: 16px; }
 html[data-theme] .app-dialog.m4-appointment-dialog.glass-effect { background: var(--surface); }
+.m4-state-editor { border-top: 1px solid var(--border); padding: 20px 0; margin-top: 20px; }
+.m4-state-editor h3 { font-size: 18px; }
+.m4-state-editor .form-label { margin-top: 12px; }
+.m4-customer-mode { display: flex; flex-wrap: wrap; gap: 18px; margin: 0 0 18px; }
+.m4-customer-mode label, .m4-customer-choice { display: flex; align-items: center; gap: 10px; min-height: 44px; cursor: pointer; }
+.m4-customer-choice { padding: 10px 0; border-bottom: 1px solid var(--border); }
+.m4-customer-choice small { display: block; color: var(--muted); }
+#connected-manual-form fieldset { border: 0; padding: 0; min-width: 0; }
+#connected-manual-form [data-manual-query] { margin: 0 0 16px; }
+#connected-manual-form [data-manual-operation] { overflow-wrap: anywhere; }
+#connected-manual-form .information-note { display: block; }
 .m4-agenda :focus-visible, .m4-history :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 /* El diálogo conserva el acceso al historial por encima de la navegación móvil. */
 @media (max-width: 767px) {

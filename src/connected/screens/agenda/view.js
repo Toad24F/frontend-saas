@@ -8,6 +8,10 @@ import { createAgendaClient } from '../../modules/agenda/client.js';
 import { createAgendaStore } from '../../modules/agenda/store.js';
 import { calendarPeriod, civilAdd, moveCalendarDate, todayCivil } from '../../modules/agenda/calendar.js';
 import { calendarTitle, renderMetrics, renderTimeline, renderMonth } from './presentation.js';
+import { canManageAppointments } from '../../modules/agenda/manual-contract.js';
+import { hasPendingManual, openManualAppointment } from './manual-view.js';
+import { attachStateEditor } from './state-editor.js';
+import { zonedParts } from '../../../shared/screens/disponibilidad/operational-contract.js';
 import '../../../shared/screens/agenda/style.css';
 import './style.css';
 
@@ -87,7 +91,8 @@ export function agenda() {
   void load();
   const model = store.state;
   const tenant = tenantById(state.tenantId);
-  const portal = tenant?.slug ? `<a class="btn btn-light" href="/reservas/${esc(tenant.slug)}" target="_blank" rel="noopener">${icon('external')}Portal de reservas</a>` : '';
+  const portal = (tenant?.slug ? `<a class="btn btn-light" href="/reservas/${esc(tenant.slug)}" target="_blank" rel="noopener">${icon('external')}Portal de reservas</a>` : '') +
+    (canManageAppointments(user?.rol) ? `<button type="button" class="btn btn-primary" data-m4-new>${icon('plus')}${hasPendingManual(user) ? 'Comprobar envío pendiente' : 'Nueva cita'}</button>` : '');
   const zones = [...new Set((model.data?.citas || []).map((item) => item.zonaHoraria))];
   return `${pageHead('Agenda', 'Organiza tu día. Conecta con tus pacientes.', portal)}${renderMetrics(model.data?.citas, state.date)}<section class="calendar-panel m4-agenda" aria-label="Agenda conectada"><div class="calendar-toolbar"><div class="calendar-date"><h2>${esc(calendarTitle(state.calendarView, state.date))}</h2><div class="date-arrows"><button class="icon-btn" data-m4-move="-1" aria-label="Periodo anterior">${icon('left')}</button><button class="icon-btn" data-m4-move="1" aria-label="Periodo siguiente">${icon('chevron')}</button></div><button class="btn btn-today" data-m4-today>Hoy</button></div><div class="segmented" aria-label="Vista del calendario">${[['day', 'Día'], ['week', 'Semana'], ['month', 'Mes']].map(([view, text]) => `<button data-m4-view="${view}" aria-pressed="${state.calendarView === view}" class="${state.calendarView === view ? 'selected' : ''}">${text}</button>`).join('')}</div></div><form id="m4-agenda-filters" class="calendar-filters"><div class="filter-group">${select('sucursalId', 'Sucursal', 'Todas las sucursales', choices.branches, state.branch, 'pin')}${user.rol !== 'profesional' ? select('personalId', 'Profesional', 'Todos los profesionales', choices.people, state.professional, 'users') : ''}${select('estado', 'Estado', 'Todos los estados', new Map(Object.entries(statuses)), state.status, 'circleCheck')}</div><label class="search-field">${icon('search')}<input type="search" name="busqueda" maxlength="150" placeholder="Buscar paciente..." aria-label="Buscar paciente" value="${esc(state.search)}"></label><button type="submit" class="visually-hidden" tabindex="-1">Aplicar filtros</button></form><div aria-live="polite" aria-busy="${model.busy}">${model.busy ? '<p class="m4-loading" role="status">Consultando citas del periodo…</p>' : model.error ? errorPanel(model.error, 'data-m4-retry') : model.data ? calendar(model.data) : ''}</div><div class="calendar-footer"><div class="legend">${Object.entries(statuses).map(([status, label]) => `<span><i class="legend-dot ${status}"></i>${label}</span>`).join('')}</div><span class="timezone" title="${esc(zones.join(' · '))}">${zones.length === 1 ? esc(zones[0]) : 'Zona local de cada cita'}</span></div></section><div class="agenda-note">${icon('info')} Los horarios se muestran en la zona guardada de cada cita.${user.rol === 'recepcionista' ? '<span title="Los filtros incluyen sucursales y profesionales de los periodos consultados.">Filtros de citas consultadas</span>' : ''}</div>`;
 }
@@ -112,6 +117,11 @@ export async function openAppointment(id) {
     if (!active()) return;
     if (!detail || detail.id !== id || !detail.zonaHoraria) throw new Error('El detalle recibido no es válido.');
     dialog.querySelector('.dialog-body').innerHTML = `${detailMarkup(detail)}<section class="m4-history" aria-label="Historial de la cita"><h3>Historial de la cita</h3><div data-m4-history></div></section>`;
+    // Estado e historial conservan su autoridad de servidor; solo los roles de gestión reciben editor.
+    attachStateEditor(dialog, detail, { role: user.rol, request: api,
+      onReload: () => openAppointment(id),
+      onChanged: async () => { await load(true); await openAppointment(id); },
+    });
     let historyGeneration = 0;
     async function showHistory(page = 1) {
       const revision = ++historyGeneration, target = dialog.querySelector('[data-m4-history]');
@@ -142,8 +152,19 @@ export async function openAppointment(id) {
 
 // Controles propios evitan invocar las acciones de edición y creación reservadas a la demo.
 export function handleAgendaClick(event) {
-  const target = event.target.closest('[data-m4-view], [data-m4-move], [data-m4-date], [data-m4-today], [data-m4-retry], [data-m4-appointment]');
+  const target = event.target.closest('[data-m4-new], [data-m4-view], [data-m4-move], [data-m4-date], [data-m4-today], [data-m4-retry], [data-m4-appointment]');
   if (!target || state.page !== 'agenda') return false;
+  if (target.hasAttribute('data-m4-new')) {
+    void openManualAppointment({ day: state.date,
+      catalogs: { services: list('services', state.tenantId), branches: list('branches', state.tenantId), people: list('professionals', state.tenantId) },
+      onSaved: async (result) => {
+        // Reconsultar después del commit, sin insertar resultados supuestos en el calendario.
+        state.date = zonedParts(result.inicioUtc, result.zonaHoraria).date;
+        state.search = ''; state.branch = state.professional = state.status = 'all';
+        await load(true);
+      }, onCleared: () => render(),
+    }); return true;
+  }
   if (target.hasAttribute('data-m4-appointment')) { void openAppointment(Number(target.dataset.m4Appointment)); return true; }
   if (target.hasAttribute('data-m4-retry')) { void load(true); render(); return true; }
   if (target.dataset.m4View) state.calendarView = target.dataset.m4View;

@@ -89,10 +89,24 @@ export function manualAppointment(day = state.date, start = '') {
   }
   const el = modal(
     'Nueva cita',
-    `<form id="manual-form"><div class="dialog-body"><p class="form-intro">Agenda una atención para tu paciente.</p><div class="form-row-two">${select('Servicio', 'serviceId', list('services', state.tenantId))}${select('Sucursal', 'branchId', list('branches', state.tenantId), state.branch !== 'all' ? state.branch : '')}</div><div class="form-row-two">${select('Profesional', 'professionalId', list('professionals', state.tenantId))}${field('Fecha', 'day', day < TODAY ? TODAY : day, 'date', `required min="${TODAY}"`)}</div><div class="form-field"><label for="f-start" class="form-label">Horario disponible</label><select id="f-start" name="start" class="form-select" required></select><p class="field-hint" id="manual-availability-hint"></p></div><div class="form-separator"><span>DATOS DEL PACIENTE</span></div><div class="form-row-two">${field('Nombre completo', 'name', '', 'text', 'required maxlength="150" placeholder="Nombre y apellidos" autocomplete="off"')}${field('Teléfono de WhatsApp', 'phone', '', 'tel', 'required pattern="[0-9]{10}" maxlength="10" inputmode="numeric" placeholder="10 dígitos" autocomplete="off"')}</div><div class="form-field"><label class="form-label" for="f-reason">Motivo de consulta <span class="optional">(opcional)</span></label><textarea class="form-control" id="f-reason" name="reason" rows="2" maxlength="500" placeholder="Información útil para el profesional"></textarea></div>${errorSlot}<div class="information-note compact-note">${icon('info')} Usa datos ficticios. Esta reserva solo se guarda durante la sesión.</div></div><div class="dialog-footer"><button type="button" class="btn btn-light" id="manual-cancel">Cancelar</button><button type="submit" class="btn btn-primary" id="manual-save">${icon('check')}Confirmar cita</button></div></form>`,
+    `<form id="manual-form"><div class="dialog-body"><p class="form-intro">Agenda una atención para tu paciente.</p><div class="form-row-two">${select('Servicio', 'serviceId', list('services', state.tenantId))}${select('Sucursal', 'branchId', list('branches', state.tenantId), state.branch !== 'all' ? state.branch : '')}</div><div class="form-row-two">${select('Profesional', 'professionalId', list('professionals', state.tenantId))}${field('Fecha', 'day', day < TODAY ? TODAY : day, 'date', `required min="${TODAY}"`)}</div><div class="form-field"><label for="f-start" class="form-label">Horario disponible</label><select id="f-start" name="start" class="form-select" required></select><p class="field-hint" id="manual-availability-hint"></p></div><div class="form-separator"><span>DATOS DEL PACIENTE</span></div><div class="form-field"><label class="form-label" for="demo-customer-mode">Tipo de cliente</label><select id="demo-customer-mode" name="customerMode" class="form-select"><option value="nuevo">Cliente nuevo</option><option value="existente">Cliente existente</option></select></div><div data-demo-existing hidden>${select('Cliente existente', 'clientId', list('clients', state.tenantId))}</div><div class="form-row-two" data-demo-new>${field('Nombre completo', 'name', '', 'text', 'required maxlength="150" placeholder="Nombre y apellidos" autocomplete="off"')}${field('Teléfono de WhatsApp', 'phone', '', 'tel', 'required pattern="[0-9]{10}" maxlength="10" inputmode="numeric" placeholder="10 dígitos" autocomplete="off"')}</div><div class="form-field"><label class="form-label" for="f-reason">Motivo de consulta <span class="optional">(opcional)</span></label><textarea class="form-control" id="f-reason" name="reason" rows="2" maxlength="500" placeholder="Información útil para el profesional"></textarea></div>${errorSlot}<div class="information-note compact-note">${icon('info')} Usa datos ficticios. Esta reserva solo se guarda durante la sesión. La recuperación tras recarga y la auditoría reales se comprueban en la versión conectada.</div></div><div class="dialog-footer"><button type="button" class="btn btn-light" id="manual-cancel">Cancelar</button><button type="submit" class="btn btn-primary" id="manual-save">${icon('check')}Confirmar cita</button></div></form>`,
     true,
   );
   const form = el.querySelector('form');
+  // La selección es explícita y solo usa fichas ficticias del negocio de la demo.
+  const syncCustomer = () => {
+    const existing = form.elements.customerMode.value === 'existente';
+    form.querySelector('[data-demo-existing]').hidden = !existing;
+    form.querySelector('[data-demo-new]').hidden = existing;
+    form.elements.clientId.disabled = !existing;
+    if (existing) {
+      const person = resource('clients', Number(form.elements.clientId.value), state.tenantId);
+      form.elements.name.value = person.name; form.elements.phone.value = person.phone;
+    }
+  };
+  form.elements.customerMode.addEventListener('change', syncCustomer);
+  form.elements.clientId.addEventListener('change', syncCustomer);
+  syncCustomer();
   const refresh = () => {
     const serviceId = Number(form.elements.serviceId.value),
       branchId = Number(form.elements.branchId.value),
@@ -144,6 +158,7 @@ export function manualAppointment(day = state.date, start = '') {
           day: f.get('day'),
           start: f.get('start'),
           origin: 'manual',
+          ...(f.get('customerMode') === 'existente' ? { clientId: Number(f.get('clientId')) } : { newClient: true }),
         },
         { name: f.get('name'), phone: f.get('phone'), reason: f.get('reason') },
       );
