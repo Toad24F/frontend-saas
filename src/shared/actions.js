@@ -228,6 +228,10 @@ export async function handleClick(e) {
     }
     const client = e.target.closest('[data-client]');
     if (client) {
+      if (isDemo) {
+        (await import('../demo/screens/clientes/actions.js')).openDemoCustomer(Number(client.dataset.client));
+        return;
+      }
       const c = resource(
         'clients',
         Number(client.dataset.client),

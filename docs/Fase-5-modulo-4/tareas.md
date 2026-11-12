@@ -1,6 +1,6 @@
 # Módulo 4 — seguimiento del frontend
 
-Alcance implementado en frontend: **M4-T088–M4-T096**. Fecha: 2026-11-11. Este seguimiento pertenece al frontend; el [plan original del backend](../../../backend/docs/fase-5-modulo-4/tareas.md) se consultó en modo de solo lectura.
+Alcance implementado en frontend: **M4-T088–M4-T099**. Fecha: 2026-11-12. Este seguimiento pertenece al frontend; el [plan original del backend](../../../backend/docs/fase-5-modulo-4/tareas.md) se consultó en modo de solo lectura.
 
 Evidencia: [archivos, flujo, tests primero, verificaciones y límites](resultados-tareas/m4-t088-t092.md).
 
@@ -19,4 +19,10 @@ Refinamiento visual solicitado después del lote: [skeleton, leyenda superior, m
 - [x] **M4-T095 — Conectar preparación y recuperación manual.** Guarda la misma clave y selección antes de preparar; doble envío, respuesta perdida y recarga pasan por resolución antes de permitir otra cita. Solo un resultado terminal reconocido libera el formulario.
 - [x] **M4-T096 — Conectar cambio de estado.** Administración y Recepción envían estado, versión observada y motivo opcional; conflicto o respuesta incierta exigen actualizar detalle, sin sobrescribir automáticamente.
 
-**Punto de parada: T096.** T097 y posteriores siguen pendientes. Clientes solo incorpora navegación; su búsqueda se utiliza dentro del alta manual, sin implementar la pantalla de directorio ni la edición de fichas de T098–T099. No se cierra el módulo ni se acreditan pruebas contra API/base real de T104 y posteriores.
+- [x] **M4-T097 — Conectar cambio de horario.** Administración/Recepción proponen solo fecha y hora con versión observada; conservan folio y horario previo visible ante rechazo. El servidor valida disponibilidad histórica; no hay reenvío automático ante conflicto.
+- [x] **M4-T098 — Conectar listado e historial de clientes.** Directorio real autenticado con búsqueda, páginas, ficha e historial por ID; teléfonos compartidos no fusionan personas y los snapshots nulos no se completan con datos actuales.
+- [x] **M4-T099 — Conectar alta y corrección de ficha.** Alta sin versión conforme al DTO real; corrección con versión observada. Borradores conservados ante error y paneles laterales; no se alteran citas previas.
+
+Evidencia del lote: [archivos, contratos, flujo, tests primero y resultados T097–T099](resultados-tareas/m4-t097-t099.md). La precisión sobre la versión del alta está explicada en ese informe: el servidor la asigna y rechaza que el cliente la envíe.
+
+**Punto de parada: T099.** T100 y posteriores siguen pendientes. No se incorpora actualización automática ni se cierra el módulo. Las pruebas M4 de navegador usan API interceptada; no acreditan integración contra API/base real de T104 y posteriores. Este lote no modifica el backend ni su base de datos.

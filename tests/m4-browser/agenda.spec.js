@@ -17,7 +17,8 @@ test('T088: navegación y rutas directas por los cuatro roles', async ({ page })
       await page.goto('/admin/clientes');
       if (role === 'profesional') await expect(page).toHaveURL(/\/admin\/agenda/);
       else await expect(page.getByRole('heading', { name: 'Clientes', exact: true })).toBeVisible();
-      expect(seen.some((entry) => /\/clientes/.test(entry))).toBe(false);
+      // Desde T098 la ruta consulta clientes solo para Administración y Recepción.
+      expect(seen.some((entry) => /\/clientes/.test(entry))).toBe(role !== 'profesional');
     }
     expect(errors).toEqual([]);
   }

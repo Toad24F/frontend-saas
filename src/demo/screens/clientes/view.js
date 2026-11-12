@@ -4,13 +4,14 @@ import { db, list, resource, appointmentInfo, tenantById, TODAY, addDays, format
 import { icon } from '../../../shared/icons.js';
 import { escape as esc, avatar, badge, pageHead, button, empty } from '../../../shared/ui.js';
 import './style.css';
+import '../../../shared/screens/clientes/style.css';
 export function clients() {
   const data = list('clients', state.tenantId).filter((c) =>
     `${c.name} ${c.phone}`.toLowerCase().includes(state.search.toLowerCase()),
   );
-  return `${pageHead('Clientes', 'Conoce a las personas que confían en tu negocio.', button('Nuevo cliente', 'new-client'))}<section class="surface"><div class="section-heading"><div class="section-title-line"><h2>Tu directorio</h2><span class="count-badge">${list('clients', state.tenantId).length}</span></div><label class="search-field table-search">${icon('search')}<input id="directory-search" aria-label="Buscar cliente" placeholder="Nombre o teléfono..." value="${esc(state.search)}" type="search"/></label></div>${
+  return `${pageHead('Clientes', 'Conoce a las personas que confían en tu negocio.', button('Nuevo cliente', 'new-client'))}<section class="surface client-directory"><div class="section-heading"><div class="section-title-line"><h2>Tu directorio</h2><span class="count-badge">${list('clients', state.tenantId).length}</span></div><label class="search-field table-search">${icon('search')}<input id="directory-search" aria-label="Buscar cliente" placeholder="Nombre o teléfono..." value="${esc(state.search)}" type="search"/></label></div>${
     data.length
-      ? `<div class="table-responsive"><table class="table app-table align-middle"><thead><tr><th>Nombre completo</th><th>WhatsApp</th><th>Citas</th><th>Última visita</th><th>Acciones</th></tr></thead><tbody>${data
+      ? `<div class="table-responsive directory-table"><table class="table app-table align-middle"><thead><tr><th>Nombre completo</th><th>WhatsApp</th><th>Citas</th><th>Última visita</th><th>Acciones</th></tr></thead><tbody>${data
           .map((c, i) => {
             const apps = list('appointments', state.tenantId).filter(
               (a) => a.clientId === c.id,
@@ -32,5 +33,5 @@ export function clients() {
           'No encontramos ese cliente',
           'Intenta buscar por otro nombre o teléfono.',
         )
-  }<div class="table-footer">${data.length} clientes · Datos de demostración</div></section>`;
+  }<div class="directory-cards">${data.map((c) => `<article><h3>${esc(c.name)}</h3><p>Cliente #${c.id} · ${esc(c.phone)}</p><button class="text-button" data-client="${c.id}">Ver ficha ${icon('chevron')}</button></article>`).join('')}</div><div class="table-footer">${data.length} clientes · Datos de demostración</div></section>`;
 }

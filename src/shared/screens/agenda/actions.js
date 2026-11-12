@@ -5,6 +5,7 @@ import { toast, escape as esc, avatar, badge } from '../../ui.js';
 import { agendaPanel as modal, agendaDraft, saveAgendaDraft, clearAgendaDraft } from './panels.js';
 import { field, select, formError, errorSlot } from '../../forms.js';
 import { slots, createAppointment, overlaps } from '../../../demo/availability.js';
+import { moveDemoAppointment } from '../../../demo/customer-schedule.js';
 export function detail(id) {
   const a = resource('appointments', id, state.tenantId),
     e = appointmentInfo(a);
@@ -62,6 +63,15 @@ export function detail(id) {
     }
   };
   el.querySelector('#cancel-appointment').onclick = () => confirmCancel(id);
+  // Propuesta de fecha/hora local de la demo; la versión conectada realiza todas las comprobaciones en el servidor.
+  el.querySelector('.dialog-body').insertAdjacentHTML('beforeend', `<form data-demo-schedule class="m4-state-editor"><h3>Cambiar horario</h3><div class="form-row-two">${field('Nueva fecha', 'fechaLocal', a.date, 'date', 'required')}${field('Nueva hora', 'horaInicio', a.start, 'time', 'required')}</div><p class="field-hint">Simulación local de horario y ocupación; conserva folio y duración. No reproduce las transacciones UTC del servidor.</p><p class="form-error" role="alert" data-demo-schedule-error hidden></p><button type="submit" class="btn btn-primary" ${a.status === 'cancelada' || a.date < TODAY ? 'disabled' : ''}>Guardar horario</button></form>`);
+  el.querySelector('[data-demo-schedule]').onsubmit = (event) => {
+    event.preventDefault();
+    try {
+      moveDemoAppointment(id, state.tenantId, Object.fromEntries(new FormData(event.target)));
+      state.date = a.date; render(); detail(id); toast('Horario actualizado en esta demostración.');
+    } catch (error) { const target = el.querySelector('[data-demo-schedule-error]'); target.textContent = error.message; target.hidden = false; }
+  };
 }
 function confirmCancel(id) {
   const a = resource('appointments', id, state.tenantId);

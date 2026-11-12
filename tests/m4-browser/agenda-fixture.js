@@ -9,6 +9,7 @@ export async function setup(page, role = 'recepcionista', theme = 'light') {
     let data;
     if (path === '/auth/profile') data = { user: { sub: 1, rol: role, negocioId: 1, nombre: 'Personal QA', negocioNombre: 'Negocio QA' } };
     else if (path === '/negocios') data = [];
+    else if (path === '/clientes') data = { clientes: [], pagina: Number(url.searchParams.get('pagina') || 1), limite: 50, hayMas: false };
     else if (path === '/citas') {
       const desde = url.searchParams.get('desde'), hasta = url.searchParams.get('hasta');
       if (url.searchParams.get('busqueda') === 'error') { await route.fulfill({ status: 503, json: { message: 'Servicio temporalmente no disponible.' } }); return; }

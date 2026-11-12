@@ -11,6 +11,7 @@ import { calendarTitle, renderMetrics, renderTimeline, renderMonth } from './pre
 import { canManageAppointments } from '../../modules/agenda/manual-contract.js';
 import { hasPendingManual, openManualAppointment } from './manual-view.js';
 import { attachStateEditor } from './state-editor.js';
+import { attachScheduleEditor } from './schedule-editor.js';
 import { zonedParts } from '../../../shared/screens/disponibilidad/operational-contract.js';
 import '../../../shared/screens/agenda/style.css';
 import './style.css';
@@ -23,6 +24,7 @@ const store = createAgendaStore(client.list);
 let identity = null;
 let choices = { branches: new Map(), people: new Map() };
 let detailGeneration = 0;
+let appointmentReturnFocus;
 const historical = (value) => value == null ? 'Sin registro histórico' : String(value);
 const errorMessage = (error) => {
   if (error.status === 401) return 'Tu sesión o licencia ya no permite consultar estos datos.';
@@ -110,7 +112,10 @@ const valueLabels = { estado: 'Estado', version: 'Versión', origen: 'Origen', f
 const valuesMarkup = (values) => values == null ? '<p>Sin valores registrados.</p>' : `<dl>${Object.entries(values).filter(([key]) => valueLabels[key]).map(([key, value]) => `<div><dt>${valueLabels[key]}</dt><dd>${esc(historical(value))}</dd></div>`).join('')}</dl>`;
 export async function openAppointment(id) {
   const generation = ++detailGeneration;
+  if (!document.querySelector('#app-dialog')?.open) appointmentReturnFocus = document.activeElement;
   const dialog = modal('Detalle de la cita', '<div class="dialog-body"><p role="status">Consultando detalle…</p></div>', true);
+  // Una relectura reemplaza controles del panel; devolver el foco a la cita vigente al cerrar.
+  dialog.onclose = () => (appointmentReturnFocus?.isConnected ? appointmentReturnFocus : document.querySelector(`[data-m4-appointment="${id}"]`))?.focus();
   // Un historial largo necesita una superficie opaca para mantener legible el texto al desplazarlo.
   dialog.classList.add('m4-appointment-dialog');
   dialog.addEventListener('close', () => { if (generation === detailGeneration) detailGeneration++; }, { once: true });
@@ -124,6 +129,16 @@ export async function openAppointment(id) {
     attachStateEditor(dialog, detail, { role: user.rol, scope: `${user.negocioId}:${user.id}:${user.sesionId || ""}`, request: api,
       onReload: () => openAppointment(id),
       onChanged: async () => { await load(true); await openAppointment(id); },
+    });
+    const sessionScope = `${user.negocioId}:${user.id}:${user.sesionId || ''}`;
+    attachScheduleEditor(dialog, detail, { role: user.rol, scope: sessionScope, request: api,
+      isCurrent: () => Boolean(user) && sessionScope === `${user.negocioId}:${user.id}:${user.sesionId || ''}`,
+      onReload: () => openAppointment(id),
+      onChanged: async (result) => {
+        state.date = zonedParts(result.inicioUtc, result.zonaHoraria).date;
+        state.search = ''; state.branch = state.professional = state.status = 'all';
+        await load(true); if (active()) await openAppointment(id);
+      },
     });
     let historyGeneration = 0;
     async function showHistory(page = 1) {

@@ -8,13 +8,13 @@ import { businessDetail } from './negocio/view.js';
 import { receptionists } from './recepcionistas/view.js';
 import { empty } from '../../shared/ui.js';
 import { agenda } from './agenda/view.js';
+import { clients } from './clientes/view.js';
 import './disponibilidad/actions.js';
 import './cuenta/actions.js';
 
 const views = {
-  // Clientes obtiene navegación en T088; la consulta del directorio corresponde a T098.
   agenda,
-  clientes: () => '<div class="page-heading"><div><h1>Clientes</h1><p>Directorio de clientes de tu negocio.</p></div></div>' + empty('Directorio pendiente de conexión', 'La consulta y gestión de fichas se habilitarán en M4-T098–T099.'),
+  clientes: clients,
   profesionales: professionals,
   servicios: services,
   sucursales: branches,
