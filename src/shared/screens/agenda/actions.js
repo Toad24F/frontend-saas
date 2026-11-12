@@ -1,7 +1,8 @@
 import { state, render, navigate } from '../../app.js';
 import { db, list, resource, tenantById, appointmentInfo, TODAY, formatDate, money, statuses } from '../../data.js';
 import { icon } from '../../icons.js';
-import { modal, toast, escape as esc, avatar, badge } from '../../ui.js';
+import { toast, escape as esc, avatar, badge } from '../../ui.js';
+import { agendaPanel as modal, agendaDraft, saveAgendaDraft, clearAgendaDraft } from './panels.js';
 import { field, select, formError, errorSlot } from '../../forms.js';
 import { slots, createAppointment, overlaps } from '../../../demo/availability.js';
 export function detail(id) {
@@ -93,6 +94,17 @@ export function manualAppointment(day = state.date, start = '') {
     true,
   );
   const form = el.querySelector('form');
+  const draftKey = `demo-manual:${state.tenantId}`, draft = agendaDraft(draftKey);
+  let saved = false;
+  if (draft) {
+    for (const [name, value] of Object.entries(draft)) if (form.elements[name]) form.elements[name].value = value;
+    start = draft.start || start;
+  }
+  el.addEventListener('close', () => {
+    if (!form.isConnected) return;
+    if (saved) clearAgendaDraft(draftKey);
+    else saveAgendaDraft(draftKey, Object.fromEntries(new FormData(form)));
+  }, { once: true });
   // La selección es explícita y solo usa fichas ficticias del negocio de la demo.
   const syncCustomer = () => {
     const existing = form.elements.customerMode.value === 'existente';
@@ -163,6 +175,7 @@ export function manualAppointment(day = state.date, start = '') {
         { name: f.get('name'), phone: f.get('phone'), reason: f.get('reason') },
       );
       state.date = a.date;
+      saved = true;
       el.close();
       navigate('agenda');
       toast(`Cita creada · Folio ${a.folio}`);

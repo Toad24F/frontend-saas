@@ -2,6 +2,8 @@
 
 Fecha: 2026-11-11. Alcance: corrección visual de M4-T088–T092 antes del commit. Revisión base `f3f943a` más el trabajo local del bloque. No se crean nuevas capacidades de escritura ni se toca el backend.
 
+Evolución visual posterior autorizada: [carga, leyenda, métricas, citas y paneles](agenda-carga-estados-paneles-2026-11-11.md). Conserva la cuadrícula de esta corrección y aplica las mejoras nuevas a ambos modos; sustituye las frases de métricas y la posición anterior de la leyenda.
+
 ## Motivo y criterio de diseño
 
 La primera implementación conectada utilizó tarjetas por fecha y omitió las métricas de la demo. Esa diferencia no era necesaria para conectarla al backend y contradecía la referencia visual solicitada. Se elimina ese diseño alternativo y se conserva el calendario conocido.

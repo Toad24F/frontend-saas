@@ -9,7 +9,7 @@ test('la agenda conectada usa cuadrícula horaria y tarjeta de estado de la demo
   assert.match(html, /week-calendar single-day/);
   assert.match(html, /time-gutter/);
   assert.match(html, /calendar-event confirmada/);
-  assert.match(html, /top:99px/);
+  assert.match(html, /top:98px/);
   assert.match(html, /Paciente &lt;QA&gt;/);
   assert.match(html, /America\/Tijuana/);
   assert.doesNotMatch(html, /lunch-block|data-slot-date|current-time/);
@@ -27,12 +27,12 @@ test('mes conserva 42 fechas, tres citas y acceso a las restantes como en demo',
   const html = renderMonth('2026-11-11', items, '2026-11-11');
   assert.equal((html.match(/data-m4-date=/g) || []).length, 43);
   assert.equal((html.match(/class="month-day/g) || []).length, 42);
-  assert.equal((html.match(/class="month-event/g) || []).length, 3);
+  assert.equal((html.match(/class="month-event /g) || []).length, 3);
   assert.match(html, /\+2 citas más/);
 });
 test('métricas comparten la jerarquía de demo sin inventar cifras', () => {
   const html = renderMetrics([item], '2026-11-11');
   assert.equal((html.match(/class="stat-card"/g) || []).length, 4);
   assert.match(html, /Citas del día/); assert.match(html, /stat-number">01/);
-  assert.match(renderMetrics(null, '2026-11-11'), /stat-number">…/);
+  assert.match(renderMetrics(null, '2026-11-11'), /skeleton-number/);
 });

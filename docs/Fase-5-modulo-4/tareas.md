@@ -6,6 +6,8 @@ Evidencia: [archivos, flujo, tests primero, verificaciones y límites](resultado
 
 Corrección visual conservada: [agenda con el diseño de la demo](resultados-tareas/ajuste-agenda-paridad-demo-2026-11-11.md). Nuevo lote autorizado: [alta manual, recuperación y estado, T093–T096](resultados-tareas/m4-t093-t096.md).
 
+Refinamiento visual solicitado después del lote: [skeleton, leyenda superior, métricas compactas, citas distinguibles y paneles laterales](resultados-tareas/agenda-carga-estados-paneles-2026-11-11.md). Se aplica a demo/conectado y no cierra tareas posteriores a T096.
+
 - [x] **M4-T088 — Habilitar navegación por rol.** Agenda para Administración, Recepción y Profesional; Clientes solo para Administración/Recepción. Rutas directas y barra móvil conservan el alcance autorizado.
 - [x] **M4-T089 — Crear cliente HTTP de agenda y clientes.** Lecturas reales mediante el cliente autenticado, sin identidad elegida en el navegador ni respaldo ficticio ante fallos.
 - [x] **M4-T090 — Conectar vistas día, semana y mes.** Periodo completo de 1, 7 o 42 fechas; sin paginación del calendario, ni truncamiento ante exceso; zonas históricas por cita.
