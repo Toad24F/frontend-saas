@@ -112,11 +112,12 @@ test('T095: pérdida en preparación y ausencia terminal permiten corregir sin r
 test('T096: motivo y versión observada; 409 conserva borrador sin sobrescribir', async ({ page }) => {
   const api = await fixture(page); await page.goto('/admin/agenda');
   await page.locator('[data-m4-appointment="7"]').click();
-  const dialog = page.getByRole('dialog');
+  const dialog = page.locator('#app-dialog');
   await dialog.getByLabel('Estado de la cita').selectOption('cancelada');
   await dialog.getByLabel('Motivo del cambio').fill('Solicitud de paciente');
   api.conflict = true;
   await dialog.getByRole('button', { name: 'Guardar estado', exact: true }).click();
+  await page.getByRole('dialog', { name: '¿Cancelar esta cita?' }).getByRole('button', { name: 'Sí, cancelar cita' }).click();
   await expect(dialog.locator('[data-state-error]')).toContainText('conflicto');
   await expect(dialog.getByLabel('Motivo del cambio')).toHaveValue('Solicitud de paciente');
   await expect(dialog.getByRole('button', { name: 'Guardar estado', exact: true })).toBeDisabled();
@@ -125,8 +126,9 @@ test('T096: motivo y versión observada; 409 conserva borrador sin sobrescribir'
   await dialog.getByRole('button', { name: 'Actualizar detalle', exact: true }).click();
   await dialog.getByLabel('Estado de la cita').selectOption('cancelada');
   await dialog.getByRole('button', { name: 'Guardar estado', exact: true }).click();
+  await page.getByRole('dialog', { name: '¿Cancelar esta cita?' }).getByRole('button', { name: 'Sí, cancelar cita' }).click();
   await expect(dialog.getByLabel('Estado de la cita')).toHaveValue('cancelada');
-  expect(api.version).toBe(2);
+  await expect.poll(() => api.version).toBe(2);
 });
 test('T093/T096: Profesional conserva consulta y no recibe formularios de escritura', async ({ page }) => {
   const api = await fixture(page, 'profesional'); await page.goto('/admin/agenda');

@@ -8,6 +8,7 @@ import './mobile.css';
 import './screens/agenda/calendar.css';
 import { icon } from './icons.js';
 import { handleAgendaNavigation, renderAgendaPreserving } from './screens/agenda/navigation.js';
+import { readAgendaView, saveAgendaView } from './screens/agenda/view-preference.js';
 import { agendaView } from './screens/agenda/view.js';
 import {
   db,
@@ -71,7 +72,7 @@ function toggleTheme() {
 export const state = {
   tenantId: 1,
   page: 'agenda',
-  calendarView: matchMedia('(max-width: 767px)').matches ? 'day' : 'week',
+  calendarView: readAgendaView(matchMedia('(max-width: 767px)').matches, isDemo ? 'demo' : 'connected'),
   date: TODAY,
   branch: 'all',
   professional: 'all',
@@ -374,6 +375,8 @@ document.addEventListener('click', async (e) => {
     return;
   }
   const view = e.target.closest('[data-view]');
+  const viewChoice = e.target.closest('[data-m4-view], [data-view]');
+  if (state.page === 'agenda' && viewChoice) saveAgendaView(viewChoice.dataset.m4View || viewChoice.dataset.view, isDemo ? 'demo' : 'connected');
   if (state.page === 'agenda' && handleAgendaNavigation(e, state, render)) return;
   if (view) {
     state.calendarView = view.dataset.view;
@@ -554,6 +557,7 @@ function registerCalendarTool() {
             )
               throw new Error('Vista o fecha inválida.');
             state.calendarView = input.view;
+            saveAgendaView(input.view, isDemo ? 'demo' : 'connected');
             state.date = input.date;
             navigate('agenda');
             return {

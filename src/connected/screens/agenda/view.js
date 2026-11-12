@@ -1,3 +1,5 @@
+import { installQuickState } from './quick-state.js';
+import '../../../shared/screens/agenda/state-menu.css';
 import { agendaFrame } from '../../../shared/screens/agenda/frame.js';
 import { api, user } from '../../backend.js';
 import { state, render } from '../../../shared/app.js';
@@ -124,8 +126,8 @@ const select = (name, label, allLabel, options, value, image) => `<label class="
 function calendar(data) {
   const period = calendarPeriod(state.calendarView, state.date);
   const days = Array.from({ length: state.calendarView === 'day' ? 1 : 7 }, (_, index) => civilAdd(period.desde, index));
-  const options = { attention: attention.state.key === JSON.stringify(attentionQuery()) ? attention.state.data : null, branch: state.branch, columnWidth: Math.max(160, ((document.querySelector('.agenda-calendar')?.clientWidth || window.innerWidth - 300) - 58) / 7) };
-  const content = state.calendarView === 'month' ? renderMonth(state.date, data.citas, todayCivil()) : renderTimeline(days, data.citas, todayCivil(), options);
+  const options = { manageStates: canManageAppointments(user?.rol), attention: attention.state.key === JSON.stringify(attentionQuery()) ? attention.state.data : null, branch: state.branch, columnWidth: Math.max(160, ((document.querySelector('.agenda-calendar')?.clientWidth || window.innerWidth - 300) - 58) / 7) };
+  const content = state.calendarView === 'month' ? renderMonth(state.date, data.citas, todayCivil(), options) : renderTimeline(days, data.citas, todayCivil(), options);
   // Incluso un periodo vacío mantiene la cuadrícula para conservar la referencia temporal de la demo.
   return `${!data.citas.length ? '<p class="m4-empty-summary" role="status">Sin citas en este periodo</p>' : ''}${content}`;
 }
@@ -294,3 +296,5 @@ document.addEventListener('input', (event) => {
   const form = event.target.form;
   searchTimer = setTimeout(() => applyFilters(form), 300);
 });
+
+installQuickState({ client, openDetail: openAppointment, refresh: () => load(true) });

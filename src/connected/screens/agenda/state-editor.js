@@ -1,3 +1,4 @@
+import { confirmCancellation } from '../../../shared/screens/agenda/state-menu.js';
 import { statuses } from '../../../shared/data.js';
 import { escape as esc } from '../../../shared/ui.js';
 import { canManageAppointments, createManualClient } from '../../modules/agenda/manual-contract.js';
@@ -36,6 +37,16 @@ export function attachStateEditor(dialog, detail, { role, scope, request, onChan
     busy = true; save.disabled = true; errorBox.hidden = true;
     try {
       const values = new FormData(form);
+      if (values.get('estado') === 'cancelada' && detail.estado !== 'cancelada') {
+        const confirmation = await confirmCancellation(detail, values.get('motivo'));
+        if (!confirmation) {
+          if (!stale && form.isConnected && dialog.open && isCurrent()) { save.disabled = false; save.focus(); }
+          return;
+        }
+        if (stale || !form.isConnected || !dialog.open || !isCurrent()) return;
+        values.set('motivo', confirmation.motivo);
+        form.elements.motivo.value = confirmation.motivo;
+      }
       form.querySelectorAll('select,textarea').forEach((control) => { control.disabled = true; });
       const result = await client.changeState(detail.id, { estado: values.get('estado'), motivo: values.get('motivo'), version: detail.version });
       if (!form.isConnected || !dialog.open || !isCurrent()) return;

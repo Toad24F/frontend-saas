@@ -173,7 +173,12 @@ test('paridad con demo: métricas, filtros, cuadrícula y tarjetas en ambos tema
   for (const width of [1366, 390]) for (const theme of ['light', 'dark']) {
     for (const target of [page, connected]) {
       await target.setViewportSize({ width, height: 900 });
-      await target.addInitScript((theme) => localStorage.setItem('cita-theme', theme), theme);
+      // Cada combinación compara una primera visita, sin heredar la vista del caso anterior.
+      await target.addInitScript((theme) => {
+        localStorage.setItem('cita-theme', theme);
+        localStorage.removeItem('cita-agenda-view:connected');
+        localStorage.removeItem('cita-agenda-view:demo');
+      }, theme);
     }
     await page.goto('/admin/agenda?demo=1'); await connected.goto('/admin/agenda');
     await expect(connected.locator('[data-m4-appointment]').first()).toBeVisible();

@@ -1,3 +1,5 @@
+import '../../../demo/agenda-quick-state.js';
+import './state-menu.css';
 import './style.css';
 import './polish.css';
 import './utility.css';
@@ -38,7 +40,7 @@ export function agendaView() {
   const select = (kind, label, items) => `<label class="filter-select">${icon(kind === 'branch' ? 'pin' : kind === 'professional' ? 'users' : 'circleCheck')}<select aria-label="${kind === 'branch' ? 'Sucursal' : kind === 'professional' ? 'Profesional' : 'Estado'}" data-filter="${kind}"><option value="all">${label}</option>${items.map((o) => `<option value="${o.id}" ${String(state[kind]) === String(o.id) ? 'selected' : ''}>${escape(o.name)}</option>`).join('')}</select>${icon('down')}</label>`;
   const filters = select('branch', 'Todas las sucursales', list('branches', state.tenantId)) + select('professional', 'Todos los profesionales', list('professionals', state.tenantId)) + select('status', 'Todos los estados', Object.entries(statuses).map(([id, name]) => ({ id, name })));
   const attention = demoAttention(days, state.professional, state.branch, schedules, blocks);
-  const options = { demo: true, attention, branch: state.branch, zones: ['America/Chihuahua'], columnWidth: Math.max(160, ((document.querySelector('.agenda-calendar')?.clientWidth || innerWidth - 300) - 58) / 7) };
+  const options = { demo: true, manageStates: true, attention, branch: state.branch, zones: ['America/Chihuahua'], columnWidth: Math.max(160, ((document.querySelector('.agenda-calendar')?.clientWidth || innerWidth - 300) - 58) / 7) };
   const body = `${apps.length ? '' : '<p class="m4-empty-summary" role="status">Sin citas en este periodo</p>'}${state.calendarView === 'month' ? renderMonth(state.date, apps, TODAY, options) : renderTimeline(days, apps, TODAY, options)}`;
   applyAgendaEffects();
   return pageHead('Agenda', 'Consulta y da seguimiento a las citas de tu negocio.', `<a class="btn btn-light" href="/reservas/${tenantById(state.tenantId).slug}" data-portal>${icon('external')}Portal de reservas</a>${button('Nueva cita', 'new-appointment')}`) + agendaFrame({ title: calendarTitle(state.calendarView, state.date), view: state.calendarView, demo: true, filters, search: state.search, summary: apps, busy: false, body, affectedOnly, zones: ['America/Chihuahua'], note: attention ? '<p class="agenda-attention-note">La trama indica intervalos sin atención · Simulación con datos ficticios.</p>' : '' });

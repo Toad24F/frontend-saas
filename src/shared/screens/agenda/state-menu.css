@@ -1,0 +1,26 @@
+/* La tarjeta conserva clic normal; la pulsación larga evita selección y menú nativo táctil. */
+[data-agenda-state-menu] { -webkit-touch-callout: none; user-select: none; }
+.agenda-state-menu {
+  position: fixed; inset: auto; margin: 0; padding: 6px; width: 292px; max-width: calc(100vw - 16px);
+  max-height: calc(100dvh - 16px); overflow-y: auto; border: 1px solid var(--border);
+  border-radius: 12px; background: var(--surface); color: var(--ink); box-shadow: var(--glass-shadow, 0 12px 40px #0003);
+}
+.agenda-state-menu p { padding: 8px 10px; margin: 0; font-size: 14px; }
+.agenda-menu-title { font-weight: 650; border-bottom: 1px solid var(--border); overflow-wrap: anywhere; }
+.agenda-state-menu small { display: block; font-size: 12px; font-weight: 400; color: var(--muted); }
+.agenda-state-menu button {
+  width: 100%; min-height: 44px; border: 0; border-radius: 6px; padding: 8px 10px;
+  display: flex; align-items: center; gap: 10px; text-align: left; color: var(--ink); background: transparent; font-size: 14px;
+}
+.agenda-state-menu button:hover:not(:disabled), .agenda-state-menu button:focus-visible { background: var(--surface-soft); }
+.agenda-state-menu button:disabled { cursor: default; color: var(--muted); }
+.agenda-state-menu button > .icon { width: 18px; height: 18px; margin-left: auto; }
+.agenda-state-menu [data-menu-detail] { border-top: 1px solid var(--border); margin-top: 4px; }
+.agenda-state-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.agenda-menu-error { color: var(--ink); }
+.agenda-cancel-dialog { background: var(--surface); color: var(--ink); width: min(480px, calc(100vw - 24px)); max-height: calc(100dvh - 24px); overflow-y: auto; border: 1px solid var(--border); border-radius: 16px; padding: 0; }
+.agenda-cancel-dialog::backdrop { background: #0007; }
+.agenda-cancel-dialog h2 { font-size: 20px; }
+.agenda-cancel-dialog .dialog-footer { flex-wrap: wrap; }
+.agenda-cancel-dialog button { min-height: 44px; }
+.app-dialog.agenda-cancel-dialog[open], .app-dialog.agenda-cancel-dialog[open]::backdrop { animation: none; }

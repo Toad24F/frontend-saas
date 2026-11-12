@@ -1,3 +1,4 @@
+import { confirmCancellation } from './state-menu.js';
 import { state, render, navigate } from '../../app.js';
 import { db, list, resource, tenantById, appointmentInfo, TODAY, formatDate, money, statuses } from '../../data.js';
 import { icon } from '../../icons.js';
@@ -73,19 +74,15 @@ export function detail(id) {
     } catch (error) { const target = el.querySelector('[data-demo-schedule-error]'); target.textContent = error.message; target.hidden = false; }
   };
 }
-function confirmCancel(id) {
-  const a = resource('appointments', id, state.tenantId);
-  const el = modal(
-    'Cancelar esta cita',
-    `<div class="dialog-body"><p>La cita de <strong>${esc(appointmentInfo(a).client.name)}</strong> del ${formatDate(a.date)} a las ${a.start} cambiará a Cancelada y liberará el horario.</p></div><div class="dialog-footer"><button class="btn btn-light" id="keep-appointment">Conservar cita</button><button class="btn btn-danger-soft" id="confirm-cancel">Sí, cancelar cita</button></div>`,
-  );
-  el.querySelector('#keep-appointment').onclick = () => detail(id);
-  el.querySelector('#confirm-cancel').onclick = () => {
-    resource('appointments', id, state.tenantId).status = 'cancelada';
-    el.close();
-    render();
-    toast('Cita cancelada. El horario vuelve a estar disponible.');
-  };
+async function confirmCancel(id) {
+  const a = resource('appointments', id, state.tenantId), e = appointmentInfo(a);
+  const confirmation = await confirmCancellation({ nombreContacto: e.client.name, nombreServicio: e.service.name,
+    nombreSucursal: e.branch.name, fechaLocal: a.date, horaInicio: a.start, zonaHoraria: 'America/Chihuahua' });
+  if (!confirmation) return;
+  a.status = 'cancelada';
+  document.querySelector('#app-dialog')?.close();
+  render();
+  toast('Demostración: cita cancelada. El horario vuelve a estar disponible.');
 }
 export function manualAppointment(day = state.date, start = '') {
   if (
