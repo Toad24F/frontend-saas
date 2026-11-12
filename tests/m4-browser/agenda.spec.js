@@ -23,7 +23,7 @@ test('T088: navegación y rutas directas por los cuatro roles', async ({ page })
     expect(errors).toEqual([]);
   }
 });
-test('T090–T092: tres vistas, filtros reales, vacío/error, detalle y páginas de historial', async ({ page }) => {
+test('T090–T092: vistas, filtros locales, error de refresco, detalle e historial', async ({ page }) => {
   const { seen, errors } = await setup(page);
   await page.goto('/admin/agenda');
   await expect(page.locator('[data-m4-appointment="7"]')).toBeVisible();
@@ -33,31 +33,34 @@ test('T090–T092: tres vistas, filtros reales, vacío/error, detalle y páginas
     if (view === 'month') await expect(page.locator('[data-m4-date]')).toHaveCount(42);
   }
   await page.getByLabel('Buscar paciente').fill('vacío');
-  // La búsqueda conserva el gesto de la demo: se aplica automáticamente al terminar de escribir.
   await expect(page.getByText('Sin citas en este periodo')).toBeVisible();
   await expect(page.getByLabel('Buscar paciente')).toBeFocused();
-  for (const search of ['error', 'exceso']) {
-    await page.getByLabel('Buscar paciente').fill(search);
-    await page.getByLabel('Buscar paciente').press('Enter');
-    await expect(page.locator('[data-m4-error]')).toBeVisible();
-    await expect(page.locator('.stats-grid')).toHaveAttribute('aria-busy', 'false');
-    await expect(page.locator('[data-agenda-skeleton]')).toHaveCount(0);
-    await expect(page.getByText('Sin citas en este periodo')).toHaveCount(0);
-  }
   await page.getByLabel('Buscar paciente').fill('');
+  await page.getByLabel('Buscar paciente').press('Enter');
+  let failure = null;
+  await page.route((url) => url.pathname === '/citas', async (route) => {
+    if (!failure) { await route.fallback(); return; }
+    await route.fulfill({ status: failure, json: { message: failure === 400 ? 'La consulta supera 1.000 citas. Acota el periodo o los filtros.' : 'Temporal' } });
+  });
+  failure = 503;
+  await page.getByRole('button', { name: 'Actualizar agenda', exact: true }).click();
+  await expect(page.locator('[data-live-warning]')).toBeVisible();
+  await expect(page.locator('[data-m4-appointment="7"]')).toBeVisible();
+  failure = 400;
+  await page.getByRole('button', { name: 'Actualizar agenda', exact: true }).click();
+  await expect(page.locator('[data-m4-error]')).toBeVisible();
+  await expect(page.locator('.agenda-summary')).toContainText('Resumen no disponible');
+  failure = null;
+  await page.getByRole('button', { name: 'Actualizar agenda', exact: true }).click();
+  await expect(page.locator('[data-m4-appointment="7"]')).toBeVisible();
+  const reads = seen.filter((x) => x === 'GET /citas').length;
   await page.getByLabel('Sucursal').selectOption('1');
   await page.getByLabel('Profesional', { exact: true }).selectOption('1');
   await page.getByLabel('Estado', { exact: true }).selectOption('confirmada');
-  const request = page.waitForRequest((r) => { const u = new URL(r.url()); return u.pathname === '/citas' && u.searchParams.get('sucursalId') === '1' && u.searchParams.get('personalId') === '1' && u.searchParams.get('estado') === 'confirmada'; });
-  await page.getByLabel('Buscar paciente').press('Enter'); await request;
+  expect(seen.filter((x) => x === 'GET /citas').length).toBe(reads);
   await page.locator('[data-m4-appointment="7"]').click();
   const dialog = page.getByRole('dialog');
-  await expect(dialog).toContainText('6145550101');
-  await expect(dialog).toContainText('2026-11-12');
-  await expect(dialog).toContainText('America/Tijuana');
-  await expect(dialog).toContainText('Nota <segura>');
-  await expect(dialog).toContainText('Sin registro histórico');
-  await expect(dialog).toContainText('9007199254740993');
+  for (const text of ['6145550101', '2026-11-12', 'America/Tijuana', 'Nota <segura>', 'Sin registro histórico', '9007199254740993']) await expect(dialog).toContainText(text);
   await dialog.getByRole('button', { name: 'Siguiente página' }).click();
   await expect(dialog).toContainText('9007199254740994');
   await dialog.getByRole('button', { name: 'Página anterior' }).click();
@@ -67,29 +70,25 @@ test('T090–T092: tres vistas, filtros reales, vacío/error, detalle y páginas
   expect(seen.every((entry) => entry.startsWith('GET '))).toBe(true);
   expect(errors).toEqual([]);
 });
-test('T091: respuestas fuera de orden, borrador y foco permanecen en la consulta vigente', async ({ page }) => {
-  await setup(page);
-  await page.goto('/admin/agenda');
+test('T091: filtro local conserva borrador y foco ante un refresco remoto tardío', async ({ page }) => {
+  await setup(page); await page.goto('/admin/agenda');
   await expect(page.locator('[data-m4-appointment="7"]')).toBeVisible();
   let release;
   const barrier = new Promise((resolve) => { release = resolve; });
-  await page.route((url) => url.pathname === '/citas' && url.searchParams.get('busqueda') === 'lenta', async (route) => {
-    const url = new URL(route.request().url());
-    await barrier;
+  await page.route((url) => url.pathname === '/citas', async (route) => {
+    const url = new URL(route.request().url()); await barrier;
     await route.fulfill({ json: { desde: url.searchParams.get('desde'), hasta: url.searchParams.get('hasta'), citas: [] } });
   });
-  await page.getByLabel('Buscar paciente').fill('lenta');
-  const pending = page.waitForRequest((r) => new URL(r.url()).searchParams.get('busqueda') === 'lenta');
-  await page.getByLabel('Buscar paciente').press('Enter'); await pending;
-  await page.getByLabel('Buscar paciente').fill('rápida');
+  const pending = page.waitForRequest((request) => new URL(request.url()).pathname === '/citas');
+  await page.getByRole('button', { name: 'Actualizar agenda', exact: true }).click(); await pending;
+  await page.getByLabel('Buscar paciente').fill('Paciente');
   await page.getByLabel('Buscar paciente').press('Enter');
   await expect(page.locator('[data-m4-appointment="7"]')).toBeVisible();
-  const response = page.waitForResponse((r) => new URL(r.url()).searchParams.get('busqueda') === 'lenta');
+  const response = page.waitForResponse((request) => new URL(request.url()).pathname === '/citas');
   release(); await response;
-  // Esperar el procesamiento del body, no un tiempo arbitrario.
   await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
   await expect(page.locator('[data-m4-appointment="7"]')).toBeVisible();
-  await expect(page.getByLabel('Buscar paciente')).toHaveValue('rápida');
+  await expect(page.getByLabel('Buscar paciente')).toHaveValue('Paciente');
   await expect(page.getByLabel('Buscar paciente')).toBeFocused();
 });
 test('T092: fallo de historial conserva contacto, permite reintentar; detalle denegado no usa la demo', async ({ page }) => {
@@ -137,7 +136,7 @@ for (const width of [1366, 390]) for (const theme of ['light', 'dark']) {
     await page.goto('/admin/agenda?demo=1');
     await expect(page.locator('[data-appointment]').first()).toBeVisible();
     // El diseño existente oculta esta nota en móvil; se comprueba su presencia y el modo explícito.
-    await expect(page.getByText('Datos ficticios · 8 de septiembre de 2026')).toHaveCount(1);
+    await expect(page.getByText('Datos ficticios', { exact: true })).toHaveCount(1);
     await expect(page.locator('html')).toHaveAttribute('data-app-mode', 'demo');
     await page.screenshot({ path: `test-results/m4/demo-${width}-${theme}.png`, fullPage: true });
     expect(errors).toEqual([]);
@@ -179,10 +178,10 @@ test('paridad con demo: métricas, filtros, cuadrícula y tarjetas en ambos tema
     await page.goto('/admin/agenda?demo=1'); await connected.goto('/admin/agenda');
     await expect(connected.locator('[data-m4-appointment]').first()).toBeVisible();
     await expect(page.locator('[data-appointment]').first()).toBeVisible();
-    for (const selector of ['.page-heading h1', '.stat-card', '.calendar-panel', '.calendar-toolbar', '.filter-select', '.segmented', '.week-header', '.calendar-event.confirmada']) {
+    for (const selector of ['.page-heading h1', '.agenda-summary', '.calendar-panel', '.calendar-toolbar', '.filter-select', '.segmented', '.week-header', '.calendar-event.confirmada']) {
       await expect.poll(async () => JSON.stringify(await inspect(connected, selector))).toBe(JSON.stringify(await inspect(page, selector)));
     }
-    await expect(connected.locator('.stat-number')).toHaveText(await page.locator('.stat-number').allTextContents());
+    await expect(connected.locator('.agenda-summary strong')).toHaveText(await page.locator('.agenda-summary strong').textContent());
     await expect(connected.locator('.calendar-event')).toHaveCount(await page.locator('.calendar-event').count());
     await connected.screenshot({ path: `test-results/m4/paridad-conectado-${width}-${theme}.png`, fullPage: true });
     await page.screenshot({ path: `test-results/m4/paridad-demo-${width}-${theme}.png`, fullPage: true });

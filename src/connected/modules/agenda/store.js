@@ -11,6 +11,10 @@ export function createAgendaStore(read) {
   };
   return {
     state,
+    use(filters, data) {
+      generation++;
+      Object.assign(state, { key: JSON.stringify(filters), data, busy: false, refreshing: false, error: null, refreshError: null });
+    },
     reset() {
       generation++;
       Object.assign(state, {
@@ -22,7 +26,7 @@ export function createAgendaStore(read) {
         refreshError: null,
       });
     },
-    async load(filters, { background = false } = {}) {
+    async load(filters, { background = false, force = false } = {}) {
       const current = ++generation;
       // Solo la MISMA consulta puede retener su último snapshot durante un refresco; nunca otro filtro o sesión.
       const retain =
@@ -38,7 +42,7 @@ export function createAgendaStore(read) {
         refreshError: null,
       });
       try {
-        const result = await read(filters);
+        const result = await read(filters, { force });
         if (current === generation) state.data = result;
       } catch (error) {
         if (current === generation) {

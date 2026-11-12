@@ -34,10 +34,17 @@ const clock = (value) => {
 export function eventLayout(items, firstMinute = 540, hourHeight = 96) {
   // Reservar también la huella visual mínima evita superposición de citas breves sin cambiar su duración real.
   const minimum = 44, gap = 4, visualMinutes = (minimum + gap) / hourHeight * 60;
-  const columns = calendarColumns(items.map((item) => ({ ...item, start: clock(minutes(item.start)), end: clock(Math.max(minutes(item.end), minutes(item.start) + visualMinutes)) })));
+  const footprints = items.map((item) => ({ ...item, start: clock(minutes(item.start)), end: clock(Math.max(minutes(item.end), minutes(item.start) + visualMinutes)) }));
+  const columns = calendarColumns(footprints);
   return new Map(items.map((item) => {
     const { lane, width } = columns.get(item.id);
+    const footprint = footprints.find((x) => x.id === item.id);
+    let span = 1;
+    for (let next = lane + 1; next < Math.round(100 / width); next++) {
+      if (footprints.some((other) => columns.get(other.id).lane === next && other.start < footprint.end && other.end > footprint.start)) break;
+      span++;
+    }
     return [item.id, { top: (minutes(item.start) - firstMinute) / 60 * hourHeight + gap / 2,
-      height: Math.max((minutes(item.end) - minutes(item.start)) / 60 * hourHeight - gap, minimum), left: lane * width, width }];
+      height: Math.max((minutes(item.end) - minutes(item.start)) / 60 * hourHeight - gap, minimum), left: lane * width, width: width * span, baseWidth: width }];
   }));
 }

@@ -12,7 +12,9 @@ test('la agenda conectada usa cuadrícula horaria y tarjeta de estado de la demo
   assert.match(html, /top:98px/);
   assert.match(html, /Paciente &lt;QA&gt;/);
   assert.match(html, /America\/Tijuana/);
-  assert.doesNotMatch(html, /lunch-block|data-slot-date|current-time/);
+  assert.doesNotMatch(html, /lunch-block|data-slot-date/);
+  assert.match(html, /data-agenda-clock/);
+  assert.match(html, /data-zone="America\/Tijuana"/);
 });
 test('horas fuera de 09–18 y continuación nocturna siguen visibles', () => {
   const late = { ...item, horaInicio: '23:30:00', fechaFinLocal: '2026-11-12', horaFin: '00:15:00' };

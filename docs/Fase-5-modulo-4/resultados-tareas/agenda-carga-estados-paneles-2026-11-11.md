@@ -1,5 +1,7 @@
 # Agenda: carga, leyenda, citas distinguibles y paneles laterales
 
+Actualización autorizada de 2026-11-12: [utilidad, caché, atención efectiva y densidad](agenda-utilidad-cache-densidad-2026-11-12.md). Agenda ahora usa resumen lineal del periodo filtrado; conserva skeleton para consultas sin caché, editores y paneles de detalle. La apertura de un tramo semanal saturado conduce a Día con foco y resaltado, sin panel adicional. Esta nota conserva la evidencia histórica del ajuste anterior.
+
 Fecha: 2026-11-11. Revisión base: `8ccf300`, más los cambios locales de este ajuste. El árbol estaba limpio al comenzar. Alcance solicitado: cinco mejoras de la agenda existente, en conectado y demo. No se implementan tareas de T097 en adelante ni se modifica el backend.
 
 ## Qué cambió y por qué

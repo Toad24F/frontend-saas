@@ -7,6 +7,7 @@ import './motion.css';
 import './mobile.css';
 import './screens/agenda/calendar.css';
 import { icon } from './icons.js';
+import { handleAgendaNavigation, renderAgendaPreserving } from './screens/agenda/navigation.js';
 import { agendaView } from './screens/agenda/view.js';
 import {
   db,
@@ -78,6 +79,7 @@ export const state = {
   search: '',
   availabilityGroup: '',
 };
+window.addEventListener('agenda-layout-change', () => { if (state.page === 'agenda') renderAgendaPreserving(render); });
 matchMedia('(max-width: 767px)').addEventListener('change', ({ matches }) => {
   document.querySelectorAll('.professional-workspace .professional-results[data-desktop-view]').forEach((results) => {
     results.classList.remove('professional-view--list', 'professional-view--cards');
@@ -372,6 +374,7 @@ document.addEventListener('click', async (e) => {
     return;
   }
   const view = e.target.closest('[data-view]');
+  if (state.page === 'agenda' && handleAgendaNavigation(e, state, render)) return;
   if (view) {
     state.calendarView = view.dataset.view;
     render();

@@ -1,5 +1,7 @@
 # Corrección de agenda conectada para conservar la demo
 
+Actualización autorizada de 2026-11-12: [utilidad, caché, atención efectiva y densidad](agenda-utilidad-cache-densidad-2026-11-12.md). Sustituye en Agenda las tarjetas por un resumen del periodo filtrado y añade hora real condicionada a una zona inequívoca, sombreado de atención comprobada y agrupaciones semanales. Las decisiones y verificaciones de esta nota corresponden al estado anterior.
+
 Fecha: 2026-11-11. Alcance: corrección visual de M4-T088–T092 antes del commit. Revisión base `f3f943a` más el trabajo local del bloque. No se crean nuevas capacidades de escritura ni se toca el backend.
 
 Evolución visual posterior autorizada: [carga, leyenda, métricas, citas y paneles](agenda-carga-estados-paneles-2026-11-11.md). Conserva la cuadrícula de esta corrección y aplica las mejoras nuevas a ambos modos; sustituye las frases de métricas y la posición anterior de la leyenda.

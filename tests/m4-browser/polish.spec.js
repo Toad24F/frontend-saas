@@ -10,7 +10,7 @@ for (const width of [1366, 390]) for (const theme of ['light', 'dark']) {
     await page.route((url) => url.pathname === '/citas', async (route) => { await barrier; await route.fallback(); });
     await page.goto('/admin/agenda');
     await expect(page.locator('[data-agenda-skeleton]')).toBeVisible();
-    await expect(page.locator('.stats-grid')).toHaveAttribute('aria-busy', 'true');
+    await expect(page.locator('.agenda-summary')).toContainText('Cargando citas');
     await expect(page.locator('.stat-caption')).toHaveCount(0);
     await expect(page.locator('.calendar-toolbar .legend')).toContainText('Confirmada');
     expect(await page.locator('.calendar-toolbar').evaluate((el) => {
@@ -18,7 +18,7 @@ for (const width of [1366, 390]) for (const theme of ['light', 'dark']) {
       return Boolean(today.compareDocumentPosition(legend) & 4) && Boolean(legend.compareDocumentPosition(views) & 4);
     })).toBe(true);
     // El estado de carga se captura después de la entrada de pantalla existente, no durante su fundido.
-    await expect.poll(() => page.locator('.stat-card').evaluateAll((items) => items.every((el) => getComputedStyle(el).opacity === '1'))).toBe(true);
+    await expect(page.locator('.agenda-summary')).toBeVisible();
     await page.screenshot({ path: `test-results/m4/skeleton-${width}-${theme}.png` });
     release();
     await expect(page.locator('[data-m4-appointment="7"]')).toBeVisible();
@@ -30,6 +30,7 @@ for (const width of [1366, 390]) for (const theme of ['light', 'dark']) {
     // Móvil ya inicia en Día: cambiar de periodo fuerza la consulta de la fixture densa en ambos tamaños.
     await page.locator('[data-m4-view="week"]').click();
     await page.locator('[data-m4-view="day"]').click();
+    await page.getByRole('button', { name: 'Actualizar agenda', exact: true }).click();
     await expect(page.locator('.calendar-event')).toHaveCount(8);
     expect(await page.locator('.calendar-event').evaluateAll((items) => {
       const rects = items.map((el) => el.getBoundingClientRect());
@@ -77,7 +78,8 @@ test('demo conserva las mismas mejoras y reduce animación cuando se solicita', 
   await page.goto('/admin/agenda?demo=1');
   await expect(page.locator('.calendar-toolbar .legend')).toContainText('No asistió');
   await expect(page.locator('.stat-caption')).toHaveCount(0);
-  await expect(page.locator('.calendar-event .event-folio').first()).toBeVisible();
+  // En columnas estrechas el folio cede espacio a hora/paciente; sigue disponible en el nombre accesible.
+  await expect(page.locator('.calendar-event').first()).toHaveAttribute('aria-label', /Folio/);
   await page.locator('[data-appointment]').first().click();
   await expect(page.getByRole('dialog')).toHaveClass(/agenda-drawer/);
   await expect.poll(() => page.getByRole('dialog').evaluate((el) => getComputedStyle(el).backgroundColor)).toMatch(/^rgb\(/);
