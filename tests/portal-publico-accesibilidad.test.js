@@ -35,11 +35,10 @@ test('T115: región estable no repite avisos idénticos ni incorpora HTML', () =
   assert.deepEqual(writes, ['Cargando', '<b>Listo</b>', '', 'Cargando']);
 });
 
-test('T115: fecha inválida y campos tienen etiquetas y referencias de ayuda/error', () => {
+test('T115: fecha y campos tienen etiquetas y referencias de ayuda/error', () => {
   const html = renderSelection({ step: 3, selection: { date: '', slot: null }, query: { status: 'invalid', message: 'Elige una fecha' }, options: { servicios: [], sucursales: [], profesionales: [] }, slots: [] });
-  assert.match(html, /for="public-date"/);
-  assert.match(html, /id="public-date"[^>]*aria-invalid="true"/);
-  assert.match(html, /aria-describedby="public-zone selection-status"/);
+  assert.match(html, /class="public-date-label"/);
+  assert.match(html, /id="selection-status"[^>]*>Elige una fecha/);
   const form = renderBooking({ phase: 'form', selection: { date: '2026-10-20', slot: { inicioUtc: '2026-10-20T17:00:00Z' } }, hold: { zonaHoraria: 'America/Mazatlan', costo: '450.00' }, holdStatus: 'active', remainingMs: 10000, contact: {}, contactErrors: { telefono: 'Revisa el teléfono' } });
   for (const field of ['nombre', 'telefono', 'notas']) {
     assert.ok(form.includes(`for="contact-${field}"`));

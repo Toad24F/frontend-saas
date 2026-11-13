@@ -152,14 +152,21 @@ function stepContent() {
   const t = tenantById(booking.tenantId);
   if (booking.step <= 3) return demoCatalog();
   if (booking.step === 4) {
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(booking.day)) return '<label for="demo-book-date">Fecha de tu cita</label><input type="date" class="form-control" id="demo-book-date" aria-invalid="true" aria-describedby="demo-date-error"><p id="demo-date-error" role="alert">Elige una fecha válida para consultar horarios.</p>';
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(booking.day)) return '<p id="demo-date-error" role="alert">Elige una fecha válida para consultar horarios.</p>';
     let dates = nextDates({ ...options(), from: TODAY }, 45);
     if (t.mode === 'compact') dates = dates.slice(0, 1);
 
     const available = dates.find((d) => d.day === booking.day)?.slots || [];
     const shown = periodSlots(available.map((horaInicio) => ({ horaInicio })), period).map((slot) => slot.horaInicio);
     const nextDay = dates.find((d) => d.day > booking.day)?.day;
-    return `<label for="demo-book-date">Fecha de tu cita</label><input type="date" class="form-control" id="demo-book-date" value="${booking.day}"><div class="date-picker-heading"><h3>${formatDate(booking.day, { month: 'long', year: 'numeric' })}</h3><span>${icon('clock')} Hora de Chihuahua</span></div><div class="booking-date-strip">${dates
+    const availableDays = new Set(dates.map((item) => item.day));
+    const start = Date.parse(`${TODAY}T12:00:00Z`);
+    const calendar = Array.from({ length: 45 }, (_, index) => {
+      const day = new Date(start + index * 86400000).toISOString().slice(0, 10);
+      const enabled = availableDays.has(day);
+      return `<button class="demo-calendar-day ${booking.day === day ? 'selected' : ''}" type="button" ${enabled ? `data-book-date="${day}"` : 'disabled'} aria-label="${formatDate(day)}${enabled ? ', disponible en esta demostración' : ', no disponible en esta demostración'}">${date(day).getDate()}</button>`;
+    }).join('');
+    return `<p class="form-label">Fecha de tu cita: ${formatDate(booking.day)}</p><div class="date-picker-heading"><h3>Próximos 45 días</h3><span>${icon('clock')} Hora de Chihuahua · Demo</span></div><p class="demo-calendar-help">Los días grises no tienen horarios en esta simulación.</p><div class="demo-calendar-grid" role="group" aria-label="Días de demostración">${['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sá'].map((day) => `<span class="demo-calendar-weekday">${day}</span>`).join('')}${Array.from({ length: new Date(start).getUTCDay() }, () => '<span aria-hidden="true"></span>').join('')}${calendar}</div><div class="booking-date-strip">${dates
       .slice(0, 14)
       .map(
         (d) =>
@@ -295,7 +302,6 @@ document.addEventListener('click', (e) => {
 });
 document.addEventListener('change', (e) => {
   if (!location.pathname.startsWith('/reservas/') || !booking.tenantId) return;
-  if (e.target.id === 'demo-book-date') { booking.day = e.target.value; booking.start = null; period = 'all'; redraw(); }
   if (e.target.matches('select[data-public-browse]') && booking.step <= 3) { browse[booking.step - 1].filter = e.target.value; browse[booking.step - 1].page = 1; redraw(); document.querySelector('#public-filter')?.focus(); }
 });
 document.addEventListener('input', (e) => {

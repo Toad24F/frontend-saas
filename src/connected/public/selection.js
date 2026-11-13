@@ -15,7 +15,7 @@ export function createPortalSelection(client, { slug, onChange = () => {}, now =
   const state = { phase: 'selection', step: 0,
     negocio: null,
     selection: { servicioId: null, sucursalId: null, personalId: null, date: '', slot: null },
-    options: { servicios: [], sucursales: [], profesionales: [] }, slots: [], availableDates: [], timeZone: '',
+    options: { servicios: [], sucursales: [], profesionales: [] }, slots: [], availableDates: [], dateRange: null, timeZone: '',
     query: { status: 'idle', message: '' }, browse: Array.from({ length: 3 }, browseDefaults), period: 'all', automaticSteps: [], hold: null, form: null, submission: null, result: null };
   let revision = 0;
   let pending;
@@ -37,6 +37,7 @@ export function createPortalSelection(client, { slug, onChange = () => {}, now =
     state.selection.slot = null;
     state.slots = [];
     state.availableDates = [];
+    state.dateRange = null;
     state.timeZone = '';
   }
   function ensureSelection() {
@@ -109,8 +110,9 @@ export function createPortalSelection(client, { slug, onChange = () => {}, now =
     const branch = state.options.sucursales.find((item) => item.id === state.selection.sucursalId);
     const today = availability ? localDate(now(), branch.zonaHoraria) : '';
     const rangeStart = availability ? [addDays(state.selection.date, -10), today].sort().at(-1) : '';
+    state.dateRange = availability ? { desde: rangeStart, hasta: addDays(rangeStart, 30), hoy: today } : null;
     const query = availability ? { servicioId: state.selection.servicioId, sucursalId: state.selection.sucursalId,
-      personalId: state.selection.personalId, desde: rangeStart, hasta: addDays(rangeStart, 30) } : {
+      personalId: state.selection.personalId, desde: rangeStart, hasta: state.dateRange.hasta } : {
       ...(state.step >= 1 ? { servicioId: state.selection.servicioId } : {}),
       ...(state.step >= 2 ? { sucursalId: state.selection.sucursalId } : {}),
     };
@@ -185,6 +187,18 @@ export function createPortalSelection(client, { slug, onChange = () => {}, now =
       if (state.phase !== 'selection' || state.step !== 3) return;
       if (!state.availableDates.includes(date)) state.availableDates = [];
       state.selection.date = date; state.period = 'all'; await load();
+    },
+    async shiftDateRange(direction) {
+      if (state.phase !== 'selection' || state.step !== 3 || !state.dateRange || ![-1, 1].includes(direction)) return;
+      const { desde, hasta, hoy } = state.dateRange;
+      if (direction < 0 && desde <= hoy) return;
+      // load() consulta 10 días antes de la fecha elegida; el ancla mantiene
+      // intervalos contiguos de 31 días sin inventar disponibilidad.
+      const anchor = direction > 0 ? addDays(hasta, 11) : addDays(desde, -21);
+      state.selection.date = anchor;
+      state.availableDates = [];
+      state.period = 'all';
+      await load();
     },
     chooseSlot(start) {
       const slot = state.slots.find((item) => item.inicioUtc === start);

@@ -144,6 +144,18 @@ html[data-theme='light'] .public-result-status { background: #fff1ce; color: #76
 .public-options:disabled .public-option:hover { transform: none; border-color: var(--border); background: var(--surface); }
 .public-option:focus-within { outline: 3px solid var(--accent); outline-offset: 2px; }
 .public-date { max-width: 300px; }
+.public-calendar { width: min(100%, 440px); padding: 16px; margin: 12px 0 18px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); }
+.public-calendar-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.public-calendar-header strong { font-size: 13px; line-height: 1.4; }
+.public-calendar-header > div { display: flex; gap: 5px; flex: none; }
+.public-calendar-header .btn { min-width: 38px; min-height: 38px; padding: 2px 8px; font-size: 22px; line-height: 1; }
+.public-calendar-help { margin: 10px 0 12px; color: var(--muted); font-size: 12px; }
+.public-calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; text-align: center; }
+.public-calendar-weekday { padding: 7px 0; color: var(--muted); font-size: 11px; font-weight: 700; }
+.public-calendar-day { min-width: 0; min-height: 42px; padding: 4px; border: 1px solid transparent; border-radius: 8px; color: var(--ink); background: var(--surface); font-variant-numeric: tabular-nums; }
+.public-calendar-day:hover:not(:disabled) { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, var(--surface)); }
+.public-calendar-day.selected:not(:disabled) { border-color: var(--accent); color: var(--accent); background: color-mix(in srgb, var(--accent) 18%, var(--surface)); font-weight: 700; }
+.public-calendar-day:disabled { color: var(--muted); background: color-mix(in srgb, var(--muted) 7%, var(--surface)); opacity: .48; cursor: not-allowed; }
 .public-date-strip { display: flex; gap: 9px; width: 100%; min-width: 0; overflow-x: auto; padding: 4px 2px 9px; scrollbar-width: thin; }
 .public-date-chip { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 9px; flex: 0 0 72px; min-height: 105px; padding: 12px 9px; border: 1px solid var(--border); border-radius: 9px; color: var(--muted); background: var(--surface); transition: border-color 180ms ease, background-color 180ms ease, color 180ms ease; }
 .public-date-chip span, .public-date-chip small { color: var(--muted); font-size: 11px; text-transform: capitalize; }

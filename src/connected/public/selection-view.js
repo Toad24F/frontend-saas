@@ -20,6 +20,23 @@ function dateStrip(selected, availableDates = []) {
   }).join('')}</div>`;
 }
 
+function availabilityCalendar(state) {
+  const range = state.dateRange;
+  if (!range) return '';
+  const available = new Set(state.availableDates);
+  const start = Date.parse(`${range.desde}T12:00:00Z`);
+  const count = Math.round((Date.parse(`${range.hasta}T12:00:00Z`) - start) / 86400000) + 1;
+  const offset = new Date(start).getUTCDay();
+  const days = Array.from({ length: count }, (_, index) => {
+    const value = new Date(start + index * 86400000).toISOString().slice(0, 10);
+    const enabled = available.has(value) && state.query.status !== 'loading';
+    const selected = value === state.selection.date;
+    return `<button class="public-calendar-day ${selected ? 'selected' : ''}" type="button" ${enabled ? `data-selection-date="${value}"` : 'disabled'} aria-label="${esc(dateLabel(value))}${enabled ? ', disponible' : ', no disponible'}" ${enabled && selected ? 'aria-current="date"' : ''}>${Number(value.slice(-2))}</button>`;
+  }).join('');
+  const label = `${dateLabel(range.desde)} al ${dateLabel(range.hasta)}`;
+  return `<div class="public-calendar" aria-label="Calendario de disponibilidad"><div class="public-calendar-header"><strong>Fechas del ${esc(label)}</strong><div><button class="btn btn-light" type="button" data-date-range="-1" aria-label="Consultar fechas anteriores" ${range.desde <= range.hoy || state.query.status === 'loading' ? 'disabled' : ''}>‹</button><button class="btn btn-light" type="button" data-date-range="1" aria-label="Consultar fechas siguientes" ${state.query.status === 'loading' ? 'disabled' : ''}>›</button></div></div><p class="public-calendar-help">Solo se pueden elegir los días con horarios disponibles.</p><div class="public-calendar-grid" role="group" aria-label="Días consultados">${['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sá'].map((day) => `<span class="public-calendar-weekday">${day}</span>`).join('')}${Array.from({ length: offset }, () => '<span aria-hidden="true"></span>').join('')}${days}</div></div>`;
+}
+
 // Radios nativos permiten selección con flechas y Tab. El controlador solo recibe
 // IDs presentes en la respuesta pública vigente; el texto siempre se escapa.
 export function renderSelection(state) {
@@ -43,9 +60,9 @@ export function renderSelection(state) {
     const zone = state.timeZone || state.options.sucursales.find((item) => item.id === selection.sucursalId)?.zonaHoraria;
     const shownSlots = periodSlots(state.slots, state.period);
     const nextDate = (state.availableDates || []).find((date) => date > selection.date);
-    content = `<label class="public-date-label" for="public-date">Fecha de tu cita</label>
-      <input class="form-control public-date" id="public-date" type="date" value="${esc(selection.date)}" aria-invalid="${query.status === 'invalid'}" aria-describedby="public-zone selection-status">
+    content = `<p class="public-date-label">Fecha de tu cita${validDate(selection.date) ? `: ${esc(dateLabel(selection.date))}` : ''}</p>
       <p id="public-zone" class="public-zone">Horarios de la sucursal · ${esc(zone)}</p>
+      ${availabilityCalendar(state)}
       ${dateStrip(selection.date, state.availableDates)}
       <h3 class="public-day">Horarios disponibles${validDate(selection.date) ? ` para ${esc(dateLabel(selection.date))}` : ''}</h3>
       ${busy ? publicSkeleton(true) : ''}
@@ -87,7 +104,6 @@ export function mountSelection(host, controller, renderView = renderSelection) {
     const input = event.target;
     if (input.matches('[data-selection]')) controller.choose(input.dataset.selection, Number(input.value));
     else if (input.matches('[data-slot]')) controller.chooseSlot(input.value);
-    else if (input.id === 'public-date') void controller.setDate(input.value);
     else if (input.matches('select[data-public-browse]')) browseInput(event);
   });
   host.addEventListener('click', (event) => {
@@ -96,7 +112,9 @@ export function mountSelection(host, controller, renderView = renderSelection) {
     if (event.target.closest('[data-public-clear]')) { controller.setBrowse('clear'); focusPublicControl(host.querySelector('#public-search') || host.querySelector('#selection-title')); return; }
     const period = event.target.closest('[data-public-period]');
     if (period) { controller.setPeriod(period.dataset.publicPeriod); return; }
-    if (event.target.closest('[data-change-date]')) { focusPublicControl(host.querySelector('#public-date')); return; }
+    if (event.target.closest('[data-change-date]')) { focusPublicControl(host.querySelector('.public-calendar-day:not(:disabled)') || host.querySelector('.public-calendar-header button:not(:disabled)')); return; }
+    const range = event.target.closest('[data-date-range]');
+    if (range && !range.disabled) { void controller.shiftDateRange(Number(range.dataset.dateRange)); return; }
     if (event.target.closest('[data-selection-next]')) void controller.next();
     else if (event.target.closest('[data-selection-back]')) void controller.back();
     else if (event.target.closest('[data-selection-retry]')) void controller.retry();
@@ -111,6 +129,7 @@ export function mountSelection(host, controller, renderView = renderSelection) {
     const oldName = inside ? active.getAttribute('name') : '';
     const oldValue = inside ? active.getAttribute('value') : '';
     const oldDate = inside ? active.dataset.selectionDate : '';
+    const oldRange = inside ? active.dataset.dateRange : '';
     const oldPeriod = inside ? active.dataset.publicPeriod : '';
     const summaryWasOpen = content.querySelector('.public-summary-disclosure')?.open;
     const actions = ['selection-next', 'selection-back', 'selection-retry', 'return-availability', 'check-hold', 'submit-reservation', 'resolve-submission', 'repeat-submission', 'review-contact'];
@@ -142,7 +161,9 @@ export function mountSelection(host, controller, renderView = renderSelection) {
     }
     if (changedStep) focusPublicControl(host.querySelector('#selection-title'));
     else if (inside) {
-      const target = oldId ? host.querySelector(`#${oldId}`) : oldDate
+      const target = oldId ? host.querySelector(`#${oldId}`) : oldRange
+        ? host.querySelector(`[data-date-range="${oldRange}"]`)
+        : oldDate
         ? [...host.querySelectorAll('[data-selection-date]')].find((button) => button.dataset.selectionDate === oldDate)
         : oldPeriod ? [...host.querySelectorAll('[data-public-period]')].find((button) => button.dataset.publicPeriod === oldPeriod)
         : oldName

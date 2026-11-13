@@ -169,13 +169,26 @@ test('la tira muestra todos los días disponibles de la ventana sin flechas', as
   assert.doesNotMatch(html, /data-selection-shift|public-date-arrow/);
   await controller.setDate('2026-10-22');
   html = renderSelection(controller.getState());
-  const visible = [...html.matchAll(/data-selection-date="([^"]+)"/g)].map((match) => match[1]);
+  const visible = [...html.matchAll(/class="public-date-chip[^"]*"[^>]*data-selection-date="([^"]+)"/g)].map((match) => match[1]);
   assert.deepEqual(visible.slice(0, 3), ['2026-10-20', '2026-10-22', '2026-10-25']);
   assert.equal(visible.length, 9);
   await controller.setDate('2026-11-21');
   assert.equal(controller.getState().query.status, 'empty');
   assert.deepEqual(controller.getState().availableDates, ['2026-11-22']);
   assert.equal(calls.at(-1).query.hasta, '2026-12-11');
+});
+
+test('el calendario desactiva días sin ranuras públicas y consulta otro intervalo al avanzar', async () => {
+  const { controller, calls } = setup((path, { query }) => path === 'catalogo' ? catalog(query) : availability(query,
+    [{ inicioUtc: '2026-10-22T17:00:00.000Z', finUtc: '2026-10-22T17:30:00.000Z' }]
+      .filter((slot) => slot.inicioUtc.slice(0, 10) >= query.desde && slot.inicioUtc.slice(0, 10) <= query.hasta)));
+  await toDate(controller);
+  const html = renderSelection(controller.getState());
+  assert.match(html, /class="public-calendar-day [^"]*" type="button" disabled aria-label="miércoles, 21[^\"]*no disponible"/);
+  assert.match(html, /class="public-calendar-day [^"]*" type="button" data-selection-date="2026-10-22"/);
+  await controller.shiftDateRange(1);
+  assert.equal(calls.at(-1).query.desde, '2026-11-19');
+  assert.equal(controller.getState().dateRange.desde, '2026-11-19');
 });
 
 test('al consultar otra fecha la tira sigue visible y el horario se presenta sin radio visible ni aviso duplicado', async () => {
