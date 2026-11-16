@@ -9,7 +9,9 @@ test('la agenda conectada usa cuadrícula horaria y tarjeta de estado de la demo
   assert.match(html, /week-calendar single-day/);
   assert.match(html, /time-gutter/);
   assert.match(html, /calendar-event confirmada/);
-  assert.match(html, /top:98px/);
+  const scale = Number(html.match(/--hour-height:([\d.]+)px/)[1]);
+  assert.ok(scale >= 96);
+  assert.ok(html.includes(`top:${scale + 2}px`));
   assert.match(html, /Paciente &lt;QA&gt;/);
   assert.match(html, /America\/Tijuana/);
   assert.doesNotMatch(html, /lunch-block|data-slot-date/);

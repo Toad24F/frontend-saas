@@ -23,7 +23,7 @@ export function currentTimePosition(day, zones, now = new Date()) {
 }
 // Agrupar componentes conectados de huellas visuales, sin duplicar ni omitir citas.
 export function denseGroups(items, columnWidth, minimumWidth = 105) {
-  const sorted = items.map((x) => ({ ...x, from: clockMinutes(x.start), to: Math.max(clockMinutes(x.end), clockMinutes(x.start) + 30) })).sort((a, b) => a.from - b.from || a.id - b.id);
+  const sorted = items.map((x) => ({ ...x, from: clockMinutes(x.start), to: clockMinutes(x.end) })).sort((a, b) => a.from - b.from || a.id - b.id);
   const groups = [];
   let group = [], end = -1;
   function flush() {

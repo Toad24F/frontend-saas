@@ -9,7 +9,7 @@ for (const mode of ['connected', 'demo']) for (const width of [1366, 390]) {
     const attr = mode === 'demo' ? 'data-view' : 'data-m4-view';
     const dayAttr = mode === 'demo' ? 'data-day' : 'data-m4-date';
     await page.goto(url);
-    await expect(page.locator(`[${attr}="${width === 390 ? 'day' : 'week'}"]`)).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.locator(`[${attr}="week"]`)).toHaveAttribute('aria-pressed', 'true');
     await page.locator(`[${attr}="month"]`).click();
     await page.reload();
     await expect(page.locator(`[${attr}="month"]`)).toHaveAttribute('aria-pressed', 'true');

@@ -1,18 +1,39 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './support.js';
 import { portalUrl, rows } from './support.js';
+
+// La suite previa edita la semana y crea bloqueos del mismo profesional.
+// Restaurar solo estos fixtures efímeros evita heredar su oferta reducida.
+test.beforeAll(async () => {
+  const [{ id: personalId }] = await rows("SELECT id FROM usuarios WHERE email='qa-prof-1@example.test'");
+  const [{ id: sucursalId }] = await rows("SELECT id FROM sucursales WHERE negocio_id=1 ORDER BY id LIMIT 1");
+  await rows('DELETE FROM bloqueos_horario WHERE negocio_id=1 AND personal_id=?', [personalId]);
+  await rows('DELETE FROM horarios_personal WHERE negocio_id=1 AND personal_id=?', [personalId]);
+  for (let day = 0; day < 7; day++) {
+    await rows('INSERT INTO horarios_personal (negocio_id,personal_id,sucursal_id,dia_semana,orden,inicio_minutos,fin_minutos,activo) VALUES (1,?,?,?,0,480,1080,1)', [personalId, sucursalId, day]);
+  }
+});
 
 const dateAt = (offset) => new Date(Date.now() + offset * 86400000).toISOString().slice(0, 10);
 
 // Los selectores siguen controles accesibles; cada caso toma otra fecha para
 // evitar que sus citas y apartados compitan entre sí dentro de la base efímera.
+// El portal actual ofrece fechas del servidor mediante botones de calendario.
+async function selectDate(page, offset) {
+  const day = page.locator('.public-calendar-day[data-selection-date="' + dateAt(offset) + '"]');
+  await expect(day).toBeEnabled();
+  await day.click();
+}
+
 async function chooseSlot(page, offset, index = 0, business = 1, apart = true) {
   await page.goto(portalUrl(business));
   await page.getByRole('radio', { name: /Corte QA/ }).check();
   await page.getByRole('button', { name: 'Continuar' }).click();
   await expect(page.getByRole('heading', { name: 'Elige fecha y hora' })).toBeVisible();
-  await page.getByLabel('Fecha de tu cita').fill(dateAt(offset));
+  await selectDate(page, offset);
   await expect(page.locator('[data-slot]').nth(index)).toBeEnabled();
-  await page.locator('[data-slot]').nth(index).check();
+  // El radio se dibuja con una etiqueta: pulsar su superficie visible como el usuario.
+  await page.locator('.public-slot').nth(index).click();
+  await expect(page.locator('[data-slot]').nth(index)).toBeChecked();
   const selected = await page.locator('[data-slot]:checked').getAttribute('value');
   if (apart) {
     await page.getByRole('button', { name: 'Apartar este horario' }).click();
@@ -23,7 +44,9 @@ async function chooseSlot(page, offset, index = 0, business = 1, apart = true) {
 
 async function fillContact(page, notes = '') {
   await page.getByLabel('Nombre completo').fill('Cliente de prueba');
-  await page.getByLabel('Teléfono mexicano').fill('6141234567');
+  // Cada caso usa otro contacto para no agotar el cupo real de casos anteriores.
+  const phone = '614' + String(test.info().testId.split('').reduce((n, c) => (n * 31 + c.charCodeAt(0)) % 10000000, 0)).padStart(7, '0');
+  await page.getByLabel('Teléfono mexicano').fill(phone);
   await page.getByLabel(/Notas o motivo/).fill(notes);
 }
 
@@ -162,7 +185,7 @@ test('T119: teclado, foco y notas HTML se mantienen como texto seguro', async ({
     await page.getByRole('button', { name: 'Continuar' }).focus();
     await page.keyboard.press('Enter');
   }
-  await page.getByLabel('Fecha de tu cita').fill(dateAt(4));
+  await selectDate(page, 4);
   await expect(page.locator('[data-slot]').first()).toBeEnabled();
   await page.locator('[data-slot]').first().focus();
   await page.keyboard.press('Space');
@@ -238,7 +261,7 @@ test('T121: navegadores aislados disputan un horario sin doble ocupación', asyn
     await b.getByRole('radio', { name: /Corte QA/ }).check();
     await b.getByRole('button', { name: 'Continuar' }).click();
     await expect(b.getByRole('heading', { name: 'Elige fecha y hora' })).toBeVisible();
-    await b.getByLabel('Fecha de tu cita').fill(dateAt(6));
+    await selectDate(b, 6);
     await expect(b.locator('[data-slot]').first()).toBeVisible();
     // La disponibilidad descarta un apartado ajeno ya confirmado.
     expect(await b.locator(`[data-slot][value="${occupied}"]`).count()).toBe(0);

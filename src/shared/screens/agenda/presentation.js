@@ -32,9 +32,9 @@ const clock = (value) => {
   return `${String(Math.floor(seconds / 3600)).padStart(2, '0')}:${String(Math.floor(seconds % 3600 / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`;
 };
 export function eventLayout(items, firstMinute = 540, hourHeight = 96) {
-  // Reservar también la huella visual mínima evita superposición de citas breves sin cambiar su duración real.
-  const minimum = 44, gap = 4, visualMinutes = (minimum + gap) / hourHeight * 60;
-  const footprints = items.map((item) => ({ ...item, start: clock(minutes(item.start)), end: clock(Math.max(minutes(item.end), minutes(item.start) + visualMinutes)) }));
+  // Solo los intervalos reales generan columnas; la escala global garantiza legibilidad.
+  const gap = 4;
+  const footprints = items.map((item) => ({ ...item, start: clock(minutes(item.start)), end: clock(minutes(item.end)) }));
   const columns = calendarColumns(footprints);
   return new Map(items.map((item) => {
     const { lane, width } = columns.get(item.id);
@@ -45,6 +45,6 @@ export function eventLayout(items, firstMinute = 540, hourHeight = 96) {
       span++;
     }
     return [item.id, { top: (minutes(item.start) - firstMinute) / 60 * hourHeight + gap / 2,
-      height: Math.max((minutes(item.end) - minutes(item.start)) / 60 * hourHeight - gap, minimum), left: lane * width, width: width * span, baseWidth: width }];
+      height: Math.max(0, (minutes(item.end) - minutes(item.start)) / 60 * hourHeight - gap), left: lane * width, width: width * span, baseWidth: width }];
   }));
 }

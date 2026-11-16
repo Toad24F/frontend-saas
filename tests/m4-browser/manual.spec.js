@@ -34,7 +34,7 @@ async function fixture(page, role = 'recepcionista', theme = 'light') {
     else if (path === '/sucursales') data = [{ id: 1, nombre: 'Sucursal QA', activo: true, zonaHoraria: 'America/Chihuahua' }];
     else if (path === '/profesionales') data = [{ id: 1, nombre: 'Profesional QA', correo: 'qa@example.test', activo: true }];
     else if (path.endsWith('/sucursales')) data = [1];
-    else if (path.endsWith('/oferta')) data = { cuentaActiva: true, sucursales: [] };
+    else if (path.endsWith('/oferta')) data = { cuentaActiva: true, sucursales: [{ id: 1, nombre: 'Sucursal QA', atencionActiva: true, sucursalActiva: true }] };
     else if (path.endsWith('/cupo')) data = { limite: 5, activos: 1, disponibles: 4, limiteSucursalesActivas: 5, sucursalesActivas: 1 };
     else data = [];
     await route.fulfill({ json: data });

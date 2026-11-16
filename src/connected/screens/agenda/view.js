@@ -1,3 +1,4 @@
+import { resolveAgendaBranches } from '../../../shared/screens/agenda/filters.js';
 import { installQuickState } from './quick-state.js';
 import '../../../shared/screens/agenda/state-menu.css';
 import { agendaFrame } from '../../../shared/screens/agenda/frame.js';
@@ -25,7 +26,7 @@ import { registerLiveRefresh, watchRecord } from './live.js';
 import { privateError } from '../../modules/agenda/errors.js';
 import { createAgendaCache } from '../../modules/agenda/cache.js';
 import { readAgendaAttention } from '../../modules/agenda/attention.js';
-import { applyAgendaEffects, resetAgendaNavigation, renderAgendaPreserving } from '../../../shared/screens/agenda/navigation.js';
+import { applyAgendaEffects, resetAgendaNavigation, renderAgendaPreserving, agendaScrollAnchor, restoreAgendaScroll } from '../../../shared/screens/agenda/navigation.js';
 import '../../../shared/screens/agenda/utility.css';
 
 const client = createAgendaClient(api);
@@ -48,7 +49,17 @@ function reset() {
 window.addEventListener('cita-session-expired', reset);
 function ensureSession() {
   const next = `${user?.id}:${user?.negocioId}:${user?.sesionId}`;
-  if (identity !== next) { reset(); identity = next; state.date = todayCivil(); state.branch = state.professional = state.status = 'all'; state.search = ''; }
+  if (identity !== next) { reset(); identity = next; state.date = todayCivil(); state.branch = state.professional = state.status = 'all'; state.search = ''; state.agendaHistory = false; if (user.rol !== 'recepcionista') syncBranch(true); }
+}
+function syncBranch(initial = false) {
+  const result = resolveAgendaBranches({ branches: [...choices.branches].map(([id, name]) => ({ id, name })), professionals: list('professionals', state.tenantId), professional: user.rol === 'profesional' ? String(user.id) : state.professional, branch: state.branch, history: state.agendaHistory, initial });
+  if (initial) {
+    const catalog = list('branches', state.tenantId);
+    const initialModel = resolveAgendaBranches({ branches: catalog, professionals: list('professionals', state.tenantId), professional: user.rol === 'profesional' ? String(user.id) : state.professional, branch: state.branch, initial: true });
+    // Sin catálogo autorizado no hay una sede predeterminada que podamos afirmar.
+    if (catalog.length) state.branch = initialModel.branch;
+  } else state.branch = result.branch;
+  return result;
 }
 const filters = () => ({ ...calendarPeriod(state.calendarView, state.date), sucursalId: state.branch, personalId: user.rol === 'profesional' ? 'all' : state.professional, estado: state.status, busqueda: state.search, afectadas: affectedOnly });
 function rememberOptions(data) {
@@ -62,6 +73,7 @@ function rememberOptions(data) {
 }
 async function load(force = false, background = false) {
   const query = filters();
+  if (state.branch === 'none') { store.use(query, { ...calendarPeriod(state.calendarView, state.date), citas: [] }); return; }
   if (!force && store.state.key === JSON.stringify(query)) return;
   if (force && !background) { cache.clear(); attention.reset(); }
   const cached = !force && cache.peek(query);
@@ -87,6 +99,7 @@ async function load(force = false, background = false) {
       const control = focused?.outerHTML;
       const scroller = document.querySelector('.m4-agenda .calendar-scroll, .m4-agenda .month-scroll');
       const pageTop = window.scrollY;
+      const anchor = agendaScrollAnchor();
       const position = scroller && { left: scroller.scrollLeft, top: scroller.scrollTop, focused: focused === scroller };
       render();
       // Reconstruir el calendario no cambia la columna/hora que se estaba explorando con teclado o en móvil.
@@ -95,7 +108,7 @@ async function load(force = false, background = false) {
         nextScroller.scrollLeft = position.left; nextScroller.scrollTop = position.top;
         if (position.focused) nextScroller.focus({ preventScroll: true });
       }
-      window.scrollTo({ top: pageTop, behavior: 'instant' });
+      restoreAgendaScroll(anchor, pageTop);
       const nextForm = document.querySelector('#m4-agenda-filters');
       for (const [key, value] of draft || []) if (nextForm?.elements[key]) nextForm.elements[key].value = value;
       if (document.querySelector('#app-dialog')?.open) {
@@ -103,14 +116,14 @@ async function load(force = false, background = false) {
         return;
       }
       if (focusName) {
-        const next = nextForm?.elements[focusName]; next?.focus();
+        const next = nextForm?.elements[focusName]; next?.focus({ preventScroll: true });
         if (selection?.[0] != null && next?.setSelectionRange) next.setSelectionRange(...selection);
       }
       else if (control) {
         // Buscar el mismo control por sus atributos propios, sin insertar HTML de la respuesta.
         const attr = [...(focused?.attributes || [])].find((item) => item.name.startsWith('data-m4-'));
-        if (attr) document.querySelector(`[${attr.name}="${attr.value}"]`)?.focus();
-        else if (focused?.type === 'submit') nextForm?.querySelector('[type="submit"]')?.focus();
+        if (attr) document.querySelector(`[${attr.name}="${attr.value}"]`)?.focus({ preventScroll: true });
+        else if (focused?.type === 'submit') nextForm?.querySelector('[type="submit"]')?.focus({ preventScroll: true });
       }
     }
     if (background && previous && store.state.data && JSON.stringify(previous) !== JSON.stringify(store.state.data)) window.dispatchEvent(new Event('m4-agenda-updated'));
@@ -121,19 +134,19 @@ registerLiveRefresh(() => {
   if (user && state.page === 'agenda' && !store.state.busy && !store.state.refreshing) return Promise.all([load(true, true), loadAttention(true)]);
 });
 // Mismos filtros compactos e iconos que la demo; cambian únicamente los nombres del contrato HTTP.
-const select = (name, label, allLabel, options, value, image) => `<label class="filter-select">${icon(image)}<select name="${name}" aria-label="${label}"><option value="all">${allLabel}</option>${[...options].map(([id, text]) => `<option value="${esc(id)}" ${String(id) === String(value) ? 'selected' : ''}>${esc(text)}</option>`).join('')}</select>${icon('down')}</label>`;
+const select = (name, label, allLabel, options, value, image) => `<label class="filter-select">${icon(image)}<select name="${name}" aria-label="${label}">${value === 'none' ? '<option value="none" selected>Sin sucursales asignadas</option>' : ''}<option value="all" ${value === 'all' ? 'selected' : ''}>${allLabel}</option>${[...options].map(([id, text]) => `<option value="${esc(id)}" ${String(id) === String(value) ? 'selected' : ''}>${esc(text)}</option>`).join('')}</select>${icon('down')}</label>`;
 
 function calendar(data) {
   const period = calendarPeriod(state.calendarView, state.date);
   const days = Array.from({ length: state.calendarView === 'day' ? 1 : 7 }, (_, index) => civilAdd(period.desde, index));
-  const options = { manageStates: canManageAppointments(user?.rol), attention: attention.state.key === JSON.stringify(attentionQuery()) ? attention.state.data : null, branch: state.branch, columnWidth: Math.max(160, ((document.querySelector('.agenda-calendar')?.clientWidth || window.innerWidth - 300) - 58) / 7) };
+  const options = { professional: user.rol === 'profesional' ? String(user.id) : state.professional, professionals: list('professionals', state.tenantId), manageStates: canManageAppointments(user?.rol), attention: attention.state.key === JSON.stringify(attentionQuery()) ? attention.state.data : null, branch: state.branch, columnWidth: Math.max(160, ((document.querySelector('.agenda-calendar')?.clientWidth || window.innerWidth - 300) - 58) / 7) };
   const content = state.calendarView === 'month' ? renderMonth(state.date, data.citas, todayCivil(), options) : renderTimeline(days, data.citas, todayCivil(), options);
   // Incluso un periodo vacío mantiene la cuadrícula para conservar la referencia temporal de la demo.
   return `${!data.citas.length ? '<p class="m4-empty-summary" role="status">Sin citas en este periodo</p>' : ''}${content}`;
 }
 function attentionQuery() {
   const person = user?.rol === 'profesional' ? user.id : state.professional;
-  return state.calendarView !== 'month' && person && person !== 'all' && state.branch !== 'all'
+  return state.calendarView !== 'month' && person && person !== 'all' && state.branch !== 'all' && state.branch !== 'none'
     ? { ...calendarPeriod(state.calendarView, state.date), personalId: person, sucursalId: state.branch } : null;
 }
 async function loadAttention(force = false) {
@@ -151,6 +164,7 @@ async function loadAttention(force = false) {
 export function agenda() {
   ensureSession();
   rememberOptions(null);
+  const branchModel = syncBranch();
   void load();
   const model = store.state;
   const tenant = tenantById(state.tenantId);
@@ -160,10 +174,10 @@ export function agenda() {
   void loadAttention(); applyAgendaEffects();
   const attentionModel = attentionQuery() ? attention.state : null;
   const note = !attentionModel ? "" : attentionModel.busy ? `<p class="agenda-attention-note" role="status">Consultando atención…</p>` : attentionModel.error ? `<div class="agenda-attention-note" role="status">No se pudo comprobar la atención. ${esc(privateError(attentionModel.error).message)} <button class="btn btn-light" data-m4-attention-retry>Reintentar atención</button></div>` : attentionModel.data?.omisiones.some((x) => String(x.sucursalId) === String(state.branch)) ? `<p class="agenda-attention-note" role="status">Atención incompleta en algunas fechas por cambios de hora local. Esas fechas no se sombrean.</p>` : attentionModel.data ? `<p class="agenda-attention-note">La trama indica intervalos sin atención; las citas existentes permanecen visibles.</p>` : "";
-  const filterMarkup = select("sucursalId", "Sucursal", "Todas las sucursales", choices.branches, state.branch, "pin") + (user.rol !== "profesional" ? select("personalId", "Profesional", "Todos los profesionales", choices.people, state.professional, "users") : "") + select("estado", "Estado", "Todos los estados", new Map(Object.entries(statuses)), state.status, "circleCheck");
+  const filterMarkup = (user.rol !== "profesional" ? select("personalId", "Profesional", "Todos los profesionales", choices.people, state.professional, "users") : "") + select("sucursalId", "Sucursal", "Todas las sucursales", new Map(branchModel.options.map((b) => [b.id, b.name])), state.branch, "pin") + select("estado", "Estado", "Todos los estados", new Map(Object.entries(statuses)), state.status, "circleCheck") + ((state.professional !== "all" || user.rol === "profesional") && branchModel.known ? `<label class="agenda-history-filter"><input type="checkbox" data-m4-agenda-history ${state.agendaHistory ? "checked" : ""}> Consultar otras sucursales (histórico)</label>` : "");
   const warning = model.refreshError ? `<div class="m4-error" data-live-warning role="status"><strong>Agenda sin actualizar</strong><p>Se muestra la última consulta confirmada. ${esc(privateError(model.refreshError).message)}</p><button class="btn btn-light" data-m4-retry>Reintentar consulta</button></div>` : "";
   const body = warning + (model.busy ? calendarSkeleton(state.calendarView) : model.error ? errorPanel(model.error, "data-m4-retry") : model.data ? calendar(model.data) : "");
-  return pageHead("Agenda", "Consulta y da seguimiento a las citas de tu negocio.", portal) + agendaFrame({ title: calendarTitle(state.calendarView, state.date), view: state.calendarView, refreshing: model.refreshing, filters: filterMarkup, search: state.search, summary: model.data?.citas, busy: model.busy, body, note: note, affectedOnly, zones });
+  return pageHead("Agenda", "Consulta y da seguimiento a las citas de tu negocio.", portal) + agendaFrame({ title: calendarTitle(state.calendarView, state.date), view: state.calendarView, refreshing: model.refreshing, filters: filterMarkup, search: state.search, summary: model.data?.citas, busy: model.busy, body, note: (user.rol === "recepcionista" ? '<p class="agenda-catalog-note">Las opciones de profesionales y sucursales proceden de citas consultadas; no constituyen un catálogo completo de asignaciones.</p>' : state.branch === "none" ? '<p class="agenda-attention-note" role="status">Sin sucursales asignadas. Puedes consultar otras sucursales para revisar el histórico.</p>' : "") + note, affectedOnly, zones });
 }
 
 // Detalle e historial se consultan por separado: errores de eventos no ocultan el snapshot autorizado.
@@ -275,7 +289,9 @@ function applyFilters(form) {
   const focusedName = document.activeElement?.name;
   const selection = document.activeElement?.selectionStart;
   const data = new FormData(form);
+  if ((data.get('personalId') || 'all') !== state.professional) state.agendaHistory = false;
   state.branch = data.get('sucursalId'); state.professional = data.get('personalId') || 'all'; state.status = data.get('estado'); state.search = data.get('busqueda').trim();
+  syncBranch();
   void load(); render();
   const control = document.querySelector('#m4-agenda-filters')?.elements[focusedName || 'busqueda'];
   control?.focus();
@@ -287,6 +303,7 @@ document.addEventListener('submit', (event) => {
   event.preventDefault(); applyFilters(event.target);
 });
 document.addEventListener('change', (event) => {
+  if (event.target.matches('[data-m4-agenda-history]')) { state.agendaHistory = event.target.checked; syncBranch(); render(); document.querySelector('[data-m4-agenda-history]')?.focus(); return; }
   if (event.target.matches('[data-m4-affected]')) { affectedOnly = event.target.checked; void load(); render(); document.querySelector('[data-m4-affected]')?.focus(); return; }
   if (event.target.closest('#m4-agenda-filters') && event.target.tagName === 'SELECT') applyFilters(event.target.form);
 });

@@ -509,7 +509,7 @@
   min-width: 350px;
 }
 .single-day .calendar-event {
-  max-width: 600px;
+  max-width: none;
 }
 .single-day .calendar-event strong {
   font-size: 13px;

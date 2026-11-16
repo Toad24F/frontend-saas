@@ -6,8 +6,8 @@ export function readAgendaView(mobile, mode = 'connected', storage) {
   try {
     const saved = (storage ?? globalThis.localStorage).getItem(key(mode));
     if (views.has(saved)) return saved;
-  } catch { /* Sin almacenamiento, conservar el inicio adaptado al tamaño. */ }
-  return mobile ? 'day' : 'week';
+  } catch { /* Sin almacenamiento, conservar el inicio semanal. */ }
+  return 'week';
 }
 export function saveAgendaView(view, mode = 'connected', storage) {
   if (!views.has(view)) return;

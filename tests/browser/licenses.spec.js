@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './support.js';
 import { rows } from './support.js';
 
 const origin = () => process.env.PORTAL_TEST_ORIGIN;
@@ -118,9 +118,12 @@ test('FALA-T030: detalle y plazo visibles en escritorio y móvil, claro y oscuro
   await page.screenshot({ path: testInfo.outputPath('license-mobile-dark.png'), fullPage: true, animations: 'disabled' });
   await page.getByRole('button', { name: 'Programar suspensión' }).click();
   const submit = page.getByRole('dialog').getByRole('button', { name: 'Programar suspensión' });
-  expect(await submit.evaluate((button) => {
+  // Esperar el final de la transición y aceptar también un hijo del botón.
+  // Un elemento ajeno superpuesto sigue haciendo fallar esta comprobación.
+  await expect.poll(() => submit.evaluate((button) => {
     const rect = button.getBoundingClientRect();
-    return document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2) === button;
+    const hit = document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2);
+    return hit === button || button.contains(hit);
   })).toBe(true);
   await page.screenshot({ path: testInfo.outputPath('license-dialog-mobile-dark.png'), animations: 'disabled' });
   await page.getByRole('dialog').getByRole('button', { name: 'Cerrar' }).click();

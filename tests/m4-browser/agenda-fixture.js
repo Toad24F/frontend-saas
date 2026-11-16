@@ -14,7 +14,12 @@ export async function setup(page, role = 'recepcionista', theme = 'light') {
       const desde = url.searchParams.get('desde'), hasta = url.searchParams.get('hasta');
       if (url.searchParams.get('busqueda') === 'error') { await route.fulfill({ status: 503, json: { message: 'Servicio temporalmente no disponible.' } }); return; }
       if (url.searchParams.get('busqueda') === 'exceso') { await route.fulfill({ status: 400, json: { message: 'La consulta supera 1.000 citas. Acota el periodo o los filtros.' } }); return; }
-      const localToday = await page.evaluate(() => new Date().toLocaleDateString('en-CA'));
+      let localToday;
+      try { localToday = await page.evaluate(() => new Date().toLocaleDateString('en-CA')); }
+      catch (error) {
+        if (!/context was destroyed|closed/i.test(error.message)) throw error;
+        await route.abort().catch(() => {}); return; // Petición de una navegación que ya terminó.
+      }
       const day = desde <= localToday && localToday <= hasta ? localToday : desde;
       const cita = { id: 7, version: 2, folio: 'M4-0007', estado: 'confirmada', origen: 'manual', nombreContacto: 'Paciente <QA>', nombreServicio: 'Consulta histórica', nombreSucursal: 'Sucursal histórica', nombreProfesional: 'Profesional QA', sucursalId: 1, personalId: 1, fechaLocal: day, horaInicio: '07:15:00', fechaFinLocal: day, horaFin: '08:00:00', zonaHoraria: 'America/Tijuana', causas: [{ codigo: 'servicio_inactivo' }] };
       data = { desde, hasta, citas: url.searchParams.get('busqueda') === 'vacío' ? [] : [cita] };
@@ -23,7 +28,7 @@ export async function setup(page, role = 'recepcionista', theme = 'light') {
       const pagina = Number(url.searchParams.get('pagina'));
       data = { pagina, limite: 50, hayMas: pagina === 1, eventos: [{ id: pagina === 1 ? '9007199254740993' : '9007199254740994', accion: pagina === 1 ? 'alta' : 'cambio_horario', ocurridoEn: '2026-11-11T15:00:00Z', versionResultante: pagina, origenActor: pagina === 1 ? 'portal_publico' : 'personal', actorUsuarioId: pagina === 1 ? null : 1, valoresAntes: null, valoresDespues: { estado: 'confirmada' }, motivo: 'Motivo <seguro>' }] };
     } else if (path.endsWith('/cupo')) data = { limite: 5, activos: 0, disponibles: 5, limiteSucursalesActivas: 5, sucursalesActivas: 0 };
-    else if (path.endsWith('/oferta')) data = { cuentaActiva: true, sucursales: [] };
+    else if (path.endsWith('/oferta')) data = { cuentaActiva: true, sucursales: role === 'profesional' ? [{ id: 1, nombre: 'Sucursal histórica', atencionActiva: true, sucursalActiva: true }] : [] };
     else if (['/servicios', '/sucursales', '/profesionales', '/recepcionistas', '/bloqueos'].includes(path) || path.endsWith('/horario') || path.endsWith('/servicios')) data = [];
     else { await route.fulfill({ status: 404, json: { message: 'Ruta no preparada' } }); return; }
     await route.fulfill({ json: data });

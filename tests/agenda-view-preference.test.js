@@ -6,9 +6,9 @@ const memory = () => {
   const values = new Map();
   return { getItem: (key) => values.get(key) ?? null, setItem: (key, value) => values.set(key, value) };
 };
-test('primera visita elige Día en móvil y Semana en escritorio; ignora valores inválidos', () => {
+test('primera visita elige Semana en móvil y escritorio; ignora valores inválidos', () => {
   const storage = memory();
-  assert.equal(readAgendaView(true, 'connected', storage), 'day');
+  assert.equal(readAgendaView(true, 'connected', storage), 'week');
   assert.equal(readAgendaView(false, 'connected', storage), 'week');
   storage.setItem('cita-agenda-view:connected', 'invalid');
   assert.equal(readAgendaView(false, 'connected', storage), 'week');
@@ -28,7 +28,7 @@ test('la elección explícita prevalece sobre el tamaño y la demo no modifica c
 });
 test('almacenamiento bloqueado conserva valores iniciales y no impide usar el calendario', () => {
   const storage = { getItem() { throw new Error('Bloqueado'); }, setItem() { throw new Error('Bloqueado'); } };
-  assert.equal(readAgendaView(true, 'connected', storage), 'day');
+  assert.equal(readAgendaView(true, 'connected', storage), 'week');
   assert.equal(readAgendaView(false, 'connected', storage), 'week');
   assert.doesNotThrow(() => saveAgendaView('month', 'connected', storage));
 });

@@ -54,7 +54,7 @@ test('T090–T092: vistas, filtros locales, error de refresco, detalle e histori
   await page.getByRole('button', { name: 'Actualizar agenda', exact: true }).click();
   await expect(page.locator('[data-m4-appointment="7"]')).toBeVisible();
   const reads = seen.filter((x) => x === 'GET /citas').length;
-  await page.getByLabel('Sucursal').selectOption('1');
+  await page.getByLabel('Sucursal', { exact: true }).selectOption('1');
   await page.getByLabel('Profesional', { exact: true }).selectOption('1');
   await page.getByLabel('Estado', { exact: true }).selectOption('confirmada');
   expect(seen.filter((x) => x === 'GET /citas').length).toBe(reads);
@@ -183,6 +183,7 @@ test('paridad con demo: métricas, filtros, cuadrícula y tarjetas en ambos tema
     await page.goto('/admin/agenda?demo=1'); await connected.goto('/admin/agenda');
     await expect(connected.locator('[data-m4-appointment]').first()).toBeVisible();
     await expect(page.locator('[data-appointment]').first()).toBeVisible();
+    await connected.getByLabel('Sucursal', { exact: true }).selectOption(await page.getByLabel('Sucursal', { exact: true }).inputValue());
     for (const selector of ['.page-heading h1', '.agenda-summary', '.calendar-panel', '.calendar-toolbar', '.filter-select', '.segmented', '.week-header', '.calendar-event.confirmada']) {
       await expect.poll(async () => JSON.stringify(await inspect(connected, selector))).toBe(JSON.stringify(await inspect(page, selector)));
     }

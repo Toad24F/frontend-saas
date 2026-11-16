@@ -432,6 +432,7 @@ document.addEventListener('change', (e) => {
   if (e.target.dataset.branchFilter) { applyBranchFilters(); return; }
   if (e.target.dataset.filter) {
     state[e.target.dataset.filter] = e.target.value;
+    if (e.target.dataset.filter === 'professional') state.agendaHistory = false;
     render();
   }
 });

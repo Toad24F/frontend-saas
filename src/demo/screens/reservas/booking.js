@@ -332,7 +332,8 @@ document.addEventListener('submit', (e) => {
     booking.hold = null;
     booking.step = 6;
     state.date = booking.day;
-    state.branch = state.professional = state.status = 'all';
+    state.branch = String(booking.confirmed.branchId);
+    state.professional = state.status = 'all';
     redraw();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   } catch (error) {
