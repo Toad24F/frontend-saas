@@ -88,6 +88,8 @@
 .agenda-calendar .calendar-event .event-time { grid-area: 1 / 2; min-width: 0; }
 .agenda-calendar .calendar-event .event-service { grid-area: 2 / 1; }
 .agenda-calendar .calendar-event .event-branch { grid-area: 2 / 2; }
+.agenda-calendar .single-day.by-professional .calendar-event .event-time { justify-content: flex-end; }
+.agenda-calendar .single-day.by-professional .calendar-event .event-branch { text-align: right; }
 .agenda-calendar .calendar-event .event-professional { grid-area: 3 / 1; }
 .agenda-calendar .calendar-event .event-cause { display: none; }
 .agenda-calendar .calendar-event[data-density='brief'] { padding-block: 3px; }
@@ -108,6 +110,9 @@
   .agenda-calendar .calendar-event[data-density='tiny'] .event-client { grid-area: 1 / 1 / 2 / 3; }
 }
 @media (max-width: 767px) {
+  .agenda-calendar .single-day.by-professional.all-branches {
+    --agenda-professional-column-width: 310px;
+  }
   .agenda-calendar .calendar-event .event-time { justify-content: flex-end; }
   .agenda-calendar .calendar-event .event-branch { text-align: right; }
 }

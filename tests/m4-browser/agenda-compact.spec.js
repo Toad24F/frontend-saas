@@ -8,7 +8,17 @@ for (const width of [1366, 390]) for (const theme of ['light', 'dark']) {
     await page.goto('/admin/agenda');
     await page.locator('[data-m4-view="day"]').click();
     await expect(page.locator('.calendar-event')).toHaveCount(1);
+    if (width === 390) {
+      expect(await page.locator('.day-column').evaluate((el) => el.getBoundingClientRect().width)).toBeGreaterThanOrEqual(890);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    }
     const card = page.locator('.calendar-event');
+    await expect(card.locator('.event-time')).toHaveCSS('justify-content', 'flex-end');
+    await expect(card.locator('.event-branch')).toHaveCSS('text-align', 'right');
+    await page.getByLabel('Sucursal', { exact: true }).selectOption('1');
+    await expect(card.locator('.event-time')).toHaveCSS('justify-content', 'flex-end');
+    await expect(card.locator('.event-branch')).toHaveCount(0);
+    await page.getByLabel('Sucursal', { exact: true }).selectOption('all');
     await expect.poll(() => card.evaluate((el) => Math.abs(el.querySelector("strong").getBoundingClientRect().y - el.querySelector(".event-time").getBoundingClientRect().y))).toBeLessThan(1);
     const geometry = await card.evaluate((el) => {
       const rect = (s) => el.querySelector(s).getBoundingClientRect();
