@@ -89,7 +89,7 @@ test('atención fallida u omitida nunca inventa un sombreado en la fecha afectad
   await expect(page.locator('.agenda-attention-note')).toContainText('No se pudo comprobar');
   await expect(page.locator('.agenda-no-attention')).toHaveCount(0);
   fail = false;
-  await page.getByRole('button', { name: 'Reintentar atención' }).click();
+  await page.getByRole('button', { name: 'Actualizar agenda' }).click();
   await expect(page.locator('.agenda-attention-note')).toContainText('Atención incompleta');
   await expect(page.locator('.day-column').first().locator('.agenda-no-attention')).toHaveCount(0);
 });

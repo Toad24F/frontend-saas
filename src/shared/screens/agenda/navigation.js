@@ -23,6 +23,7 @@ export function renderAgendaPreserving(render) {
   const next = name ? document.getElementsByName(name)[0] : attribute ? [...document.querySelectorAll(`[${attribute.name}]`)].find((x) => x.getAttribute(attribute.name) === attribute.value) : null;
   next?.focus({ preventScroll: true });
 }
+const agendaViewportTop = () => (document.querySelector('.topbar')?.getBoundingClientRect().height || 0) + (matchMedia('(max-width: 767px)').matches ? ['.week-header'] : ['.agenda-toolbar', '.calendar-filters', '.week-header']).reduce((sum, selector) => sum + (document.querySelector('.agenda-calendar ' + selector)?.getBoundingClientRect().height || 0), 0) + 12;
 const scroller = () => document.querySelector('.agenda-calendar .calendar-scroll');
 export function handleAgendaNavigation(event, state, render) {
   const group = event.target.closest('[data-agenda-density]');
@@ -45,17 +46,21 @@ export function applyAgendaEffects() {
   queueMicrotask(() => {
     const root = document.querySelector('.agenda-calendar');
     if (!root) return;
+    mountAgendaHeader(root);
     if (root !== observedRoot && typeof ResizeObserver !== 'undefined') {
       observer?.disconnect(); observedRoot = root;
       const capacity = () => Math.max(1, Math.floor(((Math.max(1178, root.clientWidth) - 58) / 7) / 105));
       let previousCapacity = capacity();
       observer = new ResizeObserver(() => {
         if (!root.isConnected) { observer.disconnect(); return; }
-        fitAgendaScale(root); updateAgendaClock();
+        updateAgendaDimensions(root); fitAgendaScale(root); updateAgendaClock();
         const next = capacity();
         if (next !== previousCapacity) { previousCapacity = next; window.dispatchEvent(new Event('agenda-layout-change')); }
       });
       observer.observe(root);
+      for (const el of root.querySelectorAll('.agenda-toolbar, .calendar-filters, .agenda-header-scroll')) observer.observe(el);
+      const topbar = document.querySelector('.topbar');
+      if (topbar) observer.observe(topbar);
       const probe = document.createElement('span');
       probe.className = 'agenda-scale-probe';
       probe.setAttribute('aria-hidden', 'true');
@@ -65,6 +70,7 @@ export function applyAgendaEffects() {
       styleObserver = new MutationObserver(() => { fitAgendaScale(root); updateAgendaClock(); });
       for (const target of [document.documentElement, root]) styleObserver.observe(target, { attributes: true, attributeFilter: ['style', 'class'] });
     }
+    updateAgendaDimensions(root);
     fitAgendaScale(root);
     updateAgendaClock();
     if (pendingReturn && root.querySelector('.week-calendar:not(.single-day)')) {
@@ -82,7 +88,7 @@ export function applyAgendaEffects() {
       if (selected.length) {
         const scroll = scroller();
         if (scroll) { const box = selected[0].getBoundingClientRect(); scroll.scrollLeft += box.left - scroll.getBoundingClientRect().left - 70; }
-        window.scrollTo({ top: window.scrollY + selected[0].getBoundingClientRect().top - 100, behavior: 'instant' });
+        window.scrollTo({ top: window.scrollY + selected[0].getBoundingClientRect().top - agendaViewportTop(), behavior: 'instant' });
         selected[0].focus({ preventScroll: true });
         const announcement = root.querySelector('[data-agenda-announcement]');
         if (announcement) announcement.textContent = `${selected.length} citas en el tramo seleccionado`;
@@ -113,18 +119,46 @@ if (typeof window !== 'undefined') {
 // Conserva la hora que se está explorando, incluso al cambiar la escala en un refresco.
 export function agendaScrollAnchor() {
   const body = document.querySelector('.agenda-calendar .week-body');
-  if (!body || body.getBoundingClientRect().top > 100) return null;
+  if (!body || body.getBoundingClientRect().top > agendaViewportTop()) return null;
   const grid = body.closest('.week-calendar');
   const scale = parseFloat(grid.style.getPropertyValue('--hour-height'));
-  return { minute: Number(grid.dataset.firstHour) * 60 + (100 - body.getBoundingClientRect().top) / scale * 60 };
+  return { minute: Number(grid.dataset.firstHour) * 60 + (agendaViewportTop() - body.getBoundingClientRect().top) / scale * 60 };
 }
 export function restoreAgendaScroll(anchor, fallback) {
   const body = document.querySelector('.agenda-calendar .week-body');
   if (anchor && body) {
     const grid = body.closest('.week-calendar');
     const scale = parseFloat(grid.style.getPropertyValue('--hour-height'));
-    window.scrollTo({ top: window.scrollY + body.getBoundingClientRect().top + (anchor.minute / 60 - Number(grid.dataset.firstHour)) * scale - 100, behavior: 'instant' });
+    window.scrollTo({ top: window.scrollY + body.getBoundingClientRect().top + (anchor.minute / 60 - Number(grid.dataset.firstHour)) * scale - agendaViewportTop(), behavior: 'instant' });
   } else window.scrollTo({ top: fallback, behavior: 'instant' });
+}
+function mountAgendaHeader(root) {
+  const scroll = root.querySelector('.calendar-scroll'), grid = scroll?.querySelector('.week-calendar');
+  const header = grid?.querySelector('.week-header');
+  if (!header || scroll.querySelector('[data-agenda-skeleton]')) return;
+  const host = document.createElement('div');
+  host.className = 'agenda-header-scroll' + (grid.classList.contains('single-day') ? ' single-day' : '');
+  host.setAttribute('aria-label', 'Encabezado del calendario');
+  host.tabIndex = 0;
+  scroll.before(host); host.append(header);
+  const sync = (from, to) => { if (Math.abs(from.scrollLeft - to.scrollLeft) > 1) to.scrollLeft = from.scrollLeft; };
+  scroll.addEventListener('scroll', () => sync(scroll, host), { passive: true });
+  host.addEventListener('scroll', () => sync(host, scroll), { passive: true });
+}
+function updateAgendaDimensions(root) {
+  const width = Math.max(1, ((root.querySelector('.calendar-scroll')?.clientWidth || root.clientWidth) - 58) / 3);
+  const height = document.querySelector('.topbar')?.getBoundingClientRect().height || 0;
+  const toolbar = root.querySelector('.agenda-toolbar')?.getBoundingClientRect().height || 0;
+  const filters = root.querySelector('.calendar-filters')?.getBoundingClientRect().height || 0;
+  const headerHeight = root.querySelector('.week-header')?.getBoundingClientRect().height || 0;
+  for (const [key, value] of [['--agenda-desktop-column-width', width + 'px'], ['--agenda-topbar-height', height + 'px'], ['--agenda-toolbar-height', toolbar + 'px'], ['--agenda-filters-height', filters + 'px'], ['--agenda-header-height', headerHeight + 'px']]) {
+    if (root.style.getPropertyValue(key) !== value) root.style.setProperty(key, value);
+  }
+  const body = root.querySelector('.week-body'), header = root.querySelector('.agenda-header-scroll .week-header');
+  if (body && header) {
+    header.style.width = body.getBoundingClientRect().width + 'px';
+    header.style.gridTemplateColumns = getComputedStyle(body).gridTemplateColumns;
+  }
 }
 function fitAgendaScale(root) {
   const grid = root.querySelector('.week-calendar');

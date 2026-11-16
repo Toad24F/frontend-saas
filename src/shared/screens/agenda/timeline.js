@@ -32,7 +32,9 @@ export function renderTimeline(days, appointments, today, options = {}) {
   const people = new Map((options.professionals || []).filter((p) => p.active !== false && (options.branch === 'all' || !Array.isArray(p.branchIds) || p.branchIds.includes(Number(options.branch)))).map((p) => [p.id, p.name]));
   // Las citas históricas siguen visibles aunque el profesional ya no figure en el catálogo.
   for (const item of segments) people.set(item.personalId, people.get(item.personalId) || historical(item.nombreProfesional));
-  const headings = byProfessional && people.size ? [...people].sort((a, b) => a[1].localeCompare(b[1], 'es') || a[0] - b[0]).map(([person, name]) => ({ day: days[0], person, name })) : days.map((day) => ({ day }));
+  const counts = new Map();
+  for (const item of segments) counts.set(item.personalId, (counts.get(item.personalId) || 0) + 1);
+  const headings = byProfessional && people.size ? [...people].sort((a, b) => (counts.get(b[0]) || 0) - (counts.get(a[0]) || 0) || a[1].localeCompare(b[1], 'es') || a[0] - b[0]).map(([person, name]) => ({ day: days[0], person, name })) : days.map((day) => ({ day }));
   const showProfessional = !single && options.professional === 'all';
   const showBranch = options.branch === 'all';
   const layouts = headings.map((heading) => {
@@ -44,7 +46,7 @@ export function renderTimeline(days, appointments, today, options = {}) {
     return { ...heading, items, groups, grouped, lanes, base };
   });
   const laneCount = layouts.reduce((sum, x) => sum + x.lanes, 0);
-  const minWidth = byProfessional ? `calc(58px + ${laneCount} * var(--agenda-professional-column-width, 260px))` : `${single ? 58 + laneCount * 260 : 1178}px`;
+  const minWidth = byProfessional ? `calc(58px + ${layouts.length} * var(--agenda-professional-column-width, 260px))` : `${single ? 58 + laneCount * 260 : 1178}px`;
   // Estimación conservadora de líneas con la tipografía de 13px; el navegador verifica
   // la altura real tras renderizar y puede aumentar uniformemente la escala si hace falta.
   const requiredHeight = (item, width) => {
@@ -63,7 +65,7 @@ export function renderTimeline(days, appointments, today, options = {}) {
   hourHeight = Math.ceil(hourHeight);
   for (const layout of layouts) layout.columns = eventLayout(layout.items, firstHour * 60, hourHeight);
   const lanes = Math.max(1, ...layouts.map((x) => x.lanes));
-  const grid = single ? layouts.map((x) => x.lanes + 'fr').join(' ') : 'repeat(7,minmax(0,1fr))';
+  const grid = byProfessional ? `repeat(${layouts.length},minmax(0,1fr))` : single ? layouts.map((x) => x.lanes + 'fr').join(' ') : 'repeat(7,minmax(0,1fr))';
   return `${!single ? '<p class="calendar-scroll-hint">Los tramos agrupados abren el día completo. Desplázate para ver todos los días.</p>' : (lanes > 1 || byProfessional) ? '<p class="calendar-scroll-hint">Desplázate horizontalmente para ver los profesionales y sus citas.</p>' : ''}<div class="calendar-scroll" tabindex="0" aria-label="Calendario de citas por horas"><div class="week-calendar ${single ? 'single-day' : ''} ${byProfessional ? 'by-professional' : ''} ${showBranch ? 'all-branches' : ''}" data-first-hour="${firstHour}" style="--days:${layouts.length};--agenda-columns:${grid};--hour-height:${hourHeight}px;min-width:${minWidth}"><div class="week-header"><span class="time-header">Hora local</span>${layouts.map(({ day, items, person, name }) => `<button class="day-header ${day === today ? 'is-today' : ''}" ${dayAttr}="${day}"><span>${esc(dateLabel(day).replace('.', ''))}</span><strong>${Number(day.slice(-2))}</strong>${person != null ? `<b class="professional-heading">${esc(name)}</b>` : ''}<small>${items.length} ${items.length === 1 ? 'cita' : 'citas'}</small></button>`).join('')}</div><div class="week-body" style="height:${hours * hourHeight}px"><div class="time-gutter">${Array.from({ length: hours + 1 }, (_, index) => `<span style="top:${index * hourHeight}px">${String(firstHour + index).padStart(2, '0')}:00</span>`).join('')}</div>${layouts.map(({ day, items, columns, groups, grouped, person }) => {
     const model = person != null ? options.attentionByProfessional?.[person] : null;
     const data = person != null ? model?.data : options.attention;

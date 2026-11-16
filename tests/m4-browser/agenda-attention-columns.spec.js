@@ -26,7 +26,7 @@ for (const width of [1366, 390]) for (const theme of ['light', 'dark']) {
     await expect(two.locator('.agenda-no-attention')).toHaveCount(0);
     await expect(two).toContainText('No se pudo consultar');
     failure = false;
-    await page.getByRole('button', { name: 'Reintentar atención', exact: true }).click();
+    await page.getByRole('button', { name: 'Actualizar agenda', exact: true }).click();
     await expect(two.locator('.agenda-no-attention')).toHaveCount(1);
     await page.getByLabel('Sucursal', { exact: true }).selectOption('1');
     await expect(one.locator('.agenda-no-attention')).toHaveCount(1);
