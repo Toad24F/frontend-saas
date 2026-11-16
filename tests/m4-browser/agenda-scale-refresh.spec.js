@@ -12,9 +12,11 @@ test('refresco conserva la hora explorada y escala también marcas y reloj', asy
     ] } });
   });
   await page.goto('/admin/agenda');
+  await page.evaluate(() => document.documentElement.style.setProperty('--agenda-hour-max', '2000px'));
   await page.locator('[data-m4-view="day"]').click();
   const grid = page.locator('.week-calendar');
   await expect(page.locator('.calendar-event')).toHaveCount(1);
+  await expect.poll(() => grid.evaluate((el) => parseFloat(el.style.getPropertyValue('--hour-height')))).toBe(180);
   const scale = await grid.evaluate((el) => parseFloat(el.style.getPropertyValue('--hour-height')));
   await page.evaluate(() => {
     const grid = document.querySelector('.week-calendar'), body = grid.querySelector('.week-body');

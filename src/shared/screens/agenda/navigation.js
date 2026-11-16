@@ -1,7 +1,7 @@
 import { currentTimePosition } from './utility.js';
 
 let pending = null, previous = null, highlighted = null, pendingReturn = null;
-let observedRoot, observer;
+let observedRoot, observer, styleObserver;
 export function resetAgendaNavigation() { pending = previous = highlighted = pendingReturn = null; }
 export const hasAgendaReturn = () => Boolean(previous);
 export function renderAgendaPreserving(render) {
@@ -51,10 +51,19 @@ export function applyAgendaEffects() {
       let previousCapacity = capacity();
       observer = new ResizeObserver(() => {
         if (!root.isConnected) { observer.disconnect(); return; }
+        fitAgendaScale(root); updateAgendaClock();
         const next = capacity();
         if (next !== previousCapacity) { previousCapacity = next; window.dispatchEvent(new Event('agenda-layout-change')); }
       });
       observer.observe(root);
+      const probe = document.createElement('span');
+      probe.className = 'agenda-scale-probe';
+      probe.setAttribute('aria-hidden', 'true');
+      root.append(probe);
+      observer.observe(probe);
+      styleObserver?.disconnect();
+      styleObserver = new MutationObserver(() => { fitAgendaScale(root); updateAgendaClock(); });
+      for (const target of [document.documentElement, root]) styleObserver.observe(target, { attributes: true, attributeFilter: ['style', 'class'] });
     }
     fitAgendaScale(root);
     updateAgendaClock();
@@ -121,26 +130,31 @@ function fitAgendaScale(root) {
   const grid = root.querySelector('.week-calendar');
   if (!grid) return;
   const scale = parseFloat(grid.style.getPropertyValue('--hour-height'));
+  const parsedMax = parseFloat(getComputedStyle(root).getPropertyValue('--agenda-hour-max'));
+  const max = Number.isFinite(parsedMax) && parsedMax > 0 ? parsedMax : 240;
   const cards = [...grid.querySelectorAll('.calendar-event')];
-  let ratio = 1;
+  let desired = 96;
   for (const card of cards) {
-    const css = getComputedStyle(card);
-    const children = [...card.children];
-    const needed = children.reduce((sum, child) => sum + child.getBoundingClientRect().height, 0) + Math.max(0, children.length - 1) * parseFloat(css.rowGap || 0) + parseFloat(css.paddingTop) + parseFloat(css.paddingBottom) + 2;
-    ratio = Math.max(ratio, (needed + 4) / (parseFloat(card.style.height) + 4));
+    const duration = (parseFloat(card.style.height) + 4) / scale;
+    const rows = card.clientWidth >= 240 ? (card.querySelector('.event-professional') ? 3 : 2) : 3 + Number(Boolean(card.querySelector('.event-professional'))) + Number(Boolean(card.querySelector('.event-branch')));
+    desired = Math.max(desired, (20 + rows * 18 + 4) / duration);
   }
-  if (ratio <= 1.01) return;
+  for (const group of grid.querySelectorAll('.agenda-density')) desired = Math.max(desired, 72 / ((parseFloat(group.style.height) + 4) / scale));
+  const next = Math.min(max, Math.ceil(desired));
+  const ratio = next / scale;
   const anchor = agendaScrollAnchor(), pageTop = window.scrollY;
-  ratio = Math.ceil(scale * ratio) / scale;
-  for (const el of grid.querySelectorAll('[style]')) {
-    if (el.classList.contains('calendar-event')) {
-      el.style.top = ((parseFloat(el.style.top) - 2) * ratio + 2) + 'px';
-      el.style.height = ((parseFloat(el.style.height) + 4) * ratio - 4) + 'px';
-    } else {
-      if (el.style.top.endsWith('px')) el.style.top = parseFloat(el.style.top) * ratio + 'px';
-      if (el.style.height.endsWith('px')) el.style.height = parseFloat(el.style.height) * ratio + 'px';
+  if (Math.abs(next - scale) > .01) {
+    for (const el of grid.querySelectorAll('[style]')) {
+      if (el.matches('.calendar-event, .agenda-density')) {
+        el.style.top = ((parseFloat(el.style.top) - 2) * ratio + 2) + 'px';
+        el.style.height = Math.max(0, (parseFloat(el.style.height) + 4) * ratio - 4) + 'px';
+      } else {
+        if (el.style.top.endsWith('px')) el.style.top = parseFloat(el.style.top) * ratio + 'px';
+        if (el.style.height.endsWith('px')) el.style.height = parseFloat(el.style.height) * ratio + 'px';
+      }
     }
+    grid.style.setProperty('--hour-height', next + 'px');
+    restoreAgendaScroll(anchor, pageTop);
   }
-  grid.style.setProperty('--hour-height', scale * ratio + 'px');
-  restoreAgendaScroll(anchor, pageTop);
+  for (const card of cards) card.dataset.density = card.clientHeight < 30 ? 'tiny' : card.clientHeight < 54 ? 'brief' : 'full';
 }

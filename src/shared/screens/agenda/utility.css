@@ -1,4 +1,6 @@
 /* Agenda operativa: conserva los tokens y estados de Citalendar en ambos temas. */
+:root { --agenda-hour-max: 240px; }
+.agenda-scale-probe { position: absolute; width: 0; height: var(--agenda-hour-max); visibility: hidden; pointer-events: none; contain: strict; }
 .agenda-calendar { overflow-anchor: none; }
 .agenda-calendar > .agenda-toolbar { grid-template-columns: max-content minmax(0, 1fr) max-content; padding: 20px 24px; }
 .agenda-toolbar .calendar-date { flex-wrap: wrap; gap: 10px; }
@@ -73,6 +75,42 @@
 .agenda-calendar .calendar-event .event-range-end { display: inline; }
 .agenda-calendar .calendar-event .event-time > span:first-child { overflow: visible; }
 .agenda-calendar .event-branch { opacity: .9; }
+.agenda-calendar .calendar-event {
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-rows: repeat(3, min-content); align-content: start; align-items: start;
+  column-gap: 16px; row-gap: 2px;
+}
+.agenda-calendar .calendar-event > :is(strong, .event-service, .event-professional, .event-branch, .event-cause) {
+  min-width: 0; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.agenda-calendar .calendar-event.is-short > :is(.event-service, .event-professional) { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.agenda-calendar .calendar-event .event-client { grid-area: 1 / 1; }
+.agenda-calendar .calendar-event .event-time { grid-area: 1 / 2; min-width: 0; }
+.agenda-calendar .calendar-event .event-service { grid-area: 2 / 1; }
+.agenda-calendar .calendar-event .event-branch { grid-area: 2 / 2; }
+.agenda-calendar .calendar-event .event-professional { grid-area: 3 / 1; }
+.agenda-calendar .calendar-event .event-cause { display: none; }
+.agenda-calendar .calendar-event[data-density='brief'] { padding-block: 3px; }
+.agenda-calendar .calendar-event[data-density='tiny'] { padding: 0 5px; }
+.agenda-calendar .calendar-event[data-density='tiny'] > :is(.event-service, .event-professional, .event-branch) { display: none; }
+.agenda-calendar .calendar-event[data-density='tiny'] .event-client,
+.agenda-calendar .calendar-event[data-density='tiny'] .event-time { font-size: 11px; line-height: 14px; }
+@container (max-width: 239px) {
+  .agenda-calendar .calendar-event .event-time { grid-area: 1 / 1 / 2 / 3; }
+  .agenda-calendar .calendar-event .event-client { grid-area: 2 / 1 / 3 / 3; }
+  .agenda-calendar .calendar-event .event-service { grid-area: 3 / 1 / 4 / 3; }
+  .agenda-calendar .calendar-event .event-professional { grid-area: 4 / 1 / 5 / 3; }
+  .agenda-calendar .calendar-event .event-branch { grid-area: 5 / 1 / 6 / 3; }
+  .agenda-calendar .calendar-event[data-density='brief'] .event-service,
+  .agenda-calendar .calendar-event[data-density='brief'] .event-professional,
+  .agenda-calendar .calendar-event[data-density='brief'] .event-branch,
+  .agenda-calendar .calendar-event[data-density='tiny'] .event-time { display: none; }
+  .agenda-calendar .calendar-event[data-density='tiny'] .event-client { grid-area: 1 / 1 / 2 / 3; }
+}
+@media (max-width: 767px) {
+  .agenda-calendar .calendar-event .event-time { justify-content: flex-end; }
+  .agenda-calendar .calendar-event .event-branch { text-align: right; }
+}
 .agenda-calendar .agenda-highlight { outline: 2px solid var(--accent); outline-offset: 1px; box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 25%, transparent); animation: agenda-arrive 2.2s ease-out both; z-index: 5; }
 @keyframes agenda-arrive { 0%, 30% { box-shadow: 0 0 0 5px color-mix(in srgb, var(--accent) 35%, transparent); } 100% { box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 10%, transparent); } }
 @keyframes agenda-refresh-turn { to { transform: rotate(360deg); } }
