@@ -75,6 +75,7 @@
 .agenda-calendar .calendar-event .event-range-end { display: inline; }
 .agenda-calendar .calendar-event .event-time > span:first-child { overflow: visible; }
 .agenda-calendar .event-branch { opacity: .9; }
+.agenda-column-attention { position: absolute; top: 8px; inset-inline: 8px; z-index: 1; pointer-events: none; padding: 6px; border-radius: 4px; background: var(--surface); color: var(--muted); font-size: 12px; }
 .agenda-calendar .calendar-event {
   display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   grid-template-rows: repeat(3, min-content); align-content: start; align-items: start;

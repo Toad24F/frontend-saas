@@ -1,8 +1,17 @@
 export const clockMinutes = (value) => Number(value.slice(0, 2)) * 60 + Number(value.slice(3, 5)) + Number(value.slice(6, 8) || 0) / 60;
 export const minuteClock = (value) => `${String(Math.floor(value / 60)).padStart(2, '0')}:${String(Math.floor(value % 60)).padStart(2, '0')}`;
+export function attentionUnavailableReason(data, day, branch) {
+  if (!data) return '';
+  if (data.omisiones.some((x) => x.fecha === day && (branch === 'all' || String(x.sucursalId) === String(branch)))) return 'Atención incompleta en esta fecha; no se sombrea.';
+  if (branch === 'all') {
+    const offsets = new Set(data.intervalos.filter((x) => x.fecha === day && x.inicioUtc).map((x) => Date.parse(x.fecha + 'T00:00:00Z') + x.inicioMinutos * 60000 - Date.parse(x.inicioUtc)));
+    if (offsets.size > 1) return 'Horarios con distintas referencias horarias; no se combina el sombreado.';
+  }
+  return '';
+}
 export function attentionGaps(data, day, branch, first, last) {
-  if (!data || data.omisiones.some((x) => x.fecha === day && String(x.sucursalId) === String(branch))) return [];
-  const spans = data.intervalos.filter((x) => x.fecha === day && String(x.sucursalId) === String(branch))
+  if (!data || attentionUnavailableReason(data, day, branch)) return [];
+  const spans = data.intervalos.filter((x) => x.fecha === day && (branch === 'all' || String(x.sucursalId) === String(branch)))
     .map((x) => [Math.max(first, x.inicioMinutos), Math.min(last, x.finMinutos)]).filter(([a, b]) => a < b).sort((a, b) => a[0] - b[0]);
   let cursor = first;
   const result = [];

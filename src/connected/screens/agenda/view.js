@@ -33,6 +33,30 @@ const client = createAgendaClient(api);
 const cache = createAgendaCache(client.list);
 const store = createAgendaStore(cache.read);
 const attention = createAgendaStore((query) => readAgendaAttention(api, query.personalId, { desde: query.desde, hasta: query.hasta }));
+const columnAttention = createAgendaStore(async (query) => {
+  const results = await Promise.allSettled(query.ids.map((id) => readAgendaAttention(api, id, { desde: query.desde, hasta: query.hasta })));
+  return Object.fromEntries(query.ids.map((id, index) => [id, results[index].status === 'fulfilled' ? { data: results[index].value } : { error: 'No se pudo consultar la atención. Usa Reintentar atención.' }]));
+});
+function columnAttentionQuery() {
+  if (state.calendarView !== 'day' || state.professional !== 'all' || user?.rol === 'profesional' || state.branch === 'none' || !store.state.data || store.state.busy) return null;
+  const ids = new Set(list('professionals', state.tenantId).filter((p) => p.active !== false && (state.branch === 'all' || p.branchIds?.includes(Number(state.branch)))).map((p) => p.id));
+  for (const item of store.state.data.citas) ids.add(item.personalId);
+  return { ...calendarPeriod('day', state.date), branch: state.branch, ids: [...ids].sort((a, b) => a - b) };
+}
+function columnAttentionModels() {
+  const query = columnAttentionQuery();
+  if (!query) return undefined;
+  return columnAttention.state.key === JSON.stringify(query) && columnAttention.state.data || Object.fromEntries(query.ids.map((id) => [id, { busy: true }]));
+}
+async function loadColumnAttention(force) {
+  const query = columnAttentionQuery();
+  if (!query) { if (columnAttention.state.key) columnAttention.reset(); return; }
+  if (!force && columnAttention.state.key === JSON.stringify(query)) return;
+  const scope = identity, beforeKey = columnAttention.state.key, before = JSON.stringify(columnAttention.state.data);
+  if (await columnAttention.load(query)) {
+    if (scope === identity && state.page === 'agenda' && (beforeKey !== columnAttention.state.key || before !== JSON.stringify(columnAttention.state.data))) renderAgendaPreserving(render);
+  }
+}
 let affectedOnly = false;
 let identity = null;
 let choices = { branches: new Map(), people: new Map() };
@@ -43,7 +67,7 @@ const errorPanel = (error, action) => { const info = privateError(error); return
 
 // La sesión forma parte de la caché: ninguna lectura de una cuenta se reutiliza al entrar con otra.
 function reset() {
-  cache.clear(); attention.reset(); affectedOnly = false; resetAgendaNavigation();
+  cache.clear(); attention.reset(); columnAttention.reset(); affectedOnly = false; resetAgendaNavigation();
   store.reset(); choices = { branches: new Map(), people: new Map() }; identity = null; detailGeneration++;
 }
 window.addEventListener('cita-session-expired', reset);
@@ -139,17 +163,18 @@ const select = (name, label, allLabel, options, value, image) => `<label class="
 function calendar(data) {
   const period = calendarPeriod(state.calendarView, state.date);
   const days = Array.from({ length: state.calendarView === 'day' ? 1 : 7 }, (_, index) => civilAdd(period.desde, index));
-  const options = { professional: user.rol === 'profesional' ? String(user.id) : state.professional, professionals: list('professionals', state.tenantId), manageStates: canManageAppointments(user?.rol), attention: attention.state.key === JSON.stringify(attentionQuery()) ? attention.state.data : null, branch: state.branch, columnWidth: Math.max(160, ((document.querySelector('.agenda-calendar')?.clientWidth || window.innerWidth - 300) - 58) / 7) };
+  const options = { attentionByProfessional: columnAttentionModels(), professional: user.rol === 'profesional' ? String(user.id) : state.professional, professionals: list('professionals', state.tenantId), manageStates: canManageAppointments(user?.rol), attention: attention.state.key === JSON.stringify(attentionQuery()) ? attention.state.data : null, branch: state.branch, columnWidth: Math.max(160, ((document.querySelector('.agenda-calendar')?.clientWidth || window.innerWidth - 300) - 58) / 7) };
   const content = state.calendarView === 'month' ? renderMonth(state.date, data.citas, todayCivil(), options) : renderTimeline(days, data.citas, todayCivil(), options);
   // Incluso un periodo vacío mantiene la cuadrícula para conservar la referencia temporal de la demo.
   return `${!data.citas.length ? '<p class="m4-empty-summary" role="status">Sin citas en este periodo</p>' : ''}${content}`;
 }
 function attentionQuery() {
   const person = user?.rol === 'profesional' ? user.id : state.professional;
-  return state.calendarView !== 'month' && person && person !== 'all' && state.branch !== 'all' && state.branch !== 'none'
+  return state.calendarView !== 'month' && person && person !== 'all' && state.branch !== 'none'
     ? { ...calendarPeriod(state.calendarView, state.date), personalId: person, sucursalId: state.branch } : null;
 }
 async function loadAttention(force = false) {
+  await loadColumnAttention(force);
   const query = attentionQuery();
   if (!query) { if (attention.state.key) attention.reset(); return; }
   if (!force && attention.state.key === JSON.stringify(query)) return;
@@ -173,7 +198,7 @@ export function agenda() {
   const zones = [...new Set((model.data?.citas || []).map((item) => item.zonaHoraria))];
   void loadAttention(); applyAgendaEffects();
   const attentionModel = attentionQuery() ? attention.state : null;
-  const note = !attentionModel ? "" : attentionModel.busy ? `<p class="agenda-attention-note" role="status">Consultando atención…</p>` : attentionModel.error ? `<div class="agenda-attention-note" role="status">No se pudo comprobar la atención. ${esc(privateError(attentionModel.error).message)} <button class="btn btn-light" data-m4-attention-retry>Reintentar atención</button></div>` : attentionModel.data?.omisiones.some((x) => String(x.sucursalId) === String(state.branch)) ? `<p class="agenda-attention-note" role="status">Atención incompleta en algunas fechas por cambios de hora local. Esas fechas no se sombrean.</p>` : attentionModel.data ? `<p class="agenda-attention-note">La trama indica intervalos sin atención; las citas existentes permanecen visibles.</p>` : "";
+  const note = columnAttentionQuery() ? `<p class="agenda-attention-note">La trama indica intervalos sin atención por profesional. <button class="btn btn-light" data-m4-attention-retry>Reintentar atención</button></p>` : !attentionModel ? "" : attentionModel.busy ? `<p class="agenda-attention-note" role="status">Consultando atención…</p>` : attentionModel.error ? `<div class="agenda-attention-note" role="status">No se pudo comprobar la atención. ${esc(privateError(attentionModel.error).message)} <button class="btn btn-light" data-m4-attention-retry>Reintentar atención</button></div>` : attentionModel.data?.omisiones.some((x) => (state.branch === 'all' || String(x.sucursalId) === String(state.branch))) ? `<p class="agenda-attention-note" role="status">Atención incompleta en algunas fechas por cambios de hora local. Esas fechas no se sombrean.</p>` : attentionModel.data ? `<p class="agenda-attention-note">La trama indica intervalos sin atención; las citas existentes permanecen visibles.</p>` : "";
   const filterMarkup = (user.rol !== "profesional" ? select("personalId", "Profesional", "Todos los profesionales", choices.people, state.professional, "users") : "") + select("sucursalId", "Sucursal", "Todas las sucursales", new Map(branchModel.options.map((b) => [b.id, b.name])), state.branch, "pin") + select("estado", "Estado", "Todos los estados", new Map(Object.entries(statuses)), state.status, "circleCheck") + ((state.professional !== "all" || user.rol === "profesional") && branchModel.known ? `<label class="agenda-history-filter"><input type="checkbox" data-m4-agenda-history ${state.agendaHistory ? "checked" : ""}> Consultar otras sucursales (histórico)</label>` : "");
   const warning = model.refreshError ? `<div class="m4-error" data-live-warning role="status"><strong>Agenda sin actualizar</strong><p>Se muestra la última consulta confirmada. ${esc(privateError(model.refreshError).message)}</p><button class="btn btn-light" data-m4-retry>Reintentar consulta</button></div>` : "";
   const body = warning + (model.busy ? calendarSkeleton(state.calendarView) : model.error ? errorPanel(model.error, "data-m4-retry") : model.data ? calendar(model.data) : "");
