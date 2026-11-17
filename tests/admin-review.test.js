@@ -19,8 +19,8 @@ test('asignación bloqueada conserva el valor para FormData y muestra causa', ()
 test('limpiar considera búsqueda efectiva y todos los filtros, sin alterar vista', () => {
   assert.equal(hasCatalogFilters({ search: '  ', status: 'all' }), false);
   for (const ui of [{ search: 'a', status: 'all' }, { search: '', status: 'inactive' }, { search: '', branch: '2' }]) assert.ok(hasCatalogFilters(ui));
-  assert.match(clearCatalogButton('professional', { search: '', status: 'all' }), /disabled/);
-  assert.doesNotMatch(clearCatalogButton('professional', { search: 'a', status: 'all' }), /disabled/);
+  assert.match(clearCatalogButton('profesional', { search: '', status: 'all' }), /disabled/);
+  assert.doesNotMatch(clearCatalogButton('profesional', { search: 'a', status: 'all' }), /disabled/);
 });
 test('cupos por rol: rutas autorizadas, respuesta validada y fallo sin cifras ficticias', async () => {
   clearRoleCapacities();

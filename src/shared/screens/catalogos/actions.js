@@ -5,14 +5,14 @@ import { icon } from '../../icons.js';
 import { toast, escape as esc } from '../../ui.js';
 import { field, select, basicForm } from '../../forms.js';
 import { loadEditableResource } from '../../../connected/modules/catalogos/detail.js';
-import { validateProfessional, professionalError, showProfessionalErrors, clearProfessionalErrors, clearProfessionalField } from '../profesionales/errors.js';
+import { validarProfesional, interpretarErrorProfesional, mostrarErroresProfesional, limpiarErroresProfesional, limpiarCampoProfesional } from '../profesionales/profesionales.errores.js';
 import { validarServicio, interpretarErrorServicio } from '../servicios/servicios.errores.js';
 import { validarSucursal, interpretarErrorSucursal } from '../sucursales/sucursales.errores.js';
 import { ZONAS_HORARIAS_MEXICO } from '../sucursales/sucursales.zonas-horarias.js';
 import { readOwnRoleQuota, ownQuotaNotice } from '../../../connected/screens/negocio/user-quota.js';
 
-const professionalField = (...args) => field(...args).replace('class="form-field"', `class="form-field" data-professional-field="${args[1]}"`);
-const professionalSelect = (...args) => select(...args).replace('class="form-field"', `class="form-field" data-professional-field="${args[1]}"`);
+const campoMarcado = (...argumentos) => field(...argumentos).replace('class="form-field"', `class="form-field" data-campo-profesional="${argumentos[1]}"`);
+const selectorMarcado = (...argumentos) => select(...argumentos).replace('class="form-field"', `class="form-field" data-campo-profesional="${argumentos[1]}"`);
 const assignmentError = (field, message) => Object.assign(new Error(message), { field });
 export async function catalog(type, id) {
   const cached = id ? resource(type, id, state.tenantId) : null;
@@ -24,7 +24,7 @@ export async function catalog(type, id) {
     }
     const dialog = basicForm(
       existing ? 'Editar servicio' : 'Nuevo servicio',
-      `${professionalField('Nombre del servicio', 'name', existing?.name, 'text', 'required maxlength="150"')}${professionalField('Descripción', 'description', existing?.description, 'text', isDemo ? 'required maxlength="200"' : 'maxlength="500"')}<div class="form-row-two">${professionalField('Duración en minutos', 'duration', existing?.duration || 45, 'number', isDemo ? 'required min="15" max="240" step="15"' : 'required min="1" step="1"')}${professionalField('Precio informativo (MXN)', 'price', existing?.price ?? 600, 'number', 'required min="0" max="99999" step="0.01"')}</div>`,
+      `${campoMarcado('Nombre del servicio', 'name', existing?.name, 'text', 'required maxlength="150"')}${campoMarcado('Descripción', 'description', existing?.description, 'text', isDemo ? 'required maxlength="200"' : 'maxlength="500"')}<div class="form-row-two">${campoMarcado('Duración en minutos', 'duration', existing?.duration || 45, 'number', isDemo ? 'required min="15" max="240" step="15"' : 'required min="1" step="1"')}${campoMarcado('Precio informativo (MXN)', 'price', existing?.price ?? 600, 'number', 'required min="0" max="99999" step="0.01"')}</div>`,
       (f) =>
         save('services', existing, {
           name: f.get('name').trim(),
@@ -39,13 +39,13 @@ export async function catalog(type, id) {
         drawer: true,
         validate(form) {
           const errors = validarServicio(new FormData(form), isDemo);
-          if (!Object.keys(errors).length) { clearProfessionalErrors(form); return true; }
-          showProfessionalErrors(form, errors);
+          if (!Object.keys(errors).length) { limpiarErroresProfesional(form); return true; }
+          mostrarErroresProfesional(form, errors);
           return false;
         },
         onError(error, form) {
           const errors = interpretarErrorServicio(error);
-          if (errors) showProfessionalErrors(form, errors);
+          if (errors) mostrarErroresProfesional(form, errors);
           else {
             const target = form.querySelector('#form-error');
             target.textContent = error.message || 'No se pudo guardar el servicio. Inténtalo de nuevo.';
@@ -57,13 +57,13 @@ export async function catalog(type, id) {
       },
     );
     const form = dialog.querySelector('#editor-form');
-    form.addEventListener('input', (event) => clearProfessionalField(form, event.target));
-    form.addEventListener('change', (event) => clearProfessionalField(form, event.target));
+    form.addEventListener('input', (event) => limpiarCampoProfesional(form, event.target));
+    form.addEventListener('change', (event) => limpiarCampoProfesional(form, event.target));
   }
   if (type === 'branches') {
     const dialog = basicForm(
       existing ? 'Editar sucursal' : 'Nueva sucursal',
-      `${professionalField('Nombre', 'name', existing?.name, 'text', 'required maxlength="150"')}${professionalField('Dirección', 'address', existing?.address, 'text', 'required maxlength="255"')}${professionalField('Teléfono', 'phone', existing?.phone, 'tel', isDemo ? 'required pattern="[0-9]{10}" maxlength="10" inputmode="numeric"' : 'required minlength="7" maxlength="20"')}${professionalField('Indicaciones de llegada', 'notes', existing?.notes, 'text', 'maxlength="255"')}${isDemo ? '' : professionalSelect('Zona horaria', 'timezone', ZONAS_HORARIAS_MEXICO, existing?.timezone || 'America/Chihuahua')}${professionalField('Enlace de Google Maps', 'maps', existing?.maps || '', 'url', 'maxlength="2048"')}`,
+      `${campoMarcado('Nombre', 'name', existing?.name, 'text', 'required maxlength="150"')}${campoMarcado('Dirección', 'address', existing?.address, 'text', 'required maxlength="255"')}${campoMarcado('Teléfono', 'phone', existing?.phone, 'tel', isDemo ? 'required pattern="[0-9]{10}" maxlength="10" inputmode="numeric"' : 'required minlength="7" maxlength="20"')}${campoMarcado('Indicaciones de llegada', 'notes', existing?.notes, 'text', 'maxlength="255"')}${isDemo ? '' : selectorMarcado('Zona horaria', 'timezone', ZONAS_HORARIAS_MEXICO, existing?.timezone || 'America/Chihuahua')}${campoMarcado('Enlace de Google Maps', 'maps', existing?.maps || '', 'url', 'maxlength="2048"')}`,
       (f) =>
         save('branches', existing, {
           name: f.get('name').trim(),
@@ -77,13 +77,13 @@ export async function catalog(type, id) {
         drawer: true,
         validate(form) {
           const errors = validarSucursal(new FormData(form), isDemo);
-          if (!Object.keys(errors).length) { clearProfessionalErrors(form); return true; }
-          showProfessionalErrors(form, errors);
+          if (!Object.keys(errors).length) { limpiarErroresProfesional(form); return true; }
+          mostrarErroresProfesional(form, errors);
           return false;
         },
         onError(error, form) {
           const errors = interpretarErrorSucursal(error);
-          if (errors) showProfessionalErrors(form, errors);
+          if (errors) mostrarErroresProfesional(form, errors);
           else {
             const target = form.querySelector('#form-error');
             target.textContent = error.message || 'No se pudo guardar la sucursal. Inténtalo de nuevo.';
@@ -95,8 +95,8 @@ export async function catalog(type, id) {
       },
     );
     const form = dialog.querySelector('#editor-form');
-    form.addEventListener('input', (event) => clearProfessionalField(form, event.target));
-    form.addEventListener('change', (event) => clearProfessionalField(form, event.target));
+    form.addEventListener('input', (event) => limpiarCampoProfesional(form, event.target));
+    form.addEventListener('change', (event) => limpiarCampoProfesional(form, event.target));
   }
   if (type === 'professionals') {
     if (isDemo && (
@@ -106,18 +106,18 @@ export async function catalog(type, id) {
       toast('Crea al menos un servicio y una sucursal primero.');
       return;
     }
-    const own = !isDemo && user.rol === 'profesional';
-    let quotaIntro = '';
+    const propio = !isDemo && user.rol === 'profesional';
+    let introduccionCupo = '';
     if (!isDemo && !existing && user.rol === 'admin_negocio') {
       // El alta muestra el cupo de la ruta propia; una lectura fallida no se
       // convierte en un límite local supuesto.
-      try { quotaIntro = ownQuotaNotice('profesionales', await readOwnRoleQuota('profesionales', api)); }
-      catch { quotaIntro = '<p class="form-intro">No se pudo consultar el cupo vigente. El servidor lo comprobará al guardar.</p>'; }
+      try { introduccionCupo = ownQuotaNotice('profesionales', await readOwnRoleQuota('profesionales', api)); }
+      catch { introduccionCupo = '<p class="form-intro">No se pudo consultar el cupo vigente. El servidor lo comprobará al guardar.</p>'; }
     }
-    let liveId = existing?.id;
-    const dialog = basicForm(
+    let idVigente = existing?.id;
+    const dialogo = basicForm(
       existing ? 'Editar profesional' : 'Nuevo profesional',
-      `${quotaIntro}${professionalField('Nombre completo', 'name', existing?.name, 'text', own ? 'readonly' : 'required maxlength="150"')}${own ? '' : professionalField('Especialidad', 'specialty', existing?.specialty, 'text', 'required maxlength="150"')}${professionalField('Correo', 'email', existing?.email, 'email', own ? 'readonly' : 'required maxlength="150"')}${isDemo || own ? '' : professionalField(existing ? 'Nueva contraseña (opcional)' : 'Contraseña', 'password', '', 'password', existing ? 'autocomplete="new-password" minlength="12"' : 'required autocomplete="new-password" minlength="12"')}${isDemo ? `<div class="form-field professional-choice-group" data-professional-field="services" role="group" aria-labelledby="professional-services-label" tabindex="-1"><span class="form-label" id="professional-services-label">Servicios que ofrece</span><div class="checkbox-list">${(existing?.catalogServices || list(
+      `${introduccionCupo}${campoMarcado('Nombre completo', 'name', existing?.name, 'text', propio ? 'readonly' : 'required maxlength="150"')}${propio ? '' : campoMarcado('Especialidad', 'specialty', existing?.specialty, 'text', 'required maxlength="150"')}${campoMarcado('Correo', 'email', existing?.email, 'email', propio ? 'readonly' : 'required maxlength="150"')}${isDemo || propio ? '' : campoMarcado(existing ? 'Nueva contraseña (opcional)' : 'Contraseña', 'password', '', 'password', existing ? 'autocomplete="new-password" minlength="12"' : 'required autocomplete="new-password" minlength="12"')}${isDemo ? `<div class="form-field profesionales-grupo-eleccion" data-campo-profesional="services" role="group" aria-labelledby="servicios-profesional-etiqueta" tabindex="-1"><span class="form-label" id="servicios-profesional-etiqueta">Servicios que ofrece</span><div class="checkbox-list">${(existing?.catalogServices || list(
         'services',
         state.tenantId,
       ))
@@ -127,86 +127,86 @@ export async function catalog(type, id) {
         )
         .join(
           '',
-      )}</div></div><div class="form-field professional-choice-group" data-professional-field="branches" role="group" aria-labelledby="professional-branches-label" tabindex="-1"><span class="form-label" id="professional-branches-label">Sucursales</span><div class="checkbox-list">${(existing?.catalogBranches || list(
+      )}</div></div><div class="form-field profesionales-grupo-eleccion" data-campo-profesional="branches" role="group" aria-labelledby="sucursales-profesional-etiqueta" tabindex="-1"><span class="form-label" id="sucursales-profesional-etiqueta">Sucursales</span><div class="checkbox-list">${(existing?.catalogBranches || list(
         'branches',
         state.tenantId,
       ))
         .map(
           (b) =>
-            `<label><input type="checkbox" class="form-check-input" name="branches" value="${b.id}" ${own ? 'disabled' : ''} ${existing?.branchIds.includes(b.id) ? 'checked' : ''}/> ${esc(b.name)}</label>`,
+            `<label><input type="checkbox" class="form-check-input" name="branches" value="${b.id}" ${propio ? 'disabled' : ''} ${existing?.branchIds.includes(b.id) ? 'checked' : ''}/> ${esc(b.name)}</label>`,
         )
         .join('')}</div></div>` : '<p class="field-hint">Después de guardar, abre Ver disponibilidad para asignar sucursales y configurar servicios.</p>'}`,
-      async (f) => {
+      async (datos) => {
         if (!isDemo) {
-          const identity = { nombre: f.get('name').trim(), correo: f.get('email').trim(), especialidad: f.get('specialty').trim(), ...(f.get('password') ? { password: f.get('password') } : {}) };
-          const saved = await api(liveId ? `/profesionales/${liveId}` : '/profesionales', liveId ? 'PATCH' : 'POST', identity);
-          liveId = saved.id;
+          const identidad = { nombre: datos.get('name').trim(), correo: datos.get('email').trim(), especialidad: datos.get('specialty').trim(), ...(datos.get('password') ? { password: datos.get('password') } : {}) };
+          const guardado = await api(idVigente ? `/profesionales/${idVigente}` : '/profesionales', idVigente ? 'PATCH' : 'POST', identidad);
+          idVigente = guardado.id;
           return;
         }
-        const serviceIds = f.getAll('services').map(Number),
-          branchIds = f.getAll('branches').map(Number);
-        serviceIds.forEach((id) => resource('services', id, state.tenantId));
-        branchIds.forEach((id) => resource('branches', id, state.tenantId));
+        const servicioIds = datos.getAll('services').map(Number),
+          sucursalIds = datos.getAll('branches').map(Number);
+        servicioIds.forEach((id) => resource('services', id, state.tenantId));
+        sucursalIds.forEach((id) => resource('branches', id, state.tenantId));
         if (existing) {
-          const linked = list('appointments', state.tenantId).filter(
-            (a) =>
-              a.professionalId === existing.id &&
-              !['cancelada', 'no_asistio', 'completada'].includes(a.status),
+          const vinculadas = list('appointments', state.tenantId).filter(
+            (cita) =>
+              cita.professionalId === existing.id &&
+              !['cancelada', 'no_asistio', 'completada'].includes(cita.status),
           );
-          if (linked.some((a) => !serviceIds.includes(a.serviceId)))
+          if (vinculadas.some((cita) => !servicioIds.includes(cita.serviceId)))
             throw assignmentError('services', 'Hay citas activas con un servicio que quitaste. Conserva ese servicio hasta que terminen las citas.');
-          if (linked.some((a) => !branchIds.includes(a.branchId)))
+          if (vinculadas.some((cita) => !sucursalIds.includes(cita.branchId)))
             throw assignmentError('branches', 'Hay citas activas en una sucursal que quitaste. Conserva esa sucursal hasta que terminen las citas.');
         }
-        const p = save('professionals', existing, {
-          name: f.get('name').trim(),
-          specialty: f.get('specialty'),
-          email: f.get('email'),
-          initials: f
+        const profesional = save('professionals', existing, {
+          name: datos.get('name').trim(),
+          specialty: datos.get('specialty'),
+          email: datos.get('email'),
+          initials: datos
             .get('name')
             .split(' ')
             .slice(-2)
             .map((x) => x[0])
             .join(''),
           color: existing?.color || 'peach',
-          serviceIds,
-          branchIds,
+          serviceIds: servicioIds,
+          branchIds: sucursalIds,
         });
         if (!existing)
-          for (let i = 1; i <= 6; i++)
+          for (let dia = 1; dia <= 6; dia++)
             db.schedules.push({
-              id: Math.max(0, ...db.schedules.map((s) => s.id)) + 1,
+              id: Math.max(0, ...db.schedules.map((horario) => horario.id)) + 1,
               tenantId: state.tenantId,
-              professionalId: p.id,
-              day: i,
-              branchId: branchIds[(i - 1) % branchIds.length],
+              professionalId: profesional.id,
+              day: dia,
+              branchId: sucursalIds[(dia - 1) % sucursalIds.length],
               start: '09:00',
               breakStart: '13:00',
               breakEnd: '14:00',
               end: '18:00',
-              enabled: i < 6,
+              enabled: dia < 6,
             });
         else
           list('schedules', state.tenantId)
             .filter(
-              (s) =>
-                s.professionalId === existing.id &&
-                !branchIds.includes(s.branchId),
+              (horario) =>
+                horario.professionalId === existing.id &&
+                !sucursalIds.includes(horario.branchId),
             )
-            .forEach((s) => (s.branchId = branchIds[0]));
+            .forEach((horario) => (horario.branchId = sucursalIds[0]));
       },
       true,
       {
         drawer: true,
         validate(form) {
-          const errors = validateProfessional(new FormData(form), { own, existing: Boolean(existing), demo: isDemo });
-          if (!Object.keys(errors).length) { clearProfessionalErrors(form); return true; }
-          showProfessionalErrors(form, errors);
+          const errors = validarProfesional(new FormData(form), { propio, existente: Boolean(existing), demo: isDemo });
+          if (!Object.keys(errors).length) { limpiarErroresProfesional(form); return true; }
+          mostrarErroresProfesional(form, errors);
           return false;
         },
         onError(error, form) {
-          const errors = professionalError(error);
-          if (errors) showProfessionalErrors(form, errors);
+          const errors = interpretarErrorProfesional(error);
+          if (errors) mostrarErroresProfesional(form, errors);
           else {
             const target = form.querySelector('#form-error');
             target.textContent = error.message || 'No se pudieron guardar los cambios. Inténtalo de nuevo.';
@@ -217,8 +217,8 @@ export async function catalog(type, id) {
         },
       },
     );
-    dialog.querySelector('#editor-form').addEventListener('input', (event) => clearProfessionalField(event.currentTarget, event.target));
-    dialog.querySelector('#editor-form').addEventListener('change', (event) => clearProfessionalField(event.currentTarget, event.target));
+    dialogo.querySelector('#editor-form').addEventListener('input', (event) => limpiarCampoProfesional(event.currentTarget, event.target));
+    dialogo.querySelector('#editor-form').addEventListener('change', (event) => limpiarCampoProfesional(event.currentTarget, event.target));
   }
 }
 export function save(table, existing, values) {

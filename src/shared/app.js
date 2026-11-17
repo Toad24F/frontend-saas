@@ -23,7 +23,7 @@ import {
   statuses,
 } from './data.js';
 import { escape, avatar, pageHead, empty } from './ui.js';
-import { applyProfessionalFilters, resetProfessionalFilters, setProfessionalView } from './screens/profesionales/view.js';
+import { aplicarFiltrosProfesionales, restablecerFiltrosProfesionales, cambiarVistaProfesionales } from './screens/profesionales/profesionales.vista.js';
 import { applyReceptionFilters, resetReceptionFilters, setReceptionView } from '../connected/screens/recepcionistas/view.js';
 import { aplicarFiltrosServicios, restablecerFiltrosServicios, cambiarVistaServicios } from './screens/servicios/servicios.vista.js';
 import { aplicarFiltrosSucursales, restablecerFiltrosSucursales, cambiarVistaSucursales } from './screens/sucursales/sucursales.vista.js';
@@ -82,9 +82,9 @@ export const state = {
 };
 window.addEventListener('agenda-layout-change', () => { if (state.page === 'agenda') renderAgendaPreserving(render); });
 matchMedia('(max-width: 767px)').addEventListener('change', ({ matches }) => {
-  document.querySelectorAll('.professional-workspace .professional-results[data-desktop-view]').forEach((results) => {
-    results.classList.remove('professional-view--list', 'professional-view--cards');
-    results.classList.add(`professional-view--${matches ? 'cards' : results.dataset.desktopView}`);
+  document.querySelectorAll('.profesionales-espacio .profesionales-resultados[data-desktop-view]').forEach((resultados) => {
+    resultados.classList.remove('profesionales-vista--lista', 'profesionales-vista--tarjetas');
+    resultados.classList.add(`profesionales-vista--${matches ? 'tarjetas' : resultados.dataset.desktopView === 'list' ? 'lista' : 'tarjetas'}`);
   });
 });
 const nav = [
@@ -293,18 +293,18 @@ export function render() {
   );
 }
 function closeProfessionalMenus(except = null) {
-  document.querySelectorAll('.professional-more[open]').forEach((menu) => {
+  document.querySelectorAll('.profesional-mas[open]').forEach((menu) => {
     if (menu !== except) menu.open = false;
   });
 }
 
 document.addEventListener('toggle', (event) => {
   const menu = event.target;
-  if (!menu.matches?.('.professional-more')) return;
+  if (!menu.matches?.('.profesional-mas')) return;
   if (!menu.open) { menu.classList.remove('is-upward'); return; }
   closeProfessionalMenus(menu);
   const trigger = menu.querySelector('summary');
-  const panel = menu.querySelector('.professional-more-menu');
+  const panel = menu.querySelector('.profesional-menu-mas');
   const mobileBar = document.querySelector('.mobile-tabbar');
   const bottomLimit = mobileBar && getComputedStyle(mobileBar).display !== 'none'
     ? mobileBar.getBoundingClientRect().top - 8
@@ -312,7 +312,7 @@ document.addEventListener('toggle', (event) => {
   menu.classList.toggle('is-upward', trigger.getBoundingClientRect().bottom + panel.offsetHeight + 6 > bottomLimit);
 }, true);
 document.addEventListener('click', (event) => {
-  if (!event.target.closest('.professional-more') || event.target.closest('[data-professional-action], [data-reception-action], [data-alternar-servicio], [data-inhabilitar-servicio], [data-alternar-sucursal], [data-inhabilitar-sucursal]')) closeProfessionalMenus();
+  if (!event.target.closest('.profesional-mas') || event.target.closest('[data-accion-profesional], [data-reception-action], [data-alternar-servicio], [data-inhabilitar-servicio], [data-alternar-sucursal], [data-inhabilitar-sucursal]')) closeProfessionalMenus();
 }, true);
 document.addEventListener('click', async (e) => {
   const accountTrigger = e.target.closest('.account-menu-trigger');
@@ -343,9 +343,9 @@ document.addEventListener('click', async (e) => {
   }
   const availabilityTab = e.target.closest('[data-availability-tab]');
   if (availabilityTab) { setAvailabilityTab(availabilityTab.dataset.availabilityTab); return; }
-  const professionalView = e.target.closest('[data-professional-view]');
-  if (professionalView) { setProfessionalView(professionalView.dataset.professionalView); return; }
-  if (e.target.closest('[data-professional-reset]')) { resetProfessionalFilters(); return; }
+  const vistaProfesionales = e.target.closest('[data-vista-profesionales]');
+  if (vistaProfesionales) { cambiarVistaProfesionales(vistaProfesionales.dataset.vistaProfesionales); return; }
+  if (e.target.closest('[data-profesional-reset]')) { restablecerFiltrosProfesionales(); return; }
   const receptionView = e.target.closest('[data-reception-view]');
   if (receptionView) { setReceptionView(receptionView.dataset.receptionView); return; }
   if (e.target.closest('[data-reception-reset]')) { resetReceptionFilters(); return; }
@@ -426,7 +426,7 @@ document.addEventListener('click', async (e) => {
 });
 document.addEventListener('change', (e) => {
   if (e.target.closest('#branch-assignments-form')) { updateAssignmentDraft(e.target.form); return; }
-  if (e.target.dataset.professionalFilter) { applyProfessionalFilters(); return; }
+  if (e.target.dataset.filtroProfesionales) { aplicarFiltrosProfesionales(); return; }
   if (e.target.dataset.receptionFilter) { applyReceptionFilters(); return; }
   if (e.target.dataset.filtroServicios) { aplicarFiltrosServicios(); return; }
   if (e.target.dataset.filtroSucursales) { aplicarFiltrosSucursales(); return; }
@@ -437,7 +437,7 @@ document.addEventListener('change', (e) => {
   }
 });
 document.addEventListener('input', (e) => {
-  if (e.target.id === 'professional-search') { applyProfessionalFilters(); return; }
+  if (e.target.id === 'busqueda-profesionales') { aplicarFiltrosProfesionales(); return; }
   if (e.target.id === 'reception-search') { applyReceptionFilters(); return; }
   if (e.target.id === 'busqueda-servicios') { aplicarFiltrosServicios(); return; }
   if (e.target.id === 'busqueda-sucursales') { aplicarFiltrosSucursales(); return; }
@@ -477,7 +477,7 @@ document.addEventListener('keydown', (event) => {
     return;
   }
   if (event.key === 'Escape') {
-    const openMenu = document.querySelector('.professional-more[open]');
+    const openMenu = document.querySelector('.profesional-mas[open]');
     if (openMenu) {
       openMenu.open = false;
       openMenu.querySelector('summary')?.focus();

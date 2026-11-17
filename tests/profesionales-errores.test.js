@@ -1,13 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { validateProfessional, professionalError } from '../src/shared/screens/profesionales/errors.js';
+import { validarProfesional, interpretarErrorProfesional } from '../src/shared/screens/profesionales/profesionales.errores.js';
 
 test('señala cada dato inválido y ambas asignaciones en la demostración', () => {
-  const data = new FormData();
-  data.set('name', '   ');
-  data.set('specialty', '');
-  data.set('email', 'correo-invalido');
-  assert.deepEqual(validateProfessional(data, { demo: true }), {
+  const datos = new FormData();
+  datos.set('name', '   ');
+  datos.set('specialty', '');
+  datos.set('email', 'correo-invalido');
+  assert.deepEqual(validarProfesional(datos, { demo: true }), {
     name: 'Escribe el nombre completo.',
     specialty: 'Escribe la especialidad.',
     email: 'Escribe un correo válido, por ejemplo nombre@dominio.com.',
@@ -17,26 +17,26 @@ test('señala cada dato inválido y ambas asignaciones en la demostración', () 
 });
 
 test('la contraseña nueva se exige al crear y se permite vacía al editar', () => {
-  const data = new FormData();
-  data.set('name', 'Ana García');
-  data.set('specialty', 'Odontología');
-  data.set('email', 'ana@example.com');
-  assert.equal(validateProfessional(data).password, 'Escribe una contraseña.');
-  assert.deepEqual(validateProfessional(data, { existing: true }), {});
-  data.set('password', 'muy-corta');
-  assert.equal(validateProfessional(data, { existing: true }).password, 'Usa al menos 12 caracteres.');
+  const datos = new FormData();
+  datos.set('name', 'Ana García');
+  datos.set('specialty', 'Odontología');
+  datos.set('email', 'ana@example.com');
+  assert.equal(validarProfesional(datos).password, 'Escribe una contraseña.');
+  assert.deepEqual(validarProfesional(datos, { existente: true }), {});
+  datos.set('password', 'muy-corta');
+  assert.equal(validarProfesional(datos, { existente: true }).password, 'Usa al menos 12 caracteres.');
 });
 
 test('ubica los errores de la API en los campos afectados', () => {
-  assert.deepEqual(professionalError(new Error('El nombre ya está registrado en este negocio.')), {
+  assert.deepEqual(interpretarErrorProfesional(new Error('El nombre ya está registrado en este negocio.')), {
     name: 'El nombre ya está registrado en este negocio.',
   });
-  assert.deepEqual(professionalError(new Error('El correo ya está registrado.')), {
+  assert.deepEqual(interpretarErrorProfesional(new Error('El correo ya está registrado.')), {
     email: 'El correo ya está registrado.',
   });
-  assert.deepEqual(professionalError(new Error('nombre: should not be empty · especialidad: should not be empty')), {
+  assert.deepEqual(interpretarErrorProfesional(new Error('nombre: should not be empty · especialidad: should not be empty')), {
     name: 'Escribe el nombre completo.',
     specialty: 'Escribe la especialidad.',
   });
-  assert.equal(professionalError(new Error('No se pudo conectar con el backend.')), null);
+  assert.equal(interpretarErrorProfesional(new Error('No se pudo conectar con el backend.')), null);
 });

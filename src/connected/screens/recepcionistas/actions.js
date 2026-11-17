@@ -5,12 +5,12 @@ import { escape } from '../../../shared/ui.js';
 import { render, state } from '../../../shared/app.js';
 import { field, basicForm, errorSlot } from '../../../shared/forms.js';
 import { modal, toast } from '../../../shared/ui.js';
-import { showProfessionalErrors, clearProfessionalErrors, clearProfessionalField } from '../../../shared/screens/profesionales/errors.js';
+import { mostrarErroresProfesional, limpiarErroresProfesional, limpiarCampoProfesional } from '../../../shared/screens/profesionales/profesionales.errores.js';
 import { validateReceptionist, receptionistError } from './errors.js';
 import { readOwnRoleQuota, ownQuotaNotice } from '../negocio/user-quota.js';
 import { disableReceptionist } from '../../modules/recursos/retired.js';
 
-const markedField = (...args) => field(...args).replace('class="form-field"', `class="form-field" data-professional-field="${args[1]}"`);
+const markedField = (...args) => field(...args).replace('class="form-field"', `class="form-field" data-campo-profesional="${args[1]}"`);
 const passwordFields = () => markedField('Contraseña', 'password', '', 'password', 'required minlength="12" autocomplete="new-password"');
 
 function receptionistForm(title, content, onSubmit, reset = false) {
@@ -18,13 +18,13 @@ function receptionistForm(title, content, onSubmit, reset = false) {
     drawer: !reset,
     validate(form) {
       const errors = validateReceptionist(new FormData(form), reset);
-      if (!Object.keys(errors).length) { clearProfessionalErrors(form); return true; }
-      showProfessionalErrors(form, errors);
+      if (!Object.keys(errors).length) { limpiarErroresProfesional(form); return true; }
+      mostrarErroresProfesional(form, errors);
       return false;
     },
     onError(error, form) {
       const errors = receptionistError(error);
-      if (errors) showProfessionalErrors(form, errors);
+      if (errors) mostrarErroresProfesional(form, errors);
       else {
         const target = form.querySelector('#form-error');
         target.textContent = error.message || 'No se pudieron guardar los cambios. Inténtalo de nuevo.';
@@ -35,8 +35,8 @@ function receptionistForm(title, content, onSubmit, reset = false) {
     },
   });
   const form = dialog.querySelector('#editor-form');
-  form.addEventListener('input', (event) => clearProfessionalField(form, event.target));
-  form.addEventListener('change', (event) => clearProfessionalField(form, event.target));
+  form.addEventListener('input', (event) => limpiarCampoProfesional(form, event.target));
+  form.addEventListener('change', (event) => limpiarCampoProfesional(form, event.target));
   return dialog;
 }
 

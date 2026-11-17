@@ -10,37 +10,37 @@
 .servicios-espacio .servicios-herramientas { grid-template-columns: minmax(210px, 1fr) auto auto; }
 .servicios-espacio .servicio-detalles { column-gap: 14px; }
 .servicios-espacio .servicio-detalles strong { font-variant-numeric: tabular-nums; }
-.servicios-espacio .professional-identity p { max-width: 48ch; }
-.servicios-espacio .professional-view--list .servicio-entrada {
+.servicios-espacio .profesional-identidad p { max-width: 48ch; }
+.servicios-espacio .profesionales-vista--lista .servicio-entrada {
   grid-template-columns: minmax(170px, 1.3fr) minmax(170px, 1fr) max-content max-content;
 }
-.servicios-espacio .professional-view--cards .servicio-entrada { min-height: 220px; }
-.servicios-espacio .professional-entry-actions .professional-availability { border: 0; }
-.servicios-espacio .professional-entry-actions .professional-availability:disabled {
+.servicios-espacio .profesionales-vista--tarjetas .servicio-entrada { min-height: 220px; }
+.servicios-espacio .profesional-acciones .profesional-disponibilidad { border: 0; }
+.servicios-espacio .profesional-acciones .profesional-disponibilidad:disabled {
   opacity: .55;
   cursor: not-allowed;
 }
-.servicios-espacio .professional-status.sin-seleccionar { color: var(--muted); background: var(--surface-soft); }
+.servicios-espacio .profesional-estado.sin-seleccionar { color: var(--muted); background: var(--surface-soft); }
 .servicios-espacio .information-note { margin-top: 20px; }
 @media (max-width: 1260px) {
   .servicios-espacio .servicios-herramientas { grid-template-columns: minmax(180px, 1fr) auto; }
-  .servicios-espacio .servicios-herramientas .professional-filters { grid-column: 1 / -1; grid-row: 2; }
-  .servicios-espacio .servicios-herramientas .professional-view-switch { grid-column: 2; grid-row: 1; }
+  .servicios-espacio .servicios-herramientas .profesionales-filtros { grid-column: 1 / -1; grid-row: 2; }
+  .servicios-espacio .servicios-herramientas .profesionales-selector-vista { grid-column: 2; grid-row: 1; }
 }
 @media (max-width: 767px) {
   .servicios-espacio .servicios-herramientas { grid-template-columns: minmax(0, 1fr); }
-  .servicios-espacio .servicios-herramientas .professional-filters { grid-column: 1; grid-row: auto; grid-template-columns: minmax(0, 1fr); }
-  .servicios-espacio .servicios-herramientas .professional-view-switch { grid-column: 1; grid-row: auto; }
-  .servicios-espacio .professional-view--list .servicio-entrada,
-  .servicios-espacio .professional-view--cards .servicio-entrada { grid-template-columns: minmax(0, 1fr) auto; }
-  .servicios-espacio .professional-view--cards .servicio-entrada { min-height: 0; }
+  .servicios-espacio .servicios-herramientas .profesionales-filtros { grid-column: 1; grid-row: auto; grid-template-columns: minmax(0, 1fr); }
+  .servicios-espacio .servicios-herramientas .profesionales-selector-vista { grid-column: 1; grid-row: auto; }
+  .servicios-espacio .profesionales-vista--lista .servicio-entrada,
+  .servicios-espacio .profesionales-vista--tarjetas .servicio-entrada { grid-template-columns: minmax(0, 1fr) auto; }
+  .servicios-espacio .profesionales-vista--tarjetas .servicio-entrada { min-height: 0; }
   .servicios-espacio .servicio-detalles { grid-column: 1 / -1; grid-row: 3; }
 }
 @container (max-width: 820px) {
-  .servicios-espacio .professional-view--list .servicio-entrada { grid-template-columns: minmax(0, 1fr) auto; }
-  .servicios-espacio .professional-view--list .servicio-detalles { grid-column: 1; grid-row: 2; }
+  .servicios-espacio .profesionales-vista--lista .servicio-entrada { grid-template-columns: minmax(0, 1fr) auto; }
+  .servicios-espacio .profesionales-vista--lista .servicio-detalles { grid-column: 1; grid-row: 2; }
 }
 @container (max-width: 500px) {
-  .servicios-espacio .professional-view--list .servicio-detalles { grid-column: 1; grid-row: 2; }
-  .servicios-espacio .professional-view--list .professional-entry-actions { grid-column: 1 / -1; grid-row: 3; }
+  .servicios-espacio .profesionales-vista--lista .servicio-detalles { grid-column: 1; grid-row: 2; }
+  .servicios-espacio .profesionales-vista--lista .profesional-acciones { grid-column: 1 / -1; grid-row: 3; }
 }

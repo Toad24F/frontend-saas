@@ -1,14 +1,14 @@
 .reception-workspace { min-width: 0; }
 .reception-toolbar { grid-template-columns: minmax(210px, 1fr) auto auto; }
-.reception-workspace .professional-assignment > span { white-space: normal; }
-.reception-workspace .professional-entry-actions .professional-availability { border: 0; }
-.reception-workspace .professional-view--cards .professional-entry-actions { gap: 8px; }
+.reception-workspace .profesional-asignacion > span { white-space: normal; }
+.reception-workspace .profesional-acciones .profesional-disponibilidad { border: 0; }
+.reception-workspace .profesionales-vista--tarjetas .profesional-acciones { gap: 8px; }
 @media (max-width: 1260px) {
   .reception-toolbar { grid-template-columns: minmax(180px, 1fr) auto; }
 }
 @media (max-width: 767px) {
   .reception-toolbar { grid-template-columns: minmax(0, 1fr); }
-  .reception-workspace .professional-filters { display: flex; }
-  .reception-workspace .professional-filters label { flex: 1; }
-  .reception-workspace .professional-filters select { max-width: none; }
+  .reception-workspace .profesionales-filtros { display: flex; }
+  .reception-workspace .profesionales-filtros label { flex: 1; }
+  .reception-workspace .profesionales-filtros select { max-width: none; }
 }
