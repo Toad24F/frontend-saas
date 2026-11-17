@@ -1,5 +1,5 @@
 /* Agenda operativa: conserva los tokens y estados de Citalendar en ambos temas. */
-:root { --agenda-hour-max: 240px; }
+:root { --agenda-hour-max: 280px; }
 .agenda-scale-probe { position: absolute; width: 0; height: var(--agenda-hour-max); visibility: hidden; pointer-events: none; contain: strict; }
 .agenda-calendar { overflow-anchor: none; }
 .agenda-calendar { overflow: clip; }
