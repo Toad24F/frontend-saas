@@ -7,8 +7,8 @@ import { field, select, basicForm } from '../../forms.js';
 import { loadEditableResource } from '../../../connected/modules/catalogos/detail.js';
 import { validateProfessional, professionalError, showProfessionalErrors, clearProfessionalErrors, clearProfessionalField } from '../profesionales/errors.js';
 import { validateService, serviceError } from '../servicios/errors.js';
-import { validateBranch, branchError } from '../sucursales/errors.js';
-import { MEXICO_TIMEZONES } from '../sucursales/timezones.js';
+import { validarSucursal, interpretarErrorSucursal } from '../sucursales/sucursales.errores.js';
+import { ZONAS_HORARIAS_MEXICO } from '../sucursales/sucursales.zonas-horarias.js';
 import { readOwnRoleQuota, ownQuotaNotice } from '../../../connected/screens/negocio/user-quota.js';
 
 const professionalField = (...args) => field(...args).replace('class="form-field"', `class="form-field" data-professional-field="${args[1]}"`);
@@ -63,7 +63,7 @@ export async function catalog(type, id) {
   if (type === 'branches') {
     const dialog = basicForm(
       existing ? 'Editar sucursal' : 'Nueva sucursal',
-      `${professionalField('Nombre', 'name', existing?.name, 'text', 'required maxlength="150"')}${professionalField('Dirección', 'address', existing?.address, 'text', 'required maxlength="255"')}${professionalField('Teléfono', 'phone', existing?.phone, 'tel', isDemo ? 'required pattern="[0-9]{10}" maxlength="10" inputmode="numeric"' : 'required minlength="7" maxlength="20"')}${professionalField('Indicaciones de llegada', 'notes', existing?.notes, 'text', 'maxlength="255"')}${isDemo ? '' : professionalSelect('Zona horaria', 'timezone', MEXICO_TIMEZONES, existing?.timezone || 'America/Chihuahua')}${professionalField('Enlace de Google Maps', 'maps', existing?.maps || '', 'url', 'maxlength="2048"')}`,
+      `${professionalField('Nombre', 'name', existing?.name, 'text', 'required maxlength="150"')}${professionalField('Dirección', 'address', existing?.address, 'text', 'required maxlength="255"')}${professionalField('Teléfono', 'phone', existing?.phone, 'tel', isDemo ? 'required pattern="[0-9]{10}" maxlength="10" inputmode="numeric"' : 'required minlength="7" maxlength="20"')}${professionalField('Indicaciones de llegada', 'notes', existing?.notes, 'text', 'maxlength="255"')}${isDemo ? '' : professionalSelect('Zona horaria', 'timezone', ZONAS_HORARIAS_MEXICO, existing?.timezone || 'America/Chihuahua')}${professionalField('Enlace de Google Maps', 'maps', existing?.maps || '', 'url', 'maxlength="2048"')}`,
       (f) =>
         save('branches', existing, {
           name: f.get('name').trim(),
@@ -76,13 +76,13 @@ export async function catalog(type, id) {
       {
         drawer: true,
         validate(form) {
-          const errors = validateBranch(new FormData(form), isDemo);
+          const errors = validarSucursal(new FormData(form), isDemo);
           if (!Object.keys(errors).length) { clearProfessionalErrors(form); return true; }
           showProfessionalErrors(form, errors);
           return false;
         },
         onError(error, form) {
-          const errors = branchError(error);
+          const errors = interpretarErrorSucursal(error);
           if (errors) showProfessionalErrors(form, errors);
           else {
             const target = form.querySelector('#form-error');

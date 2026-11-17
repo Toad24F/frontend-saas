@@ -26,7 +26,7 @@ import { escape, avatar, pageHead, empty } from './ui.js';
 import { applyProfessionalFilters, resetProfessionalFilters, setProfessionalView } from './screens/profesionales/view.js';
 import { applyReceptionFilters, resetReceptionFilters, setReceptionView } from '../connected/screens/recepcionistas/view.js';
 import { applyServiceFilters, resetServiceFilters, setServiceView } from './screens/servicios/view.js';
-import { applyBranchFilters, resetBranchFilters, setBranchView } from './screens/sucursales/view.js';
+import { aplicarFiltrosSucursales, restablecerFiltrosSucursales, cambiarVistaSucursales } from './screens/sucursales/sucursales.vista.js';
 import { setAvailabilityTab } from './screens/disponibilidad/view.js';
 import { updateAssignmentDraft } from './screens/disponibilidad/branch-assignments.js';
 import { allowedAvailabilityGroups, resolveAvailabilityGroup } from './screens/disponibilidad/groups.js';
@@ -312,7 +312,7 @@ document.addEventListener('toggle', (event) => {
   menu.classList.toggle('is-upward', trigger.getBoundingClientRect().bottom + panel.offsetHeight + 6 > bottomLimit);
 }, true);
 document.addEventListener('click', (event) => {
-  if (!event.target.closest('.professional-more') || event.target.closest('[data-professional-action], [data-reception-action], [data-toggle-service], [data-disable-service], [data-toggle-branch], [data-disable-branch]')) closeProfessionalMenus();
+  if (!event.target.closest('.professional-more') || event.target.closest('[data-professional-action], [data-reception-action], [data-toggle-service], [data-disable-service], [data-alternar-sucursal], [data-inhabilitar-sucursal]')) closeProfessionalMenus();
 }, true);
 document.addEventListener('click', async (e) => {
   const accountTrigger = e.target.closest('.account-menu-trigger');
@@ -352,9 +352,9 @@ document.addEventListener('click', async (e) => {
   const serviceView = e.target.closest('[data-service-view]');
   if (serviceView) { setServiceView(serviceView.dataset.serviceView); return; }
   if (e.target.closest('[data-service-reset]')) { resetServiceFilters(); return; }
-  const branchView = e.target.closest('[data-branch-view]');
-  if (branchView) { setBranchView(branchView.dataset.branchView); return; }
-  if (e.target.closest('[data-branch-reset]')) { resetBranchFilters(); return; }
+  const vistaSucursales = e.target.closest('[data-vista-sucursales]');
+  if (vistaSucursales) { cambiarVistaSucursales(vistaSucursales.dataset.vistaSucursales); return; }
+  if (e.target.closest('[data-sucursal-reset]')) { restablecerFiltrosSucursales(); return; }
   const business = e.target.closest('[data-business-detail]');
   if (business && !isDemo) {
     navigate('negocio', Number(business.dataset.businessDetail));
@@ -429,7 +429,7 @@ document.addEventListener('change', (e) => {
   if (e.target.dataset.professionalFilter) { applyProfessionalFilters(); return; }
   if (e.target.dataset.receptionFilter) { applyReceptionFilters(); return; }
   if (e.target.dataset.serviceFilter) { applyServiceFilters(); return; }
-  if (e.target.dataset.branchFilter) { applyBranchFilters(); return; }
+  if (e.target.dataset.filtroSucursales) { aplicarFiltrosSucursales(); return; }
   if (e.target.dataset.filter) {
     state[e.target.dataset.filter] = e.target.value;
     if (e.target.dataset.filter === 'professional') state.agendaHistory = false;
@@ -440,7 +440,7 @@ document.addEventListener('input', (e) => {
   if (e.target.id === 'professional-search') { applyProfessionalFilters(); return; }
   if (e.target.id === 'reception-search') { applyReceptionFilters(); return; }
   if (e.target.id === 'service-search') { applyServiceFilters(); return; }
-  if (e.target.id === 'branch-search') { applyBranchFilters(); return; }
+  if (e.target.id === 'busqueda-sucursales') { aplicarFiltrosSucursales(); return; }
   if (e.target.id === 'agenda-search') {
     const pos = e.target.selectionStart;
     state.search = e.target.value;

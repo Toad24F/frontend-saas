@@ -1,10 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { MEXICO_TIMEZONES } from '../src/shared/screens/sucursales/timezones.js';
+import { ZONAS_HORARIAS_MEXICO } from '../src/shared/screens/sucursales/sucursales.zonas-horarias.js';
 
 test('incluye todos los identificadores IANA vigentes para México', () => {
   assert.deepEqual(
-    MEXICO_TIMEZONES.map(({ id }) => id),
+    ZONAS_HORARIAS_MEXICO.map(({ id }) => id),
     [
       'America/Mexico_City',
       'America/Cancun',
@@ -23,8 +23,8 @@ test('incluye todos los identificadores IANA vigentes para México', () => {
 });
 
 test('cada opción usa un identificador reconocido por Intl', () => {
-  for (const { id, name } of MEXICO_TIMEZONES) {
+  for (const { id, name: nombre } of ZONAS_HORARIAS_MEXICO) {
     assert.doesNotThrow(() => new Intl.DateTimeFormat('es-MX', { timeZone: id }));
-    assert.ok(name.length > 0);
+    assert.ok(nombre.length > 0);
   }
 });

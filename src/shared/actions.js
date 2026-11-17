@@ -52,9 +52,9 @@ export async function handleClick(e) {
       }
     }
     if (!isDemo && user.rol === 'admin_negocio' && state.page === 'sucursales') {
-      const branch = e.target.closest('[data-disable-branch]');
-      if (branch) {
-        (await import('../connected/screens/sucursales/actions.js')).confirmBranchDisable(Number(branch.dataset.disableBranch));
+      const sucursal = e.target.closest('[data-inhabilitar-sucursal]');
+      if (sucursal) {
+        (await import('../connected/screens/sucursales/sucursales.acciones.js')).confirmarInhabilitacionSucursal(Number(sucursal.dataset.inhabilitarSucursal));
         return;
       }
     }
@@ -114,19 +114,19 @@ export async function handleClick(e) {
       } catch (error) { toast(error.message); serviceToggle.disabled = false; }
       return;
     }
-    const branchToggle = e.target.closest('[data-toggle-branch]');
-    if (branchToggle) {
-      const branch = resource('branches', Number(branchToggle.dataset.toggleBranch), state.tenantId);
-      branchToggle.disabled = true;
+    const alternarSucursal = e.target.closest('[data-alternar-sucursal]');
+    if (alternarSucursal) {
+      const sucursal = resource('branches', Number(alternarSucursal.dataset.alternarSucursal), state.tenantId);
+      alternarSucursal.disabled = true;
       try {
-        if (isDemo) branch.active = branch.active === false;
+        if (isDemo) sucursal.active = sucursal.active === false;
         else if (user.rol === 'profesional') {
-          await api(`/profesionales/${user.id}/sucursales/${branch.id}/atencion`, 'PUT', { activo: !branch.active });
-        } else await api(`/sucursales/${branch.id}/${branch.active === false ? 'reactivar' : 'desactivar'}`, 'POST', {});
+          await api(`/profesionales/${user.id}/sucursales/${sucursal.id}/atencion`, 'PUT', { activo: !sucursal.active });
+        } else await api(`/sucursales/${sucursal.id}/${sucursal.active === false ? 'reactivar' : 'desactivar'}`, 'POST', {});
         if (!isDemo) await loadBackendData();
         render();
         toast(user?.rol === 'profesional' && !isDemo ? 'Disponibilidad en sucursal actualizada.' : 'Sucursal actualizada.');
-      } catch (error) { toast(error.message); branchToggle.disabled = false; }
+      } catch (error) { toast(error.message); alternarSucursal.disabled = false; }
       return;
     }
     const addSchedule = e.target.closest('[data-add-schedule]');
@@ -165,7 +165,7 @@ export async function handleClick(e) {
       'go-agenda': () => navigate('agenda'),
       'new-client': async () => (await import('../demo/screens/clientes/actions.js')).newClient(),
       'new-service': () => catalog('services'),
-      'new-branch': () => catalog('branches'),
+      'nueva-sucursal': () => catalog('branches'),
       'new-professional': () => catalog('professionals'),
       'new-block': newBlock,
       'switch-tenant': switchTenant,
@@ -216,7 +216,7 @@ export async function handleClick(e) {
     }
     for (const [attr, type] of [
       ['editService', 'services'],
-      ['editBranch', 'branches'],
+      ['editarSucursal', 'branches'],
       ['editProfessional', 'professionals'],
     ]) {
       const selector = attr.replace(/[A-Z]/g, (c) => '-' + c.toLowerCase());

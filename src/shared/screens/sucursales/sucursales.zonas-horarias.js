@@ -1,4 +1,4 @@
-export const MEXICO_TIMEZONES = [
+export const ZONAS_HORARIAS_MEXICO = [
   { id: 'America/Mexico_City', name: 'Centro — Ciudad de México y zona centro' },
   { id: 'America/Cancun', name: 'Sureste — Quintana Roo' },
   { id: 'America/Merida', name: 'Centro — Campeche y Yucatán' },

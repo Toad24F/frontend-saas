@@ -1,0 +1,117 @@
+import { configureCatalogPaging, catalogPagination, updateCatalogPage } from '../catalog-pagination.js';
+import { catalogHead, capacityHtml, clearCatalogButton, hasCatalogFilters } from '../catalog-header.js';
+import { isDemo, user } from '../../../connected/backend.js';
+import { state, render } from '../../app.js';
+import { getCatalogView, setCatalogView } from '../catalog-view.js';
+import { list } from '../../data.js';
+import { icon } from '../../icons.js';
+import { resourceStatus } from '../../resource-status.js';
+import { escape as escapar, pageHead, button, empty } from '../../ui.js';
+import '../profesionales/style.css';
+import './sucursales.estilos.css';
+
+const interfaz = { search: '', status: 'all' };
+let alcance = null;
+const normalizar = (valor) => String(valor ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('es-MX');
+
+function coincide(sucursal) {
+  return (!interfaz.search || normalizar(`${sucursal.name} ${sucursal.address || ''} ${sucursal.phone || ''} ${sucursal.notes || ''}`).includes(normalizar(interfaz.search)))
+    && (interfaz.status === 'all' || (interfaz.status === 'active') === (sucursal.active !== false));
+}
+
+function mapaGoogle(sucursal) {
+  if (!sucursal.maps) return null;
+  try {
+    const url = new URL(sucursal.maps);
+    const dominio = url.hostname.toLowerCase();
+    if (url.protocol !== 'https:' || !['google.com', 'www.google.com', 'maps.google.com', 'maps.app.goo.gl', 'goo.gl'].includes(dominio)) return null;
+    if (dominio === 'www.google.com' && url.pathname.startsWith('/maps/embed')) return { enlace: url.href, insercion: url.href, aproximado: false };
+    const lugar = url.pathname.match(/\/maps\/place\/([^/]+)/)?.[1];
+    const coordenadas = url.pathname.match(/@(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/);
+    const consulta = url.searchParams.get('q') || url.searchParams.get('query') || (lugar ? decodeURIComponent(lugar.replace(/\+/g, ' ')) : '') || (coordenadas ? `${coordenadas[1]},${coordenadas[2]}` : '') || sucursal.address;
+    return { enlace: url.href, insercion: consulta ? `https://www.google.com/maps?q=${encodeURIComponent(consulta)}&output=embed` : null, aproximado: !lugar && !coordenadas && !url.searchParams.has('q') && !url.searchParams.has('query') };
+  } catch { return null; }
+}
+
+function barraCupo(sucursales, propias, cupo) {
+  if (!isDemo && !propias && !cupo) return '<p class="catalog-quota-error">Cupo de sucursales no disponible.</p>';
+  if (cupo) return capacityHtml('Sucursales activas', { activos: Number(cupo.sucursalesActivas), limite: Number(cupo.limiteSucursalesActivas), disponibles: Number(cupo.disponibles) });
+  const activas = sucursales.filter((sucursal) => sucursal.active !== false).length;
+  const limite = cupo && Number.isFinite(Number(cupo.limiteSucursalesActivas)) ? Number(cupo.limiteSucursalesActivas) : sucursales.length;
+  const usadas = cupo ? Number(cupo.sucursalesActivas) || 0 : activas;
+  const titulo = cupo ? 'Cupo de sucursales activas' : propias ? 'Atención activa en tus sucursales' : 'Sucursales activas';
+  return `<section class="sucursales-cupo" aria-label="${titulo}"><div class="sucursales-cupo-encabezado"><span>${titulo}</span><strong>${usadas} de ${limite}</strong></div><progress class="sucursales-cupo-progreso" value="${Math.max(0, usadas)}" max="${Math.max(1, limite, usadas)}" aria-label="${titulo}"></progress>${cupo ? `<small>${Number(cupo.disponibles) || 0} ${Number(cupo.disponibles) === 1 ? 'sucursal disponible' : 'sucursales disponibles'}</small>` : ''}</section>`;
+}
+
+function renderSucursal(sucursal, profesionales, propia, administrar, visible) {
+  const activa = sucursal.active !== false;
+  const personas = profesionales.filter((persona) => persona.branchIds.includes(sucursal.id));
+  const mapa = mapaGoogle(sucursal);
+  const estado = propia ? !sucursal.globalActive ? 'Sucursal inactiva' : activa ? 'Atención activa' : 'Atención pausada' : resourceStatus(sucursal).label === 'Activo' ? 'Activa' : resourceStatus(sucursal).label === 'Inactivo' ? 'Inactiva' : 'Inhabilitada';
+  const etiquetaAlternar = propia ? activa ? 'Pausar atención' : 'Activar atención' : activa ? 'Desactivar' : 'Activar';
+  const alternar = `<button type="button" class="${activa ? 'action-caution' : ''}" data-alternar-sucursal="${sucursal.id}" aria-label="${etiquetaAlternar} ${escapar(sucursal.name)}" ${propia && !sucursal.globalActive ? 'disabled title="Sucursal inactiva en el negocio"' : ''}>${etiquetaAlternar}</button>`;
+  const acciones = propia
+    ? `<button type="button" class="professional-availability" data-alternar-sucursal="${sucursal.id}" aria-label="${etiquetaAlternar} ${escapar(sucursal.name)}" ${!sucursal.globalActive ? 'disabled title="Sucursal inactiva en el negocio"' : ''}>${etiquetaAlternar} ${icon('arrow')}</button>`
+    : `<button type="button" class="professional-availability" data-editar-sucursal="${sucursal.id}">Editar ${icon('arrow')}</button><details class="professional-more"><summary aria-label="Más acciones para ${escapar(sucursal.name)}">${icon('more')}</summary><div class="professional-more-menu">${alternar}${administrar(sucursal)}</div></details>`;
+  return `<article class="surface professional-entry sucursal-entrada" data-sucursal-entrada="${sucursal.id}" ${visible ? '' : 'hidden'}>
+    <div class="sucursal-mapa">${mapa?.insercion ? `<iframe title="Mapa de ${escapar(sucursal.name)}" src="${escapar(mapa.insercion)}" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>${mapa.aproximado ? '<span class="sucursal-mapa-leyenda">Vista por dirección</span>' : ''}` : `<div class="sucursal-mapa-vacio">${icon('pin')}<span>${sucursal.maps ? 'Enlace de mapa no compatible' : 'Mapa no agregado'}</span></div>`}</div>
+    <div class="professional-person"><span class="sucursal-icono">${icon('pin')}</span><div class="professional-identity"><h2>${escapar(sucursal.name)}</h2><p>${escapar(sucursal.address || 'Dirección no disponible')}</p>${sucursal.phone ? `<small>${escapar(sucursal.phone)}</small>` : ''}</div></div>
+    <div class="professional-assignment sucursal-detalles"><span>${icon('users')}<strong>${personas.length}</strong> ${personas.length === 1 ? 'profesional' : 'profesionales'}</span>${mapa ? `<a href="${escapar(mapa.enlace)}" target="_blank" rel="noopener noreferrer">${icon('pin')}Abrir en Google Maps</a>` : ''}${sucursal.notes ? `<span class="sucursal-llegada">${icon('info')}${escapar(sucursal.notes)}</span>` : ''}</div>
+    <span class="professional-status ${activa && (!propia || sucursal.globalActive) ? 'is-active' : 'is-inactive'}"><i></i>${estado}</span>
+    <div class="professional-entry-actions">${acciones}</div>
+  </article>`;
+}
+
+export function sucursales({ cupo = null, administrar = () => '', accionesEncabezado = '' } = {}) {
+  const propia = !isDemo && user?.rol === 'profesional';
+  const alcanceActual = `${state.tenantId}:${propia ? user.id : 'admin'}`;
+  if (alcance !== alcanceActual) { Object.assign(interfaz, { search: '', status: 'all' }); alcance = alcanceActual; }
+  const profesional = propia ? list('professionals', state.tenantId)[0] : null;
+  const sucursales = list('branches', state.tenantId).filter((sucursal) => !propia || profesional?.branchIds.includes(sucursal.id));
+  const profesionales = list('professionals', state.tenantId);
+  const activas = sucursales.filter((sucursal) => sucursal.active !== false).length;
+  const visibles = sucursales.filter(coincide);
+  const pagina = configureCatalogPaging('sucursal', state.tenantId, sucursales, () => list('branches', state.tenantId).filter((sucursal) => (!propia || profesional?.branchIds.includes(sucursal.id)) && coincide(sucursal)), (sucursal) => renderSucursal(sucursal, profesionales, propia, administrar, true), 'sucursales');
+  const vistaEscritorio = getCatalogView();
+  const vistaResultados = matchMedia('(max-width: 767px)').matches ? 'cards' : vistaEscritorio;
+  return `<div class="professional-workspace sucursales-espacio">${catalogHead('Sucursales', propia ? 'Consulta y activa la disponibilidad de tus sucursales asignadas.' : 'Gestiona las ubicaciones de tu negocio.', accionesEncabezado + (propia ? '' : button('Nueva sucursal', 'nueva-sucursal')), barraCupo(sucursales, propia, cupo))}
+    <div class="professional-overview"><strong>${sucursales.length}</strong> ${sucursales.length === 1 ? 'sucursal' : 'sucursales'}<span aria-hidden="true">·</span><strong>${activas}</strong> activas<span aria-hidden="true">·</span><strong>${sucursales.length - activas}</strong> inactivas</div>
+    <section class="professional-toolbar sucursales-herramientas" aria-label="Buscar y filtrar sucursales">
+      <label class="professional-search">${icon('search')}<span class="visually-hidden">Buscar sucursales</span><input id="busqueda-sucursales" type="search" placeholder="Buscar por nombre, dirección o teléfono" value="${escapar(interfaz.search)}" autocomplete="off"></label>
+      <div class="professional-filters"><label><span>Estado</span><select data-filtro-sucursales="estado"><option value="all">Todas</option><option value="active" ${interfaz.status === 'active' ? 'selected' : ''}>Activas</option><option value="inactive" ${interfaz.status === 'inactive' ? 'selected' : ''}>Inactivas</option></select></label>${clearCatalogButton('sucursal', interfaz)}</div>
+      <div class="professional-view-switch" role="group" aria-label="Tipo de vista"><button type="button" data-vista-sucursales="list" aria-pressed="${vistaEscritorio === 'list'}" class="${vistaEscritorio === 'list' ? 'is-selected' : ''}">${icon('menu')}<span>Lista</span></button><button type="button" data-vista-sucursales="cards" aria-pressed="${vistaEscritorio === 'cards'}" class="${vistaEscritorio === 'cards' ? 'is-selected' : ''}">${icon('grid')}<span>Tarjetas</span></button></div>
+    </section>
+    <div class="professional-results-heading"><span id="conteo-resultados-sucursales" role="status" aria-live="polite">${visibles.length} ${visibles.length === 1 ? 'resultado' : 'resultados'}</span></div>
+    ${sucursales.length ? `<div class="professional-results professional-view--${vistaResultados}" data-desktop-view="${vistaEscritorio}" id="sucursal-results">${pagina.rows.map((sucursal) => renderSucursal(sucursal, profesionales, propia, administrar, true)).join('')}</div>${catalogPagination('sucursal', pagina)}<div class="professional-no-results" id="sin-resultados-sucursales" ${visibles.length ? 'hidden' : ''}>${empty('Sin coincidencias', 'Prueba otra búsqueda o cambia el filtro de estado.', '<button type="button" class="btn btn-light" data-sucursal-reset>Limpiar filtros</button>')}</div>` : empty('Aún no hay sucursales', propia ? 'Tu negocio todavía no te asigna una sucursal.' : 'Crea una sucursal para empezar a organizar la atención.', propia ? '' : '<button type="button" class="btn btn-primary" data-action="nueva-sucursal">Nueva sucursal</button>')}
+  </div>`;
+}
+
+export function cambiarVistaSucursales(vista) {
+  if (setCatalogView(vista)) render();
+}
+
+export function restablecerFiltrosSucursales() {
+  Object.assign(interfaz, { search: '', status: 'all' });
+  const raiz = document.querySelector('.sucursales-espacio');
+  if (!raiz) return;
+  raiz.querySelector('#busqueda-sucursales').value = '';
+  raiz.querySelector('[data-filtro-sucursales]').value = 'all';
+  aplicarFiltrosSucursales();
+  raiz.querySelector('#busqueda-sucursales').focus();
+}
+
+export function aplicarFiltrosSucursales() {
+  const raiz = document.querySelector('.sucursales-espacio');
+  if (!raiz) return;
+  interfaz.search = raiz.querySelector('#busqueda-sucursales')?.value.trim() || '';
+  interfaz.status = raiz.querySelector('[data-filtro-sucursales]')?.value || 'all';
+  const propia = !isDemo && user?.rol === 'profesional';
+  const profesional = propia ? list('professionals', state.tenantId)[0] : null;
+  raiz.querySelectorAll('[data-sucursal-reset]').forEach((boton) => { boton.disabled = !hasCatalogFilters(interfaz); });
+  const visibles = new Set(list('branches', state.tenantId).filter((sucursal) => (!propia || profesional?.branchIds.includes(sucursal.id)) && coincide(sucursal)).map((sucursal) => String(sucursal.id)));
+  updateCatalogPage('sucursal', true);
+  const conteo = visibles.size;
+  raiz.querySelector('#conteo-resultados-sucursales').textContent = `${conteo} ${conteo === 1 ? 'resultado' : 'resultados'}`;
+  const sinResultados = raiz.querySelector('#sin-resultados-sucursales');
+  if (sinResultados) sinResultados.hidden = conteo > 0;
+}

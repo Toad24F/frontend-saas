@@ -1,12 +1,12 @@
 import { replaceData, time } from '../../../shared/data.js';
 import { api, user } from '../auth/session.js';
 import { loadRoleCapacities, clearRoleCapacities } from '../catalogos/capacity.js';
-import { setBranchQuota } from '../sucursales/quota.js';
+import { establecerCupoSucursales } from '../sucursales/sucursales.cupo.js';
 
 const initials = (name) => name.split(/\s+/).slice(0, 2).map((part) => part[0]).join('');
 const clock = (value) => value == null ? '' : time(value % 1440);
 export async function loadBackendData() {
-  setBranchQuota(null);
+  establecerCupoSucursales(null);
   clearRoleCapacities();
   const tenantId = user.negocioId || 1;
   const next = { tenants: [], professionals: [], receptionists: [], branches: [], services: [], schedules: [], blocks: [], appointments: [], clients: [], holds: [] };
@@ -52,7 +52,7 @@ export async function loadBackendData() {
   } else if (user.rol === 'admin_negocio') {
     await loadRoleCapacities(api);
     const [services, branches, quota, professionals, receptionists, blocks] = await Promise.all([api('/servicios'), api('/sucursales'), api('/sucursales/cupo'), api('/profesionales'), api('/recepcionistas'), api('/bloqueos')]);
-    setBranchQuota(quota);
+    establecerCupoSucursales(quota);
     next.receptionists = receptionists.map((r) => ({ id: r.id, tenantId, name: r.nombre, email: r.email, active: r.activo, activatedAt: r.activadoEn, initials: initials(r.nombre) }));
     next.services = services.map((s) => ({ id: s.id, tenantId, name: s.nombre, duration: s.duracionMinutos, price: Number(s.costo), active: s.activo, description: s.descripcion || '', creatorId: s.creadorPersonalId, icon: 'briefcase', color: 'blue' }));
     next.branches = branches.map((b) => ({ id: b.id, tenantId, name: b.nombre, address: b.direccion, phone: b.telefono, timezone: b.zonaHoraria, maps: b.urlGoogleMaps, notes: b.notasLlegada || '', active: b.activo, color: 'orange' }));
