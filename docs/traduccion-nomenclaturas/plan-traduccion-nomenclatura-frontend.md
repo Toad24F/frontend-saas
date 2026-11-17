@@ -1,7 +1,7 @@
 # Reglas y plan de traducción de la nomenclatura del frontend
 
 Fecha de definición: 2026-11-16  
-Estado: implementación por conjuntos; glosario, Sucursales y Servicios terminados
+Estado: implementación por conjuntos; glosario, Sucursales, Servicios y Profesionales terminados
 
 ## Objetivo
 
@@ -186,11 +186,13 @@ Resultado: conjunto cerrado el 2026-11-17 en `docs/traduccion-nomenclaturas/resu
 
 ### 3. Profesionales
 
-- [ ] Renombrar juntos `shared/screens/profesionales/view.js`, `errors.js` y `style.css`.
-- [ ] Renombrar juntos `connected/screens/profesionales/view.js`, `actions.js` y `style.css`.
-- [ ] Revisar `connected/modules/profesionales/operations.js`.
-- [ ] Actualizar las pruebas `profesionales-*.test.js` y pruebas de navegador relacionadas.
-- [ ] Verificar asignaciones, estados y permisos en ambos tamaños y temas.
+- [x] Renombrar juntos `shared/screens/profesionales/view.js`, `errors.js` y `style.css`.
+- [x] Renombrar juntos `connected/screens/profesionales/view.js`, `actions.js` y `style.css`.
+- [x] Revisar `connected/modules/profesionales/operations.js`.
+- [x] Actualizar las pruebas `profesionales-*.test.js` y pruebas de navegador relacionadas.
+- [x] Verificar asignaciones, estados y permisos en ambos tamaños y temas.
+
+Resultado: conjunto cerrado el 2026-11-17 en `docs/traduccion-nomenclaturas/resultado-profesionales-2026-11-17.md`.
 
 ### 4. Recepcionistas
 

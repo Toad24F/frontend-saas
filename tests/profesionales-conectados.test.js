@@ -1,14 +1,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { submitProfessionalAction } from '../src/connected/modules/profesionales/operations.js';
+import { ejecutarAccionProfesional } from '../src/connected/modules/profesionales/profesionales.operaciones.js';
 
 test('las acciones de estado y baja usan rutas y cuerpos admitidos', async () => {
-  const calls = [];
-  const request = async (...args) => { calls.push(args); return null; };
-  await submitProfessionalAction(12, 'deactivate', request);
-  await submitProfessionalAction(12, 'reactivate', request);
-  await submitProfessionalAction(12, 'disable', request);
-  assert.deepEqual(calls, [
+  const llamadas = [];
+  const peticion = async (...argumentos) => { llamadas.push(argumentos); return null; };
+  await ejecutarAccionProfesional(12, 'desactivar', peticion);
+  await ejecutarAccionProfesional(12, 'reactivar', peticion);
+  await ejecutarAccionProfesional(12, 'inhabilitar', peticion);
+  assert.deepEqual(llamadas, [
     ['/profesionales/12/desactivar', 'POST', {}],
     ['/profesionales/12/reactivar', 'POST', {}],
     ['/profesionales/12/inhabilitar', 'POST', {}],
@@ -16,9 +16,9 @@ test('las acciones de estado y baja usan rutas y cuerpos admitidos', async () =>
 });
 
 test('la baja no oculta conflictos y rechaza acciones no admitidas', async () => {
-  const conflict = new Error('El perfil conserva historial.');
-  await assert.rejects(submitProfessionalAction(12, 'disable', async () => { throw conflict; }), (error) => error === conflict);
-  await assert.rejects(submitProfessionalAction(0, 'disable'), /no válida/);
-  await assert.rejects(submitProfessionalAction(12, 'delete'), /no válida/);
-  await assert.rejects(submitProfessionalAction(12, 'suspend'), /no válida/);
+  const conflicto = new Error('El perfil conserva historial.');
+  await assert.rejects(ejecutarAccionProfesional(12, 'inhabilitar', async () => { throw conflicto; }), (error) => error === conflicto);
+  await assert.rejects(ejecutarAccionProfesional(0, 'inhabilitar'), /no válida/);
+  await assert.rejects(ejecutarAccionProfesional(12, 'eliminar'), /no válida/);
+  await assert.rejects(ejecutarAccionProfesional(12, 'suspender'), /no válida/);
 });

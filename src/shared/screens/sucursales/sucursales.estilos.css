@@ -19,26 +19,26 @@
 .sucursales-espacio .sucursales-herramientas { grid-template-columns: minmax(210px, 1fr) auto auto; }
 .sucursales-espacio .sucursal-icono { display: grid; place-items: center; flex: 0 0 46px; width: 46px; height: 46px; border-radius: 12px; color: var(--accent); background: var(--surface-soft); }
 .sucursales-espacio .sucursal-icono .icon { width: 21px; height: 21px; }
-.sucursales-espacio .professional-identity p { max-width: 46ch; }
+.sucursales-espacio .profesional-identidad p { max-width: 46ch; }
 .sucursales-espacio .sucursal-detalles { align-items: flex-start; }
 .sucursales-espacio .sucursal-detalles a { display: inline-flex; align-items: center; gap: 4px; color: var(--accent); font-weight: 650; text-decoration: none; }
 .sucursales-espacio .sucursal-detalles a:hover { color: var(--accent-dark); text-decoration: underline; }
 .sucursales-espacio .sucursal-detalles .sucursal-llegada { flex-basis: 100%; white-space: normal; line-height: 1.4; }
 .sucursales-espacio .sucursal-detalles .sucursal-llegada .icon { flex: 0 0 14px; }
-.sucursales-espacio .professional-entry-actions .professional-availability { border: 0; }
-.sucursales-espacio .professional-entry-actions .professional-availability:disabled { opacity: .55; cursor: not-allowed; }
-.sucursales-espacio .professional-view--list .sucursal-entrada { grid-template-columns: minmax(175px, 1.3fr) minmax(160px, 1fr) max-content max-content; }
-.sucursales-espacio .professional-view--list .sucursal-mapa { display: none; }
-.sucursales-espacio .professional-view--cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-.sucursales-espacio .professional-view--cards .sucursal-entrada { grid-template-columns: minmax(0, 1fr); gap: 12px; padding: 0 0 18px; }
-.sucursales-espacio .professional-view--cards .sucursal-mapa { grid-row: 1; }
-.sucursales-espacio .professional-view--cards .professional-person,
-.sucursales-espacio .professional-view--cards .professional-status,
-.sucursales-espacio .professional-view--cards .sucursal-detalles,
-.sucursales-espacio .professional-view--cards .professional-entry-actions { margin-left: 18px; margin-right: 18px; }
-.sucursales-espacio .professional-view--cards .professional-status { grid-row: 3; }
-.sucursales-espacio .professional-view--cards .sucursal-detalles { grid-row: 4; padding-top: 10px; border-top: 1px solid var(--border); }
-.sucursales-espacio .professional-view--cards .professional-entry-actions { grid-row: 5; margin-top: auto; padding-top: 10px; border-top: 1px solid var(--border); }
+.sucursales-espacio .profesional-acciones .profesional-disponibilidad { border: 0; }
+.sucursales-espacio .profesional-acciones .profesional-disponibilidad:disabled { opacity: .55; cursor: not-allowed; }
+.sucursales-espacio .profesionales-vista--lista .sucursal-entrada { grid-template-columns: minmax(175px, 1.3fr) minmax(160px, 1fr) max-content max-content; }
+.sucursales-espacio .profesionales-vista--lista .sucursal-mapa { display: none; }
+.sucursales-espacio .profesionales-vista--tarjetas { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.sucursales-espacio .profesionales-vista--tarjetas .sucursal-entrada { grid-template-columns: minmax(0, 1fr); gap: 12px; padding: 0 0 18px; }
+.sucursales-espacio .profesionales-vista--tarjetas .sucursal-mapa { grid-row: 1; }
+.sucursales-espacio .profesionales-vista--tarjetas .profesional-persona,
+.sucursales-espacio .profesionales-vista--tarjetas .profesional-estado,
+.sucursales-espacio .profesionales-vista--tarjetas .sucursal-detalles,
+.sucursales-espacio .profesionales-vista--tarjetas .profesional-acciones { margin-left: 18px; margin-right: 18px; }
+.sucursales-espacio .profesionales-vista--tarjetas .profesional-estado { grid-row: 3; }
+.sucursales-espacio .profesionales-vista--tarjetas .sucursal-detalles { grid-row: 4; padding-top: 10px; border-top: 1px solid var(--border); }
+.sucursales-espacio .profesionales-vista--tarjetas .profesional-acciones { grid-row: 5; margin-top: auto; padding-top: 10px; border-top: 1px solid var(--border); }
 .sucursal-mapa { position: relative; height: 166px; overflow: hidden; border-radius: 11px 11px 0 0; background: var(--surface-soft); }
 .sucursal-mapa iframe { display: block; width: 100%; height: 100%; border: 0; }
 .sucursal-mapa-vacio { display: grid; place-content: center; justify-items: center; gap: 8px; height: 100%; color: var(--muted); font-size: 12px; }
@@ -46,35 +46,35 @@
 .sucursal-mapa-leyenda { position: absolute; right: 10px; bottom: 10px; padding: 3px 6px; border-radius: 5px; background: var(--surface); color: var(--muted); font-size: 10px; }
 @media (max-width: 1260px) {
   .sucursales-espacio .sucursales-herramientas { grid-template-columns: minmax(180px, 1fr) auto; }
-  .sucursales-espacio .sucursales-herramientas .professional-filters { grid-column: 1 / -1; grid-row: 2; }
-  .sucursales-espacio .sucursales-herramientas .professional-view-switch { grid-column: 2; grid-row: 1; }
+  .sucursales-espacio .sucursales-herramientas .profesionales-filtros { grid-column: 1 / -1; grid-row: 2; }
+  .sucursales-espacio .sucursales-herramientas .profesionales-selector-vista { grid-column: 2; grid-row: 1; }
 }
 @media (max-width: 900px) {
-  .sucursales-espacio .professional-view--cards { grid-template-columns: minmax(0, 1fr); }
+  .sucursales-espacio .profesionales-vista--tarjetas { grid-template-columns: minmax(0, 1fr); }
 }
 @media (max-width: 767px) {
   .sucursales-espacio .sucursales-herramientas { grid-template-columns: minmax(0, 1fr); }
-  .sucursales-espacio .sucursales-herramientas .professional-filters { grid-column: 1; grid-row: auto; grid-template-columns: minmax(0, 1fr); }
-  .sucursales-espacio .sucursales-herramientas .professional-view-switch { grid-column: 1; grid-row: auto; }
-  .sucursales-espacio .professional-view--cards { grid-template-columns: minmax(0, 1fr); }
-  .sucursales-espacio .professional-view--cards .sucursal-entrada { display: grid; grid-template-columns: minmax(0, 1fr); padding: 0 0 16px; }
-  .sucursales-espacio .professional-view--cards .professional-person,
-  .sucursales-espacio .professional-view--cards .professional-status,
-  .sucursales-espacio .professional-view--cards .sucursal-detalles,
-  .sucursales-espacio .professional-view--cards .professional-entry-actions { grid-column: 1; margin-left: 14px; margin-right: 14px; }
-  .sucursales-espacio .professional-view--cards .professional-person { grid-row: 2; }
-  .sucursales-espacio .professional-view--cards .professional-status { grid-row: 3; }
-  .sucursales-espacio .professional-view--cards .sucursal-detalles { grid-row: 4; }
-  .sucursales-espacio .professional-view--cards .professional-entry-actions { grid-row: 5; }
+  .sucursales-espacio .sucursales-herramientas .profesionales-filtros { grid-column: 1; grid-row: auto; grid-template-columns: minmax(0, 1fr); }
+  .sucursales-espacio .sucursales-herramientas .profesionales-selector-vista { grid-column: 1; grid-row: auto; }
+  .sucursales-espacio .profesionales-vista--tarjetas { grid-template-columns: minmax(0, 1fr); }
+  .sucursales-espacio .profesionales-vista--tarjetas .sucursal-entrada { display: grid; grid-template-columns: minmax(0, 1fr); padding: 0 0 16px; }
+  .sucursales-espacio .profesionales-vista--tarjetas .profesional-persona,
+  .sucursales-espacio .profesionales-vista--tarjetas .profesional-estado,
+  .sucursales-espacio .profesionales-vista--tarjetas .sucursal-detalles,
+  .sucursales-espacio .profesionales-vista--tarjetas .profesional-acciones { grid-column: 1; margin-left: 14px; margin-right: 14px; }
+  .sucursales-espacio .profesionales-vista--tarjetas .profesional-persona { grid-row: 2; }
+  .sucursales-espacio .profesionales-vista--tarjetas .profesional-estado { grid-row: 3; }
+  .sucursales-espacio .profesionales-vista--tarjetas .sucursal-detalles { grid-row: 4; }
+  .sucursales-espacio .profesionales-vista--tarjetas .profesional-acciones { grid-row: 5; }
   .sucursales-cupo { max-width: none; }
-  .sucursales-espacio .professional-more-menu { left: 0; right: auto; }
-  .sucursales-espacio .professional-view--cards .professional-more-menu { left: auto; right: 0; }
+  .sucursales-espacio .profesional-menu-mas { left: 0; right: auto; }
+  .sucursales-espacio .profesionales-vista--tarjetas .profesional-menu-mas { left: auto; right: 0; }
 }
 @container (max-width: 820px) {
-  .sucursales-espacio .professional-view--list .sucursal-entrada { grid-template-columns: minmax(0, 1fr) auto; }
-  .sucursales-espacio .professional-view--list .sucursal-detalles { grid-column: 1; grid-row: 2; }
+  .sucursales-espacio .profesionales-vista--lista .sucursal-entrada { grid-template-columns: minmax(0, 1fr) auto; }
+  .sucursales-espacio .profesionales-vista--lista .sucursal-detalles { grid-column: 1; grid-row: 2; }
 }
 @container (max-width: 500px) {
-  .sucursales-espacio .professional-view--list .sucursal-detalles { grid-column: 1; grid-row: 2; }
-  .sucursales-espacio .professional-view--list .professional-entry-actions { grid-column: 1 / -1; grid-row: 3; }
+  .sucursales-espacio .profesionales-vista--lista .sucursal-detalles { grid-column: 1; grid-row: 2; }
+  .sucursales-espacio .profesionales-vista--lista .profesional-acciones { grid-column: 1 / -1; grid-row: 3; }
 }

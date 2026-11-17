@@ -71,7 +71,7 @@ html[data-theme='dark'] .btn-light,
 html[data-theme='dark'] .btn-today { background: #2c2d34; border-color: #454650; color: var(--ink); }
 html[data-theme='dark'] .btn-light:hover,
 html[data-theme='dark'] .btn-today:hover { background: #393a43; color: #fff; }
-html[data-theme='dark'] :is(.btn-primary:hover, .btn-primary:focus-visible, .professional-availability:hover) {
+html[data-theme='dark'] :is(.btn-primary:hover, .btn-primary:focus-visible, .profesional-disponibilidad:hover) {
   background: #a6402a;
   border-color: #a6402a;
   color: #fff;

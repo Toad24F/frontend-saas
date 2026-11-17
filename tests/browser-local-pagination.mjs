@@ -46,43 +46,44 @@ try {
   });
   const page = await context.newPage();
   page.on('pageerror', (error) => errors.push(error.message));
-  for (const [screen, kind] of [['profesionales', 'professional'], ['recepcionistas', 'reception'], ['servicios', 'servicio'], ['sucursales', 'sucursal']]) {
+  for (const [screen, kind] of [['profesionales', 'profesional'], ['recepcionistas', 'reception'], ['servicios', 'servicio'], ['sucursales', 'sucursal']]) {
     await page.setViewportSize({ width: 1366, height: 900 });
     await page.goto(`${origin}/admin/${screen}`);
+    const esProfesionales = screen === 'profesionales';
     const esSucursales = screen === 'sucursales';
     const esServicios = screen === 'servicios';
     const results = page.locator(`#${kind}-results`), footer = page.locator(`[data-catalog-pagination=${kind}]`);
     await results.waitFor();
     await expect(results.locator('article')).toHaveCount(10);
-    assert.match(await page.locator('.professional-overview').innerText(), /21/);
+    assert.match(await page.locator('.profesionales-resumen').innerText(), /21/);
     const initialRequests = requests;
     await footer.getByRole('button', { name: 'Siguiente', exact: true }).click();
     assert.match(await footer.innerText(), /11–20 de 21/);
-    await page.locator(esServicios ? '[data-vista-servicios=cards]' : esSucursales ? '[data-vista-sucursales=cards]' : `[data-${kind}-view=cards]`).click();
+    await page.locator(esProfesionales ? '[data-vista-profesionales=cards]' : esServicios ? '[data-vista-servicios=cards]' : esSucursales ? '[data-vista-sucursales=cards]' : `[data-${kind}-view=cards]`).click();
     assert.match(await footer.innerText(), /11–20 de 21/);
     await page.setViewportSize({ width: 390, height: 900 });
     await expect(results.locator('article')).toHaveCount(10);
-    assert.match(await results.getAttribute('class'), /view--cards/);
+    assert.match(await results.getAttribute('class'), /vista--tarjetas/);
     await footer.getByRole('button', { name: 'Siguiente', exact: true }).click();
     assert.equal(await results.locator('article').count(), 1);
     assert.match(await footer.innerText(), /21–21 de 21/);
     assert.equal(requests, initialRequests);
-    await page.locator(esServicios ? '[data-filtro-servicios=estado]' : esSucursales ? '[data-filtro-sucursales=estado]' : `[data-${kind}-filter=status]`).selectOption('inactive');
+    await page.locator(esProfesionales ? '[data-filtro-profesionales=status]' : esServicios ? '[data-filtro-servicios=estado]' : esSucursales ? '[data-filtro-sucursales=estado]' : `[data-${kind}-filter=status]`).selectOption('inactive');
     await expect(results.locator('article')).toHaveCount(10);
     assert.equal(await footer.locator('nav').count(), 0);
-    await page.locator(esServicios ? '[data-filtro-servicios=estado]' : esSucursales ? '[data-filtro-sucursales=estado]' : `[data-${kind}-filter=status]`).selectOption('active');
+    await page.locator(esProfesionales ? '[data-filtro-profesionales=status]' : esServicios ? '[data-filtro-servicios=estado]' : esSucursales ? '[data-filtro-sucursales=estado]' : `[data-${kind}-filter=status]`).selectOption('active');
     assert.equal(await footer.locator('nav').count(), 1);
-    await page.locator(esServicios ? '#busqueda-servicios' : esSucursales ? '#busqueda-sucursales' : `#${kind}-search`).fill('unico');
+    await page.locator(esProfesionales ? '#busqueda-profesionales' : esServicios ? '#busqueda-servicios' : esSucursales ? '#busqueda-sucursales' : `#${kind}-search`).fill('unico');
     assert.equal(await results.locator('article').count(), 1);
     assert.equal(await footer.locator('nav').count(), 0);
-    await page.locator(esServicios ? '#busqueda-servicios' : esSucursales ? '#busqueda-sucursales' : `#${kind}-search`).fill('sin coincidencias');
+    await page.locator(esProfesionales ? '#busqueda-profesionales' : esServicios ? '#busqueda-servicios' : esSucursales ? '#busqueda-sucursales' : `#${kind}-search`).fill('sin coincidencias');
     assert.equal(await results.locator('article').count(), 0);
-    await page.locator(esServicios ? '#sin-resultados-servicios' : esSucursales ? '#sin-resultados-sucursales' : `#${kind}-no-results`).waitFor();
-    await page.locator(esServicios ? '.professional-toolbar [data-servicio-reset]' : esSucursales ? '.professional-toolbar [data-sucursal-reset]' : `.professional-toolbar [data-${kind}-reset]`).click();
+    await page.locator(esProfesionales ? '#sin-resultados-profesionales' : esServicios ? '#sin-resultados-servicios' : esSucursales ? '#sin-resultados-sucursales' : `#${kind}-no-results`).waitFor();
+    await page.locator(esProfesionales ? '.profesionales-herramientas [data-profesional-reset]' : esServicios ? '.profesionales-herramientas [data-servicio-reset]' : esSucursales ? '.profesionales-herramientas [data-sucursal-reset]' : `.profesionales-herramientas [data-${kind}-reset]`).click();
     await expect(results.locator('article')).toHaveCount(10);
     for (const width of [1366, 1159, 390, 320]) {
       await page.setViewportSize({ width, height: 900 });
-      if (width > 767) await page.locator(esServicios ? '[data-vista-servicios=list]' : esSucursales ? '[data-vista-sucursales=list]' : `[data-${kind}-view=list]`).click();
+      if (width > 767) await page.locator(esProfesionales ? '[data-vista-profesionales=list]' : esServicios ? '[data-vista-servicios=list]' : esSucursales ? '[data-vista-sucursales=list]' : `[data-${kind}-view=list]`).click();
       for (const theme of ['light', 'dark']) {
         await page.evaluate((theme) => { localStorage.setItem('cita-theme', theme); document.documentElement.dataset.theme = theme; }, theme);
         assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), `${screen}/${width}/${theme}`);
@@ -92,15 +93,15 @@ try {
     }
   }
   await page.goto(`${origin}/admin/profesionales`);
-  await page.locator('#professional-results').waitFor();
-  const professionalFooter = page.locator('[data-catalog-pagination=professional]');
+  await page.locator('#profesional-results').waitFor();
+  const professionalFooter = page.locator('[data-catalog-pagination=profesional]');
   await professionalFooter.getByRole('button', { name: 'Siguiente', exact: true }).click();
   await professionalFooter.getByRole('button', { name: 'Siguiente', exact: true }).click();
-  await page.locator('#professional-results summary').click();
-  await page.locator('[data-professional-action=disable]').click();
+  await page.locator('#profesional-results summary').click();
+  await page.locator('[data-accion-profesional=inhabilitar]').click();
   await page.getByRole('dialog').getByRole('button', { name: 'Inhabilitar', exact: true }).click();
-  await page.waitForFunction(() => document.querySelector('[data-catalog-pagination=professional]')?.textContent.includes('11–20 de 20'));
-  assert.equal(await page.locator('#professional-results article').count(), 10);
+  await page.waitForFunction(() => document.querySelector('[data-catalog-pagination=profesional]')?.textContent.includes('11–20 de 20'));
+  assert.equal(await page.locator('#profesional-results article').count(), 10);
   await page.goto(`${origin}/admin/disponibilidad/equipo`);
   await page.getByRole('tab', { name: 'Bloqueos', exact: true }).click();
   const blockResults = page.locator('[data-block-results]');

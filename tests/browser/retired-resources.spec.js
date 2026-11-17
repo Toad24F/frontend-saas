@@ -24,7 +24,7 @@ test('FALA-T035–T040: cuatro retiros recuperables y consultas separadas', asyn
     }
   });
   const cases = [
-    { type: 'profesionales', name: 'Profesional QA 2', article: '[data-professional-id]', action: '[data-professional-action="disable"]' },
+    { type: 'profesionales', name: 'Profesional QA 2', article: '[data-profesional-id]', action: '[data-accion-profesional="inhabilitar"]' },
     { type: 'recepcionistas', name: 'Recepción Retiro QA', article: '[data-reception-entry]', action: '[data-reception-action="disable"]' },
     { type: 'servicios', name: 'Corte QA', article: '[data-servicio-entrada]', action: '[data-inhabilitar-servicio]' },
     { type: 'sucursales', name: 'Sucursal QA 2', article: '[data-sucursal-entrada]', action: '[data-inhabilitar-sucursal]' },
@@ -72,7 +72,7 @@ test('FALA-T035: la demo conserva sus catálogos sin fingir retiros conectados',
   await page.goto(`${origin()}/admin/profesionales?demo=1`);
   await expect(page.getByRole('heading', { name: 'Profesionales' })).toBeVisible();
   await expect(page.locator('[data-retired-open]')).toHaveCount(0);
-  await expect(page.locator('[data-professional-id]').first()).toBeVisible();
+  await expect(page.locator('[data-profesional-id]').first()).toBeVisible();
 });
 
 test('FALA-T043: otro administrador no consulta el detalle retirado del negocio 2', async ({ page }) => {
@@ -91,7 +91,7 @@ test('FALA-T043: otro administrador no consulta el detalle retirado del negocio 
 test('FALA-T041–T043: restaurar los cuatro deja inactivo y activar respeta cupo', async ({ page }) => {
   await login(page, 'admin-qa-2@example.test');
   const items = [
-    ['profesionales', 'Profesional QA 2', '[data-professional-id]'],
+    ['profesionales', 'Profesional QA 2', '[data-profesional-id]'],
     ['recepcionistas', 'Recepción Retiro QA', '[data-reception-entry]'],
     ['servicios', 'Corte QA', '[data-servicio-entrada]'],
     ['sucursales', 'Sucursal QA 2', '[data-sucursal-entrada]'],
@@ -112,9 +112,9 @@ test('FALA-T041–T043: restaurar los cuatro deja inactivo y activar respeta cup
   }
   await rows('UPDATE negocios SET limite_profesionales_activos=1 WHERE id=2');
   await page.goto(`${origin()}/admin/profesionales`);
-  const card = page.locator('[data-professional-id]', { hasText: 'Profesional QA 2' }).first();
+  const card = page.locator('[data-profesional-id]', { hasText: 'Profesional QA 2' }).first();
   await card.locator('summary').click();
-  await card.locator('[data-professional-action="reactivate"]').click();
+  await card.locator('[data-accion-profesional="reactivar"]').click();
   await page.getByRole('dialog').getByRole('button', { name: 'Reactivar' }).click();
   await expect(page.getByRole('dialog')).toContainText(/No hay cupo/i);
   await expect(card).toContainText('Inactivo');

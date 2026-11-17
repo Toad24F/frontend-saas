@@ -63,13 +63,14 @@ try {
     await page.setViewportSize({ width, height: 900 });
     for (const theme of ['light', 'dark']) {
       await page.evaluate((theme) => { localStorage.setItem('cita-theme', theme); document.documentElement.dataset.theme = theme; }, theme);
-      for (const [screen, kind] of [['profesionales', 'professional'], ['recepcionistas', 'reception'], ['servicios', 'service'], ['sucursales', 'branch']]) {
+      for (const [screen, kind] of [['profesionales', 'profesional'], ['recepcionistas', 'reception'], ['servicios', 'service'], ['sucursales', 'branch']]) {
         await goto(screen);
+        const esProfesionales = screen === 'profesionales';
         const esSucursales = screen === 'sucursales';
         const esServicios = screen === 'servicios';
-        const clear = page.locator(esServicios ? '.professional-toolbar [data-servicio-reset]' : esSucursales ? '.professional-toolbar [data-sucursal-reset]' : '.professional-toolbar [data-' + kind + '-reset]');
+        const clear = page.locator(esProfesionales ? '.profesionales-herramientas [data-profesional-reset]' : esServicios ? '.profesionales-herramientas [data-servicio-reset]' : esSucursales ? '.profesionales-herramientas [data-sucursal-reset]' : '.profesionales-herramientas [data-' + kind + '-reset]');
         assert.equal(await clear.isDisabled(), true);
-        await page.locator(esServicios ? '#busqueda-servicios' : esSucursales ? '#busqueda-sucursales' : '#' + kind + '-search').fill('no coincide');
+        await page.locator(esProfesionales ? '#busqueda-profesionales' : esServicios ? '#busqueda-servicios' : esSucursales ? '#busqueda-sucursales' : '#' + kind + '-search').fill('no coincide');
         assert.equal(await clear.isEnabled(), true);
         await clear.click();
         assert.equal(await clear.isDisabled(), true);
@@ -84,7 +85,7 @@ try {
           await caution.hover();
           await expect(caution).toHaveCSS('background-color', theme === 'dark' ? 'rgb(96, 74, 28)' : 'rgb(255, 228, 154)');
         }
-        const action = { profesionales: 'new-professional', recepcionistas: 'new-receptionist', servicios: 'nuevo-servicio', sucursales: 'nueva-sucursal' }[screen];
+        const action = { profesionales: 'nuevo-profesional', recepcionistas: 'new-receptionist', servicios: 'nuevo-servicio', sucursales: 'nueva-sucursal' }[screen];
         await page.locator('[data-action="' + action + '"]').first().click();
         await page.locator('.form-drawer[open]').waitFor();
         const rect = await page.locator('.form-drawer').boundingBox();
@@ -94,8 +95,8 @@ try {
         assert.ok(footerRect.y + footerRect.height <= 901);
         await page.screenshot({ animations: 'disabled', path: `test-results/admin-review/${width}-${theme}-alta-${screen}.png` });
         await page.getByRole('dialog').getByRole('button', { name: 'Cancelar', exact: true }).click();
-        await page.locator('.professional-more summary').first().click();
-        const danger = page.locator('.professional-more-menu button.action-danger').first();
+        await page.locator('.profesional-mas summary').first().click();
+        const danger = page.locator('.profesional-menu-mas button.action-danger').first();
         assert.equal(await danger.evaluate((el) => getComputedStyle(el).color), theme === 'dark' ? 'rgb(255, 182, 190)' : 'rgb(165, 42, 50)');
         assert.equal(await danger.evaluate((el) => getComputedStyle(el).borderTopWidth), '0px');
         await danger.hover();
@@ -118,7 +119,7 @@ try {
   await page.locator('.sidebar [data-nav=recepcionistas]').click();
   assert.equal(await page.locator('[data-users-menu]').getAttribute('aria-expanded'), 'true');
   await page.setViewportSize({ width: 1366, height: 900 });
-  for (const [screen, edit] of [['profesionales', 'data-edit-professional'], ['servicios', 'data-editar-servicio'], ['sucursales', 'data-editar-sucursal']]) {
+  for (const [screen, edit] of [['profesionales', 'data-editar-profesional'], ['servicios', 'data-editar-servicio'], ['sucursales', 'data-editar-sucursal']]) {
     await goto(screen);
     await page.locator('[' + edit + ']').first().click();
     await page.locator('.form-drawer[open]').waitFor();
@@ -140,7 +141,7 @@ try {
   await page.getByRole('button', { name: 'Seguir editando', exact: true }).click();
   await page.keyboard.press('Escape');
   await page.getByRole('button', { name: 'Descartar cambios', exact: true }).click();
-  await page.locator('.professional-more summary').click();
+  await page.locator('.profesional-mas summary').click();
   await page.getByRole('button', { name: 'Restablecer contraseña', exact: true }).click();
   await page.getByRole('dialog').waitFor();
   await page.getByRole('dialog').getByRole('button', { name: 'Cancelar', exact: true }).click();
@@ -207,11 +208,11 @@ try {
   await page.unroute('**/profesionales/cupo');
   await page.setViewportSize({ width: 1366, height: 900 });
   await goto('profesionales');
-  await page.locator('[data-professional-view=cards]').click();
-  await page.locator('#professional-search').fill('María');
-  await page.locator('.professional-toolbar [data-professional-reset]').click();
-  assert.equal(await page.locator('[data-professional-view=cards]').getAttribute('aria-pressed'), 'true');
-  await page.locator('[data-professional-view=list]').click();
+  await page.locator('[data-vista-profesionales=cards]').click();
+  await page.locator('#busqueda-profesionales').fill('María');
+  await page.locator('.profesionales-herramientas [data-profesional-reset]').click();
+  assert.equal(await page.locator('[data-vista-profesionales=cards]').getAttribute('aria-pressed'), 'true');
+  await page.locator('[data-vista-profesionales=list]').click();
   await page.route('**/servicios/inhabilitados', (route) => route.fulfill({ status: 503, json: { message: 'Lista no disponible' } }));
   await goto('servicios');
   await page.locator('[data-retired-open]').click();
@@ -229,7 +230,7 @@ try {
   assert.equal(await page.locator('[data-retired-open]').count(), 0);
   for (const ancho of [1366, 390]) for (const tema of ['light', 'dark']) {
     await page.setViewportSize({ width: ancho, height: 900 });
-    for (const [pantalla, selector] of [['servicios', '[data-servicio-entrada]'], ['sucursales', '[data-sucursal-entrada]']]) {
+    for (const [pantalla, selector] of [['profesionales', '[data-profesional-id]'], ['servicios', '[data-servicio-entrada]'], ['sucursales', '[data-sucursal-entrada]']]) {
       await page.goto(`${origin}/admin/${pantalla}?demo=1`);
       await page.evaluate((valor) => { localStorage.setItem('cita-theme', valor); document.documentElement.dataset.theme = valor; }, tema);
       await page.locator(selector).first().waitFor();
@@ -241,5 +242,5 @@ try {
   await page.goto(`${origin}/admin/disponibilidad/negocio?demo=1`);
   await page.getByText('Esta demostración usa su intervalo configurable; no reproduce el redondeo del motor conectado.', { exact: true }).waitFor();
   assert.deepEqual(errors, []);
-  console.log('OK: catálogos, filtros, Servicios y Sucursales conectados/demo en escritorio/móvil y ambos temas, navegación Usuarios, cupos, menú de recepción, panel de inhabilitados/detalle/restauración, asignación bloqueada conservada, oferta y reglas. API simulada; solo 2 escrituras en memoria.');
+  console.log('OK: catálogos, filtros, Profesionales, Servicios y Sucursales conectados/demo en escritorio/móvil y ambos temas, navegación Usuarios, cupos, menú de recepción, panel de inhabilitados/detalle/restauración, asignación bloqueada conservada, oferta y reglas. API simulada; solo 2 escrituras en memoria.');
 } finally { await browser.close(); }

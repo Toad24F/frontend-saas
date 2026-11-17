@@ -59,10 +59,10 @@ export async function handleClick(e) {
       }
     }
     if (!isDemo && user.rol === 'admin_negocio' && state.page === 'profesionales') {
-      const professional = e.target.closest('[data-professional-action]');
-      if (professional) {
+      const profesional = e.target.closest('[data-accion-profesional]');
+      if (profesional) {
         // El diálogo espera el cupo vigente antes de abrir una reactivación.
-        await (await import('../connected/screens/profesionales/actions.js')).professionalAction(professional.dataset.professionalAction, Number(professional.dataset.professionalId));
+        await (await import('../connected/screens/profesionales/profesionales.acciones.js')).accionProfesional(profesional.dataset.accionProfesional, Number(profesional.dataset.profesionalId));
         return;
       }
     }
@@ -152,7 +152,7 @@ export async function handleClick(e) {
       return;
     }
     const action = e.target.closest('[data-action]')?.dataset.action;
-    if (!isDemo && user.rol === 'profesional' && action === 'new-professional') { toast('Tu cuenta puede editar sus servicios desde Editar profesional.'); return; }
+    if (!isDemo && user.rol === 'profesional' && action === 'nuevo-profesional') { toast('Tu cuenta puede editar sus servicios desde Editar profesional.'); return; }
     if (!isDemo && (['new-appointment', 'new-client', 'copy-link', 'filter-reports', 'export-report'].includes(action) || e.target.closest('[data-slot-date], button[data-mode]'))) { toast(pending); return; }
     const actionMap = {
       'new-receptionist': async () => (await import('../connected/screens/recepcionistas/actions.js')).newReceptionist(),
@@ -166,7 +166,7 @@ export async function handleClick(e) {
       'new-client': async () => (await import('../demo/screens/clientes/actions.js')).newClient(),
       'nuevo-servicio': () => catalog('services'),
       'nueva-sucursal': () => catalog('branches'),
-      'new-professional': () => catalog('professionals'),
+      'nuevo-profesional': () => catalog('professionals'),
       'new-block': newBlock,
       'switch-tenant': switchTenant,
       'new-tenant': newTenant,
@@ -217,7 +217,7 @@ export async function handleClick(e) {
     for (const [attr, type] of [
       ['editarServicio', 'services'],
       ['editarSucursal', 'branches'],
-      ['editProfessional', 'professionals'],
+      ['editarProfesional', 'professionals'],
     ]) {
       const selector = attr.replace(/[A-Z]/g, (c) => '-' + c.toLowerCase());
       const el = e.target.closest(`[data-${selector}]`);
