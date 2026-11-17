@@ -45,9 +45,9 @@ export async function handleClick(e) {
       }
     }
     if (!isDemo && user.rol === 'admin_negocio' && state.page === 'servicios') {
-      const service = e.target.closest('[data-disable-service]');
-      if (service) {
-        (await import('../connected/screens/servicios/actions.js')).confirmServiceDisable(Number(service.dataset.disableService));
+      const servicio = e.target.closest('[data-inhabilitar-servicio]');
+      if (servicio) {
+        (await import('../connected/screens/servicios/servicios.acciones.js')).confirmarInhabilitacionServicio(Number(servicio.dataset.inhabilitarServicio));
         return;
       }
     }
@@ -95,23 +95,23 @@ export async function handleClick(e) {
         return;
       }
     }
-    const serviceToggle = e.target.closest('[data-toggle-service]');
-    if (serviceToggle) {
-      const service = resource('services', Number(serviceToggle.dataset.toggleService), state.tenantId);
-      serviceToggle.disabled = true;
+    const alternarServicio = e.target.closest('[data-alternar-servicio]');
+    if (alternarServicio) {
+      const servicio = resource('services', Number(alternarServicio.dataset.alternarServicio), state.tenantId);
+      alternarServicio.disabled = true;
       try {
-        if (isDemo) service.active = service.active === false;
+        if (isDemo) servicio.active = servicio.active === false;
         else if (user.rol === 'profesional') {
           const professional = list('professionals', state.tenantId)[0];
-          const serviceIds = professional.serviceIds.includes(service.id)
-            ? professional.serviceIds.filter((id) => id !== service.id)
-            : [...professional.serviceIds, service.id];
+          const serviceIds = professional.serviceIds.includes(servicio.id)
+            ? professional.serviceIds.filter((id) => id !== servicio.id)
+            : [...professional.serviceIds, servicio.id];
           await api(`/profesionales/${user.id}/servicios`, 'PUT', { servicioIds: serviceIds });
-        } else await api(`/servicios/${service.id}/${service.active === false ? 'reactivar' : 'desactivar'}`, 'POST', {});
+        } else await api(`/servicios/${servicio.id}/${servicio.active === false ? 'reactivar' : 'desactivar'}`, 'POST', {});
         if (!isDemo) await loadBackendData();
         render();
         toast('Servicio actualizado.');
-      } catch (error) { toast(error.message); serviceToggle.disabled = false; }
+      } catch (error) { toast(error.message); alternarServicio.disabled = false; }
       return;
     }
     const alternarSucursal = e.target.closest('[data-alternar-sucursal]');
@@ -164,7 +164,7 @@ export async function handleClick(e) {
       'new-appointment': async () => (await import('./screens/agenda/actions.js')).manualAppointment(),
       'go-agenda': () => navigate('agenda'),
       'new-client': async () => (await import('../demo/screens/clientes/actions.js')).newClient(),
-      'new-service': () => catalog('services'),
+      'nuevo-servicio': () => catalog('services'),
       'nueva-sucursal': () => catalog('branches'),
       'new-professional': () => catalog('professionals'),
       'new-block': newBlock,
@@ -215,7 +215,7 @@ export async function handleClick(e) {
       return;
     }
     for (const [attr, type] of [
-      ['editService', 'services'],
+      ['editarServicio', 'services'],
       ['editarSucursal', 'branches'],
       ['editProfessional', 'professionals'],
     ]) {

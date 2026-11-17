@@ -6,7 +6,7 @@ import { toast, escape as esc } from '../../ui.js';
 import { field, select, basicForm } from '../../forms.js';
 import { loadEditableResource } from '../../../connected/modules/catalogos/detail.js';
 import { validateProfessional, professionalError, showProfessionalErrors, clearProfessionalErrors, clearProfessionalField } from '../profesionales/errors.js';
-import { validateService, serviceError } from '../servicios/errors.js';
+import { validarServicio, interpretarErrorServicio } from '../servicios/servicios.errores.js';
 import { validarSucursal, interpretarErrorSucursal } from '../sucursales/sucursales.errores.js';
 import { ZONAS_HORARIAS_MEXICO } from '../sucursales/sucursales.zonas-horarias.js';
 import { readOwnRoleQuota, ownQuotaNotice } from '../../../connected/screens/negocio/user-quota.js';
@@ -38,13 +38,13 @@ export async function catalog(type, id) {
       {
         drawer: true,
         validate(form) {
-          const errors = validateService(new FormData(form), isDemo);
+          const errors = validarServicio(new FormData(form), isDemo);
           if (!Object.keys(errors).length) { clearProfessionalErrors(form); return true; }
           showProfessionalErrors(form, errors);
           return false;
         },
         onError(error, form) {
-          const errors = serviceError(error);
+          const errors = interpretarErrorServicio(error);
           if (errors) showProfessionalErrors(form, errors);
           else {
             const target = form.querySelector('#form-error');

@@ -25,7 +25,7 @@ import {
 import { escape, avatar, pageHead, empty } from './ui.js';
 import { applyProfessionalFilters, resetProfessionalFilters, setProfessionalView } from './screens/profesionales/view.js';
 import { applyReceptionFilters, resetReceptionFilters, setReceptionView } from '../connected/screens/recepcionistas/view.js';
-import { applyServiceFilters, resetServiceFilters, setServiceView } from './screens/servicios/view.js';
+import { aplicarFiltrosServicios, restablecerFiltrosServicios, cambiarVistaServicios } from './screens/servicios/servicios.vista.js';
 import { aplicarFiltrosSucursales, restablecerFiltrosSucursales, cambiarVistaSucursales } from './screens/sucursales/sucursales.vista.js';
 import { setAvailabilityTab } from './screens/disponibilidad/view.js';
 import { updateAssignmentDraft } from './screens/disponibilidad/branch-assignments.js';
@@ -312,7 +312,7 @@ document.addEventListener('toggle', (event) => {
   menu.classList.toggle('is-upward', trigger.getBoundingClientRect().bottom + panel.offsetHeight + 6 > bottomLimit);
 }, true);
 document.addEventListener('click', (event) => {
-  if (!event.target.closest('.professional-more') || event.target.closest('[data-professional-action], [data-reception-action], [data-toggle-service], [data-disable-service], [data-alternar-sucursal], [data-inhabilitar-sucursal]')) closeProfessionalMenus();
+  if (!event.target.closest('.professional-more') || event.target.closest('[data-professional-action], [data-reception-action], [data-alternar-servicio], [data-inhabilitar-servicio], [data-alternar-sucursal], [data-inhabilitar-sucursal]')) closeProfessionalMenus();
 }, true);
 document.addEventListener('click', async (e) => {
   const accountTrigger = e.target.closest('.account-menu-trigger');
@@ -349,9 +349,9 @@ document.addEventListener('click', async (e) => {
   const receptionView = e.target.closest('[data-reception-view]');
   if (receptionView) { setReceptionView(receptionView.dataset.receptionView); return; }
   if (e.target.closest('[data-reception-reset]')) { resetReceptionFilters(); return; }
-  const serviceView = e.target.closest('[data-service-view]');
-  if (serviceView) { setServiceView(serviceView.dataset.serviceView); return; }
-  if (e.target.closest('[data-service-reset]')) { resetServiceFilters(); return; }
+  const vistaServicios = e.target.closest('[data-vista-servicios]');
+  if (vistaServicios) { cambiarVistaServicios(vistaServicios.dataset.vistaServicios); return; }
+  if (e.target.closest('[data-servicio-reset]')) { restablecerFiltrosServicios(); return; }
   const vistaSucursales = e.target.closest('[data-vista-sucursales]');
   if (vistaSucursales) { cambiarVistaSucursales(vistaSucursales.dataset.vistaSucursales); return; }
   if (e.target.closest('[data-sucursal-reset]')) { restablecerFiltrosSucursales(); return; }
@@ -428,7 +428,7 @@ document.addEventListener('change', (e) => {
   if (e.target.closest('#branch-assignments-form')) { updateAssignmentDraft(e.target.form); return; }
   if (e.target.dataset.professionalFilter) { applyProfessionalFilters(); return; }
   if (e.target.dataset.receptionFilter) { applyReceptionFilters(); return; }
-  if (e.target.dataset.serviceFilter) { applyServiceFilters(); return; }
+  if (e.target.dataset.filtroServicios) { aplicarFiltrosServicios(); return; }
   if (e.target.dataset.filtroSucursales) { aplicarFiltrosSucursales(); return; }
   if (e.target.dataset.filter) {
     state[e.target.dataset.filter] = e.target.value;
@@ -439,7 +439,7 @@ document.addEventListener('change', (e) => {
 document.addEventListener('input', (e) => {
   if (e.target.id === 'professional-search') { applyProfessionalFilters(); return; }
   if (e.target.id === 'reception-search') { applyReceptionFilters(); return; }
-  if (e.target.id === 'service-search') { applyServiceFilters(); return; }
+  if (e.target.id === 'busqueda-servicios') { aplicarFiltrosServicios(); return; }
   if (e.target.id === 'busqueda-sucursales') { aplicarFiltrosSucursales(); return; }
   if (e.target.id === 'agenda-search') {
     const pos = e.target.selectionStart;

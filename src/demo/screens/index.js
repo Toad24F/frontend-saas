@@ -1,7 +1,7 @@
 import { overview } from './resumen/view.js';
 import { clients } from './clientes/view.js';
 import { professionals } from '../../shared/screens/profesionales/view.js';
-import { services } from '../../shared/screens/servicios/view.js';
+import { servicios } from '../../shared/screens/servicios/servicios.vista.js';
 import { sucursales } from '../../shared/screens/sucursales/sucursales.vista.js';
 import { availability } from './disponibilidad/view.js';
 import { reports } from './reportes/view.js';
@@ -14,7 +14,7 @@ const views = {
   resumen: overview,
   clientes: clients,
   profesionales: professionals,
-  servicios: services,
+  servicios,
   sucursales,
   disponibilidad: availability,
   reportes: reports,

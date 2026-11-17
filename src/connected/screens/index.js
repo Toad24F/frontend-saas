@@ -1,5 +1,5 @@
 import { professionals } from './profesionales/view.js';
-import { services } from './servicios/view.js';
+import { servicios } from './servicios/servicios.vista.js';
 import { sucursales } from './sucursales/sucursales.vista.js';
 import { availability } from './disponibilidad/view.js';
 import { platform } from '../../shared/screens/plataforma/view.js';
@@ -16,7 +16,7 @@ const views = {
   agenda,
   clientes: clients,
   profesionales: professionals,
-  servicios: services,
+  servicios,
   sucursales,
   disponibilidad: availability,
   plataforma: platform,

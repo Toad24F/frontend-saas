@@ -1,7 +1,7 @@
 # Reglas y plan de traducción de la nomenclatura del frontend
 
 Fecha de definición: 2026-11-16  
-Estado: propuesta acordada; todavía no implementada
+Estado: implementación por conjuntos; glosario, Sucursales y Servicios terminados
 
 ## Objetivo
 
@@ -176,11 +176,13 @@ Resultado: piloto cerrado el 2026-11-17 en `docs/traduccion-nomenclaturas/result
 
 ### 2. Servicios
 
-- [ ] Renombrar juntos `shared/screens/servicios/view.js`, `errors.js` y `style.css`.
-- [ ] Renombrar juntos `connected/screens/servicios/view.js` y `actions.js`.
-- [ ] Revisar `connected/modules/servicios/operations.js`.
-- [ ] Actualizar `servicios-conectados.test.js`, `servicios-errores.test.js` y pruebas de navegador relacionadas.
-- [ ] Verificar lista, tarjetas, formularios, estados vacío/error y permisos.
+- [x] Renombrar juntos `shared/screens/servicios/view.js`, `errors.js` y `style.css`.
+- [x] Renombrar juntos `connected/screens/servicios/view.js` y `actions.js`.
+- [x] Revisar `connected/modules/servicios/operations.js`.
+- [x] Actualizar `servicios-conectados.test.js`, `servicios-errores.test.js` y pruebas de navegador relacionadas.
+- [x] Verificar lista, tarjetas, formularios, estados vacío/error y permisos.
+
+Resultado: conjunto cerrado el 2026-11-17 en `docs/traduccion-nomenclaturas/resultado-servicios-2026-11-17.md`.
 
 ### 3. Profesionales
 

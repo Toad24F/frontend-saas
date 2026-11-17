@@ -66,9 +66,10 @@ try {
       for (const [screen, kind] of [['profesionales', 'professional'], ['recepcionistas', 'reception'], ['servicios', 'service'], ['sucursales', 'branch']]) {
         await goto(screen);
         const esSucursales = screen === 'sucursales';
-        const clear = page.locator(esSucursales ? '.professional-toolbar [data-sucursal-reset]' : '.professional-toolbar [data-' + kind + '-reset]');
+        const esServicios = screen === 'servicios';
+        const clear = page.locator(esServicios ? '.professional-toolbar [data-servicio-reset]' : esSucursales ? '.professional-toolbar [data-sucursal-reset]' : '.professional-toolbar [data-' + kind + '-reset]');
         assert.equal(await clear.isDisabled(), true);
-        await page.locator(esSucursales ? '#busqueda-sucursales' : '#' + kind + '-search').fill('no coincide');
+        await page.locator(esServicios ? '#busqueda-servicios' : esSucursales ? '#busqueda-sucursales' : '#' + kind + '-search').fill('no coincide');
         assert.equal(await clear.isEnabled(), true);
         await clear.click();
         assert.equal(await clear.isDisabled(), true);
@@ -83,7 +84,7 @@ try {
           await caution.hover();
           await expect(caution).toHaveCSS('background-color', theme === 'dark' ? 'rgb(96, 74, 28)' : 'rgb(255, 228, 154)');
         }
-        const action = { profesionales: 'new-professional', recepcionistas: 'new-receptionist', servicios: 'new-service', sucursales: 'nueva-sucursal' }[screen];
+        const action = { profesionales: 'new-professional', recepcionistas: 'new-receptionist', servicios: 'nuevo-servicio', sucursales: 'nueva-sucursal' }[screen];
         await page.locator('[data-action="' + action + '"]').first().click();
         await page.locator('.form-drawer[open]').waitFor();
         const rect = await page.locator('.form-drawer').boundingBox();
@@ -117,7 +118,7 @@ try {
   await page.locator('.sidebar [data-nav=recepcionistas]').click();
   assert.equal(await page.locator('[data-users-menu]').getAttribute('aria-expanded'), 'true');
   await page.setViewportSize({ width: 1366, height: 900 });
-  for (const [screen, edit] of [['profesionales', 'data-edit-professional'], ['servicios', 'data-edit-service'], ['sucursales', 'data-editar-sucursal']]) {
+  for (const [screen, edit] of [['profesionales', 'data-edit-professional'], ['servicios', 'data-editar-servicio'], ['sucursales', 'data-editar-sucursal']]) {
     await goto(screen);
     await page.locator('[' + edit + ']').first().click();
     await page.locator('.form-drawer[open]').waitFor();
@@ -224,19 +225,21 @@ try {
   assert.equal(await page.locator('[data-users-menu], [data-retired-open]').count(), 0);
   role = 'admin_negocio';
   await page.goto(`${origin}/admin/servicios?demo=1`);
-  await page.locator('#service-search').waitFor();
+  await page.locator('#busqueda-servicios').waitFor();
   assert.equal(await page.locator('[data-retired-open]').count(), 0);
   for (const ancho of [1366, 390]) for (const tema of ['light', 'dark']) {
     await page.setViewportSize({ width: ancho, height: 900 });
-    await page.goto(`${origin}/admin/sucursales?demo=1`);
-    await page.evaluate((valor) => { localStorage.setItem('cita-theme', valor); document.documentElement.dataset.theme = valor; }, tema);
-    await page.locator('[data-sucursal-entrada]').first().waitFor();
-    assert.equal(await page.locator('[data-retired-open]').count(), 0);
-    assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), `demo/sucursales/${ancho}/${tema}`);
-    await page.screenshot({ animations: 'disabled', fullPage: true, path: `test-results/admin-review/${ancho}-${tema}-demo-sucursales.png` });
+    for (const [pantalla, selector] of [['servicios', '[data-servicio-entrada]'], ['sucursales', '[data-sucursal-entrada]']]) {
+      await page.goto(`${origin}/admin/${pantalla}?demo=1`);
+      await page.evaluate((valor) => { localStorage.setItem('cita-theme', valor); document.documentElement.dataset.theme = valor; }, tema);
+      await page.locator(selector).first().waitFor();
+      assert.equal(await page.locator('[data-retired-open]').count(), 0);
+      assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), `demo/${pantalla}/${ancho}/${tema}`);
+      await page.screenshot({ animations: 'disabled', fullPage: true, path: `test-results/admin-review/${ancho}-${tema}-demo-${pantalla}.png` });
+    }
   }
   await page.goto(`${origin}/admin/disponibilidad/negocio?demo=1`);
   await page.getByText('Esta demostración usa su intervalo configurable; no reproduce el redondeo del motor conectado.', { exact: true }).waitFor();
   assert.deepEqual(errors, []);
-  console.log('OK: catálogos, filtros, Sucursales conectada/demo en escritorio/móvil y ambos temas, navegación Usuarios, cupos, menú de recepción, panel de inhabilitados/detalle/restauración, asignación bloqueada conservada, oferta y reglas. API simulada; solo 2 escrituras en memoria.');
+  console.log('OK: catálogos, filtros, Servicios y Sucursales conectados/demo en escritorio/móvil y ambos temas, navegación Usuarios, cupos, menú de recepción, panel de inhabilitados/detalle/restauración, asignación bloqueada conservada, oferta y reglas. API simulada; solo 2 escrituras en memoria.');
 } finally { await browser.close(); }
