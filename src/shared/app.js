@@ -82,9 +82,9 @@ export const state = {
 };
 window.addEventListener('agenda-layout-change', () => { if (state.page === 'agenda') renderAgendaPreserving(render); });
 matchMedia('(max-width: 767px)').addEventListener('change', ({ matches }) => {
-  document.querySelectorAll('.profesionales-espacio .profesionales-resultados[data-desktop-view]').forEach((resultados) => {
+  document.querySelectorAll('.profesionales-espacio .profesionales-resultados[data-vista-escritorio]').forEach((resultados) => {
     resultados.classList.remove('profesionales-vista--lista', 'profesionales-vista--tarjetas');
-    resultados.classList.add(`profesionales-vista--${matches ? 'tarjetas' : resultados.dataset.desktopView === 'list' ? 'lista' : 'tarjetas'}`);
+    resultados.classList.add(`profesionales-vista--${matches ? 'tarjetas' : resultados.dataset.vistaEscritorio}`);
   });
 });
 const nav = [
@@ -345,16 +345,16 @@ document.addEventListener('click', async (e) => {
   if (availabilityTab) { setAvailabilityTab(availabilityTab.dataset.availabilityTab); return; }
   const vistaProfesionales = e.target.closest('[data-vista-profesionales]');
   if (vistaProfesionales) { cambiarVistaProfesionales(vistaProfesionales.dataset.vistaProfesionales); return; }
-  if (e.target.closest('[data-profesional-reset]')) { restablecerFiltrosProfesionales(); return; }
+  if (e.target.closest('[data-profesional-limpiar]')) { restablecerFiltrosProfesionales(); return; }
   const vistaRecepcionistas = e.target.closest('[data-vista-recepcionistas]');
   if (vistaRecepcionistas) { cambiarVistaRecepcionistas(vistaRecepcionistas.dataset.vistaRecepcionistas); return; }
-  if (e.target.closest('[data-recepcionista-reset]')) { restablecerFiltrosRecepcionistas(); return; }
+  if (e.target.closest('[data-recepcionista-limpiar]')) { restablecerFiltrosRecepcionistas(); return; }
   const vistaServicios = e.target.closest('[data-vista-servicios]');
   if (vistaServicios) { cambiarVistaServicios(vistaServicios.dataset.vistaServicios); return; }
-  if (e.target.closest('[data-servicio-reset]')) { restablecerFiltrosServicios(); return; }
+  if (e.target.closest('[data-servicio-limpiar]')) { restablecerFiltrosServicios(); return; }
   const vistaSucursales = e.target.closest('[data-vista-sucursales]');
   if (vistaSucursales) { cambiarVistaSucursales(vistaSucursales.dataset.vistaSucursales); return; }
-  if (e.target.closest('[data-sucursal-reset]')) { restablecerFiltrosSucursales(); return; }
+  if (e.target.closest('[data-sucursal-limpiar]')) { restablecerFiltrosSucursales(); return; }
   const business = e.target.closest('[data-business-detail]');
   if (business && !isDemo) {
     navigate('negocio', Number(business.dataset.businessDetail));

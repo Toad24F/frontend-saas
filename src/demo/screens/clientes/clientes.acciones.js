@@ -2,7 +2,7 @@ import { state } from '../../../shared/app.js';
 import { list, resource, appointmentInfo } from '../../../shared/data.js';
 import { field, basicForm } from '../../../shared/forms.js';
 import { validateContact } from '../../availability.js';
-import { save } from '../../../shared/screens/catalogos/actions.js';
+import { guardarRegistroCatalogo } from '../../../shared/screens/catalogos/catalogos.acciones.js';
 import { corregirClienteDemo } from '../../clientes.horario.js';
 import { agendaPanel } from '../../../shared/screens/agenda/panels.js';
 import { escape as esc } from '../../../shared/ui.js';
@@ -14,7 +14,7 @@ export function nuevoCliente() {
     (formulario) => {
       validateContact(formulario.get('nombreCompleto'), formulario.get('telefono'));
       // El teléfono no identifica por sí solo a una persona: cada alta crea una ficha independiente.
-      save('clients', null, {
+      guardarRegistroCatalogo('clients', null, {
         name: formulario.get('nombreCompleto').trim(),
         phone: formulario.get('telefono'),
       });

@@ -1,7 +1,7 @@
 # Reglas y plan de traducción de la nomenclatura del frontend
 
 Fecha de definición: 2026-11-16  
-Estado: implementación por conjuntos; glosario, Sucursales, Servicios, Profesionales, Recepcionistas y Clientes terminados
+Estado: implementación por conjuntos; glosario, Sucursales, Servicios, Profesionales, Recepcionistas, Clientes y Catálogos compartidos terminados
 
 ## Objetivo
 
@@ -215,11 +215,13 @@ Resultado: conjunto cerrado el 2026-11-17 en [Resultado de traducción de Client
 
 ### 6. Catálogos compartidos
 
-- [ ] Renombrar juntos `shared/screens/catalog-view.js`, `catalog-header.js`, `catalog-pagination.js` y `catalogos/actions.js`.
-- [ ] Renombrar `shared/screens/local-pagination.js` junto con todas sus pruebas y consumidores.
-- [ ] Revisar juntos `connected/modules/catalogos/detail.js`, `capacity.js` y `payload.js`; conservar `payload`.
-- [ ] Actualizar `detalle-edicion-conectado.test.js`, `local-pagination.test.js` y pruebas de navegador relacionadas.
-- [ ] Verificar que sucursales, servicios y profesionales sigan compartiendo el mismo comportamiento.
+- [x] Renombrar juntos `shared/screens/catalog-view.js`, `catalog-header.js`, `catalog-pagination.js` y `catalogos/actions.js`.
+- [x] Renombrar `shared/screens/local-pagination.js` junto con todas sus pruebas y consumidores.
+- [x] Revisar juntos `connected/modules/catalogos/detail.js`, `capacity.js` y `payload.js`; conservar `payload`.
+- [x] Actualizar `detalle-edicion-conectado.test.js`, `local-pagination.test.js` y pruebas de navegador relacionadas.
+- [x] Verificar que sucursales, servicios y profesionales sigan compartiendo el mismo comportamiento.
+
+Resultado: conjunto cerrado el 2026-11-17 en [Catálogos compartidos](resultado-catalogos-compartidos-2026-11-17.md).
 
 ### 7. Disponibilidad — REALIZAR CON CUIDADO
 

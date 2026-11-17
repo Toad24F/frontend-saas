@@ -1,4 +1,4 @@
-import { catalog } from './screens/catalogos/actions.js';
+import { abrirEditorCatalogo } from './screens/catalogos/catalogos.acciones.js';
 import { newBlock, editBlock } from './screens/disponibilidad/actions.js';
 import { switchTenant, newTenant } from './screens/plataforma/actions.js';
 import { isDemo, pending, api, user, loadBackendData, schedulePayload } from '../connected/backend.js';
@@ -164,9 +164,9 @@ export async function handleClick(e) {
       'new-appointment': async () => (await import('./screens/agenda/actions.js')).manualAppointment(),
       'go-agenda': () => navigate('agenda'),
       'nuevo-cliente': async () => (await import('../demo/screens/clientes/clientes.acciones.js')).nuevoCliente(),
-      'nuevo-servicio': () => catalog('services'),
-      'nueva-sucursal': () => catalog('branches'),
-      'nuevo-profesional': () => catalog('professionals'),
+      'nuevo-servicio': () => abrirEditorCatalogo('services'),
+      'nueva-sucursal': () => abrirEditorCatalogo('branches'),
+      'nuevo-profesional': () => abrirEditorCatalogo('professionals'),
       'new-block': newBlock,
       'switch-tenant': switchTenant,
       'new-tenant': newTenant,
@@ -222,7 +222,7 @@ export async function handleClick(e) {
       const selector = attr.replace(/[A-Z]/g, (c) => '-' + c.toLowerCase());
       const el = e.target.closest(`[data-${selector}]`);
       if (el) {
-        await catalog(type, Number(el.dataset[attr]));
+        await abrirEditorCatalogo(type, Number(el.dataset[attr]));
         return;
       }
     }

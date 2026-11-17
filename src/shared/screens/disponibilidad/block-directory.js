@@ -1,5 +1,5 @@
 import { escape, empty } from '../../ui.js';
-import { localPage, paginationHtml } from '../local-pagination.js';
+import { paginarLocalmente, renderPaginacionLocal } from '../paginacion.local.js';
 import { filteredBlocks, blockRangeError, blockTypes, hasBlockFilters } from './block-filters.js';
 const defaults = () => ({ search: '', type: 'all', branch: 'all', from: '', to: '' });
 let filters = defaults();
@@ -7,11 +7,11 @@ let context = null;
 let page = 1;
 
 function resultHtml() {
-  const result = localPage(filteredBlocks(context.blocks, filters, context.scope), page);
-  page = result.page;
+  const result = paginarLocalmente(filteredBlocks(context.blocks, filters, context.scope), page);
+  page = result.pagina;
   const error = blockRangeError(filters);
   const scopedCount = filteredBlocks(context.blocks, defaults(), context.scope).length;
-  return error ? `<p role="alert">${error}</p>` : result.total ? `<div class="blocks-list">${result.rows.map(context.row).join('')}</div>${paginationHtml(result, 'bloqueos', 'blocks', 'data-block-page')}`
+  return error ? `<p role="alert">${error}</p>` : result.total ? `<div class="blocks-list">${result.filas.map(context.row).join('')}</div>${renderPaginacionLocal(result, 'bloqueos', 'blocks', 'data-block-page')}`
     : empty(scopedCount ? 'Sin coincidencias' : 'Sin bloqueos en esta vista', scopedCount ? 'Prueba otra búsqueda o cambia los filtros.' : 'No hay bloqueos para la selección actual.', hasBlockFilters(filters) ? '<button type="button" class="btn btn-light" data-block-clear>Limpiar filtros</button>' : '');
 }
 

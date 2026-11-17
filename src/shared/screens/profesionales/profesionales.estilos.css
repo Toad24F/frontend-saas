@@ -131,23 +131,23 @@ html[data-theme='dark'] .profesional-menu-mas { box-shadow: 0 14px 34px rgba(0, 
   .profesionales-vista--lista .profesional-estado { grid-column: 2; grid-row: 2; justify-self: end; }
   .profesionales-vista--lista .profesional-acciones { grid-column: 1 / -1; grid-row: 3; justify-content: flex-start; flex-wrap: wrap; }
 }
-.catalog-page-heading { display: grid; grid-template-columns: minmax(180px, 1fr) minmax(190px, 240px) auto; align-items: center; gap: 20px; }
-.catalog-page-heading:not(:has(.catalog-capacity)) { grid-template-columns: minmax(0, 1fr) auto; }
-.catalog-page-heading .heading-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
-.catalog-page-heading .sucursales-cupo { margin: 0; padding: 0; background: transparent; border: 0; border-radius: 0; }
-.catalog-quota > div { display: flex; justify-content: space-between; gap: 12px; font-size: 12px; }
-.catalog-quota span, .catalog-quota small, .catalog-quota-error { color: var(--muted); font-size: 12px; }
-.catalog-quota progress { appearance: none; display: block; width: 100%; height: 7px; margin: 8px 0; border: 0; border-radius: 5px; overflow: hidden; background: var(--surface-soft); }
-.catalog-quota progress::-webkit-progress-bar { background: var(--surface-soft); }
-.catalog-quota progress::-webkit-progress-value { background: var(--accent); }
-.catalog-quota progress::-moz-progress-bar { background: var(--accent); }
-.catalog-clear:disabled { opacity: .45; }
+.catalogo-encabezado { display: grid; grid-template-columns: minmax(180px, 1fr) minmax(190px, 240px) auto; align-items: center; gap: 20px; }
+.catalogo-encabezado:not(:has(.catalogo-cupo)) { grid-template-columns: minmax(0, 1fr) auto; }
+.catalogo-encabezado .heading-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+.catalogo-encabezado .sucursales-cupo { margin: 0; padding: 0; background: transparent; border: 0; border-radius: 0; }
+.catalogo-indicador-cupo > div { display: flex; justify-content: space-between; gap: 12px; font-size: 12px; }
+.catalogo-indicador-cupo span, .catalogo-indicador-cupo small, .catalogo-cupo-error { color: var(--muted); font-size: 12px; }
+.catalogo-indicador-cupo progress { appearance: none; display: block; width: 100%; height: 7px; margin: 8px 0; border: 0; border-radius: 5px; overflow: hidden; background: var(--surface-soft); }
+.catalogo-indicador-cupo progress::-webkit-progress-bar { background: var(--surface-soft); }
+.catalogo-indicador-cupo progress::-webkit-progress-value { background: var(--accent); }
+.catalogo-indicador-cupo progress::-moz-progress-bar { background: var(--accent); }
+.catalogo-limpiar:disabled { opacity: .45; }
 .profesionales-filtros { align-items: end; }
-@media (max-width: 1100px) { .catalog-page-heading { grid-template-columns: minmax(0, 1fr) minmax(170px, 240px); } .catalog-page-heading .heading-actions { grid-column: 1 / -1; justify-content: flex-start; } }
-@media (max-width: 767px) { .catalog-page-heading, .catalog-page-heading:not(:has(.catalog-capacity)) { grid-template-columns: minmax(0, 1fr); } .catalog-page-heading .heading-actions { display: flex; width: 100%; } .catalog-page-heading .heading-actions .btn { flex: 1 1 150px; } .catalog-clear { min-height: 44px; } }
-.local-pagination, .local-pagination nav { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
-.local-pagination { margin: 22px 0; font-size: 12px; }
-.local-pagination p { margin: 0; color: var(--muted); }
-.local-pagination .btn { min-height: 44px; }
+@media (max-width: 1100px) { .catalogo-encabezado { grid-template-columns: minmax(0, 1fr) minmax(170px, 240px); } .catalogo-encabezado .heading-actions { grid-column: 1 / -1; justify-content: flex-start; } }
+@media (max-width: 767px) { .catalogo-encabezado, .catalogo-encabezado:not(:has(.catalogo-cupo)) { grid-template-columns: minmax(0, 1fr); } .catalogo-encabezado .heading-actions { display: flex; width: 100%; } .catalogo-encabezado .heading-actions .btn { flex: 1 1 150px; } .catalogo-limpiar { min-height: 44px; } }
+.paginacion-local, .paginacion-local nav { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+.paginacion-local { margin: 22px 0; font-size: 12px; }
+.paginacion-local p { margin: 0; color: var(--muted); }
+.paginacion-local .btn { min-height: 44px; }
 .profesionales-resultados, [data-block-results] { scroll-margin-top: 90px; }
-@media (max-width: 767px) { .local-pagination nav { width: 100%; } }
+@media (max-width: 767px) { .paginacion-local nav { width: 100%; } }

@@ -1,8 +1,8 @@
-import { configureCatalogPaging, catalogPagination, updateCatalogPage } from '../catalog-pagination.js';
-import { catalogHead, capacityHtml, clearCatalogButton, hasCatalogFilters } from '../catalog-header.js';
+import { configurarPaginacionCatalogo, renderPaginacionCatalogo, actualizarPaginaCatalogo } from '../catalogos/catalogos.paginacion.js';
+import { renderEncabezadoCatalogo, renderCupoCatalogo, renderBotonLimpiarCatalogo, hayFiltrosCatalogo } from '../catalogos/catalogos.encabezado.js';
 import { isDemo, user } from '../../../connected/backend.js';
 import { state, render } from '../../app.js';
-import { getCatalogView, setCatalogView } from '../catalog-view.js';
+import { consultarVistaCatalogos, cambiarVistaCatalogos } from '../catalogos/catalogos.vista.js';
 import { list } from '../../data.js';
 import { icon } from '../../icons.js';
 import { resourceStatus } from '../../resource-status.js';
@@ -10,13 +10,13 @@ import { escape as escapar, pageHead, button, empty } from '../../ui.js';
 import '../profesionales/profesionales.estilos.css';
 import './sucursales.estilos.css';
 
-const interfaz = { search: '', status: 'all' };
+const interfaz = { busqueda: '', estado: 'todos' };
 let alcance = null;
 const normalizar = (valor) => String(valor ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('es-MX');
 
 function coincide(sucursal) {
-  return (!interfaz.search || normalizar(`${sucursal.name} ${sucursal.address || ''} ${sucursal.phone || ''} ${sucursal.notes || ''}`).includes(normalizar(interfaz.search)))
-    && (interfaz.status === 'all' || (interfaz.status === 'active') === (sucursal.active !== false));
+  return (!interfaz.busqueda || normalizar(`${sucursal.name} ${sucursal.address || ''} ${sucursal.phone || ''} ${sucursal.notes || ''}`).includes(normalizar(interfaz.busqueda)))
+    && (interfaz.estado === 'todos' || (interfaz.estado === 'activo') === (sucursal.active !== false));
 }
 
 function mapaGoogle(sucursal) {
@@ -34,8 +34,8 @@ function mapaGoogle(sucursal) {
 }
 
 function barraCupo(sucursales, propias, cupo) {
-  if (!isDemo && !propias && !cupo) return '<p class="catalog-quota-error">Cupo de sucursales no disponible.</p>';
-  if (cupo) return capacityHtml('Sucursales activas', { activos: Number(cupo.sucursalesActivas), limite: Number(cupo.limiteSucursalesActivas), disponibles: Number(cupo.disponibles) });
+  if (!isDemo && !propias && !cupo) return '<p class="catalogo-cupo-error">Cupo de sucursales no disponible.</p>';
+  if (cupo) return renderCupoCatalogo('Sucursales activas', { activos: Number(cupo.sucursalesActivas), limite: Number(cupo.limiteSucursalesActivas), disponibles: Number(cupo.disponibles) });
   const activas = sucursales.filter((sucursal) => sucursal.active !== false).length;
   const limite = cupo && Number.isFinite(Number(cupo.limiteSucursalesActivas)) ? Number(cupo.limiteSucursalesActivas) : sucursales.length;
   const usadas = cupo ? Number(cupo.sucursalesActivas) || 0 : activas;
@@ -65,37 +65,37 @@ function renderSucursal(sucursal, profesionales, propia, administrar, visible) {
 export function sucursales({ cupo = null, administrar = () => '', accionesEncabezado = '' } = {}) {
   const propia = !isDemo && user?.rol === 'profesional';
   const alcanceActual = `${state.tenantId}:${propia ? user.id : 'admin'}`;
-  if (alcance !== alcanceActual) { Object.assign(interfaz, { search: '', status: 'all' }); alcance = alcanceActual; }
+  if (alcance !== alcanceActual) { Object.assign(interfaz, { busqueda: '', estado: 'todos' }); alcance = alcanceActual; }
   const profesional = propia ? list('professionals', state.tenantId)[0] : null;
   const sucursales = list('branches', state.tenantId).filter((sucursal) => !propia || profesional?.branchIds.includes(sucursal.id));
   const profesionales = list('professionals', state.tenantId);
   const activas = sucursales.filter((sucursal) => sucursal.active !== false).length;
   const visibles = sucursales.filter(coincide);
-  const pagina = configureCatalogPaging('sucursal', state.tenantId, sucursales, () => list('branches', state.tenantId).filter((sucursal) => (!propia || profesional?.branchIds.includes(sucursal.id)) && coincide(sucursal)), (sucursal) => renderSucursal(sucursal, profesionales, propia, administrar, true), 'sucursales');
-  const vistaEscritorio = getCatalogView();
-  const vistaResultados = matchMedia('(max-width: 767px)').matches ? 'cards' : vistaEscritorio;
-  return `<div class="profesionales-espacio sucursales-espacio">${catalogHead('Sucursales', propia ? 'Consulta y activa la disponibilidad de tus sucursales asignadas.' : 'Gestiona las ubicaciones de tu negocio.', accionesEncabezado + (propia ? '' : button('Nueva sucursal', 'nueva-sucursal')), barraCupo(sucursales, propia, cupo))}
+  const pagina = configurarPaginacionCatalogo('sucursal', state.tenantId, sucursales, () => list('branches', state.tenantId).filter((sucursal) => (!propia || profesional?.branchIds.includes(sucursal.id)) && coincide(sucursal)), (sucursal) => renderSucursal(sucursal, profesionales, propia, administrar, true), 'sucursales');
+  const vistaEscritorio = consultarVistaCatalogos();
+  const vistaResultados = matchMedia('(max-width: 767px)').matches ? 'tarjetas' : vistaEscritorio;
+  return `<div class="profesionales-espacio sucursales-espacio">${renderEncabezadoCatalogo('Sucursales', propia ? 'Consulta y activa la disponibilidad de tus sucursales asignadas.' : 'Gestiona las ubicaciones de tu negocio.', accionesEncabezado + (propia ? '' : button('Nueva sucursal', 'nueva-sucursal')), barraCupo(sucursales, propia, cupo))}
     <div class="profesionales-resumen"><strong>${sucursales.length}</strong> ${sucursales.length === 1 ? 'sucursal' : 'sucursales'}<span aria-hidden="true">·</span><strong>${activas}</strong> activas<span aria-hidden="true">·</span><strong>${sucursales.length - activas}</strong> inactivas</div>
     <section class="profesionales-herramientas sucursales-herramientas" aria-label="Buscar y filtrar sucursales">
-      <label class="profesionales-busqueda">${icon('search')}<span class="visually-hidden">Buscar sucursales</span><input id="busqueda-sucursales" type="search" placeholder="Buscar por nombre, dirección o teléfono" value="${escapar(interfaz.search)}" autocomplete="off"></label>
-      <div class="profesionales-filtros"><label><span>Estado</span><select data-filtro-sucursales="estado"><option value="all">Todas</option><option value="active" ${interfaz.status === 'active' ? 'selected' : ''}>Activas</option><option value="inactive" ${interfaz.status === 'inactive' ? 'selected' : ''}>Inactivas</option></select></label>${clearCatalogButton('sucursal', interfaz)}</div>
-      <div class="profesionales-selector-vista" role="group" aria-label="Tipo de vista"><button type="button" data-vista-sucursales="list" aria-pressed="${vistaEscritorio === 'list'}" class="${vistaEscritorio === 'list' ? 'is-selected' : ''}">${icon('menu')}<span>Lista</span></button><button type="button" data-vista-sucursales="cards" aria-pressed="${vistaEscritorio === 'cards'}" class="${vistaEscritorio === 'cards' ? 'is-selected' : ''}">${icon('grid')}<span>Tarjetas</span></button></div>
+      <label class="profesionales-busqueda">${icon('search')}<span class="visually-hidden">Buscar sucursales</span><input id="busqueda-sucursales" type="search" placeholder="Buscar por nombre, dirección o teléfono" value="${escapar(interfaz.busqueda)}" autocomplete="off"></label>
+      <div class="profesionales-filtros"><label><span>Estado</span><select data-filtro-sucursales="estado"><option value="todos">Todas</option><option value="activo" ${interfaz.estado === 'activo' ? 'selected' : ''}>Activas</option><option value="inactivo" ${interfaz.estado === 'inactivo' ? 'selected' : ''}>Inactivas</option></select></label>${renderBotonLimpiarCatalogo('sucursal', interfaz)}</div>
+      <div class="profesionales-selector-vista" role="group" aria-label="Tipo de vista"><button type="button" data-vista-sucursales="lista" aria-pressed="${vistaEscritorio === 'lista'}" class="${vistaEscritorio === 'lista' ? 'is-selected' : ''}">${icon('menu')}<span>Lista</span></button><button type="button" data-vista-sucursales="tarjetas" aria-pressed="${vistaEscritorio === 'tarjetas'}" class="${vistaEscritorio === 'tarjetas' ? 'is-selected' : ''}">${icon('grid')}<span>Tarjetas</span></button></div>
     </section>
-    <div class="profesionales-encabezado-resultados"><span id="conteo-resultados-sucursales" role="status" aria-live="polite">${visibles.length} ${visibles.length === 1 ? 'resultado' : 'resultados'}</span></div>
-    ${sucursales.length ? `<div class="profesionales-resultados profesionales-vista--${vistaResultados === 'list' ? 'lista' : 'tarjetas'}" data-desktop-view="${vistaEscritorio}" id="sucursal-results">${pagina.rows.map((sucursal) => renderSucursal(sucursal, profesionales, propia, administrar, true)).join('')}</div>${catalogPagination('sucursal', pagina)}<div class="profesionales-sin-resultados" id="sin-resultados-sucursales" ${visibles.length ? 'hidden' : ''}>${empty('Sin coincidencias', 'Prueba otra búsqueda o cambia el filtro de estado.', '<button type="button" class="btn btn-light" data-sucursal-reset>Limpiar filtros</button>')}</div>` : empty('Aún no hay sucursales', propia ? 'Tu negocio todavía no te asigna una sucursal.' : 'Crea una sucursal para empezar a organizar la atención.', propia ? '' : '<button type="button" class="btn btn-primary" data-action="nueva-sucursal">Nueva sucursal</button>')}
+    <div class="profesionales-encabezado-resultados"><span id="conteo-resultados-sucursales" role="estado" aria-live="polite">${visibles.length} ${visibles.length === 1 ? 'resultado' : 'resultados'}</span></div>
+    ${sucursales.length ? `<div class="profesionales-resultados profesionales-vista--${vistaResultados}" data-vista-escritorio="${vistaEscritorio}" id="sucursal-resultados">${pagina.filas.map((sucursal) => renderSucursal(sucursal, profesionales, propia, administrar, true)).join('')}</div>${renderPaginacionCatalogo('sucursal', pagina)}<div class="profesionales-sin-resultados" id="sin-resultados-sucursales" ${visibles.length ? 'hidden' : ''}>${empty('Sin coincidencias', 'Prueba otra búsqueda o cambia el filtro de estado.', '<button type="button" class="btn btn-light" data-sucursal-limpiar>Limpiar filtros</button>')}</div>` : empty('Aún no hay sucursales', propia ? 'Tu negocio todavía no te asigna una sucursal.' : 'Crea una sucursal para empezar a organizar la atención.', propia ? '' : '<button type="button" class="btn btn-primary" data-action="nueva-sucursal">Nueva sucursal</button>')}
   </div>`;
 }
 
 export function cambiarVistaSucursales(vista) {
-  if (setCatalogView(vista)) render();
+  if (cambiarVistaCatalogos(vista)) render();
 }
 
 export function restablecerFiltrosSucursales() {
-  Object.assign(interfaz, { search: '', status: 'all' });
+  Object.assign(interfaz, { busqueda: '', estado: 'todos' });
   const raiz = document.querySelector('.sucursales-espacio');
   if (!raiz) return;
   raiz.querySelector('#busqueda-sucursales').value = '';
-  raiz.querySelector('[data-filtro-sucursales]').value = 'all';
+  raiz.querySelector('[data-filtro-sucursales]').value = 'todos';
   aplicarFiltrosSucursales();
   raiz.querySelector('#busqueda-sucursales').focus();
 }
@@ -103,13 +103,13 @@ export function restablecerFiltrosSucursales() {
 export function aplicarFiltrosSucursales() {
   const raiz = document.querySelector('.sucursales-espacio');
   if (!raiz) return;
-  interfaz.search = raiz.querySelector('#busqueda-sucursales')?.value.trim() || '';
-  interfaz.status = raiz.querySelector('[data-filtro-sucursales]')?.value || 'all';
+  interfaz.busqueda = raiz.querySelector('#busqueda-sucursales')?.value.trim() || '';
+  interfaz.estado = raiz.querySelector('[data-filtro-sucursales]')?.value || 'todos';
   const propia = !isDemo && user?.rol === 'profesional';
   const profesional = propia ? list('professionals', state.tenantId)[0] : null;
-  raiz.querySelectorAll('[data-sucursal-reset]').forEach((boton) => { boton.disabled = !hasCatalogFilters(interfaz); });
+  raiz.querySelectorAll('[data-sucursal-limpiar]').forEach((boton) => { boton.disabled = !hayFiltrosCatalogo(interfaz); });
   const visibles = new Set(list('branches', state.tenantId).filter((sucursal) => (!propia || profesional?.branchIds.includes(sucursal.id)) && coincide(sucursal)).map((sucursal) => String(sucursal.id)));
-  updateCatalogPage('sucursal', true);
+  actualizarPaginaCatalogo('sucursal', true);
   const conteo = visibles.size;
   raiz.querySelector('#conteo-resultados-sucursales').textContent = `${conteo} ${conteo === 1 ? 'resultado' : 'resultados'}`;
   const sinResultados = raiz.querySelector('#sin-resultados-sucursales');

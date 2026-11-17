@@ -1,8 +1,8 @@
-import { configureCatalogPaging, catalogPagination, updateCatalogPage } from '../catalog-pagination.js';
-import { catalogHead, clearCatalogButton, hasCatalogFilters } from '../catalog-header.js';
+import { configurarPaginacionCatalogo, renderPaginacionCatalogo, actualizarPaginaCatalogo } from '../catalogos/catalogos.paginacion.js';
+import { renderEncabezadoCatalogo, renderBotonLimpiarCatalogo, hayFiltrosCatalogo } from '../catalogos/catalogos.encabezado.js';
 import { isDemo, user } from '../../../connected/backend.js';
 import { state, render } from '../../app.js';
-import { getCatalogView, setCatalogView } from '../catalog-view.js';
+import { consultarVistaCatalogos, cambiarVistaCatalogos } from '../catalogos/catalogos.vista.js';
 import { list, money } from '../../data.js';
 import { icon } from '../../icons.js';
 import { resourceStatus } from '../../resource-status.js';
@@ -10,13 +10,13 @@ import { escape as escapar, pageHead, button, empty } from '../../ui.js';
 import '../profesionales/profesionales.estilos.css';
 import './servicios.estilos.css';
 
-const interfaz = { search: '', status: 'all' };
+const interfaz = { busqueda: '', estado: 'todos' };
 let negocioId = null;
 const normalizar = (valor) => String(valor ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('es-MX');
 
 function coincide(servicio) {
-  return (!interfaz.search || normalizar(`${servicio.name} ${servicio.description || ''}`).includes(normalizar(interfaz.search)))
-    && (interfaz.status === 'all' || (interfaz.status === 'active') === (servicio.active !== false));
+  return (!interfaz.busqueda || normalizar(`${servicio.name} ${servicio.description || ''}`).includes(normalizar(interfaz.busqueda)))
+    && (interfaz.estado === 'todos' || (interfaz.estado === 'activo') === (servicio.active !== false));
 }
 
 function renderServicio(servicio, profesionales, propio, profesional, administrar, visible) {
@@ -40,39 +40,39 @@ function renderServicio(servicio, profesionales, propio, profesional, administra
 }
 
 export function servicios(administrar = () => '', { accionesEncabezado = '' } = {}) {
-  if (negocioId !== state.tenantId) { Object.assign(interfaz, { search: '', status: 'all' }); negocioId = state.tenantId; }
+  if (negocioId !== state.tenantId) { Object.assign(interfaz, { busqueda: '', estado: 'todos' }); negocioId = state.tenantId; }
   const propio = !isDemo && user?.rol === 'profesional';
   const profesional = propio ? list('professionals', state.tenantId)[0] : null;
   const servicios = list('services', state.tenantId);
   const profesionales = list('professionals', state.tenantId);
   const visibles = servicios.filter(coincide);
-  const pagina = configureCatalogPaging('servicio', state.tenantId, servicios, () => list('services', state.tenantId).filter(coincide), (servicio) => renderServicio(servicio, profesionales, propio, profesional, administrar, true), 'servicios');
+  const pagina = configurarPaginacionCatalogo('servicio', state.tenantId, servicios, () => list('services', state.tenantId).filter(coincide), (servicio) => renderServicio(servicio, profesionales, propio, profesional, administrar, true), 'servicios');
   const activos = servicios.filter((servicio) => servicio.active !== false).length;
-  const vistaEscritorio = getCatalogView();
-  const vistaResultados = matchMedia('(max-width: 767px)').matches ? 'cards' : vistaEscritorio;
-  return `<div class="profesionales-espacio servicios-espacio">${catalogHead('Servicios', propio ? 'Los servicios que ofreces a tus clientes.' : 'Gestiona lo que ofrece tu negocio.', accionesEncabezado + button('Nuevo servicio', 'nuevo-servicio'))}
+  const vistaEscritorio = consultarVistaCatalogos();
+  const vistaResultados = matchMedia('(max-width: 767px)').matches ? 'tarjetas' : vistaEscritorio;
+  return `<div class="profesionales-espacio servicios-espacio">${renderEncabezadoCatalogo('Servicios', propio ? 'Los servicios que ofreces a tus clientes.' : 'Gestiona lo que ofrece tu negocio.', accionesEncabezado + button('Nuevo servicio', 'nuevo-servicio'))}
     <div class="profesionales-resumen"><strong>${servicios.length}</strong> ${servicios.length === 1 ? 'servicio' : 'servicios'}<span aria-hidden="true">·</span><strong>${activos}</strong> activos<span aria-hidden="true">·</span><strong>${servicios.length - activos}</strong> inactivos</div>
     <section class="profesionales-herramientas servicios-herramientas" aria-label="Buscar y filtrar servicios">
-      <label class="profesionales-busqueda">${icon('search')}<span class="visually-hidden">Buscar servicios</span><input id="busqueda-servicios" type="search" placeholder="Buscar por nombre o descripción" value="${escapar(interfaz.search)}" autocomplete="off"></label>
-      <div class="profesionales-filtros"><label><span>Estado</span><select data-filtro-servicios="estado"><option value="all">Todos</option><option value="active" ${interfaz.status === 'active' ? 'selected' : ''}>Activos</option><option value="inactive" ${interfaz.status === 'inactive' ? 'selected' : ''}>Inactivos</option></select></label>${clearCatalogButton('servicio', interfaz)}</div>
-      <div class="profesionales-selector-vista" role="group" aria-label="Tipo de vista"><button type="button" data-vista-servicios="list" aria-pressed="${vistaEscritorio === 'list'}" class="${vistaEscritorio === 'list' ? 'is-selected' : ''}">${icon('menu')}<span>Lista</span></button><button type="button" data-vista-servicios="cards" aria-pressed="${vistaEscritorio === 'cards'}" class="${vistaEscritorio === 'cards' ? 'is-selected' : ''}">${icon('grid')}<span>Tarjetas</span></button></div>
+      <label class="profesionales-busqueda">${icon('search')}<span class="visually-hidden">Buscar servicios</span><input id="busqueda-servicios" type="search" placeholder="Buscar por nombre o descripción" value="${escapar(interfaz.busqueda)}" autocomplete="off"></label>
+      <div class="profesionales-filtros"><label><span>Estado</span><select data-filtro-servicios="estado"><option value="todos">Todos</option><option value="activo" ${interfaz.estado === 'activo' ? 'selected' : ''}>Activos</option><option value="inactivo" ${interfaz.estado === 'inactivo' ? 'selected' : ''}>Inactivos</option></select></label>${renderBotonLimpiarCatalogo('servicio', interfaz)}</div>
+      <div class="profesionales-selector-vista" role="group" aria-label="Tipo de vista"><button type="button" data-vista-servicios="lista" aria-pressed="${vistaEscritorio === 'lista'}" class="${vistaEscritorio === 'lista' ? 'is-selected' : ''}">${icon('menu')}<span>Lista</span></button><button type="button" data-vista-servicios="tarjetas" aria-pressed="${vistaEscritorio === 'tarjetas'}" class="${vistaEscritorio === 'tarjetas' ? 'is-selected' : ''}">${icon('grid')}<span>Tarjetas</span></button></div>
     </section>
-    <div class="profesionales-encabezado-resultados"><span id="conteo-resultados-servicios" role="status" aria-live="polite">${visibles.length} ${visibles.length === 1 ? 'resultado' : 'resultados'}</span></div>
-    ${servicios.length ? `<div class="profesionales-resultados profesionales-vista--${vistaResultados === 'list' ? 'lista' : 'tarjetas'}" data-desktop-view="${vistaEscritorio}" id="servicio-results">${pagina.rows.map((servicio) => renderServicio(servicio, profesionales, propio, profesional, administrar, true)).join('')}</div>${catalogPagination('servicio', pagina)}<div class="profesionales-sin-resultados" id="sin-resultados-servicios" ${visibles.length ? 'hidden' : ''}>${empty('Sin coincidencias', 'Prueba otra búsqueda o cambia el filtro de estado.', '<button type="button" class="btn btn-light" data-servicio-reset>Limpiar filtros</button>')}</div>` : empty('Aún no hay servicios', 'Crea el primer servicio para organizar tu oferta.', '<button type="button" class="btn btn-primary" data-action="nuevo-servicio">Nuevo servicio</button>')}
+    <div class="profesionales-encabezado-resultados"><span id="conteo-resultados-servicios" role="estado" aria-live="polite">${visibles.length} ${visibles.length === 1 ? 'resultado' : 'resultados'}</span></div>
+    ${servicios.length ? `<div class="profesionales-resultados profesionales-vista--${vistaResultados}" data-vista-escritorio="${vistaEscritorio}" id="servicio-resultados">${pagina.filas.map((servicio) => renderServicio(servicio, profesionales, propio, profesional, administrar, true)).join('')}</div>${renderPaginacionCatalogo('servicio', pagina)}<div class="profesionales-sin-resultados" id="sin-resultados-servicios" ${visibles.length ? 'hidden' : ''}>${empty('Sin coincidencias', 'Prueba otra búsqueda o cambia el filtro de estado.', '<button type="button" class="btn btn-light" data-servicio-limpiar>Limpiar filtros</button>')}</div>` : empty('Aún no hay servicios', 'Crea el primer servicio para organizar tu oferta.', '<button type="button" class="btn btn-primary" data-action="nuevo-servicio">Nuevo servicio</button>')}
     <div class="information-note">${icon('info')} La duración de cada servicio determina los horarios disponibles en tu portal. El precio es informativo; no se realizan cobros en línea.</div>
   </div>`;
 }
 
 export function cambiarVistaServicios(vista) {
-  if (setCatalogView(vista)) render();
+  if (cambiarVistaCatalogos(vista)) render();
 }
 
 export function restablecerFiltrosServicios() {
-  Object.assign(interfaz, { search: '', status: 'all' });
+  Object.assign(interfaz, { busqueda: '', estado: 'todos' });
   const raiz = document.querySelector('.servicios-espacio');
   if (!raiz) return;
   raiz.querySelector('#busqueda-servicios').value = '';
-  raiz.querySelector('[data-filtro-servicios]').value = 'all';
+  raiz.querySelector('[data-filtro-servicios]').value = 'todos';
   aplicarFiltrosServicios();
   raiz.querySelector('#busqueda-servicios').focus();
 }
@@ -80,11 +80,11 @@ export function restablecerFiltrosServicios() {
 export function aplicarFiltrosServicios() {
   const raiz = document.querySelector('.servicios-espacio');
   if (!raiz) return;
-  interfaz.search = raiz.querySelector('#busqueda-servicios')?.value.trim() || '';
-  interfaz.status = raiz.querySelector('[data-filtro-servicios]')?.value || 'all';
-  raiz.querySelectorAll('[data-servicio-reset]').forEach((boton) => { boton.disabled = !hasCatalogFilters(interfaz); });
+  interfaz.busqueda = raiz.querySelector('#busqueda-servicios')?.value.trim() || '';
+  interfaz.estado = raiz.querySelector('[data-filtro-servicios]')?.value || 'todos';
+  raiz.querySelectorAll('[data-servicio-limpiar]').forEach((boton) => { boton.disabled = !hayFiltrosCatalogo(interfaz); });
   const visibles = new Set(list('services', state.tenantId).filter(coincide).map((servicio) => String(servicio.id)));
-  updateCatalogPage('servicio', true);
+  actualizarPaginaCatalogo('servicio', true);
   const conteo = visibles.size;
   raiz.querySelector('#conteo-resultados-servicios').textContent = `${conteo} ${conteo === 1 ? 'resultado' : 'resultados'}`;
   const sinResultados = raiz.querySelector('#sin-resultados-servicios');

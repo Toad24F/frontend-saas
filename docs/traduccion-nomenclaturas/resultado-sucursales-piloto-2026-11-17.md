@@ -1,5 +1,7 @@
 # Resultado del piloto de nomenclatura — Sucursales
 
+La actualización posterior de filtros, vista y paginación compartida se documenta en [Catálogos compartidos](resultado-catalogos-compartidos-2026-11-17.md).
+
 Fecha: 2026-11-17  
 Estado: implementado y verificado
 

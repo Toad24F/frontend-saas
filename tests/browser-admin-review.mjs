@@ -69,7 +69,7 @@ try {
         const esRecepcionistas = screen === 'recepcionistas';
         const esSucursales = screen === 'sucursales';
         const esServicios = screen === 'servicios';
-        const clear = page.locator(esProfesionales ? '.profesionales-herramientas [data-profesional-reset]' : esRecepcionistas ? '.profesionales-herramientas [data-recepcionista-reset]' : esServicios ? '.profesionales-herramientas [data-servicio-reset]' : esSucursales ? '.profesionales-herramientas [data-sucursal-reset]' : '.profesionales-herramientas [data-' + kind + '-reset]');
+        const clear = page.locator(esProfesionales ? '.profesionales-herramientas [data-profesional-limpiar]' : esRecepcionistas ? '.profesionales-herramientas [data-recepcionista-limpiar]' : esServicios ? '.profesionales-herramientas [data-servicio-limpiar]' : esSucursales ? '.profesionales-herramientas [data-sucursal-limpiar]' : '.profesionales-herramientas [data-' + kind + '-reset]');
         assert.equal(await clear.isDisabled(), true);
         await page.locator(esProfesionales ? '#busqueda-profesionales' : esRecepcionistas ? '#busqueda-recepcionistas' : esServicios ? '#busqueda-servicios' : esSucursales ? '#busqueda-sucursales' : '#' + kind + '-search').fill('no coincide');
         assert.equal(await clear.isEnabled(), true);
@@ -77,8 +77,8 @@ try {
         assert.equal(await clear.isDisabled(), true);
         assert.equal(await page.locator('main section[aria-label^="Inhabilitados"]').count(), 0);
         if (screen === 'sucursales') {
-          assert.equal(await page.locator('.catalog-capacity .catalog-quota').count(), 1);
-          assert.equal(await page.locator('.catalog-quota progress').evaluate((el) => getComputedStyle(el).height), '7px');
+          assert.equal(await page.locator('.catalogo-cupo .catalogo-indicador-cupo').count(), 1);
+          assert.equal(await page.locator('.catalogo-indicador-cupo progress').evaluate((el) => getComputedStyle(el).height), '7px');
         }
         if (screen === 'recepcionistas') {
           const caution = page.locator('.recepcionista-accion-estado.action-caution');
@@ -209,11 +209,11 @@ try {
   await page.unroute('**/profesionales/cupo');
   await page.setViewportSize({ width: 1366, height: 900 });
   await goto('profesionales');
-  await page.locator('[data-vista-profesionales=cards]').click();
+  await page.locator('[data-vista-profesionales=tarjetas]').click();
   await page.locator('#busqueda-profesionales').fill('María');
-  await page.locator('.profesionales-herramientas [data-profesional-reset]').click();
-  assert.equal(await page.locator('[data-vista-profesionales=cards]').getAttribute('aria-pressed'), 'true');
-  await page.locator('[data-vista-profesionales=list]').click();
+  await page.locator('.profesionales-herramientas [data-profesional-limpiar]').click();
+  assert.equal(await page.locator('[data-vista-profesionales=tarjetas]').getAttribute('aria-pressed'), 'true');
+  await page.getByRole('group', { name: 'Tipo de vista' }).getByRole('button', { name: 'Lista', exact: true }).click();
   await page.route('**/servicios/inhabilitados', (route) => route.fulfill({ status: 503, json: { message: 'Lista no disponible' } }));
   await goto('servicios');
   await page.locator('[data-retired-open]').click();
