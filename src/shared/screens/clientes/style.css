@@ -1,0 +1,95 @@
+/* El directorio conserva la tabla del panel; en móvil cada ficha tiene una tarjeta y una acción completa. */
+.client-directory .section-heading {
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+#connected-directory-filters {
+  display: flex;
+  gap: 0.5rem;
+  min-width: 0;
+}
+#connected-directory-filters .search-field {
+  min-width: 0;
+}
+.directory-id {
+  display: block;
+  opacity: 0.7;
+  margin-top: 0.25rem;
+}
+.directory-cards {
+  display: none;
+}
+.directory-pages {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: space-between;
+}
+.directory-pages > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.directory-loading {
+  padding: 2rem;
+}
+.directory-loading .skeleton-fill {
+  display: block;
+  height: 1rem;
+  margin-bottom: 1rem;
+}
+.client-directory .table-footer {
+  border-top: 1px solid var(--border);
+  padding: 1rem 1.5rem;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+.customer-history {
+  margin-top: 1.5rem;
+}
+.customer-history ol {
+  list-style: none;
+  padding: 0;
+}
+.customer-history li {
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--border);
+  overflow-wrap: anywhere;
+}
+.customer-history li p {
+  margin: 0.4rem 0;
+}
+.customer-notice {
+  margin: 1rem 0;
+}
+@media (max-width: 767px) {
+  .directory-table {
+    display: none;
+  }
+  .directory-cards {
+    display: grid;
+    padding: 0 1rem;
+  }
+  .directory-cards article {
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--border);
+    overflow-wrap: anywhere;
+  }
+  .directory-cards h3 {
+    font-size: 1rem;
+  }
+  #connected-directory-filters {
+    width: 100%;
+  }
+  #connected-directory-filters .search-field {
+    flex: 1;
+  }
+  #connected-directory-filters input {
+    width: 100%;
+    min-width: 0;
+  }
+  .directory-pages > div {
+    width: 100%;
+  }
+}

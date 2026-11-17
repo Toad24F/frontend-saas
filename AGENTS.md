@@ -13,7 +13,9 @@
 - `src/main.js` elige `src/connected/` o `src/demo/` mediante `?demo=1`. La UI, el enrutado y los estilos comunes viven en `src/shared/`. Reutiliza esa separación y limita los cambios a las pantallas solicitadas.
 - Vite (`npm run dev`) se usa para desarrollo y depuración; `npm run build` genera `dist/` y `npm run preview` permite revisar esa salida. **Nginx es el servidor previsto para publicar el frontend**, no sustituye a Vite durante el desarrollo. No hay configuración de Nginx en este repositorio: antes de implementarla, acuerda dominio, HTTPS, ubicación de la API y proxy. Al servir la SPA, las rutas de frontend deben volver a `index.html`; no redirijas rutas de API sin conocer el despliegue.
 - Las variables `VITE_*` quedan expuestas en el navegador. No coloques secretos, tokens ni contraseñas en el código, la demo, `.env.example` o la documentación.
-- Usar una estructura de carpetas modular y nombres de archivos coherentes.
+- Todo código nuevo propio del frontend debe nombrar en español archivos, carpetas, funciones, variables, selectores y pruebas, con el formato `dominio.responsabilidad.extensión`.
+- Conserva en inglés `client`, `store`, `payload`, `render`, `handler` y `handle`, además de contratos externos, APIs del navegador y nombres impuestos por dependencias.
+- Sigue las reglas y el checklist de `docs/plan-traduccion-nomenclatura-frontend.md`; no aproveches una implementación nueva para renombrar código anterior fuera de su alcance.
 
 ## Demo, backend e interfaz
 

@@ -40,6 +40,20 @@ const options = () => ({
   day: TODAY,
   mode: 'free',
 });
+// La demo manual representa la selección expresa por ficha sin cambiar el contrato del portal de ejemplo.
+test('demo manual: ficha explícita y cliente nuevo no se fusionan por teléfono compartido', () => {
+  const original = db.clients[0];
+  const other = { ...original, id: 100, name: 'Otra Persona' };
+  db.clients.push(other);
+  const firstTime = slots(options())[0];
+  const appointment = createAppointment({ ...options(), start: firstTime, clientId: 100 }, { name: other.name, phone: other.phone });
+  assert.equal(appointment.clientId, 100);
+  const secondTime = slots(options())[0], count = db.clients.length;
+  const newAppointment = createAppointment({ ...options(), start: secondTime, newClient: true }, { name: 'Persona Nueva', phone: other.phone });
+  assert.equal(db.clients.length, count + 1);
+  assert.notEqual(newAppointment.clientId, original.id);
+  assert.notEqual(newAppointment.clientId, 100);
+});
 test('rechaza recursos de otro tenant en el selector de demostración', () => {
   assert.throws(() => resource('appointments', 24, 1), /no está disponible/);
   assert.throws(() => resource('clients', 21, 1), /no está disponible/);

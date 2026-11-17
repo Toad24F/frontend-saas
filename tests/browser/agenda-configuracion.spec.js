@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './support.js';
 
 // El mismo formulario pasa por 400, 503 y una escritura real en la base efímera;
 // solo esta última puede cambiar el estado confirmado en la pantalla.

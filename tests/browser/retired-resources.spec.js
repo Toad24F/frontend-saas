@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './support.js';
 import { rows } from './support.js';
 
 const origin = () => process.env.PORTAL_TEST_ORIGIN;

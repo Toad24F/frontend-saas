@@ -162,9 +162,11 @@ export function createAppointment(options, contact, holdId = null) {
   )
     throw new Error('El horario ya no está disponible. Selecciona otro.');
   const service = resource('services', options.serviceId, options.tenantId);
-  let client = list('clients', options.tenantId).find(
-    (c) => c.phone === contact.phone,
-  );
+  // El formulario manual de demo elige ficha por ID o crea una persona nueva.
+  // El portal de ejemplo conserva su comportamiento previo cuando no envía estas opciones.
+  let client = options.clientId != null
+    ? resource('clients', options.clientId, options.tenantId)
+    : options.newClient ? null : list('clients', options.tenantId).find((c) => c.phone === contact.phone);
   if (client) {
     if (
       client.name.toLocaleLowerCase() !==

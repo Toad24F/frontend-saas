@@ -1,3 +1,4 @@
+import { test as base, expect } from '@playwright/test';
 import { createRequire } from 'node:module';
 import { resolve } from 'node:path';
 
@@ -6,7 +7,7 @@ const { createConnection } = backendRequire('mysql2/promise');
 
 export const portalUrl = (business = 1) => `${process.env.PORTAL_TEST_ORIGIN}/reservas/portal-qa-${business}`;
 
-// El lector de evidencias solo se conecta a la base temporal que creó globalSetup.
+// Las consultas y los fixtures solo se conectan a la base temporal que creó globalSetup.
 export async function rows(sql, params = []) {
   const name = process.env.PORTAL_TEST_DB_NAME;
   if (!/^citas_persistencia_[a-f0-9]{32}$/.test(name ?? '')) throw new Error('Falta la base efímera de pruebas.');
@@ -16,3 +17,13 @@ export async function rows(sql, params = []) {
   try { return (await db.query(sql, params))[0]; }
   finally { await db.end(); }
 }
+
+// Cada caso empieza con contador limpio exclusivamente en la base efímera.
+// Se conserva el guard real y su límite; no se falsea el login ni su respuesta.
+export const test = base.extend({
+  aislamientoLogin: [async ({}, use) => {
+    await rows('DELETE FROM limites_intentos');
+    await use();
+  }, { auto: true }],
+});
+export { expect };

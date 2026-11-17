@@ -71,8 +71,8 @@ function setup(handler, extra = {}) {
   return { flow, calls, store, storage, messages };
 }
 async function form(flow) {
-  await flow.start(); flow.choose('servicioId', 1); await flow.next(); flow.choose('sucursalId', 2); await flow.next();
-  flow.choose('personalId', 3); await flow.next(); flow.chooseSlot(result.inicioUtc); await flow.reserveSelected();
+  await flow.start(); flow.choose('servicioId', 1); await flow.next(); if (flow.getState().step === 1) flow.choose('sucursalId', 2); await flow.next();
+  if (flow.getState().step === 2) flow.choose('personalId', 3); await flow.next(); flow.chooseSlot(result.inicioUtc); await flow.reserveSelected();
   flow.updateContact('nombre', '  Ana  '); flow.updateContact('telefono', '+52 614-123-4567'); flow.updateContact('notas', ' Nota privada ');
 }
 

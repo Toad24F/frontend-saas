@@ -2,6 +2,7 @@ import { renderSelection, mountSelection } from './selection-view.js';
 import { dateLabel, localTime, localDate } from './dates.js';
 import { focusPublicControl } from './accessibility.js';
 import { icon } from '../../shared/icons.js';
+import { publicSkeleton } from '../../shared/public/options.js';
 
 // Todo dato personal se escapa antes de generar HTML; no se consulta por teléfono.
 const esc = (value = '') => String(value).replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
@@ -16,7 +17,7 @@ function renderBody(state) {
   const notice = state.notice ? `<p class="public-hold-notice">${esc(state.notice)}</p>` : '';
   if (state.phase === 'selection') return `${notice}${renderSelection(state)}`;
   if (state.phase === 'hold') return `<h2 id="selection-title" tabindex="-1">Apartar tu horario</h2>${notice}
-    ${state.holdStatus === 'request-error' ? '<button class="btn btn-primary" type="button" data-selection-retry>Reintentar el mismo apartado</button>' : '<p>Espera mientras comprobamos el horario. Todavía no se ha creado una cita.</p>'}`;
+    ${state.holdStatus === 'request-error' ? '<button class="btn btn-primary" type="button" data-selection-retry>Reintentar el mismo apartado</button>' : `<p>Espera mientras comprobamos el horario. Todavía no se ha creado una cita.</p>${publicSkeleton(true)}`}`;
   // Estas pantallas no dependen del apartado ni del catálogo: una recuperación
   // tras recarga puede no tener selecciones locales o contacto en memoria.
   if (state.phase === 'sending' || state.phase === 'uncertain') return `<h2 id="selection-title" tabindex="-1">${state.phase === 'sending' ? 'Registrando tu reserva' : state.submission?.status === 'phone-quota' ? 'No se registró la reserva' : 'Comprueba tu envío'}</h2>
@@ -86,8 +87,8 @@ export function renderBooking(state) {
   const price = result ? result.costo : state.phase === 'selection' ? service?.costo : state.hold?.costo;
   return `<nav class="public-progress" aria-label="Pasos de reserva"><ol class="public-steps">${stepNames.map((name, index) => `<li class="${index < step ? 'is-complete' : ''}" ${step === index ? 'aria-current="step"' : ''}><span>${index < step ? '✓' : index + 1}</span><strong>${name}</strong></li>`).join('')}</ol></nav>
     <div class="public-booking-columns"><section class="public-booking-surface">${renderBody(state)}</section>
-      <aside class="public-booking-aside" aria-label="Resumen de la reserva"><div class="public-summary-card"><div class="public-summary-content"><div class="public-summary-heading">${icon('calendar')}<h3>Resumen de tu cita</h3></div><dl class="public-summary-items">${summary.map(([label, value, symbol, filled]) => `<div class="${filled ? 'is-filled' : ''}"><dt class="visually-hidden">${label}</dt><dd>${icon(symbol)}<span>${esc(value)}</span></dd></div>`).join('')}</dl>${price !== undefined ? `<div class="public-summary-price"><span>${service?.duracionMinutos ? `${service.duracionMinutos} minutos` : 'Costo de la reserva'}</span><strong>${esc(price)} <small>MXN</small></strong></div><p class="public-summary-payment">Pago directamente en sucursal.</p>` : ''}</div><span class="public-summary-leaf" aria-hidden="true">${icon('leaf')}</span></div>
-      <p class="public-booking-trust">${result ? 'Reserva registrada, pendiente de confirmación.' : price === undefined ? 'La disponibilidad se confirma con el servidor antes de registrar tu reserva.' : 'La disponibilidad y el costo se confirman con el servidor antes de registrar tu reserva.'}</p></aside></div>`;
+      <aside class="public-booking-aside" aria-label="Resumen de la reserva"><details class="public-summary-disclosure" ${typeof matchMedia === 'undefined' || matchMedia('(min-width: 901px)').matches ? 'open' : ''}><summary>Ver resumen de tu cita</summary><div class="public-summary-card"><div class="public-summary-content"><div class="public-summary-heading">${icon('calendar')}<h3>Resumen de tu cita</h3></div><dl class="public-summary-items">${summary.map(([label, value, symbol, filled]) => `<div class="${filled ? 'is-filled' : ''}"><dt class="visually-hidden">${label}</dt><dd>${icon(symbol)}<span>${esc(value)}</span></dd></div>`).join('')}</dl>${price !== undefined ? `<div class="public-summary-price"><span>${service?.duracionMinutos ? `${service.duracionMinutos} minutos` : 'Costo de la reserva'}</span><strong>${esc(price)} <small>MXN</small></strong></div><p class="public-summary-payment">Pago directamente en sucursal.</p>` : ''}</div><span class="public-summary-leaf" aria-hidden="true">${icon('leaf')}</span></div>
+      <p class="public-booking-trust">${result ? 'Reserva registrada, pendiente de confirmación.' : price === undefined ? 'La disponibilidad se confirma con el servidor antes de registrar tu reserva.' : 'La disponibilidad y el costo se confirman con el servidor antes de registrar tu reserva.'}</p></details></aside></div>`;
 }
 
 // El contador se actualiza sin recrear inputs, para conservar foco, cursor e IME.
@@ -99,6 +100,8 @@ export function updateHoldTime(host, state) {
 }
 export function mountBooking(host, flow) {
   const render = mountSelection(host, flow, renderBooking);
+  const wide = matchMedia('(min-width: 901px)');
+  wide.addEventListener('change', () => { const details = host.querySelector('.public-summary-disclosure'); if (details) details.open = wide.matches; });
   host.addEventListener('input', (event) => {
     const field = event.target.dataset.contactField;
     if (field) {
