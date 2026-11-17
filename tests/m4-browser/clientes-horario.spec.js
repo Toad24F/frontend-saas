@@ -2,23 +2,23 @@ import { test, expect } from '@playwright/test';
 import { setup } from './agenda-fixture.js';
 
 // Todos los datos y mutaciones de esta suite son dobles HTTP; no escriben en el backend real.
-async function fixture(page, role = 'recepcionista', theme = 'light') {
-  const { errors } = await setup(page, role, theme);
+async function prepararEscenario(page, rol = 'recepcionista', tema = 'light') {
+  const { errors } = await setup(page, rol, tema);
   const control = {
-    writes: [],
-    status: 0,
-    historyStatus: 0,
+    escrituras: [],
+    estadoHttp: 0,
+    estadoHistorial: 0,
     version: 2,
-    moved: false,
-    name: 'Ana actual',
-    empty: false,
-    delayWrite: null,
+    citaMovida: false,
+    nombreFicha: 'Ana actual',
+    directorioVacio: false,
+    esperaEscritura: null,
   };
   const ficha = (id = 1) => ({
     id,
     negocioId: 1,
     version: control.version,
-    nombreCompleto: id === 1 ? control.name : 'Otra persona',
+    nombreCompleto: id === 1 ? control.nombreFicha : 'Otra persona',
     telefono: '6145550101',
     creadoEn: '2026-11-12T12:00:00Z',
   });
@@ -28,26 +28,26 @@ async function fixture(page, role = 'recepcionista', theme = 'light') {
       url.pathname === '/citas/7/horario' ||
       url.pathname === '/citas/7',
     async (route) => {
-      const req = route.request(),
-        url = new URL(req.url()),
+      const solicitud = route.request(),
+        url = new URL(solicitud.url()),
         path = url.pathname;
-      if (req.method() !== 'GET') {
-        control.writes.push({
+      if (solicitud.method() !== 'GET') {
+        control.escrituras.push({
           path,
-          method: req.method(),
-          body: req.postDataJSON(),
+          method: solicitud.method(),
+          body: solicitud.postDataJSON(),
         });
-        if (control.delayWrite) await control.delayWrite;
-        if (control.status) {
+        if (control.esperaEscritura) await control.esperaEscritura;
+        if (control.estadoHttp) {
           await route.fulfill({
-            status: control.status,
+            status: control.estadoHttp,
             json: { message: 'Rechazo de prueba' },
           });
           return;
         }
         control.version++;
-        if (path.endsWith('/horario')) control.moved = true;
-        else control.name = req.postDataJSON().nombreCompleto;
+        if (path.endsWith('/horario')) control.citaMovida = true;
+        else control.nombreFicha = solicitud.postDataJSON().nombreCompleto;
       }
       let data;
       if (path === '/citas/7' || path.endsWith('/horario'))
@@ -56,20 +56,20 @@ async function fixture(page, role = 'recepcionista', theme = 'light') {
           folio: 'M4-0007',
           version: control.version,
           estado: 'confirmada',
-          inicioUtc: control.moved
+          inicioUtc: control.citaMovida
             ? '2030-12-21T16:00:00Z'
             : '2030-12-20T15:00:00Z',
           finUtc: '2030-12-21T16:30:00Z',
           finOcupacionUtc: '2030-12-21T16:35:00Z',
-          fechaLocal: control.moved ? '2030-12-21' : '2030-12-20',
-          horaInicio: control.moved ? '10:00:00' : '09:00:00',
+          fechaLocal: control.citaMovida ? '2030-12-21' : '2030-12-20',
+          horaInicio: control.citaMovida ? '10:00:00' : '09:00:00',
           zonaHoraria: 'America/Chihuahua',
           nombreContacto: 'Contacto histórico',
         };
       else if (path.endsWith('/citas')) {
-        if (control.historyStatus) {
+        if (control.estadoHistorial) {
           await route.fulfill({
-            status: control.historyStatus,
+            status: control.estadoHistorial,
             json: { message: 'Historial no disponible' },
           });
           return;
@@ -96,9 +96,9 @@ async function fixture(page, role = 'recepcionista', theme = 'light') {
           limite: 50,
           hayMas: url.searchParams.get('pagina') === '1',
         };
-      } else if (path === '/clientes' && req.method() === 'GET')
+      } else if (path === '/clientes' && solicitud.method() === 'GET')
         data = {
-          clientes: control.empty ? [] : [ficha(), ficha(2)],
+          clientes: control.directorioVacio ? [] : [ficha(), ficha(2)],
           pagina: Number(url.searchParams.get('pagina')),
           limite: 50,
           hayMas: url.searchParams.get('pagina') === '1',
@@ -113,13 +113,13 @@ async function fixture(page, role = 'recepcionista', theme = 'light') {
 test('T097: rechazo conserva horario y borrador; relectura explícita permite mover el mismo folio', async ({
   page,
 }) => {
-  const { control } = await fixture(page);
+  const { control } = await prepararEscenario(page);
   await page.goto('/admin/agenda');
   await page.locator('[data-m4-appointment="7"]').click();
   const panel = page.getByRole('dialog');
   await panel.getByLabel('Nueva fecha').fill('2030-12-21');
   await panel.getByLabel('Nueva hora').fill('10:00');
-  control.status = 409;
+  control.estadoHttp = 409;
   await panel
     .getByRole('button', { name: 'Guardar horario', exact: true })
     .click();
@@ -134,7 +134,7 @@ test('T097: rechazo conserva horario y borrador; relectura explícita permite mo
   await page.keyboard.press('Escape');
   await page.locator('[data-m4-appointment="7"]').click();
   await expect(panel.getByLabel('Nueva fecha')).toHaveValue('2030-12-21');
-  control.status = 0;
+  control.estadoHttp = 0;
   await panel
     .getByRole('button', { name: 'Releer horario', exact: true })
     .click();
@@ -144,7 +144,7 @@ test('T097: rechazo conserva horario y borrador; relectura explícita permite mo
     .getByRole('button', { name: 'Guardar horario', exact: true })
     .click();
   await expect(panel.locator('.m4-detail-fields')).toContainText('2030-12-21');
-  expect(control.writes.at(-1)).toEqual({
+  expect(control.escrituras.at(-1)).toEqual({
     path: '/citas/7/horario',
     method: 'PATCH',
     body: { fechaLocal: '2030-12-21', horaInicio: '10:00', version: 2 },
@@ -155,12 +155,12 @@ test('T097: rechazo conserva horario y borrador; relectura explícita permite mo
 test('T098/T099: fichas distintas con teléfono compartido, historial separado, alta y corrección versionada', async ({
   page,
 }) => {
-  const { control, errors } = await fixture(page);
+  const { control, errors } = await prepararEscenario(page);
   await page.goto('/admin/clientes');
-  await expect(page.locator('[data-directory-open]')).toHaveCount(4); // Tabla y tarjetas comparten las dos fichas.
+  await expect(page.locator('[data-directorio-abrir]')).toHaveCount(4); // Tabla y tarjetas comparten las dos fichas.
   await page.getByLabel('Buscar clientes', { exact: true }).fill('Ana');
   await page.getByRole('button', { name: 'Buscar', exact: true }).click();
-  await page.locator('[data-directory-open="1"]:visible').click();
+  await page.locator('[data-directorio-abrir="1"]:visible').click();
   const panel = page.getByRole('dialog');
   await expect(panel).toContainText('Contacto histórico');
   await expect(panel).toContainText('Sin registro histórico');
@@ -174,7 +174,7 @@ test('T098/T099: fichas distintas con teléfono compartido, historial separado, 
   await panel
     .getByLabel('Nombre completo', { exact: true })
     .fill('Nombre corregido');
-  control.status = 409;
+  control.estadoHttp = 409;
   await panel
     .getByRole('button', { name: 'Guardar ficha', exact: true })
     .click();
@@ -184,7 +184,7 @@ test('T098/T099: fichas distintas con teléfono compartido, historial separado, 
   await expect(
     panel.getByRole('button', { name: 'Guardar ficha', exact: true }),
   ).toBeDisabled();
-  control.status = 0;
+  control.estadoHttp = 0;
   await panel
     .getByRole('button', { name: 'Releer ficha', exact: true })
     .click();
@@ -210,27 +210,27 @@ test('T098/T099: fichas distintas con teléfono compartido, historial separado, 
     .getByRole('button', { name: 'Guardar ficha', exact: true })
     .click();
   await expect(panel).toContainText('Nueva ficha');
-  expect(control.writes.map((row) => row.path)).toEqual([
+  expect(control.escrituras.map((row) => row.path)).toEqual([
     '/clientes/1',
     '/clientes/1',
     '/clientes',
   ]);
-  expect(control.writes[1].body.version).toBe(2);
-  expect(control.writes[2].body.version).toBeUndefined();
+  expect(control.escrituras[1].body.version).toBe(2);
+  expect(control.escrituras[2].body.version).toBeUndefined();
   expect(errors).toEqual([]);
 });
 
-for (const width of [1366, 390])
-  for (const theme of ['light', 'dark'])
-    test(`T098/T099: directorio y panel ${width}px ${theme}`, async ({
+for (const ancho of [1366, 390])
+  for (const tema of ['light', 'dark'])
+    test(`T098/T099: directorio y panel ${ancho}px ${tema}`, async ({
       page,
     }) => {
-      await page.setViewportSize({ width, height: 900 });
-      const { errors } = await fixture(page, 'admin_negocio', theme);
+      await page.setViewportSize({ width: ancho, height: 900 });
+      const { errors } = await prepararEscenario(page, 'admin_negocio', tema);
       await page.goto('/admin/clientes');
-      await expect(page.locator('[data-directory-open="1"]:visible')).toBeVisible();
-      await page.screenshot({ path: `test-results/m4/directorio-${width}-${theme}.png` });
-      await page.locator('[data-directory-open="1"]:visible').click();
+      await expect(page.locator('[data-directorio-abrir="1"]:visible')).toBeVisible();
+      await page.screenshot({ path: `test-results/m4/directorio-${ancho}-${tema}.png` });
+      await page.locator('[data-directorio-abrir="1"]:visible').click();
       const panel = page.getByRole('dialog');
       await expect(panel).toContainText('Contacto histórico');
       await expect(panel).toHaveClass(/agenda-drawer/);
@@ -247,39 +247,39 @@ for (const width of [1366, 390])
         ),
       ).toBe(true);
       await page.screenshot({
-        path: `test-results/m4/clientes-${width}-${theme}.png`,
+        path: `test-results/m4/clientes-${ancho}-${tema}.png`,
       });
       await panel.getByRole('button', { name: 'Corregir ficha', exact: true }).click();
       // El panel vuelve a animarse al reemplazar detalle por formulario: capturar solo su posición final.
       await expect.poll(() => panel.evaluate((el) => Math.abs(el.getBoundingClientRect().right - innerWidth) < 1)).toBe(true);
       await expect(panel.getByRole('button', { name: 'Guardar ficha', exact: true })).toBeInViewport();
-      await page.screenshot({ path: `test-results/m4/ficha-editor-${width}-${theme}.png` });
+      await page.screenshot({ path: `test-results/m4/ficha-editor-${ancho}-${tema}.png` });
       await page.keyboard.press('Escape');
       await expect(
-        page.locator('[data-directory-open="1"]:visible'),
+        page.locator('[data-directorio-abrir="1"]:visible'),
       ).toBeFocused();
       await page.goto('/admin/agenda');
       await page.locator('[data-m4-appointment="7"]').click();
       const saveSchedule = panel.getByRole('button', { name: 'Guardar horario', exact: true });
       await saveSchedule.scrollIntoViewIfNeeded(); await expect(saveSchedule).toBeInViewport();
-      await page.screenshot({ path: `test-results/m4/horario-editor-${width}-${theme}.png` });
+      await page.screenshot({ path: `test-results/m4/horario-editor-${ancho}-${tema}.png` });
       expect(errors).toEqual([]);
     });
 
 test('T098/T099: vacío real, historial fallido independiente y alta incierta sin reenvío', async ({
   page,
 }) => {
-  const { control } = await fixture(page);
+  const { control } = await prepararEscenario(page);
   await page.goto('/admin/clientes');
-  await page.locator('[data-directory-open="1"]:visible').click();
+  await page.locator('[data-directorio-abrir="1"]:visible').click();
   const panel = page.getByRole('dialog');
   await expect(panel).toContainText('Contacto histórico');
-  control.historyStatus = 503;
+  control.estadoHistorial = 503;
   await panel
     .getByRole('button', { name: 'Siguiente página', exact: true })
     .click();
   await expect(panel).toContainText('Ana actual');
-  await expect(panel.locator('[data-customer-history]')).toContainText(
+  await expect(panel.locator('[data-ficha-historial]')).toContainText(
     'Reintentar',
   );
   await page.keyboard.press('Escape');
@@ -288,7 +288,7 @@ test('T098/T099: vacío real, historial fallido independiente y alta incierta si
     .click();
   await panel.getByLabel('Nombre completo', { exact: true }).fill('Borrador');
   await panel.getByLabel('Teléfono', { exact: true }).fill('6145550101');
-  control.status = 503;
+  control.estadoHttp = 503;
   await panel
     .getByRole('button', { name: 'Guardar ficha', exact: true })
     .click();
@@ -305,9 +305,9 @@ test('T098/T099: vacío real, historial fallido independiente y alta incierta si
   await expect(
     panel.getByRole('button', { name: 'Guardar ficha', exact: true }),
   ).toBeDisabled();
-  expect(control.writes).toHaveLength(1);
+  expect(control.escrituras).toHaveLength(1);
   await page.keyboard.press('Escape');
-  control.empty = true;
+  control.directorioVacio = true;
   await page.getByRole('button', { name: 'Buscar', exact: true }).click();
   await expect(page.getByRole('main')).toContainText('Sin clientes');
 });
@@ -315,7 +315,7 @@ test('T098/T099: vacío real, historial fallido independiente y alta incierta si
 test('T097/T098: profesional no recibe editor de horario ni directorio', async ({
   page,
 }) => {
-  await fixture(page, 'profesional');
+  await prepararEscenario(page, 'profesional');
   await page.goto('/admin/agenda');
   await page.locator('[data-m4-appointment="7"]').click();
   await expect(page.getByLabel('Nueva fecha')).toHaveCount(0);
@@ -327,7 +327,7 @@ test('T097/T098: profesional no recibe editor de horario ni directorio', async (
 test('T099: cerrar durante el envío no habilita otro POST y un 400 permite corregir', async ({
   page,
 }) => {
-  const { control } = await fixture(page);
+  const { control } = await prepararEscenario(page);
   await page.goto('/admin/clientes');
   await page
     .getByRole('button', { name: 'Nuevo cliente', exact: true })
@@ -337,19 +337,19 @@ test('T099: cerrar durante el envío no habilita otro POST y un 400 permite corr
     .getByLabel('Nombre completo', { exact: true })
     .fill('Borrador lento');
   await panel.getByLabel('Teléfono', { exact: true }).fill('6145550101');
-  control.status = 400;
+  control.estadoHttp = 400;
   await panel
     .getByRole('button', { name: 'Guardar ficha', exact: true })
     .click();
-  await expect(panel.locator('[data-customer-error]')).toContainText('Entrada inválida');
+  await expect(panel.locator('[data-ficha-error]')).toContainText('Entrada inválida');
   await expect(
     panel.getByRole('button', { name: 'Guardar ficha', exact: true }),
   ).toBeEnabled();
   let release;
-  control.delayWrite = new Promise((resolve) => {
+  control.esperaEscritura = new Promise((resolve) => {
     release = resolve;
   });
-  control.status = 0;
+  control.estadoHttp = 0;
   await panel
     .getByRole('button', { name: 'Guardar ficha', exact: true })
     .click();
@@ -367,13 +367,13 @@ test('T099: cerrar durante el envío no habilita otro POST y un 400 permite corr
   await expect(
     panel.getByLabel('Nombre completo', { exact: true }),
   ).toHaveValue('Borrador lento');
-  expect(control.writes).toHaveLength(2);
+  expect(control.escrituras).toHaveLength(2);
 });
 
 test('T097: borrador de otra versión exige relectura; una cita cancelada no se puede mover', async ({
   page,
 }) => {
-  const { control } = await fixture(page);
+  const { control } = await prepararEscenario(page);
   await page.goto('/admin/agenda');
   await page.locator('[data-m4-appointment="7"]').click();
   const panel = page.getByRole('dialog');
@@ -406,22 +406,22 @@ test('T097: borrador de otra versión exige relectura; una cita cancelada no se 
   await expect(
     panel.getByRole('button', { name: 'Guardar horario', exact: true }),
   ).toBeDisabled();
-  expect(control.writes).toEqual([]);
+  expect(control.escrituras).toEqual([]);
 });
 
-for (const width of [1366, 390])
-  for (const theme of ['light', 'dark'])
-    test(`demo: directorio, corrección y teléfono compartido ${width}px ${theme}`, async ({
+for (const ancho of [1366, 390])
+  for (const tema of ['light', 'dark'])
+    test(`demo: directorio, corrección y teléfono compartido ${ancho}px ${tema}`, async ({
       page,
     }) => {
-      await page.setViewportSize({ width, height: 900 });
+      await page.setViewportSize({ width: ancho, height: 900 });
       await page.addInitScript(
         (value) => localStorage.setItem('cita-theme', value),
-        theme,
+        tema,
       );
       await page.goto('/admin/clientes?demo=1');
-      const first = page.locator('[data-client]:visible').first();
-      await first.click();
+      const primeraFicha = page.locator('[data-ficha-demo-abrir]:visible').first();
+      await primeraFicha.click();
       const panel = page.getByRole('dialog');
       await expect(panel).toHaveClass(/agenda-drawer/);
       await panel
@@ -430,7 +430,7 @@ for (const width of [1366, 390])
       await panel
         .getByLabel('Nombre completo', { exact: true })
         .fill('Cliente demo corregido');
-      const phone = await panel
+      const telefono = await panel
         .getByLabel('Teléfono', { exact: true })
         .inputValue();
       await panel.getByRole('button', { name: 'Guardar', exact: true }).click();
@@ -443,7 +443,7 @@ for (const width of [1366, 390])
       await panel
         .getByLabel('Nombre completo', { exact: true })
         .fill('Teléfono compartido demo');
-      await panel.getByLabel('Teléfono de WhatsApp').fill(phone);
+      await panel.getByLabel('Teléfono de WhatsApp').fill(telefono);
       await panel.getByRole('button', { name: 'Guardar', exact: true }).click();
       await expect(page.getByRole('main')).toContainText(
         'Teléfono compartido demo',
@@ -454,6 +454,6 @@ for (const width of [1366, 390])
         ),
       ).toBe(true);
       await page.screenshot({
-        path: `test-results/m4/demo-clientes-${width}-${theme}.png`,
+        path: `test-results/m4/demo-clientes-${ancho}-${tema}.png`,
       });
     });

@@ -1,7 +1,7 @@
 # Reglas y plan de traducción de la nomenclatura del frontend
 
 Fecha de definición: 2026-11-16  
-Estado: implementación por conjuntos; glosario, Sucursales, Servicios, Profesionales y Recepcionistas terminados
+Estado: implementación por conjuntos; glosario, Sucursales, Servicios, Profesionales, Recepcionistas y Clientes terminados
 
 ## Objetivo
 
@@ -204,12 +204,14 @@ Resultado: conjunto cerrado el 2026-11-17 en `docs/traduccion-nomenclaturas/resu
 
 ### 5. Clientes
 
-- [ ] Renombrar juntos `shared/screens/clientes/style.css`, `connected/screens/clientes/view.js` y `panels.js`.
-- [ ] Conservar `connected/modules/clientes/client.js` con el término técnico `client`, adaptando el nombre compuesto acordado.
-- [ ] Renombrar juntos `demo/screens/clientes/view.js`, `actions.js` y `style.css`.
-- [ ] Revisar `demo/customer-schedule.js` y traducirlo de acuerdo con el glosario.
-- [ ] Actualizar `m4-clientes-horario.test.js`, sus pruebas de navegador y fixtures relacionados.
-- [ ] Verificar que las propiedades provenientes del backend permanezcan intactas.
+- [x] Renombrar juntos `shared/screens/clientes/style.css`, `connected/screens/clientes/view.js` y `panels.js`.
+- [x] Conservar `connected/modules/clientes/client.js` con el término técnico `client`, adaptando el nombre compuesto acordado.
+- [x] Renombrar juntos `demo/screens/clientes/view.js`, `actions.js` y `style.css`.
+- [x] Revisar `demo/customer-schedule.js` y traducirlo de acuerdo con el glosario.
+- [x] Actualizar `m4-clientes-horario.test.js`, sus pruebas de navegador y fixtures relacionados.
+- [x] Verificar que las propiedades provenientes del backend permanezcan intactas.
+
+Resultado: conjunto cerrado el 2026-11-17 en [Resultado de traducción de Clientes](resultado-clientes-2026-11-17.md).
 
 ### 6. Catálogos compartidos
 

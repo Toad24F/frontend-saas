@@ -1,5 +1,5 @@
 import { overview } from './resumen/view.js';
-import { clients } from './clientes/view.js';
+import { clientes } from './clientes/clientes.vista.js';
 import { profesionales } from '../../shared/screens/profesionales/profesionales.vista.js';
 import { servicios } from '../../shared/screens/servicios/servicios.vista.js';
 import { sucursales } from '../../shared/screens/sucursales/sucursales.vista.js';
@@ -12,7 +12,7 @@ import { empty, button } from '../../shared/ui.js';
 
 const views = {
   resumen: overview,
-  clientes: clients,
+  clientes,
   profesionales,
   servicios,
   sucursales,

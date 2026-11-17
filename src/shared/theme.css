@@ -94,8 +94,8 @@ html[data-theme='dark'] :is(.stat-top, .stat-caption, .section-heading p, .subtl
 html[data-theme='dark'] :is(.segmented, .month-label, .muted-day, .app-table thead th, .form-separator, .calendar-toolbar, .information-note, .compact-note) { background: #292a31; border-color: var(--border); color: #c5c3c7; }
 html[data-theme='dark'] .segmented button { color: #c4c1c6; }
 html[data-theme='dark'] .segmented button.selected { background: #454047; color: #fff; }
-html[data-theme='dark'] :is(.filter-select, .search-field, .table-search, .phone-input) { background: #292a31; border-color: #484951; color: var(--ink); }
-html[data-theme='dark'] :is(.filter-select select, .search-field input, .table-search input) { color: var(--ink); }
+html[data-theme='dark'] :is(.filter-select, .search-field, .busqueda-tabla-clientes, .phone-input) { background: #292a31; border-color: #484951; color: var(--ink); }
+html[data-theme='dark'] :is(.filter-select select, .search-field input, .busqueda-tabla-clientes input) { color: var(--ink); }
 html[data-theme='dark'] :is(input, select, textarea, .form-control, .form-select) {
   background-color: #292a31;
   border-color: #484951;
@@ -195,7 +195,7 @@ html[data-theme='dark'] .app-toast.glass-effect { background: var(--glass-surfac
   border-color: var(--border);
 }
 .main-layout :is(.icon-btn, .btn-subtle, .text-button, .filter-select select,
-  .search-field input, .table-search input),
+  .search-field input, .busqueda-tabla-clientes input),
 .booking-layout :is(.text-button, .booking-date, .booking-slot) {
   color: var(--ink);
 }
@@ -343,7 +343,7 @@ html[data-theme='light'] :is(.page-heading h1, .section-heading h2,
   .summary-price > strong, .detail-list strong, .app-table td strong) { color: var(--ink); }
 html[data-theme='light'] :is(.section-heading p, .subtle-text, .field-hint,
   .optional, .form-label, .eyebrow, .footer-logo, .bar-column,
-  .app-table td small, .table-search, .search-field, .filter-select > .icon,
+  .app-table td small, .busqueda-tabla-clientes, .search-field, .filter-select > .icon,
   .profile-button small, .profile-button > .icon, .day-header,
   .time-header, .day-off, .date-picker-heading > span) { color: var(--muted); }
 html[data-theme='light'] :is(.stat-number, .app-table, .summary-price,
@@ -367,12 +367,12 @@ html[data-theme='light'] .segmented button.selected {
   box-shadow: 0 1px 4px rgba(37, 42, 46, 0.1);
 }
 html[data-theme='light'] .calendar-toolbar { background: var(--surface); }
-html[data-theme='light'] :is(.filter-select, .table-search, .phone-input) {
+html[data-theme='light'] :is(.filter-select, .busqueda-tabla-clientes, .phone-input) {
   background: var(--surface);
   border-color: var(--border);
   color: var(--ink);
 }
-html[data-theme='light'] :is(.filter-select, .search-field, .table-search):focus-within {
+html[data-theme='light'] :is(.filter-select, .search-field, .busqueda-tabla-clientes):focus-within {
   outline: 2px solid var(--accent);
   outline-offset: 3px;
 }

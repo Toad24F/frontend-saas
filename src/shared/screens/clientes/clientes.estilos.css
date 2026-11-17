@@ -1,95 +1,95 @@
 /* El directorio conserva la tabla del panel; en móvil cada ficha tiene una tarjeta y una acción completa. */
-.client-directory .section-heading {
+.directorio-clientes .section-heading {
   flex-wrap: wrap;
   gap: 1rem;
 }
-#connected-directory-filters {
+#filtros-directorio-conectado {
   display: flex;
   gap: 0.5rem;
   min-width: 0;
 }
-#connected-directory-filters .search-field {
+#filtros-directorio-conectado .search-field {
   min-width: 0;
 }
-.directory-id {
+.directorio-identificador {
   display: block;
   opacity: 0.7;
   margin-top: 0.25rem;
 }
-.directory-cards {
+.directorio-tarjetas {
   display: none;
 }
-.directory-pages {
+.directorio-paginacion {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: 1rem;
   justify-content: space-between;
 }
-.directory-pages > div {
+.directorio-paginacion > div {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
 }
-.directory-loading {
+.directorio-carga {
   padding: 2rem;
 }
-.directory-loading .skeleton-fill {
+.directorio-carga .skeleton-fill {
   display: block;
   height: 1rem;
   margin-bottom: 1rem;
 }
-.client-directory .table-footer {
+.directorio-clientes .table-footer {
   border-top: 1px solid var(--border);
   padding: 1rem 1.5rem;
   color: var(--muted);
   font-size: 0.8rem;
 }
-.customer-history {
+.historial-cliente {
   margin-top: 1.5rem;
 }
-.customer-history ol {
+.historial-cliente ol {
   list-style: none;
   padding: 0;
 }
-.customer-history li {
+.historial-cliente li {
   padding: 1rem 0;
   border-bottom: 1px solid var(--border);
   overflow-wrap: anywhere;
 }
-.customer-history li p {
+.historial-cliente li p {
   margin: 0.4rem 0;
 }
-.customer-notice {
+.aviso-cliente {
   margin: 1rem 0;
 }
 @media (max-width: 767px) {
-  .directory-table {
+  .directorio-tabla {
     display: none;
   }
-  .directory-cards {
+  .directorio-tarjetas {
     display: grid;
     padding: 0 1rem;
   }
-  .directory-cards article {
+  .directorio-tarjetas article {
     padding: 1rem 0;
     border-bottom: 1px solid var(--border);
     overflow-wrap: anywhere;
   }
-  .directory-cards h3 {
+  .directorio-tarjetas h3 {
     font-size: 1rem;
   }
-  #connected-directory-filters {
+  #filtros-directorio-conectado {
     width: 100%;
   }
-  #connected-directory-filters .search-field {
+  #filtros-directorio-conectado .search-field {
     flex: 1;
   }
-  #connected-directory-filters input {
+  #filtros-directorio-conectado input {
     width: 100%;
     min-width: 0;
   }
-  .directory-pages > div {
+  .directorio-paginacion > div {
     width: 100%;
   }
 }

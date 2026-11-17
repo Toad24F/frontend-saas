@@ -49,7 +49,7 @@ export const tenantById = (id) => db.tenants.find((t) => t.id === Number(id));
 export const appointmentInfo = (a) => ({
   ...a,
   // Las correcciones de ficha de la demo no reescriben el contacto de citas ya creadas.
-  client: a.clientSnapshot || resource('clients', a.clientId, a.tenantId),
+  client: a.contactoHistorico || resource('clients', a.clientId, a.tenantId),
   service: resource('services', a.serviceId, a.tenantId),
   professional: resource('professionals', a.professionalId, a.tenantId),
   branch: resource('branches', a.branchId, a.tenantId),

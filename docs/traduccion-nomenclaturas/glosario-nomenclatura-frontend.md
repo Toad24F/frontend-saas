@@ -197,3 +197,16 @@ Antes de agregar un nombre:
 
 Este glosario se aplica al código nuevo desde su fecha de cierre. La migración del código existente debe seguir las unidades y verificaciones de `docs/traduccion-nomenclaturas/plan-traduccion-nomenclatura-frontend.md`.
 
+## Equivalencias de Clientes
+
+| Nombre anterior | Nombre adoptado |
+| --- | --- |
+| `clientes/view.js`, `clientes/actions.js`, `clientes/panels.js`, `clientes/style.css` | `clientes.vista.js`, `clientes.acciones.js`, `clientes.paneles.js`, `clientes.estilos.css` |
+| `clientes/client.js`, `createCustomerClient`, `customerPayload` | `clientes.client.js`, `crearClientesClient`, `crearPayloadCliente` |
+| `list`, `detail`, `history`, `create`, `update` del cliente HTTP | `listar`, `consultar`, `consultarHistorial`, `crear`, `corregir` |
+| `clients` como nombre de la vista | `clientes` |
+| `openCustomer`, `openCustomerEditor`, `openDemoCustomer`, `newClient` | `abrirFichaCliente`, `abrirEditorCliente`, `abrirFichaClienteDemo`, `nuevoCliente` |
+| `customer-schedule.js`, `correctDemoCustomer`, `moveDemoAppointment` | `clientes.horario.js`, `corregirClienteDemo`, `moverCitaDemo` |
+| `clientSnapshot` en las citas de demo | `contactoHistorico` |
+| `data-directory-open`, `data-client`, `new-client` | `data-directorio-abrir`, `data-ficha-demo-abrir`, `nuevo-cliente` |
+

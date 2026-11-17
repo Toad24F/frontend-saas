@@ -1741,10 +1741,10 @@ html[data-theme='dark'] .sidebar .brand .brand-logo-on-light { display: none; }
   .section-heading h2 {
     font-size: 16px;
   }
-  .table-search {
+  .busqueda-tabla-clientes {
     width: 100%;
   }
-  .table-search input {
+  .busqueda-tabla-clientes input {
     width: 100%;
   }
   .app-table td {

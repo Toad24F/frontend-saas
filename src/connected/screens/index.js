@@ -8,13 +8,13 @@ import { businessDetail } from './negocio/view.js';
 import { recepcionistas } from './recepcionistas/recepcionistas.vista.js';
 import { empty } from '../../shared/ui.js';
 import { agenda } from './agenda/view.js';
-import { clients } from './clientes/view.js';
+import { clientes } from './clientes/clientes.vista.js';
 import './disponibilidad/actions.js';
 import './cuenta/actions.js';
 
 const views = {
   agenda,
-  clientes: clients,
+  clientes,
   profesionales,
   servicios,
   sucursales,
