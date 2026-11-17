@@ -25,7 +25,7 @@ test('FALA-T035–T040: cuatro retiros recuperables y consultas separadas', asyn
   });
   const cases = [
     { type: 'profesionales', name: 'Profesional QA 2', article: '[data-profesional-id]', action: '[data-accion-profesional="inhabilitar"]' },
-    { type: 'recepcionistas', name: 'Recepción Retiro QA', article: '[data-reception-entry]', action: '[data-reception-action="disable"]' },
+    { type: 'recepcionistas', name: 'Recepción Retiro QA', article: '[data-recepcionista-entrada]', action: '[data-accion-recepcionista="inhabilitar"]' },
     { type: 'servicios', name: 'Corte QA', article: '[data-servicio-entrada]', action: '[data-inhabilitar-servicio]' },
     { type: 'sucursales', name: 'Sucursal QA 2', article: '[data-sucursal-entrada]', action: '[data-inhabilitar-sucursal]' },
   ];
@@ -92,7 +92,7 @@ test('FALA-T041–T043: restaurar los cuatro deja inactivo y activar respeta cup
   await login(page, 'admin-qa-2@example.test');
   const items = [
     ['profesionales', 'Profesional QA 2', '[data-profesional-id]'],
-    ['recepcionistas', 'Recepción Retiro QA', '[data-reception-entry]'],
+    ['recepcionistas', 'Recepción Retiro QA', '[data-recepcionista-entrada]'],
     ['servicios', 'Corte QA', '[data-servicio-entrada]'],
     ['sucursales', 'Sucursal QA 2', '[data-sucursal-entrada]'],
   ];
@@ -127,7 +127,7 @@ test('FALA-T040: inhabilitados visibles en escritorio y móvil, claro y oscuro',
   await page.goto(`${origin()}/admin/recepcionistas`);
   // La prueba anterior restauró esta cuenta. Se retira de nuevo en la base
   // efímera para inspeccionar la sección con un resultado real.
-  await page.locator('[data-reception-entry]', { hasText: 'Recepción Retiro QA' }).locator('summary').click();
+  await page.locator('[data-recepcionista-entrada]', { hasText: 'Recepción Retiro QA' }).locator('summary').click();
   await page.getByRole('button', { name: 'Inhabilitar a Recepción Retiro QA' }).click();
   await page.getByRole('dialog').getByRole('button', { name: 'Inhabilitar' }).click();
   await expect(page.getByRole('dialog')).toHaveCount(0);

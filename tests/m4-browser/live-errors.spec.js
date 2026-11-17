@@ -47,7 +47,7 @@ async function fixture(page, theme = 'light') {
         zonaHoraria: 'America/Chihuahua',
         causas: [],
       };
-      const customer = {
+      const ficha = {
         id: 1,
         negocioId: 1,
         version: control.version,
@@ -65,12 +65,12 @@ async function fixture(page, theme = 'light') {
       } else if (path === '/citas/7') data = summary;
       else if (path === '/clientes')
         data = {
-          clientes: [customer],
+          clientes: [ficha],
           pagina: Number(url.searchParams.get('pagina') || 1),
           limite: 50,
           hayMas: true,
         };
-      else data = customer;
+      else data = ficha;
       await route.fulfill({ json: data });
     },
   );
@@ -168,7 +168,7 @@ test('T100/T102: corrección de ficha conserva teclado y detecta obsolescencia s
 }) => {
   const { control } = await fixture(page);
   await page.goto('/admin/clientes');
-  await page.locator('[data-directory-open="1"]:visible').click();
+  await page.locator('[data-directorio-abrir="1"]:visible').click();
   const panel = page.getByRole('dialog');
   await panel
     .getByRole('button', { name: 'Corregir ficha', exact: true })
@@ -177,7 +177,7 @@ test('T100/T102: corrección de ficha conserva teclado y detecta obsolescencia s
   await input.fill('Mi borrador');
   control.version++;
   await page.evaluate(() => window.dispatchEvent(new Event('focus')));
-  await expect(panel.locator('[data-customer-error]')).toContainText(
+  await expect(panel.locator('[data-ficha-error]')).toContainText(
     'otra sesión',
   );
   await expect(input).toHaveValue('Mi borrador');
@@ -278,7 +278,7 @@ test('T101: 401 vuelve al acceso; un fallo de red no parece directorio vacío', 
   await expect(
     page.getByText('Tu sesión expiró. Inicia sesión nuevamente.'),
   ).toBeVisible();
-  await expect(page.locator('[data-directory-open]')).toHaveCount(0);
+  await expect(page.locator('[data-directorio-abrir]')).toHaveCount(0);
   control.status = 0;
   await page.goto('/admin/clientes');
   await page.route(
@@ -311,7 +311,7 @@ for (const width of [1366, 390])
       await page.setViewportSize({ width, height: 900 });
       const { errors } = await fixture(page, theme);
       await page.goto('/admin/clientes');
-      const ficha = page.locator('[data-directory-open="1"]:visible');
+      const ficha = page.locator('[data-directorio-abrir="1"]:visible');
       await ficha.focus();
       await page.keyboard.press('Enter');
       const panel = page.getByRole('dialog');

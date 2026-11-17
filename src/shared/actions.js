@@ -1,4 +1,4 @@
-import { catalog } from './screens/catalogos/actions.js';
+import { abrirEditorCatalogo } from './screens/catalogos/catalogos.acciones.js';
 import { newBlock, editBlock } from './screens/disponibilidad/actions.js';
 import { switchTenant, newTenant } from './screens/plataforma/actions.js';
 import { isDemo, pending, api, user, loadBackendData, schedulePayload } from '../connected/backend.js';
@@ -87,11 +87,11 @@ export async function handleClick(e) {
       }
     }
     if (!isDemo && user.rol === 'admin_negocio' && state.page === 'recepcionistas') {
-      const accountAction = e.target.closest('[data-reception-action]');
-      if (accountAction) {
-        const reception = await import('../connected/screens/recepcionistas/actions.js');
+      const accionCuenta = e.target.closest('[data-accion-recepcionista]');
+      if (accionCuenta) {
+        const recepcion = await import('../connected/screens/recepcionistas/recepcionistas.acciones.js');
         // Esperar la lectura del cupo conserva el manejo de errores del clic.
-        await reception.receptionistAction(accountAction.dataset.receptionAction, Number(accountAction.dataset.receptionId));
+        await recepcion.accionRecepcionista(accionCuenta.dataset.accionRecepcionista, Number(accionCuenta.dataset.recepcionistaId));
         return;
       }
     }
@@ -153,9 +153,9 @@ export async function handleClick(e) {
     }
     const action = e.target.closest('[data-action]')?.dataset.action;
     if (!isDemo && user.rol === 'profesional' && action === 'nuevo-profesional') { toast('Tu cuenta puede editar sus servicios desde Editar profesional.'); return; }
-    if (!isDemo && (['new-appointment', 'new-client', 'copy-link', 'filter-reports', 'export-report'].includes(action) || e.target.closest('[data-slot-date], button[data-mode]'))) { toast(pending); return; }
+    if (!isDemo && (['new-appointment', 'nuevo-cliente', 'copy-link', 'filter-reports', 'export-report'].includes(action) || e.target.closest('[data-slot-date], button[data-mode]'))) { toast(pending); return; }
     const actionMap = {
-      'new-receptionist': async () => (await import('../connected/screens/recepcionistas/actions.js')).newReceptionist(),
+      'nueva-recepcionista': async () => (await import('../connected/screens/recepcionistas/recepcionistas.acciones.js')).nuevaRecepcionista(),
       'change-password': async () => (await import('../connected/screens/cuenta/actions.js')).changePassword(),
       'logout-account': async () => (await import('../connected/screens/cuenta/actions.js')).closeAccountSession(),
       'refresh-license': async () => (await import('../connected/screens/cuenta/view.js')).refreshOwnLicense(),
@@ -163,10 +163,10 @@ export async function handleClick(e) {
       'retry-business-detail': async () => (await import('../connected/screens/negocio/view.js')).refreshBusinessDetail(),
       'new-appointment': async () => (await import('./screens/agenda/actions.js')).manualAppointment(),
       'go-agenda': () => navigate('agenda'),
-      'new-client': async () => (await import('../demo/screens/clientes/actions.js')).newClient(),
-      'nuevo-servicio': () => catalog('services'),
-      'nueva-sucursal': () => catalog('branches'),
-      'nuevo-profesional': () => catalog('professionals'),
+      'nuevo-cliente': async () => (await import('../demo/screens/clientes/clientes.acciones.js')).nuevoCliente(),
+      'nuevo-servicio': () => abrirEditorCatalogo('services'),
+      'nueva-sucursal': () => abrirEditorCatalogo('branches'),
+      'nuevo-profesional': () => abrirEditorCatalogo('professionals'),
       'new-block': newBlock,
       'switch-tenant': switchTenant,
       'new-tenant': newTenant,
@@ -222,24 +222,24 @@ export async function handleClick(e) {
       const selector = attr.replace(/[A-Z]/g, (c) => '-' + c.toLowerCase());
       const el = e.target.closest(`[data-${selector}]`);
       if (el) {
-        await catalog(type, Number(el.dataset[attr]));
+        await abrirEditorCatalogo(type, Number(el.dataset[attr]));
         return;
       }
     }
-    const client = e.target.closest('[data-client]');
-    if (client) {
+    const ficha = e.target.closest('[data-ficha-demo-abrir]');
+    if (ficha) {
       if (isDemo) {
-        (await import('../demo/screens/clientes/actions.js')).openDemoCustomer(Number(client.dataset.client));
+        (await import('../demo/screens/clientes/clientes.acciones.js')).abrirFichaClienteDemo(Number(ficha.dataset.fichaDemoAbrir));
         return;
       }
-      const c = resource(
+      const cliente = resource(
         'clients',
-        Number(client.dataset.client),
+        Number(ficha.dataset.fichaDemoAbrir),
         state.tenantId,
       );
       modal(
-        esc(c.name),
-        `<div class="dialog-body"><p class="mb-4">${icon('message')} ${esc(c.phone)} · Historial de citas</p>${appointmentTable(list('appointments', state.tenantId).filter((a) => a.clientId === c.id))}</div>`,
+        esc(cliente.name),
+        `<div class="dialog-body"><p class="mb-4">${icon('message')} ${esc(cliente.phone)} · Historial de citas</p>${appointmentTable(list('appointments', state.tenantId).filter((a) => a.clientId === cliente.id))}</div>`,
         true,
       );
       return;
@@ -329,10 +329,10 @@ export async function handleClick(e) {
   }
 }
 document.addEventListener('input', (e) => {
-  if (e.target.id === 'directory-search') {
+  if (e.target.id === 'busqueda-directorio-demo') {
     state.search = e.target.value;
     render();
-    document.querySelector('#directory-search').focus();
+    document.querySelector('#busqueda-directorio-demo').focus();
   }
 });
 document.addEventListener('change', (e) => {

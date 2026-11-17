@@ -1,7 +1,7 @@
 # Reglas y plan de traducción de la nomenclatura del frontend
 
 Fecha de definición: 2026-11-16  
-Estado: implementación por conjuntos; glosario, Sucursales, Servicios y Profesionales terminados
+Estado: implementación por conjuntos; glosario, Sucursales, Servicios, Profesionales, Recepcionistas, Clientes y Catálogos compartidos terminados
 
 ## Objetivo
 
@@ -196,26 +196,32 @@ Resultado: conjunto cerrado el 2026-11-17 en `docs/traduccion-nomenclaturas/resu
 
 ### 4. Recepcionistas
 
-- [ ] Renombrar juntos `connected/screens/recepcionistas/view.js`, `actions.js`, `errors.js` y `style.css`.
-- [ ] Actualizar `recepcionistas-errores.test.js` y pruebas de navegador relacionadas.
-- [ ] Verificar formularios, errores, cupos, estados y permisos.
+- [x] Renombrar juntos `connected/screens/recepcionistas/view.js`, `actions.js`, `errors.js` y `style.css`.
+- [x] Actualizar `recepcionistas-errores.test.js` y pruebas de navegador relacionadas.
+- [x] Verificar formularios, errores, cupos, estados y permisos.
+
+Resultado: conjunto cerrado el 2026-11-17 en `docs/traduccion-nomenclaturas/resultado-recepcionistas-2026-11-17.md`.
 
 ### 5. Clientes
 
-- [ ] Renombrar juntos `shared/screens/clientes/style.css`, `connected/screens/clientes/view.js` y `panels.js`.
-- [ ] Conservar `connected/modules/clientes/client.js` con el término técnico `client`, adaptando el nombre compuesto acordado.
-- [ ] Renombrar juntos `demo/screens/clientes/view.js`, `actions.js` y `style.css`.
-- [ ] Revisar `demo/customer-schedule.js` y traducirlo de acuerdo con el glosario.
-- [ ] Actualizar `m4-clientes-horario.test.js`, sus pruebas de navegador y fixtures relacionados.
-- [ ] Verificar que las propiedades provenientes del backend permanezcan intactas.
+- [x] Renombrar juntos `shared/screens/clientes/style.css`, `connected/screens/clientes/view.js` y `panels.js`.
+- [x] Conservar `connected/modules/clientes/client.js` con el término técnico `client`, adaptando el nombre compuesto acordado.
+- [x] Renombrar juntos `demo/screens/clientes/view.js`, `actions.js` y `style.css`.
+- [x] Revisar `demo/customer-schedule.js` y traducirlo de acuerdo con el glosario.
+- [x] Actualizar `m4-clientes-horario.test.js`, sus pruebas de navegador y fixtures relacionados.
+- [x] Verificar que las propiedades provenientes del backend permanezcan intactas.
+
+Resultado: conjunto cerrado el 2026-11-17 en [Resultado de traducción de Clientes](resultado-clientes-2026-11-17.md).
 
 ### 6. Catálogos compartidos
 
-- [ ] Renombrar juntos `shared/screens/catalog-view.js`, `catalog-header.js`, `catalog-pagination.js` y `catalogos/actions.js`.
-- [ ] Renombrar `shared/screens/local-pagination.js` junto con todas sus pruebas y consumidores.
-- [ ] Revisar juntos `connected/modules/catalogos/detail.js`, `capacity.js` y `payload.js`; conservar `payload`.
-- [ ] Actualizar `detalle-edicion-conectado.test.js`, `local-pagination.test.js` y pruebas de navegador relacionadas.
-- [ ] Verificar que sucursales, servicios y profesionales sigan compartiendo el mismo comportamiento.
+- [x] Renombrar juntos `shared/screens/catalog-view.js`, `catalog-header.js`, `catalog-pagination.js` y `catalogos/actions.js`.
+- [x] Renombrar `shared/screens/local-pagination.js` junto con todas sus pruebas y consumidores.
+- [x] Revisar juntos `connected/modules/catalogos/detail.js`, `capacity.js` y `payload.js`; conservar `payload`.
+- [x] Actualizar `detalle-edicion-conectado.test.js`, `local-pagination.test.js` y pruebas de navegador relacionadas.
+- [x] Verificar que sucursales, servicios y profesionales sigan compartiendo el mismo comportamiento.
+
+Resultado: conjunto cerrado el 2026-11-17 en [Catálogos compartidos](resultado-catalogos-compartidos-2026-11-17.md).
 
 ### 7. Disponibilidad — REALIZAR CON CUIDADO
 

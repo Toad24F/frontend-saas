@@ -24,7 +24,7 @@ import {
 } from './data.js';
 import { escape, avatar, pageHead, empty } from './ui.js';
 import { aplicarFiltrosProfesionales, restablecerFiltrosProfesionales, cambiarVistaProfesionales } from './screens/profesionales/profesionales.vista.js';
-import { applyReceptionFilters, resetReceptionFilters, setReceptionView } from '../connected/screens/recepcionistas/view.js';
+import { aplicarFiltrosRecepcionistas, restablecerFiltrosRecepcionistas, cambiarVistaRecepcionistas } from '../connected/screens/recepcionistas/recepcionistas.vista.js';
 import { aplicarFiltrosServicios, restablecerFiltrosServicios, cambiarVistaServicios } from './screens/servicios/servicios.vista.js';
 import { aplicarFiltrosSucursales, restablecerFiltrosSucursales, cambiarVistaSucursales } from './screens/sucursales/sucursales.vista.js';
 import { setAvailabilityTab } from './screens/disponibilidad/view.js';
@@ -82,9 +82,9 @@ export const state = {
 };
 window.addEventListener('agenda-layout-change', () => { if (state.page === 'agenda') renderAgendaPreserving(render); });
 matchMedia('(max-width: 767px)').addEventListener('change', ({ matches }) => {
-  document.querySelectorAll('.profesionales-espacio .profesionales-resultados[data-desktop-view]').forEach((resultados) => {
+  document.querySelectorAll('.profesionales-espacio .profesionales-resultados[data-vista-escritorio]').forEach((resultados) => {
     resultados.classList.remove('profesionales-vista--lista', 'profesionales-vista--tarjetas');
-    resultados.classList.add(`profesionales-vista--${matches ? 'tarjetas' : resultados.dataset.desktopView === 'list' ? 'lista' : 'tarjetas'}`);
+    resultados.classList.add(`profesionales-vista--${matches ? 'tarjetas' : resultados.dataset.vistaEscritorio}`);
   });
 });
 const nav = [
@@ -312,7 +312,7 @@ document.addEventListener('toggle', (event) => {
   menu.classList.toggle('is-upward', trigger.getBoundingClientRect().bottom + panel.offsetHeight + 6 > bottomLimit);
 }, true);
 document.addEventListener('click', (event) => {
-  if (!event.target.closest('.profesional-mas') || event.target.closest('[data-accion-profesional], [data-reception-action], [data-alternar-servicio], [data-inhabilitar-servicio], [data-alternar-sucursal], [data-inhabilitar-sucursal]')) closeProfessionalMenus();
+  if (!event.target.closest('.profesional-mas') || event.target.closest('[data-accion-profesional], [data-accion-recepcionista], [data-alternar-servicio], [data-inhabilitar-servicio], [data-alternar-sucursal], [data-inhabilitar-sucursal]')) closeProfessionalMenus();
 }, true);
 document.addEventListener('click', async (e) => {
   const accountTrigger = e.target.closest('.account-menu-trigger');
@@ -345,16 +345,16 @@ document.addEventListener('click', async (e) => {
   if (availabilityTab) { setAvailabilityTab(availabilityTab.dataset.availabilityTab); return; }
   const vistaProfesionales = e.target.closest('[data-vista-profesionales]');
   if (vistaProfesionales) { cambiarVistaProfesionales(vistaProfesionales.dataset.vistaProfesionales); return; }
-  if (e.target.closest('[data-profesional-reset]')) { restablecerFiltrosProfesionales(); return; }
-  const receptionView = e.target.closest('[data-reception-view]');
-  if (receptionView) { setReceptionView(receptionView.dataset.receptionView); return; }
-  if (e.target.closest('[data-reception-reset]')) { resetReceptionFilters(); return; }
+  if (e.target.closest('[data-profesional-limpiar]')) { restablecerFiltrosProfesionales(); return; }
+  const vistaRecepcionistas = e.target.closest('[data-vista-recepcionistas]');
+  if (vistaRecepcionistas) { cambiarVistaRecepcionistas(vistaRecepcionistas.dataset.vistaRecepcionistas); return; }
+  if (e.target.closest('[data-recepcionista-limpiar]')) { restablecerFiltrosRecepcionistas(); return; }
   const vistaServicios = e.target.closest('[data-vista-servicios]');
   if (vistaServicios) { cambiarVistaServicios(vistaServicios.dataset.vistaServicios); return; }
-  if (e.target.closest('[data-servicio-reset]')) { restablecerFiltrosServicios(); return; }
+  if (e.target.closest('[data-servicio-limpiar]')) { restablecerFiltrosServicios(); return; }
   const vistaSucursales = e.target.closest('[data-vista-sucursales]');
   if (vistaSucursales) { cambiarVistaSucursales(vistaSucursales.dataset.vistaSucursales); return; }
-  if (e.target.closest('[data-sucursal-reset]')) { restablecerFiltrosSucursales(); return; }
+  if (e.target.closest('[data-sucursal-limpiar]')) { restablecerFiltrosSucursales(); return; }
   const business = e.target.closest('[data-business-detail]');
   if (business && !isDemo) {
     navigate('negocio', Number(business.dataset.businessDetail));
@@ -427,7 +427,7 @@ document.addEventListener('click', async (e) => {
 document.addEventListener('change', (e) => {
   if (e.target.closest('#branch-assignments-form')) { updateAssignmentDraft(e.target.form); return; }
   if (e.target.dataset.filtroProfesionales) { aplicarFiltrosProfesionales(); return; }
-  if (e.target.dataset.receptionFilter) { applyReceptionFilters(); return; }
+  if (e.target.dataset.filtroRecepcionistas) { aplicarFiltrosRecepcionistas(); return; }
   if (e.target.dataset.filtroServicios) { aplicarFiltrosServicios(); return; }
   if (e.target.dataset.filtroSucursales) { aplicarFiltrosSucursales(); return; }
   if (e.target.dataset.filter) {
@@ -438,7 +438,7 @@ document.addEventListener('change', (e) => {
 });
 document.addEventListener('input', (e) => {
   if (e.target.id === 'busqueda-profesionales') { aplicarFiltrosProfesionales(); return; }
-  if (e.target.id === 'reception-search') { applyReceptionFilters(); return; }
+  if (e.target.id === 'busqueda-recepcionistas') { aplicarFiltrosRecepcionistas(); return; }
   if (e.target.id === 'busqueda-servicios') { aplicarFiltrosServicios(); return; }
   if (e.target.id === 'busqueda-sucursales') { aplicarFiltrosSucursales(); return; }
   if (e.target.id === 'agenda-search') {

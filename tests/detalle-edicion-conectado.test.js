@@ -1,38 +1,38 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { loadEditableResource } from '../src/connected/modules/catalogos/detail.js';
+import { consultarRegistroEditable } from '../src/connected/modules/catalogos/catalogos.detalle.js';
 
 test('edición de catálogos abre con la ficha individual reciente', async () => {
-  const calls = [];
-  const responses = {
+  const llamadas = [];
+  const respuestas = {
     '/servicios/7': { nombre: 'Consulta nueva', descripcion: null, duracionMinutos: 30, costo: '250.00', activo: false, creadorPersonalId: 3 },
     '/sucursales/8': { nombre: 'Norte', direccion: 'Calle nueva', telefono: '6141234567', zonaHoraria: 'America/Chihuahua', urlGoogleMaps: null, notasLlegada: 'Planta baja', activo: true },
   };
-  const request = async (path) => { calls.push(path); return responses[path]; };
-  const service = await loadEditableResource('services', { id: 7, name: 'Nombre viejo', color: 'blue' }, request);
-  const branch = await loadEditableResource('branches', { id: 8, name: 'Nombre viejo', color: 'orange' }, request);
-  assert.deepEqual(calls, ['/servicios/7', '/sucursales/8']);
-  assert.equal(service.name, 'Consulta nueva');
-  assert.equal(service.price, 250);
-  assert.equal(service.color, 'blue');
-  assert.equal(branch.name, 'Norte');
-  assert.equal(branch.notes, 'Planta baja');
-  assert.equal(branch.color, 'orange');
+  const solicitar = async (ruta) => { llamadas.push(ruta); return respuestas[ruta]; };
+  const servicio = await consultarRegistroEditable('services', { id: 7, name: 'Nombre viejo', color: 'blue' }, solicitar);
+  const sucursal = await consultarRegistroEditable('branches', { id: 8, name: 'Nombre viejo', color: 'orange' }, solicitar);
+  assert.deepEqual(llamadas, ['/servicios/7', '/sucursales/8']);
+  assert.equal(servicio.name, 'Consulta nueva');
+  assert.equal(servicio.price, 250);
+  assert.equal(servicio.color, 'blue');
+  assert.equal(sucursal.name, 'Norte');
+  assert.equal(sucursal.notes, 'Planta baja');
+  assert.equal(sucursal.color, 'orange');
 });
 
 test('edición de profesional refresca solo el perfil', async () => {
-  const calls = [];
-  const responses = {
+  const llamadas = [];
+  const respuestas = {
     '/profesionales/9': { nombre: 'María actual', correo: 'maria@example.com', especialidad: 'Medicina', activo: true },
   };
-  const person = await loadEditableResource('professionals', { id: 9, name: 'María anterior', branchIds: [2], serviceIds: [10] }, async (path) => { calls.push(path); return responses[path]; });
-  assert.deepEqual(calls, ['/profesionales/9']);
-  assert.equal(person.name, 'María actual');
-  assert.deepEqual(person.branchIds, [2]);
-  assert.deepEqual(person.serviceIds, [10]);
+  const persona = await consultarRegistroEditable('professionals', { id: 9, name: 'María anterior', branchIds: [2], serviceIds: [10] }, async (ruta) => { llamadas.push(ruta); return respuestas[ruta]; });
+  assert.deepEqual(llamadas, ['/profesionales/9']);
+  assert.equal(persona.name, 'María actual');
+  assert.deepEqual(persona.branchIds, [2]);
+  assert.deepEqual(persona.serviceIds, [10]);
 });
 
 test('la edición rechaza IDs inválidos y propaga una ficha eliminada', async () => {
-  await assert.rejects(loadEditableResource('services', { id: 0 }), /no válido/);
-  await assert.rejects(loadEditableResource('services', { id: 3 }, async () => { throw new Error('Servicio no disponible.'); }), /no disponible/);
+  await assert.rejects(consultarRegistroEditable('services', { id: 0 }), /no válido/);
+  await assert.rejects(consultarRegistroEditable('services', { id: 3 }, async () => { throw new Error('Servicio no disponible.'); }), /no disponible/);
 });

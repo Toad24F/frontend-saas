@@ -1,5 +1,7 @@
 # Resultado de traducción — Servicios
 
+La actualización posterior de filtros, vista y paginación compartida se documenta en [Catálogos compartidos](resultado-catalogos-compartidos-2026-11-17.md).
+
 Fecha de cierre: 2026-11-17  
 Estado: terminado
 

@@ -1,9 +1,9 @@
-.table-search {
+.busqueda-tabla-clientes {
   border: 1px solid var(--border);
   border-radius: 6px;
   padding: 10px 12px;
 }
-.table-search input {
+.busqueda-tabla-clientes input {
   width: 210px;
   max-width: 100%;
   font-size: 12px;

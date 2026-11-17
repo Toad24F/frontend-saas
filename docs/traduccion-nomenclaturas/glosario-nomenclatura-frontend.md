@@ -197,3 +197,30 @@ Antes de agregar un nombre:
 
 Este glosario se aplica al código nuevo desde su fecha de cierre. La migración del código existente debe seguir las unidades y verificaciones de `docs/traduccion-nomenclaturas/plan-traduccion-nomenclatura-frontend.md`.
 
+## Equivalencias de Clientes
+
+| Nombre anterior | Nombre adoptado |
+| --- | --- |
+| `clientes/view.js`, `clientes/actions.js`, `clientes/panels.js`, `clientes/style.css` | `clientes.vista.js`, `clientes.acciones.js`, `clientes.paneles.js`, `clientes.estilos.css` |
+| `clientes/client.js`, `createCustomerClient`, `customerPayload` | `clientes.client.js`, `crearClientesClient`, `crearPayloadCliente` |
+| `list`, `detail`, `history`, `create`, `update` del cliente HTTP | `listar`, `consultar`, `consultarHistorial`, `crear`, `corregir` |
+| `clients` como nombre de la vista | `clientes` |
+| `openCustomer`, `openCustomerEditor`, `openDemoCustomer`, `newClient` | `abrirFichaCliente`, `abrirEditorCliente`, `abrirFichaClienteDemo`, `nuevoCliente` |
+| `customer-schedule.js`, `correctDemoCustomer`, `moveDemoAppointment` | `clientes.horario.js`, `corregirClienteDemo`, `moverCitaDemo` |
+| `clientSnapshot` en las citas de demo | `contactoHistorico` |
+| `data-directory-open`, `data-client`, `new-client` | `data-directorio-abrir`, `data-ficha-demo-abrir`, `nuevo-cliente` |
+
+## Equivalencias de Catálogos compartidos
+
+| Nombre anterior | Nombre adoptado |
+| --- | --- |
+| `catalog-view.js`, `catalog-header.js`, `catalog-pagination.js`, `catalogos/actions.js` | `catalogos.vista.js`, `catalogos.encabezado.js`, `catalogos.paginacion.js`, `catalogos.acciones.js` |
+| `local-pagination.js`, `localPage`, `paginationHtml` | `paginacion.local.js`, `paginarLocalmente`, `renderPaginacionLocal` |
+| `catalogos/detail.js`, `catalogos/capacity.js`, `catalogos/payload.js` | `catalogos.detalle.js`, `catalogos.cupo.js`, `catalogos.payload.js` |
+| `catalog`, `save`, `catalogPayload` | `abrirEditorCatalogo`, `guardarRegistroCatalogo`, `crearPayloadCatalogo` |
+| `search`, `status`, `branch`, `service` de los filtros de catálogo | `busqueda`, `estado`, `sucursal`, `servicio` |
+| `all`, `active`, `inactive` de los filtros de catálogo | `todos`, `activo`, `inactivo` |
+| `list`, `cards` en la interfaz de catálogo | `lista`, `tarjetas`. En el almacenamiento se conservan `list` y `cards`. |
+| `data-desktop-view`, `data-catalog-pagination`, `data-catalog-page`, `data-page-kind` | `data-vista-escritorio`, `data-paginacion-catalogo`, `data-pagina-catalogo`, `data-tipo-catalogo` |
+| Sufijos `-results` y `-reset` de catálogos | `-resultados` y `-limpiar` |
+

@@ -8,14 +8,17 @@ const named = (id) => id === 21 ? 'Registro único' : `Registro ${id}`;
 let professionals = Array.from({ length: 21 }, (_, i) => ({ id: i + 1, nombre: named(i + 1), correo: `prof${i + 1}@example.test`, activo: i % 2 === 0 }));
 const services = Array.from({ length: 21 }, (_, i) => ({ id: i + 1, nombre: named(i + 1), activo: i % 2 === 0, duracionMinutos: 30, costo: 200, seleccionado: i === 0 }));
 const branches = Array.from({ length: 21 }, (_, i) => ({ id: i + 1, nombre: named(i + 1), activo: i % 2 === 0, direccion: 'Dirección de prueba', telefono: '6145550101', zonaHoraria: 'America/Chihuahua' }));
-const receptionists = Array.from({ length: 21 }, (_, i) => ({ id: i + 1, nombre: named(i + 1), email: `recep${i + 1}@example.test`, activo: i % 2 === 0 }));
+const recepcionistas = Array.from({ length: 21 }, (_, i) => ({ id: i + 1, nombre: named(i + 1), email: `recep${i + 1}@example.test`, activo: i % 2 === 0 }));
 const blocks = Array.from({ length: 21 }, (_, i) => ({ id: i + 1, personalId: i % 3 === 0 ? null : 1, sucursalId: i % 5 === 0 ? null : i % 2 ? 1 : 2, tipo: ['vacaciones', 'dia_festivo', 'emergencia'][i % 3], motivo: `Bloqueo ${i + 1}`, fechaInicio: `2026-11-${String(i + 1).padStart(2, '0')}`, fechaFin: i === 0 ? '2026-11-09' : `2026-11-${String(i + 1).padStart(2, '0')}`, inicioMinutos: null, finMinutos: null }));
 let requests = 0;
 const errors = [], writes = [];
 await mkdir('test-results/local-pagination', { recursive: true });
 try {
   const context = await browser.newContext({ reducedMotion: 'reduce' });
-  await context.addInitScript(() => sessionStorage.setItem('cita-session', 'qa-simulado'));
+  await context.addInitScript(() => {
+    sessionStorage.setItem('cita-session', 'qa-simulado');
+    localStorage.setItem('citalendar-professionals-view', 'cards');
+  });
   await context.route((url) => /^\/(auth|profesionales|recepcionistas|servicios|sucursales|bloqueos|disponibilidad)(\/|$)/.test(url.pathname), async (route) => {
     requests++;
     const path = new URL(route.request().url()).pathname, method = route.request().method();
@@ -31,7 +34,7 @@ try {
     else if (path === '/profesionales') data = professionals;
     else if (path === '/servicios') data = services;
     else if (path === '/sucursales') data = branches;
-    else if (path === '/recepcionistas') data = receptionists;
+    else if (path === '/recepcionistas') data = recepcionistas;
     else if (path === '/profesionales/cupo' || path === '/recepcionistas/cupo') data = { limite: 30, activos: 11, disponibles: 19 };
     else if (path === '/sucursales/cupo') data = { limiteSucursalesActivas: 30, sucursalesActivas: 11, disponibles: 19 };
     else if (path.endsWith('/sucursales')) data = [1, 2];
@@ -46,44 +49,51 @@ try {
   });
   const page = await context.newPage();
   page.on('pageerror', (error) => errors.push(error.message));
-  for (const [screen, kind] of [['profesionales', 'profesional'], ['recepcionistas', 'reception'], ['servicios', 'servicio'], ['sucursales', 'sucursal']]) {
+  for (const [screen, kind] of [['profesionales', 'profesional'], ['recepcionistas', 'recepcionista'], ['servicios', 'servicio'], ['sucursales', 'sucursal']]) {
     await page.setViewportSize({ width: 1366, height: 900 });
     await page.goto(`${origin}/admin/${screen}`);
     const esProfesionales = screen === 'profesionales';
+    const esRecepcionistas = screen === 'recepcionistas';
     const esSucursales = screen === 'sucursales';
     const esServicios = screen === 'servicios';
-    const results = page.locator(`#${kind}-results`), footer = page.locator(`[data-catalog-pagination=${kind}]`);
+    const results = page.locator(`#${kind}-resultados`), footer = page.locator(`[data-paginacion-catalogo=${kind}]`);
     await results.waitFor();
     await expect(results.locator('article')).toHaveCount(10);
+    const selectorVista = page.getByRole('group', { name: 'Tipo de vista' });
+    await expect(selectorVista.getByRole('button', { name: esProfesionales ? 'Tarjetas' : 'Lista' })).toHaveAttribute('aria-pressed', 'true');
     assert.match(await page.locator('.profesionales-resumen').innerText(), /21/);
     const initialRequests = requests;
     await footer.getByRole('button', { name: 'Siguiente', exact: true }).click();
     assert.match(await footer.innerText(), /11–20 de 21/);
-    await page.locator(esProfesionales ? '[data-vista-profesionales=cards]' : esServicios ? '[data-vista-servicios=cards]' : esSucursales ? '[data-vista-sucursales=cards]' : `[data-${kind}-view=cards]`).click();
+    await selectorVista.getByRole('button', { name: 'Lista' }).click();
+    assert.equal(await page.evaluate(() => localStorage.getItem('citalendar-catalog-view')), 'list');
+    await selectorVista.getByRole('button', { name: 'Tarjetas' }).click();
+    assert.equal(await page.evaluate(() => localStorage.getItem('citalendar-catalog-view')), 'cards');
     assert.match(await footer.innerText(), /11–20 de 21/);
     await page.setViewportSize({ width: 390, height: 900 });
+    await expect(selectorVista).toBeHidden();
     await expect(results.locator('article')).toHaveCount(10);
     assert.match(await results.getAttribute('class'), /vista--tarjetas/);
     await footer.getByRole('button', { name: 'Siguiente', exact: true }).click();
     assert.equal(await results.locator('article').count(), 1);
     assert.match(await footer.innerText(), /21–21 de 21/);
     assert.equal(requests, initialRequests);
-    await page.locator(esProfesionales ? '[data-filtro-profesionales=status]' : esServicios ? '[data-filtro-servicios=estado]' : esSucursales ? '[data-filtro-sucursales=estado]' : `[data-${kind}-filter=status]`).selectOption('inactive');
+    await page.locator(esProfesionales ? '[data-filtro-profesionales=estado]' : esRecepcionistas ? '[data-filtro-recepcionistas=estado]' : esServicios ? '[data-filtro-servicios=estado]' : esSucursales ? '[data-filtro-sucursales=estado]' : `[data-${kind}-filter=status]`).selectOption('inactivo');
     await expect(results.locator('article')).toHaveCount(10);
     assert.equal(await footer.locator('nav').count(), 0);
-    await page.locator(esProfesionales ? '[data-filtro-profesionales=status]' : esServicios ? '[data-filtro-servicios=estado]' : esSucursales ? '[data-filtro-sucursales=estado]' : `[data-${kind}-filter=status]`).selectOption('active');
+    await page.locator(esProfesionales ? '[data-filtro-profesionales=estado]' : esRecepcionistas ? '[data-filtro-recepcionistas=estado]' : esServicios ? '[data-filtro-servicios=estado]' : esSucursales ? '[data-filtro-sucursales=estado]' : `[data-${kind}-filter=status]`).selectOption('activo');
     assert.equal(await footer.locator('nav').count(), 1);
-    await page.locator(esProfesionales ? '#busqueda-profesionales' : esServicios ? '#busqueda-servicios' : esSucursales ? '#busqueda-sucursales' : `#${kind}-search`).fill('unico');
+    await page.locator(esProfesionales ? '#busqueda-profesionales' : esRecepcionistas ? '#busqueda-recepcionistas' : esServicios ? '#busqueda-servicios' : esSucursales ? '#busqueda-sucursales' : `#${kind}-search`).fill('unico');
     assert.equal(await results.locator('article').count(), 1);
     assert.equal(await footer.locator('nav').count(), 0);
-    await page.locator(esProfesionales ? '#busqueda-profesionales' : esServicios ? '#busqueda-servicios' : esSucursales ? '#busqueda-sucursales' : `#${kind}-search`).fill('sin coincidencias');
+    await page.locator(esProfesionales ? '#busqueda-profesionales' : esRecepcionistas ? '#busqueda-recepcionistas' : esServicios ? '#busqueda-servicios' : esSucursales ? '#busqueda-sucursales' : `#${kind}-search`).fill('sin coincidencias');
     assert.equal(await results.locator('article').count(), 0);
-    await page.locator(esProfesionales ? '#sin-resultados-profesionales' : esServicios ? '#sin-resultados-servicios' : esSucursales ? '#sin-resultados-sucursales' : `#${kind}-no-results`).waitFor();
-    await page.locator(esProfesionales ? '.profesionales-herramientas [data-profesional-reset]' : esServicios ? '.profesionales-herramientas [data-servicio-reset]' : esSucursales ? '.profesionales-herramientas [data-sucursal-reset]' : `.profesionales-herramientas [data-${kind}-reset]`).click();
+    await page.locator(esProfesionales ? '#sin-resultados-profesionales' : esRecepcionistas ? '#sin-resultados-recepcionistas' : esServicios ? '#sin-resultados-servicios' : esSucursales ? '#sin-resultados-sucursales' : `#${kind}-no-results`).waitFor();
+    await page.locator(esProfesionales ? '.profesionales-herramientas [data-profesional-limpiar]' : esRecepcionistas ? '.profesionales-herramientas [data-recepcionista-limpiar]' : esServicios ? '.profesionales-herramientas [data-servicio-limpiar]' : esSucursales ? '.profesionales-herramientas [data-sucursal-limpiar]' : `.profesionales-herramientas [data-${kind}-limpiar]`).click();
     await expect(results.locator('article')).toHaveCount(10);
     for (const width of [1366, 1159, 390, 320]) {
       await page.setViewportSize({ width, height: 900 });
-      if (width > 767) await page.locator(esProfesionales ? '[data-vista-profesionales=list]' : esServicios ? '[data-vista-servicios=list]' : esSucursales ? '[data-vista-sucursales=list]' : `[data-${kind}-view=list]`).click();
+      if (width > 767) await selectorVista.getByRole('button', { name: 'Lista' }).click();
       for (const theme of ['light', 'dark']) {
         await page.evaluate((theme) => { localStorage.setItem('cita-theme', theme); document.documentElement.dataset.theme = theme; }, theme);
         assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), `${screen}/${width}/${theme}`);
@@ -93,15 +103,15 @@ try {
     }
   }
   await page.goto(`${origin}/admin/profesionales`);
-  await page.locator('#profesional-results').waitFor();
-  const professionalFooter = page.locator('[data-catalog-pagination=profesional]');
+  await page.locator('#profesional-resultados').waitFor();
+  const professionalFooter = page.locator('[data-paginacion-catalogo=profesional]');
   await professionalFooter.getByRole('button', { name: 'Siguiente', exact: true }).click();
   await professionalFooter.getByRole('button', { name: 'Siguiente', exact: true }).click();
-  await page.locator('#profesional-results summary').click();
+  await page.locator('#profesional-resultados summary').click();
   await page.locator('[data-accion-profesional=inhabilitar]').click();
   await page.getByRole('dialog').getByRole('button', { name: 'Inhabilitar', exact: true }).click();
-  await page.waitForFunction(() => document.querySelector('[data-catalog-pagination=profesional]')?.textContent.includes('11–20 de 20'));
-  assert.equal(await page.locator('#profesional-results article').count(), 10);
+  await page.waitForFunction(() => document.querySelector('[data-paginacion-catalogo=profesional]')?.textContent.includes('11–20 de 20'));
+  assert.equal(await page.locator('#profesional-resultados article').count(), 10);
   await page.goto(`${origin}/admin/disponibilidad/equipo`);
   await page.getByRole('tab', { name: 'Bloqueos', exact: true }).click();
   const blockResults = page.locator('[data-block-results]');
@@ -141,8 +151,8 @@ try {
     await page.screenshot({ animations: 'disabled', fullPage: true, path: `test-results/local-pagination/${width}-${theme}-bloqueos.png` });
   }
   await page.goto(`${origin}/admin/servicios?demo=1`);
-  await page.locator('#servicio-results').waitFor();
-  assert.equal(await page.locator('[data-catalog-page]').count(), 0);
+  await page.locator('#servicio-resultados').waitFor();
+  assert.equal(await page.locator('[data-pagina-catalogo]').count(), 0);
   assert.deepEqual(errors, []);
   assert.deepEqual(writes, ['/profesionales/21/inhabilitar']);
   console.log('OK: 4 catálogos y Bloqueos, filtros antes de paginar, cambio lista/tarjetas/móvil, 10/11/21, ajuste de última página, alcance global, fechas, cero consultas por paginación. API simulada.');

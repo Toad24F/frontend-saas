@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { api, login, restoreSession, loadBackendData, catalogPayload, schedulePayload, modeUrl, availablePage, defaultPage } from '../src/connected/backend.js';
+import { api, login, restoreSession, loadBackendData, crearPayloadCatalogo, schedulePayload, modeUrl, availablePage, defaultPage } from '../src/connected/backend.js';
 import { db } from '../src/shared/data.js';
 import { validateNewPassword } from '../src/connected/modules/auth/password-policy.js';
 import { obtenerCupoSucursales } from '../src/connected/modules/sucursales/sucursales.cupo.js';
@@ -19,8 +19,8 @@ test('semana completa: conserva IDs y orden por día sin descanso incrustado; ex
 });
 
 test('catálogos solo envían los campos admitidos por el backend', () => {
-  assert.deepEqual(catalogPayload('services', { name: 'Consulta', price: 350.5, duration: 20, description: 'demo', tenantId: 9 }), { nombre: 'Consulta', descripcion: 'demo', costo: '350.5', duracionMinutos: 20 });
-  assert.deepEqual(catalogPayload('branches', { name: 'Centro', address: 'Calle 1', phone: '+52 614 1234567', timezone: 'America/Chihuahua', notes: '', maps: '' }), { nombre: 'Centro', direccion: 'Calle 1', telefono: '+52 614 1234567', zonaHoraria: 'America/Chihuahua', notasLlegada: null, urlGoogleMaps: null });
+  assert.deepEqual(crearPayloadCatalogo('services', { name: 'Consulta', price: 350.5, duration: 20, description: 'demo', tenantId: 9 }), { nombre: 'Consulta', descripcion: 'demo', costo: '350.5', duracionMinutos: 20 });
+  assert.deepEqual(crearPayloadCatalogo('branches', { name: 'Centro', address: 'Calle 1', phone: '+52 614 1234567', timezone: 'America/Chihuahua', notes: '', maps: '' }), { nombre: 'Centro', direccion: 'Calle 1', telefono: '+52 614 1234567', zonaHoraria: 'America/Chihuahua', notasLlegada: null, urlGoogleMaps: null });
   assert.equal(modeUrl('/admin/profesionales', true), '/admin/profesionales?demo=1');
   assert.equal(modeUrl('/admin/profesionales', false), '/admin/profesionales');
 });
