@@ -15,7 +15,7 @@
 - Las variables `VITE_*` quedan expuestas en el navegador. No coloques secretos, tokens ni contraseñas en el código, la demo, `.env.example` o la documentación.
 - Todo código nuevo propio del frontend debe nombrar en español archivos, carpetas, funciones, variables, selectores y pruebas, con el formato `dominio.responsabilidad.extensión`.
 - Conserva en inglés `client`, `store`, `payload`, `render`, `handler` y `handle`, además de contratos externos, APIs del navegador y nombres impuestos por dependencias.
-- Sigue las reglas y el checklist de `docs/plan-traduccion-nomenclatura-frontend.md`; no aproveches una implementación nueva para renombrar código anterior fuera de su alcance.
+- Sigue las reglas y el checklist de `docs/traduccion-nomenclaturas/plan-traduccion-nomenclatura-frontend.md`; no aproveches una implementación nueva para renombrar código anterior fuera de su alcance.
 
 ## Demo, backend e interfaz
 

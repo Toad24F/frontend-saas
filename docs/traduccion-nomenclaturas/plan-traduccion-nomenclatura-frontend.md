@@ -1,7 +1,7 @@
 # Reglas y plan de traducción de la nomenclatura del frontend
 
 Fecha de definición: 2026-11-16  
-Estado: propuesta acordada; todavía no implementada
+Estado: implementación por conjuntos; glosario, Sucursales y Servicios terminados
 
 ## Objetivo
 
@@ -152,31 +152,37 @@ No se deben mezclar refactorizaciones funcionales o visuales con una unidad de t
 
 ### 0. Glosario e inventario
 
-- [ ] Crear el glosario definitivo de entidades: cita, cliente, sucursal, profesional, servicio, horario, disponibilidad, reserva, licencia y negocio.
-- [ ] Crear el glosario de acciones: crear, consultar, cargar, actualizar, eliminar, seleccionar, abrir, cerrar y validar.
-- [ ] Registrar las excepciones técnicas en inglés: `client`, `store`, `payload`, `render`, `handler` y `handle`.
-- [ ] Inventariar contratos HTTP, rutas, roles, estados, claves persistentes y selectores externos que quedan protegidos.
-- [ ] Definir si las siglas técnicas se conservan en mayúsculas: API, HTTP, URL, ID, UTC y DOM.
+- [x] Crear el glosario definitivo de entidades: cita, cliente, sucursal, profesional, servicio, horario, disponibilidad, reserva, licencia y negocio.
+- [x] Crear el glosario de acciones: crear, consultar, cargar, actualizar, eliminar, seleccionar, abrir, cerrar y validar.
+- [x] Registrar las excepciones técnicas en inglés: `client`, `store`, `payload`, `render`, `handler` y `handle`.
+- [x] Inventariar contratos HTTP, rutas, roles, estados, claves persistentes y selectores externos que quedan protegidos.
+- [x] Definir si las siglas técnicas se conservan en mayúsculas: API, HTTP, URL, ID, UTC y DOM.
+
+Resultado: etapa cerrada el 2026-11-17 en `docs/traduccion-nomenclaturas/glosario-nomenclatura-frontend.md`. No se renombró código durante esta etapa.
 
 ### 1. Sucursales — conjunto piloto
 
 Este conjunto debe ser el primero porque es suficientemente pequeño para validar la convención completa.
 
-- [ ] Renombrar juntos `shared/screens/sucursales/view.js`, `errors.js`, `timezones.js` y `style.css`.
-- [ ] Renombrar juntos `connected/screens/sucursales/view.js` y `actions.js`.
-- [ ] Revisar `connected/modules/sucursales/operations.js` y `quota.js`.
-- [ ] Traducir funciones, variables, constantes, selectores y propiedades internas del conjunto.
-- [ ] Actualizar las pruebas `sucursales-*.test.js` y sus imports.
-- [ ] Comprobar modo conectado, escritorio, móvil, tema claro y tema oscuro.
-- [ ] Confirmar la convención final antes de continuar con otros módulos.
+- [x] Renombrar juntos `shared/screens/sucursales/view.js`, `errors.js`, `timezones.js` y `style.css`.
+- [x] Renombrar juntos `connected/screens/sucursales/view.js` y `actions.js`.
+- [x] Revisar `connected/modules/sucursales/operations.js` y `quota.js`.
+- [x] Traducir funciones, variables, constantes, selectores y propiedades internas del conjunto.
+- [x] Actualizar las pruebas `sucursales-*.test.js` y sus imports.
+- [x] Comprobar modo conectado, escritorio, móvil, tema claro y tema oscuro.
+- [x] Confirmar la convención final antes de continuar con otros módulos.
+
+Resultado: piloto cerrado el 2026-11-17 en `docs/traduccion-nomenclaturas/resultado-sucursales-piloto-2026-11-17.md`.
 
 ### 2. Servicios
 
-- [ ] Renombrar juntos `shared/screens/servicios/view.js`, `errors.js` y `style.css`.
-- [ ] Renombrar juntos `connected/screens/servicios/view.js` y `actions.js`.
-- [ ] Revisar `connected/modules/servicios/operations.js`.
-- [ ] Actualizar `servicios-conectados.test.js`, `servicios-errores.test.js` y pruebas de navegador relacionadas.
-- [ ] Verificar lista, tarjetas, formularios, estados vacío/error y permisos.
+- [x] Renombrar juntos `shared/screens/servicios/view.js`, `errors.js` y `style.css`.
+- [x] Renombrar juntos `connected/screens/servicios/view.js` y `actions.js`.
+- [x] Revisar `connected/modules/servicios/operations.js`.
+- [x] Actualizar `servicios-conectados.test.js`, `servicios-errores.test.js` y pruebas de navegador relacionadas.
+- [x] Verificar lista, tarjetas, formularios, estados vacío/error y permisos.
+
+Resultado: conjunto cerrado el 2026-11-17 en `docs/traduccion-nomenclaturas/resultado-servicios-2026-11-17.md`.
 
 ### 3. Profesionales
 

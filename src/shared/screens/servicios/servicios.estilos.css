@@ -1,0 +1,46 @@
+.servicios-espacio .servicio-icono {
+  display: grid;
+  place-items: center;
+  flex: 0 0 46px;
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+}
+.servicios-espacio .servicio-icono .icon { width: 23px; height: 23px; }
+.servicios-espacio .servicios-herramientas { grid-template-columns: minmax(210px, 1fr) auto auto; }
+.servicios-espacio .servicio-detalles { column-gap: 14px; }
+.servicios-espacio .servicio-detalles strong { font-variant-numeric: tabular-nums; }
+.servicios-espacio .professional-identity p { max-width: 48ch; }
+.servicios-espacio .professional-view--list .servicio-entrada {
+  grid-template-columns: minmax(170px, 1.3fr) minmax(170px, 1fr) max-content max-content;
+}
+.servicios-espacio .professional-view--cards .servicio-entrada { min-height: 220px; }
+.servicios-espacio .professional-entry-actions .professional-availability { border: 0; }
+.servicios-espacio .professional-entry-actions .professional-availability:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+}
+.servicios-espacio .professional-status.sin-seleccionar { color: var(--muted); background: var(--surface-soft); }
+.servicios-espacio .information-note { margin-top: 20px; }
+@media (max-width: 1260px) {
+  .servicios-espacio .servicios-herramientas { grid-template-columns: minmax(180px, 1fr) auto; }
+  .servicios-espacio .servicios-herramientas .professional-filters { grid-column: 1 / -1; grid-row: 2; }
+  .servicios-espacio .servicios-herramientas .professional-view-switch { grid-column: 2; grid-row: 1; }
+}
+@media (max-width: 767px) {
+  .servicios-espacio .servicios-herramientas { grid-template-columns: minmax(0, 1fr); }
+  .servicios-espacio .servicios-herramientas .professional-filters { grid-column: 1; grid-row: auto; grid-template-columns: minmax(0, 1fr); }
+  .servicios-espacio .servicios-herramientas .professional-view-switch { grid-column: 1; grid-row: auto; }
+  .servicios-espacio .professional-view--list .servicio-entrada,
+  .servicios-espacio .professional-view--cards .servicio-entrada { grid-template-columns: minmax(0, 1fr) auto; }
+  .servicios-espacio .professional-view--cards .servicio-entrada { min-height: 0; }
+  .servicios-espacio .servicio-detalles { grid-column: 1 / -1; grid-row: 3; }
+}
+@container (max-width: 820px) {
+  .servicios-espacio .professional-view--list .servicio-entrada { grid-template-columns: minmax(0, 1fr) auto; }
+  .servicios-espacio .professional-view--list .servicio-detalles { grid-column: 1; grid-row: 2; }
+}
+@container (max-width: 500px) {
+  .servicios-espacio .professional-view--list .servicio-detalles { grid-column: 1; grid-row: 2; }
+  .servicios-espacio .professional-view--list .professional-entry-actions { grid-column: 1 / -1; grid-row: 3; }
+}

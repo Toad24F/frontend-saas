@@ -26,8 +26,8 @@ test('FALA-T035–T040: cuatro retiros recuperables y consultas separadas', asyn
   const cases = [
     { type: 'profesionales', name: 'Profesional QA 2', article: '[data-professional-id]', action: '[data-professional-action="disable"]' },
     { type: 'recepcionistas', name: 'Recepción Retiro QA', article: '[data-reception-entry]', action: '[data-reception-action="disable"]' },
-    { type: 'servicios', name: 'Corte QA', article: '[data-service-entry]', action: '[data-disable-service]' },
-    { type: 'sucursales', name: 'Sucursal QA 2', article: '[data-branch-entry]', action: '[data-disable-branch]' },
+    { type: 'servicios', name: 'Corte QA', article: '[data-servicio-entrada]', action: '[data-inhabilitar-servicio]' },
+    { type: 'sucursales', name: 'Sucursal QA 2', article: '[data-sucursal-entrada]', action: '[data-inhabilitar-sucursal]' },
   ];
   for (const item of cases) {
     await page.goto(`${origin()}/admin/${item.type}`);
@@ -93,8 +93,8 @@ test('FALA-T041–T043: restaurar los cuatro deja inactivo y activar respeta cup
   const items = [
     ['profesionales', 'Profesional QA 2', '[data-professional-id]'],
     ['recepcionistas', 'Recepción Retiro QA', '[data-reception-entry]'],
-    ['servicios', 'Corte QA', '[data-service-entry]'],
-    ['sucursales', 'Sucursal QA 2', '[data-branch-entry]'],
+    ['servicios', 'Corte QA', '[data-servicio-entrada]'],
+    ['sucursales', 'Sucursal QA 2', '[data-sucursal-entrada]'],
   ];
   for (const [type, name, selector] of items) {
     await page.goto(`${origin()}/admin/${type}`);

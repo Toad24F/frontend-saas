@@ -134,7 +134,7 @@ html[data-theme='dark'] .professional-more-menu { box-shadow: 0 14px 34px rgba(0
 .catalog-page-heading { display: grid; grid-template-columns: minmax(180px, 1fr) minmax(190px, 240px) auto; align-items: center; gap: 20px; }
 .catalog-page-heading:not(:has(.catalog-capacity)) { grid-template-columns: minmax(0, 1fr) auto; }
 .catalog-page-heading .heading-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
-.catalog-page-heading .branch-capacity { margin: 0; padding: 0; background: transparent; border: 0; border-radius: 0; }
+.catalog-page-heading .sucursales-cupo { margin: 0; padding: 0; background: transparent; border: 0; border-radius: 0; }
 .catalog-quota > div { display: flex; justify-content: space-between; gap: 12px; font-size: 12px; }
 .catalog-quota span, .catalog-quota small, .catalog-quota-error { color: var(--muted); font-size: 12px; }
 .catalog-quota progress { appearance: none; display: block; width: 100%; height: 7px; margin: 8px 0; border: 0; border-radius: 5px; overflow: hidden; background: var(--surface-soft); }

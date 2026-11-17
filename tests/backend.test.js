@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { api, login, restoreSession, loadBackendData, catalogPayload, schedulePayload, modeUrl, availablePage, defaultPage } from '../src/connected/backend.js';
 import { db } from '../src/shared/data.js';
 import { validateNewPassword } from '../src/connected/modules/auth/password-policy.js';
-import { getBranchQuota } from '../src/connected/modules/sucursales/quota.js';
+import { obtenerCupoSucursales } from '../src/connected/modules/sucursales/sucursales.cupo.js';
 
 test('semana completa: conserva IDs y orden por día sin descanso incrustado; excluye borradores vacíos', () => {
   const row = { id: 12, day: 1, branchId: 3, start: '07:00', end: '12:00', breakStart: '09:00', breakEnd: '09:30', enabled: true };
@@ -94,7 +94,7 @@ test('carga datos reales aislados del negocio, sin inventar citas, y envía auto
     assert.equal(await loadBackendData(), 7);
     assert.equal(db.tenants[0].name, 'Clínica Central');
     assert.equal(db.tenants[0].slug, 'clinica-central');
-    assert.deepEqual(getBranchQuota(), responses['/sucursales/cupo']);
+    assert.deepEqual(obtenerCupoSucursales(), responses['/sucursales/cupo']);
     assert.deepEqual(db.professionals[0].branchIds, [20]);
     assert.deepEqual(db.professionals[0].serviceIds, [10]);
     assert.equal(db.professionals[0].active, false);
