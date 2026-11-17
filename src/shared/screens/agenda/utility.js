@@ -1,5 +1,13 @@
 export const clockMinutes = (value) => Number(value.slice(0, 2)) * 60 + Number(value.slice(3, 5)) + Number(value.slice(6, 8) || 0) / 60;
 export const minuteClock = (value) => `${String(Math.floor(value / 60)).padStart(2, '0')}:${String(Math.floor(value % 60)).padStart(2, '0')}`;
+export function teamAttention(models, complete = true) {
+  if (!complete) return { error: 'No se dispone del catálogo completo del equipo para comprobar los tramos sin atención.' };
+  const values = Object.values(models || {});
+  if (!values.length) return { error: 'No hay información del equipo para comprobar la atención.' };
+  if (values.some((x) => x.busy)) return { busy: true };
+  if (values.some((x) => x.error || !x.data)) return { error: 'No se pudo comprobar la atención de todo el equipo. Usa Actualizar agenda.' };
+  return { data: { intervalos: values.flatMap((x) => x.data.intervalos), omisiones: values.flatMap((x) => x.data.omisiones) } };
+}
 export function attentionUnavailableReason(data, day, branch) {
   if (!data) return '';
   if (data.omisiones.some((x) => x.fecha === day && (branch === 'all' || String(x.sucursalId) === String(branch)))) return 'Atención incompleta en esta fecha; no se sombrea.';

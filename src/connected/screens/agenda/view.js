@@ -1,3 +1,4 @@
+import { teamAttention } from '../../../shared/screens/agenda/utility.js';
 import { resolveAgendaBranches } from '../../../shared/screens/agenda/filters.js';
 import { installQuickState } from './quick-state.js';
 import '../../../shared/screens/agenda/state-menu.css';
@@ -38,10 +39,10 @@ const columnAttention = createAgendaStore(async (query) => {
   return Object.fromEntries(query.ids.map((id, index) => [id, results[index].status === 'fulfilled' ? { data: results[index].value } : { error: 'No se pudo consultar la atención. Usa Actualizar agenda.' }]));
 });
 function columnAttentionQuery() {
-  if (state.calendarView !== 'day' || state.professional !== 'all' || user?.rol === 'profesional' || state.branch === 'none' || !store.state.data || store.state.busy) return null;
+  if (!['day', 'week'].includes(state.calendarView) || (state.calendarView === 'week' && user?.rol === 'recepcionista') || state.professional !== 'all' || user?.rol === 'profesional' || state.branch === 'none' || !store.state.data || store.state.busy) return null;
   const ids = new Set(list('professionals', state.tenantId).filter((p) => p.active !== false && (state.branch === 'all' || p.branchIds?.includes(Number(state.branch)))).map((p) => p.id));
   for (const item of store.state.data.citas) ids.add(item.personalId);
-  return { ...calendarPeriod('day', state.date), branch: state.branch, ids: [...ids].sort((a, b) => a - b) };
+  return { ...calendarPeriod(state.calendarView, state.date), branch: state.branch, ids: [...ids].sort((a, b) => a - b) };
 }
 function columnAttentionModels() {
   const query = columnAttentionQuery();
@@ -163,7 +164,8 @@ const select = (name, label, allLabel, options, value, image) => `<label class="
 function calendar(data) {
   const period = calendarPeriod(state.calendarView, state.date);
   const days = Array.from({ length: state.calendarView === 'day' ? 1 : 7 }, (_, index) => civilAdd(period.desde, index));
-  const options = { attentionByProfessional: columnAttentionModels(), professional: user.rol === 'profesional' ? String(user.id) : state.professional, professionals: list('professionals', state.tenantId), manageStates: canManageAppointments(user?.rol), attention: attention.state.key === JSON.stringify(attentionQuery()) ? attention.state.data : null, branch: state.branch, columnWidth: Math.max(160, ((document.querySelector('.agenda-calendar')?.clientWidth || window.innerWidth - 300) - 58) / 7) };
+  const team = state.calendarView === 'week' && state.professional === 'all' && user?.rol !== 'profesional' ? teamAttention(columnAttentionModels(), user?.rol !== 'recepcionista') : undefined;
+  const options = { attentionTeam: team, attentionByProfessional: columnAttentionModels(), professional: user.rol === 'profesional' ? String(user.id) : state.professional, professionals: list('professionals', state.tenantId), manageStates: canManageAppointments(user?.rol), attention: attention.state.key === JSON.stringify(attentionQuery()) ? attention.state.data : null, branch: state.branch, columnWidth: Math.max(160, ((document.querySelector('.agenda-calendar')?.clientWidth || window.innerWidth - 300) - 58) / 7) };
   const content = state.calendarView === 'month' ? renderMonth(state.date, data.citas, todayCivil(), options) : renderTimeline(days, data.citas, todayCivil(), options);
   // Incluso un periodo vacío mantiene la cuadrícula para conservar la referencia temporal de la demo.
   return `${!data.citas.length ? '<p class="m4-empty-summary" role="status">Sin citas en este periodo</p>' : ''}${content}`;
@@ -179,10 +181,11 @@ async function loadAttention(force = false) {
   if (!query) { if (attention.state.key) attention.reset(); return; }
   if (!force && attention.state.key === JSON.stringify(query)) return;
   const scope = identity;
+  const previousKey = attention.state.key;
   const previousData = attention.state.data;
   const previousError = attention.state.error;
   if (await attention.load(query)) {
-    if (!previousError && !attention.state.error && JSON.stringify(previousData) === JSON.stringify(attention.state.data)) return;
+    if (previousKey === attention.state.key && !previousError && !attention.state.error && JSON.stringify(previousData) === JSON.stringify(attention.state.data)) return;
     if (scope === identity && state.page === 'agenda') renderAgendaPreserving(render);
   }
 }
