@@ -1,0 +1,14 @@
+.recepcionistas-espacio { min-width: 0; }
+.recepcionistas-herramientas { grid-template-columns: minmax(210px, 1fr) auto auto; }
+.recepcionistas-espacio .profesional-asignacion > span { white-space: normal; }
+.recepcionistas-espacio .profesional-acciones .profesional-disponibilidad { border: 0; }
+.recepcionistas-espacio .profesionales-vista--tarjetas .profesional-acciones { gap: 8px; }
+@media (max-width: 1260px) {
+  .recepcionistas-herramientas { grid-template-columns: minmax(180px, 1fr) auto; }
+}
+@media (max-width: 767px) {
+  .recepcionistas-herramientas { grid-template-columns: minmax(0, 1fr); }
+  .recepcionistas-espacio .profesionales-filtros { display: flex; }
+  .recepcionistas-espacio .profesionales-filtros label { flex: 1; }
+  .recepcionistas-espacio .profesionales-filtros select { max-width: none; }
+}

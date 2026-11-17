@@ -63,14 +63,15 @@ try {
     await page.setViewportSize({ width, height: 900 });
     for (const theme of ['light', 'dark']) {
       await page.evaluate((theme) => { localStorage.setItem('cita-theme', theme); document.documentElement.dataset.theme = theme; }, theme);
-      for (const [screen, kind] of [['profesionales', 'profesional'], ['recepcionistas', 'reception'], ['servicios', 'service'], ['sucursales', 'branch']]) {
+      for (const [screen, kind] of [['profesionales', 'profesional'], ['recepcionistas', 'recepcionista'], ['servicios', 'service'], ['sucursales', 'branch']]) {
         await goto(screen);
         const esProfesionales = screen === 'profesionales';
+        const esRecepcionistas = screen === 'recepcionistas';
         const esSucursales = screen === 'sucursales';
         const esServicios = screen === 'servicios';
-        const clear = page.locator(esProfesionales ? '.profesionales-herramientas [data-profesional-reset]' : esServicios ? '.profesionales-herramientas [data-servicio-reset]' : esSucursales ? '.profesionales-herramientas [data-sucursal-reset]' : '.profesionales-herramientas [data-' + kind + '-reset]');
+        const clear = page.locator(esProfesionales ? '.profesionales-herramientas [data-profesional-reset]' : esRecepcionistas ? '.profesionales-herramientas [data-recepcionista-reset]' : esServicios ? '.profesionales-herramientas [data-servicio-reset]' : esSucursales ? '.profesionales-herramientas [data-sucursal-reset]' : '.profesionales-herramientas [data-' + kind + '-reset]');
         assert.equal(await clear.isDisabled(), true);
-        await page.locator(esProfesionales ? '#busqueda-profesionales' : esServicios ? '#busqueda-servicios' : esSucursales ? '#busqueda-sucursales' : '#' + kind + '-search').fill('no coincide');
+        await page.locator(esProfesionales ? '#busqueda-profesionales' : esRecepcionistas ? '#busqueda-recepcionistas' : esServicios ? '#busqueda-servicios' : esSucursales ? '#busqueda-sucursales' : '#' + kind + '-search').fill('no coincide');
         assert.equal(await clear.isEnabled(), true);
         await clear.click();
         assert.equal(await clear.isDisabled(), true);
@@ -80,12 +81,12 @@ try {
           assert.equal(await page.locator('.catalog-quota progress').evaluate((el) => getComputedStyle(el).height), '7px');
         }
         if (screen === 'recepcionistas') {
-          const caution = page.locator('.reception-status-action.action-caution');
+          const caution = page.locator('.recepcionista-accion-estado.action-caution');
           assert.equal(await caution.evaluate((el) => getComputedStyle(el).backgroundColor), theme === 'dark' ? 'rgb(73, 56, 22)' : 'rgb(255, 240, 194)');
           await caution.hover();
           await expect(caution).toHaveCSS('background-color', theme === 'dark' ? 'rgb(96, 74, 28)' : 'rgb(255, 228, 154)');
         }
-        const action = { profesionales: 'nuevo-profesional', recepcionistas: 'new-receptionist', servicios: 'nuevo-servicio', sucursales: 'nueva-sucursal' }[screen];
+        const action = { profesionales: 'nuevo-profesional', recepcionistas: 'nueva-recepcionista', servicios: 'nuevo-servicio', sucursales: 'nueva-sucursal' }[screen];
         await page.locator('[data-action="' + action + '"]').first().click();
         await page.locator('.form-drawer[open]').waitFor();
         const rect = await page.locator('.form-drawer').boundingBox();
@@ -126,7 +127,7 @@ try {
     await page.getByRole('dialog').getByRole('button', { name: 'Cancelar', exact: true }).click();
   }
   await goto('recepcionistas');
-  await page.locator('[data-action=new-receptionist]').click();
+  await page.locator('[data-action=nueva-recepcionista]').click();
   await page.locator('#f-name').fill('Borrador de prueba');
   await page.getByRole('dialog').getByRole('button', { name: 'Guardar', exact: true }).click();
   assert.equal(await page.locator('.form-drawer[open]').count(), 1);
@@ -242,5 +243,5 @@ try {
   await page.goto(`${origin}/admin/disponibilidad/negocio?demo=1`);
   await page.getByText('Esta demostración usa su intervalo configurable; no reproduce el redondeo del motor conectado.', { exact: true }).waitFor();
   assert.deepEqual(errors, []);
-  console.log('OK: catálogos, filtros, Profesionales, Servicios y Sucursales conectados/demo en escritorio/móvil y ambos temas, navegación Usuarios, cupos, menú de recepción, panel de inhabilitados/detalle/restauración, asignación bloqueada conservada, oferta y reglas. API simulada; solo 2 escrituras en memoria.');
+  console.log('OK: catálogos y filtros; Recepcionistas conectado, y Profesionales, Servicios y Sucursales conectados/demo, en escritorio/móvil y ambos temas; navegación Usuarios, cupos, menú de recepción, panel de inhabilitados/detalle/restauración, asignación bloqueada conservada, oferta y reglas. API simulada; solo 2 escrituras en memoria.');
 } finally { await browser.close(); }

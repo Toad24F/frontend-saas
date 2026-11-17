@@ -8,7 +8,7 @@ const named = (id) => id === 21 ? 'Registro único' : `Registro ${id}`;
 let professionals = Array.from({ length: 21 }, (_, i) => ({ id: i + 1, nombre: named(i + 1), correo: `prof${i + 1}@example.test`, activo: i % 2 === 0 }));
 const services = Array.from({ length: 21 }, (_, i) => ({ id: i + 1, nombre: named(i + 1), activo: i % 2 === 0, duracionMinutos: 30, costo: 200, seleccionado: i === 0 }));
 const branches = Array.from({ length: 21 }, (_, i) => ({ id: i + 1, nombre: named(i + 1), activo: i % 2 === 0, direccion: 'Dirección de prueba', telefono: '6145550101', zonaHoraria: 'America/Chihuahua' }));
-const receptionists = Array.from({ length: 21 }, (_, i) => ({ id: i + 1, nombre: named(i + 1), email: `recep${i + 1}@example.test`, activo: i % 2 === 0 }));
+const recepcionistas = Array.from({ length: 21 }, (_, i) => ({ id: i + 1, nombre: named(i + 1), email: `recep${i + 1}@example.test`, activo: i % 2 === 0 }));
 const blocks = Array.from({ length: 21 }, (_, i) => ({ id: i + 1, personalId: i % 3 === 0 ? null : 1, sucursalId: i % 5 === 0 ? null : i % 2 ? 1 : 2, tipo: ['vacaciones', 'dia_festivo', 'emergencia'][i % 3], motivo: `Bloqueo ${i + 1}`, fechaInicio: `2026-11-${String(i + 1).padStart(2, '0')}`, fechaFin: i === 0 ? '2026-11-09' : `2026-11-${String(i + 1).padStart(2, '0')}`, inicioMinutos: null, finMinutos: null }));
 let requests = 0;
 const errors = [], writes = [];
@@ -31,7 +31,7 @@ try {
     else if (path === '/profesionales') data = professionals;
     else if (path === '/servicios') data = services;
     else if (path === '/sucursales') data = branches;
-    else if (path === '/recepcionistas') data = receptionists;
+    else if (path === '/recepcionistas') data = recepcionistas;
     else if (path === '/profesionales/cupo' || path === '/recepcionistas/cupo') data = { limite: 30, activos: 11, disponibles: 19 };
     else if (path === '/sucursales/cupo') data = { limiteSucursalesActivas: 30, sucursalesActivas: 11, disponibles: 19 };
     else if (path.endsWith('/sucursales')) data = [1, 2];
@@ -46,10 +46,11 @@ try {
   });
   const page = await context.newPage();
   page.on('pageerror', (error) => errors.push(error.message));
-  for (const [screen, kind] of [['profesionales', 'profesional'], ['recepcionistas', 'reception'], ['servicios', 'servicio'], ['sucursales', 'sucursal']]) {
+  for (const [screen, kind] of [['profesionales', 'profesional'], ['recepcionistas', 'recepcionista'], ['servicios', 'servicio'], ['sucursales', 'sucursal']]) {
     await page.setViewportSize({ width: 1366, height: 900 });
     await page.goto(`${origin}/admin/${screen}`);
     const esProfesionales = screen === 'profesionales';
+    const esRecepcionistas = screen === 'recepcionistas';
     const esSucursales = screen === 'sucursales';
     const esServicios = screen === 'servicios';
     const results = page.locator(`#${kind}-results`), footer = page.locator(`[data-catalog-pagination=${kind}]`);
@@ -59,7 +60,7 @@ try {
     const initialRequests = requests;
     await footer.getByRole('button', { name: 'Siguiente', exact: true }).click();
     assert.match(await footer.innerText(), /11–20 de 21/);
-    await page.locator(esProfesionales ? '[data-vista-profesionales=cards]' : esServicios ? '[data-vista-servicios=cards]' : esSucursales ? '[data-vista-sucursales=cards]' : `[data-${kind}-view=cards]`).click();
+    await page.locator(esProfesionales ? '[data-vista-profesionales=cards]' : esRecepcionistas ? '[data-vista-recepcionistas=cards]' : esServicios ? '[data-vista-servicios=cards]' : esSucursales ? '[data-vista-sucursales=cards]' : `[data-${kind}-view=cards]`).click();
     assert.match(await footer.innerText(), /11–20 de 21/);
     await page.setViewportSize({ width: 390, height: 900 });
     await expect(results.locator('article')).toHaveCount(10);
@@ -68,22 +69,22 @@ try {
     assert.equal(await results.locator('article').count(), 1);
     assert.match(await footer.innerText(), /21–21 de 21/);
     assert.equal(requests, initialRequests);
-    await page.locator(esProfesionales ? '[data-filtro-profesionales=status]' : esServicios ? '[data-filtro-servicios=estado]' : esSucursales ? '[data-filtro-sucursales=estado]' : `[data-${kind}-filter=status]`).selectOption('inactive');
+    await page.locator(esProfesionales ? '[data-filtro-profesionales=status]' : esRecepcionistas ? '[data-filtro-recepcionistas=status]' : esServicios ? '[data-filtro-servicios=estado]' : esSucursales ? '[data-filtro-sucursales=estado]' : `[data-${kind}-filter=status]`).selectOption('inactive');
     await expect(results.locator('article')).toHaveCount(10);
     assert.equal(await footer.locator('nav').count(), 0);
-    await page.locator(esProfesionales ? '[data-filtro-profesionales=status]' : esServicios ? '[data-filtro-servicios=estado]' : esSucursales ? '[data-filtro-sucursales=estado]' : `[data-${kind}-filter=status]`).selectOption('active');
+    await page.locator(esProfesionales ? '[data-filtro-profesionales=status]' : esRecepcionistas ? '[data-filtro-recepcionistas=status]' : esServicios ? '[data-filtro-servicios=estado]' : esSucursales ? '[data-filtro-sucursales=estado]' : `[data-${kind}-filter=status]`).selectOption('active');
     assert.equal(await footer.locator('nav').count(), 1);
-    await page.locator(esProfesionales ? '#busqueda-profesionales' : esServicios ? '#busqueda-servicios' : esSucursales ? '#busqueda-sucursales' : `#${kind}-search`).fill('unico');
+    await page.locator(esProfesionales ? '#busqueda-profesionales' : esRecepcionistas ? '#busqueda-recepcionistas' : esServicios ? '#busqueda-servicios' : esSucursales ? '#busqueda-sucursales' : `#${kind}-search`).fill('unico');
     assert.equal(await results.locator('article').count(), 1);
     assert.equal(await footer.locator('nav').count(), 0);
-    await page.locator(esProfesionales ? '#busqueda-profesionales' : esServicios ? '#busqueda-servicios' : esSucursales ? '#busqueda-sucursales' : `#${kind}-search`).fill('sin coincidencias');
+    await page.locator(esProfesionales ? '#busqueda-profesionales' : esRecepcionistas ? '#busqueda-recepcionistas' : esServicios ? '#busqueda-servicios' : esSucursales ? '#busqueda-sucursales' : `#${kind}-search`).fill('sin coincidencias');
     assert.equal(await results.locator('article').count(), 0);
-    await page.locator(esProfesionales ? '#sin-resultados-profesionales' : esServicios ? '#sin-resultados-servicios' : esSucursales ? '#sin-resultados-sucursales' : `#${kind}-no-results`).waitFor();
-    await page.locator(esProfesionales ? '.profesionales-herramientas [data-profesional-reset]' : esServicios ? '.profesionales-herramientas [data-servicio-reset]' : esSucursales ? '.profesionales-herramientas [data-sucursal-reset]' : `.profesionales-herramientas [data-${kind}-reset]`).click();
+    await page.locator(esProfesionales ? '#sin-resultados-profesionales' : esRecepcionistas ? '#sin-resultados-recepcionistas' : esServicios ? '#sin-resultados-servicios' : esSucursales ? '#sin-resultados-sucursales' : `#${kind}-no-results`).waitFor();
+    await page.locator(esProfesionales ? '.profesionales-herramientas [data-profesional-reset]' : esRecepcionistas ? '.profesionales-herramientas [data-recepcionista-reset]' : esServicios ? '.profesionales-herramientas [data-servicio-reset]' : esSucursales ? '.profesionales-herramientas [data-sucursal-reset]' : `.profesionales-herramientas [data-${kind}-reset]`).click();
     await expect(results.locator('article')).toHaveCount(10);
     for (const width of [1366, 1159, 390, 320]) {
       await page.setViewportSize({ width, height: 900 });
-      if (width > 767) await page.locator(esProfesionales ? '[data-vista-profesionales=list]' : esServicios ? '[data-vista-servicios=list]' : esSucursales ? '[data-vista-sucursales=list]' : `[data-${kind}-view=list]`).click();
+      if (width > 767) await page.locator(esProfesionales ? '[data-vista-profesionales=list]' : esRecepcionistas ? '[data-vista-recepcionistas=list]' : esServicios ? '[data-vista-servicios=list]' : esSucursales ? '[data-vista-sucursales=list]' : `[data-${kind}-view=list]`).click();
       for (const theme of ['light', 'dark']) {
         await page.evaluate((theme) => { localStorage.setItem('cita-theme', theme); document.documentElement.dataset.theme = theme; }, theme);
         assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), `${screen}/${width}/${theme}`);

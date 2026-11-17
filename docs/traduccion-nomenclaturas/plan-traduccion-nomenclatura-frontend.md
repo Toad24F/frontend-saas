@@ -1,7 +1,7 @@
 # Reglas y plan de traducción de la nomenclatura del frontend
 
 Fecha de definición: 2026-11-16  
-Estado: implementación por conjuntos; glosario, Sucursales, Servicios y Profesionales terminados
+Estado: implementación por conjuntos; glosario, Sucursales, Servicios, Profesionales y Recepcionistas terminados
 
 ## Objetivo
 
@@ -196,9 +196,11 @@ Resultado: conjunto cerrado el 2026-11-17 en `docs/traduccion-nomenclaturas/resu
 
 ### 4. Recepcionistas
 
-- [ ] Renombrar juntos `connected/screens/recepcionistas/view.js`, `actions.js`, `errors.js` y `style.css`.
-- [ ] Actualizar `recepcionistas-errores.test.js` y pruebas de navegador relacionadas.
-- [ ] Verificar formularios, errores, cupos, estados y permisos.
+- [x] Renombrar juntos `connected/screens/recepcionistas/view.js`, `actions.js`, `errors.js` y `style.css`.
+- [x] Actualizar `recepcionistas-errores.test.js` y pruebas de navegador relacionadas.
+- [x] Verificar formularios, errores, cupos, estados y permisos.
+
+Resultado: conjunto cerrado el 2026-11-17 en `docs/traduccion-nomenclaturas/resultado-recepcionistas-2026-11-17.md`.
 
 ### 5. Clientes
 

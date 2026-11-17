@@ -5,7 +5,7 @@ import { availability } from './disponibilidad/view.js';
 import { platform } from '../../shared/screens/plataforma/view.js';
 import { account } from './cuenta/view.js';
 import { businessDetail } from './negocio/view.js';
-import { receptionists } from './recepcionistas/view.js';
+import { recepcionistas } from './recepcionistas/recepcionistas.vista.js';
 import { empty } from '../../shared/ui.js';
 import { agenda } from './agenda/view.js';
 import { clients } from './clientes/view.js';
@@ -22,7 +22,7 @@ const views = {
   plataforma: platform,
   cuenta: account,
   negocio: businessDetail,
-  recepcionistas: receptionists,
+  recepcionistas,
 };
 
 export function renderView(page) {

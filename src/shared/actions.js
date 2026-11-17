@@ -87,11 +87,11 @@ export async function handleClick(e) {
       }
     }
     if (!isDemo && user.rol === 'admin_negocio' && state.page === 'recepcionistas') {
-      const accountAction = e.target.closest('[data-reception-action]');
-      if (accountAction) {
-        const reception = await import('../connected/screens/recepcionistas/actions.js');
+      const accionCuenta = e.target.closest('[data-accion-recepcionista]');
+      if (accionCuenta) {
+        const recepcion = await import('../connected/screens/recepcionistas/recepcionistas.acciones.js');
         // Esperar la lectura del cupo conserva el manejo de errores del clic.
-        await reception.receptionistAction(accountAction.dataset.receptionAction, Number(accountAction.dataset.receptionId));
+        await recepcion.accionRecepcionista(accionCuenta.dataset.accionRecepcionista, Number(accionCuenta.dataset.recepcionistaId));
         return;
       }
     }
@@ -155,7 +155,7 @@ export async function handleClick(e) {
     if (!isDemo && user.rol === 'profesional' && action === 'nuevo-profesional') { toast('Tu cuenta puede editar sus servicios desde Editar profesional.'); return; }
     if (!isDemo && (['new-appointment', 'new-client', 'copy-link', 'filter-reports', 'export-report'].includes(action) || e.target.closest('[data-slot-date], button[data-mode]'))) { toast(pending); return; }
     const actionMap = {
-      'new-receptionist': async () => (await import('../connected/screens/recepcionistas/actions.js')).newReceptionist(),
+      'nueva-recepcionista': async () => (await import('../connected/screens/recepcionistas/recepcionistas.acciones.js')).nuevaRecepcionista(),
       'change-password': async () => (await import('../connected/screens/cuenta/actions.js')).changePassword(),
       'logout-account': async () => (await import('../connected/screens/cuenta/actions.js')).closeAccountSession(),
       'refresh-license': async () => (await import('../connected/screens/cuenta/view.js')).refreshOwnLicense(),
