@@ -4,7 +4,7 @@ Se corrige exclusivamente el ejecutor de pruebas; no se modifica la interfaz ni 
 
 - tests/browser/support.js exporta una fixture automática que limpia limites_intentos antes de cada caso, solo en la base efímera validada por rows. Evita que los logins correctos de otros tests consuman el límite del caso siguiente. El guard y el login reales siguen activos.
 - Los seis archivos *.spec.js importan esa fixture común para aislar el contador.
-- tests/browser/portal.spec.js selecciona fechas con los botones del calendario actual y asigna un teléfono ficticio diferente por caso. Conserva el cupo real por sucursal y las comprobaciones de reservas, respuesta perdida, teclado y vencimiento.
+- tests/browser/portal.reservas.spec.js selecciona fechas con los botones del calendario actual y asigna un teléfono ficticio diferente por caso. Conserva el cupo real por sucursal y las comprobaciones de reservas, respuesta perdida, teclado y vencimiento.
 
 Primero se ejecutó la suite completa y se observaron errores de límite de login y del selector antiguo de fecha. Se repite la suite tras ajustar el ejecutor. Los resultados definitivos, revisiones y límites se registran en el [informe de cierre](../../backend/docs/fase-5-modulo-4/resultados-tareas/m4-t116-t124.md). Las respuestas simuladas de algunos escenarios conservan ese alcance; los escritores reales se verifican también desde backend con MariaDB efímera y navegador.
 

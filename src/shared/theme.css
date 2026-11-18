@@ -35,7 +35,7 @@ html[data-theme='light'] {
 }
 .theme-toggle .icon { width: 19px; height: 19px; }
 .theme-toggle:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
-.portal-topbar .theme-toggle { margin-left: 4px; }
+.portal-demo-barra .theme-toggle { margin-left: 4px; }
 
 html[data-theme='dark'] {
   color-scheme: dark;
@@ -61,8 +61,8 @@ html[data-theme='dark'] {
   --bs-secondary-color: var(--muted);
 }
 html[data-theme='dark'] body { color: var(--ink); }
-html[data-theme='dark'] :is(.topbar, .portal-topbar) { background: #1d1e24; border-color: var(--border); }
-html[data-theme='dark'] :is(.breadcrumbs, .breadcrumbs strong, .topbar-date, .profile-button, .profile-button small, .profile-button > .icon, .page-heading p, .app-footer, .portal-footer) { color: var(--muted); }
+html[data-theme='dark'] :is(.topbar, .portal-demo-barra) { background: #1d1e24; border-color: var(--border); }
+html[data-theme='dark'] :is(.breadcrumbs, .breadcrumbs strong, .topbar-date, .profile-button, .profile-button small, .profile-button > .icon, .page-heading p, .app-footer, .portal-demo-pie) { color: var(--muted); }
 html[data-theme='dark'] :is(.icon-btn, .btn-subtle, .text-button) { color: #d2d0d3; }
 html[data-theme='dark'] .icon-btn:hover { background: #34353d; color: #fff; }
 html[data-theme='dark'] .theme-toggle { background: #2a2b32; border-color: #44454f; color: #f1cc9c; }
@@ -82,7 +82,7 @@ html[data-theme='dark'] :is(
   .stat-card, .calendario-panel, .surface, .empty-state, .professional-card,
   .service-card, .branch-card, .settings-card, .opcion-modo-agenda, .bloqueo-entrada,
   .notification-card, .message-preview, .report-card, .report-filters,
-  .booking-surface, .booking-choice, .booking-date, .booking-slot,
+  .reserva-demo-superficie, .reserva-demo-opcion, .reserva-demo-fecha, .reserva-demo-horario,
   .tenant-option, .section-card
 ) {
   background: var(--surface);
@@ -90,11 +90,11 @@ html[data-theme='dark'] :is(
   color: var(--ink);
 }
 html[data-theme='dark'] .service-tags > span { background: var(--surface-soft); color: #d6d3d5; }
-html[data-theme='dark'] :is(.stat-top, .stat-caption, .section-heading p, .subtle-text, .field-hint, .optional, .form-label, .booking-title p, .choice-content p, .booking-business p, .booking-trust p, .summary-items > div, .summary-items > div.filled) { color: var(--muted); }
+html[data-theme='dark'] :is(.stat-top, .stat-caption, .section-heading p, .subtle-text, .field-hint, .optional, .form-label, .reserva-demo-titulo p, .reserva-demo-opcion-texto p, .reserva-demo-negocio p, .reserva-demo-privacidad p, .reserva-demo-resumen-elementos > div, .reserva-demo-resumen-elementos > div.filled) { color: var(--muted); }
 html[data-theme='dark'] :is(.segmented, .mes-etiqueta, .dia-atenuado, .app-table thead th, .form-separator, .calendario-barra, .information-note, .compact-note) { background: #292a31; border-color: var(--border); color: #c5c3c7; }
 html[data-theme='dark'] .segmented button { color: #c4c1c6; }
 html[data-theme='dark'] .segmented button.selected { background: #454047; color: #fff; }
-html[data-theme='dark'] :is(.filter-select, .search-field, .busqueda-tabla-clientes, .phone-input) { background: #292a31; border-color: #484951; color: var(--ink); }
+html[data-theme='dark'] :is(.filter-select, .search-field, .busqueda-tabla-clientes, .reserva-demo-campo-telefono) { background: #292a31; border-color: #484951; color: var(--ink); }
 html[data-theme='dark'] :is(.filter-select select, .search-field input, .busqueda-tabla-clientes input) { color: var(--ink); }
 html[data-theme='dark'] :is(input, select, textarea, .form-control, .form-select) {
   background-color: #292a31;
@@ -148,19 +148,19 @@ html[data-theme='dark'] .horario-tabla .horario-franja-inactiva td:last-child {
 html[data-theme='dark'] .daily-insight { background: radial-gradient(circle at 85% 18%, #49414a, transparent 42%), radial-gradient(circle at 12% 88%, #5a3d39, transparent 46%), #2a272d; border-color: #51434a; }
 html[data-theme='dark'] .daily-insight::before { background: rgba(26, 24, 29, .52); border-color: rgba(241, 219, 209, .14); }
 html[data-theme='dark'] .daily-insight :is(h2, p) { color: var(--ink); }
-html[data-theme='dark'] .booking-layout { background: var(--canvas); }
-html[data-theme='dark'] .portal-brand { color: var(--ink); }
-html[data-theme='dark'] .booking-layout :is(h1, h2, h3, h4, .choice-content > strong, .summary-top h3, .date-picker-heading h3) { color: var(--ink); }
-html[data-theme='dark'] .booking-layout :is(.choice-meta, .booking-title .eyebrow, .slot-heading, .date-picker-heading > span) { color: var(--muted); }
-html[data-theme='dark'] .booking-business > .soft-tag { background: #343039; border-color: #514951; color: #e3d7d3; }
-html[data-theme='dark'] .booking-step > span { background: #2d2d35; border-color: #4b4b55; color: var(--ink); }
-html[data-theme='dark'] .booking-step.current > span { background: var(--accent); border-color: var(--accent); color: #fff; }
-html[data-theme='dark'] .booking-aside { background: radial-gradient(circle at 87% 14%, #46404a, transparent 42%), radial-gradient(circle at 8% 80%, #543b37, transparent 52%), #242329; }
-html[data-theme='dark'] .booking-summary.glass-effect { background: rgba(33, 32, 39, .9); border-color: var(--glass-border); }
-html[data-theme='dark'] .booking-summary.glass-effect :is(h3, p, .summary-items > div, .summary-items > div.filled, .summary-price > strong) { color: #e4e0df; }
-html[data-theme='dark'] :is(.booking-choice:hover, .booking-date:hover, .booking-slot:hover) { background: #303139; }
-html[data-theme='dark'] :is(.booking-choice.selected, .booking-date.selected, .booking-slot.selected) { background: #523729; border-color: #e08b60; color: #fff1e5; }
-html[data-theme='dark'] :is(.booking-step, .portal-topbar-caption, .portal-topbar > .text-button) { color: var(--muted); }
+html[data-theme='dark'] .reserva-demo { background: var(--canvas); }
+html[data-theme='dark'] .portal-demo-marca { color: var(--ink); }
+html[data-theme='dark'] .reserva-demo :is(h1, h2, h3, h4, .reserva-demo-opcion-texto > strong, .reserva-demo-resumen-encabezado h3, .reserva-demo-encabezado-fecha h3) { color: var(--ink); }
+html[data-theme='dark'] .reserva-demo :is(.reserva-demo-opcion-datos, .reserva-demo-titulo .eyebrow, .reserva-demo-encabezado-horarios, .reserva-demo-encabezado-fecha > span) { color: var(--muted); }
+html[data-theme='dark'] .reserva-demo-negocio > .soft-tag { background: #343039; border-color: #514951; color: #e3d7d3; }
+html[data-theme='dark'] .reserva-demo-paso > span { background: #2d2d35; border-color: #4b4b55; color: var(--ink); }
+html[data-theme='dark'] .reserva-demo-paso.current > span { background: var(--accent); border-color: var(--accent); color: #fff; }
+html[data-theme='dark'] .reserva-demo-lateral { background: radial-gradient(circle at 87% 14%, #46404a, transparent 42%), radial-gradient(circle at 8% 80%, #543b37, transparent 52%), #242329; }
+html[data-theme='dark'] .reserva-demo-resumen.glass-effect { background: rgba(33, 32, 39, .9); border-color: var(--glass-border); }
+html[data-theme='dark'] .reserva-demo-resumen.glass-effect :is(h3, p, .reserva-demo-resumen-elementos > div, .reserva-demo-resumen-elementos > div.filled, .reserva-demo-resumen-precio > strong) { color: #e4e0df; }
+html[data-theme='dark'] :is(.reserva-demo-opcion:hover, .reserva-demo-fecha:hover, .reserva-demo-horario:hover) { background: #303139; }
+html[data-theme='dark'] :is(.reserva-demo-opcion.selected, .reserva-demo-fecha.selected, .reserva-demo-horario.selected) { background: #523729; border-color: #e08b60; color: #fff1e5; }
+html[data-theme='dark'] :is(.reserva-demo-paso, .portal-demo-subtitulo, .portal-demo-barra > .text-button) { color: var(--muted); }
 
 html[data-theme='dark'] .app-dialog.glass-effect { background: var(--dialog-glass); border-color: var(--glass-border); color: var(--ink); text-shadow: none; }
 html[data-theme='dark'] .app-dialog :is(.eyebrow, .form-label, .field-hint, .optional, .form-separator > span, .detail-list small, .detail-list strong, .app-table td, .app-table td strong, .app-table td small, .app-table thead th) { color: #d1cdd1; }
@@ -174,44 +174,44 @@ html[data-theme='dark'] .app-toast.glass-effect { background: var(--glass-surfac
   .legend > span, .mes-fecha, .mes-etiqueta, .columna-horas > span) {
   color: var(--muted);
 }
-.booking-layout :is(.portal-topbar-caption, .portal-topbar > .text-button,
-  .booking-business p, .booking-title p, .choice-content > p,
-  .choice-content > small, .choice-meta, .booking-summary > p,
-  .summary-items > div, .booking-trust p, .privacy-note, .portal-footer) {
+.reserva-demo :is(.portal-demo-subtitulo, .portal-demo-barra > .text-button,
+  .reserva-demo-negocio p, .reserva-demo-titulo p, .reserva-demo-opcion-texto > p,
+  .reserva-demo-opcion-texto > small, .reserva-demo-opcion-datos, .reserva-demo-resumen > p,
+  .reserva-demo-resumen-elementos > div, .reserva-demo-privacidad p, .reserva-demo-nota-privacidad, .portal-demo-pie) {
   color: var(--muted);
 }
 .main-layout :is(.stat-card, .calendario-panel, .surface, .empty-state,
   .professional-card, .service-card, .branch-card, .settings-card,
   .opcion-modo-agenda, .bloqueo-entrada, .notification-card, .message-preview,
   .report-card, .report-filters, .section-card),
-.booking-layout :is(.booking-surface, .booking-choice, .booking-date, .booking-slot) {
+.reserva-demo :is(.reserva-demo-superficie, .reserva-demo-opcion, .reserva-demo-fecha, .reserva-demo-horario) {
   background-color: var(--surface);
   border-color: var(--border);
   color: var(--ink);
 }
 .main-layout :is(.segmented, .mes-etiqueta, .calendario-barra),
-.booking-layout .phone-input > span {
+.reserva-demo .reserva-demo-campo-telefono > span {
   background-color: var(--surface-soft);
   border-color: var(--border);
 }
 .main-layout :is(.icon-btn, .btn-subtle, .text-button, .filter-select select,
   .search-field input, .busqueda-tabla-clientes input),
-.booking-layout :is(.text-button, .booking-date, .booking-slot) {
+.reserva-demo :is(.text-button, .reserva-demo-fecha, .reserva-demo-horario) {
   color: var(--ink);
 }
 .main-layout :is(.stat-caption, .legend > span, .timezone, .agenda-nota),
-.booking-layout :is(.choice-content > small, .choice-meta, .privacy-note,
-  .summary-items > div, .portal-footer) {
+.reserva-demo :is(.reserva-demo-opcion-texto > small, .reserva-demo-opcion-datos, .reserva-demo-nota-privacidad,
+  .reserva-demo-resumen-elementos > div, .portal-demo-pie) {
   font-size: 12px;
 }
 .main-layout .topbar,
-.booking-layout .portal-topbar {
+.reserva-demo .portal-demo-barra {
   background-color: var(--surface);
   border-color: var(--border);
 }
-.booking-layout { background-color: var(--canvas); }
+.reserva-demo { background-color: var(--canvas); }
 .main-layout .stat-card { box-shadow: 0 5px 20px rgba(23, 43, 29, 0.04); }
-.booking-summary.glass-effect {
+.reserva-demo-resumen.glass-effect {
   background: var(--glass-surface);
   border-color: var(--glass-border);
   box-shadow: var(--glass-shadow);
@@ -253,18 +253,18 @@ html[data-theme='dark'] .app-toast.glass-effect { background: var(--glass-surfac
 .sidebar .nav-item.active > .icon { color: #fff; }
 .btn-primary { color: #fff; }
 .btn-primary:hover, .btn-primary:focus-visible { color: #fff; }
-.booking-step.current { color: var(--accent); }
-.booking-step:not(.current) { color: var(--muted); }
-.booking-step:not(.current) > span { color: var(--muted); }
-.booking-layout :is(.booking-title .eyebrow, .booking-business > .soft-tag,
-  .date-picker-heading > span, .slot-heading) { color: var(--muted); }
-.booking-title .eyebrow { font-size: 11px; }
-.booking-summary.glass-effect > p,
-.booking-summary.glass-effect .summary-items > div,
-.booking-summary.glass-effect .summary-items > div.filled { color: var(--muted); }
-.booking-layout .booking-trust p { font-size: 12px; }
-.booking-step.current > span,
-.selected > .choice-radio { color: #fff; }
+.reserva-demo-paso.current { color: var(--accent); }
+.reserva-demo-paso:not(.current) { color: var(--muted); }
+.reserva-demo-paso:not(.current) > span { color: var(--muted); }
+.reserva-demo :is(.reserva-demo-titulo .eyebrow, .reserva-demo-negocio > .soft-tag,
+  .reserva-demo-encabezado-fecha > span, .reserva-demo-encabezado-horarios) { color: var(--muted); }
+.reserva-demo-titulo .eyebrow { font-size: 11px; }
+.reserva-demo-resumen.glass-effect > p,
+.reserva-demo-resumen.glass-effect .reserva-demo-resumen-elementos > div,
+.reserva-demo-resumen.glass-effect .reserva-demo-resumen-elementos > div.filled { color: var(--muted); }
+.reserva-demo .reserva-demo-privacidad p { font-size: 12px; }
+.reserva-demo-paso.current > span,
+.selected > .reserva-demo-opcion-marca { color: #fff; }
 
 html[data-theme='dark'] .glass-effect { color: var(--ink); }
 html[data-theme='dark'] .workspace-identity.glass-effect {
@@ -337,16 +337,16 @@ html[data-theme='light'] .sidebar .portal-icon { color: var(--accent); }
 
 /* Target legacy fixed colors without changing layout or dark-mode rules. */
 html[data-theme='light'] body { color: var(--ink); }
-html[data-theme='light'] .booking-layout { background: var(--canvas); }
+html[data-theme='light'] .reserva-demo { background: var(--canvas); }
 html[data-theme='light'] :is(.page-heading h1, .section-heading h2,
-  .booking-title h2, .choice-content > strong, .summary-top h3,
-  .summary-price > strong, .detail-list strong, .app-table td strong) { color: var(--ink); }
+  .reserva-demo-titulo h2, .reserva-demo-opcion-texto > strong, .reserva-demo-resumen-encabezado h3,
+  .reserva-demo-resumen-precio > strong, .detail-list strong, .app-table td strong) { color: var(--ink); }
 html[data-theme='light'] :is(.section-heading p, .subtle-text, .field-hint,
   .optional, .form-label, .eyebrow, .footer-logo, .bar-column,
   .app-table td small, .busqueda-tabla-clientes, .search-field, .filter-select > .icon,
   .profile-button small, .profile-button > .icon, .encabezado-dia,
-  .encabezado-hora, .dia-sin-atencion, .date-picker-heading > span) { color: var(--muted); }
-html[data-theme='light'] :is(.stat-number, .app-table, .summary-price,
+  .encabezado-hora, .dia-sin-atencion, .reserva-demo-encabezado-fecha > span) { color: var(--muted); }
+html[data-theme='light'] :is(.stat-number, .app-table, .reserva-demo-resumen-precio,
   .calendario-evento, .mes-evento) { font-variant-numeric: tabular-nums; }
 html[data-theme='light'] :is(.stat-card, .calendario-panel, .surface) { box-shadow: var(--surface-shadow); }
 html[data-theme='light'] :is(.btn-light, .btn-hoy, .theme-toggle) {
@@ -367,7 +367,7 @@ html[data-theme='light'] .segmented button.selected {
   box-shadow: 0 1px 4px rgba(37, 42, 46, 0.1);
 }
 html[data-theme='light'] .calendario-barra { background: var(--surface); }
-html[data-theme='light'] :is(.filter-select, .busqueda-tabla-clientes, .phone-input) {
+html[data-theme='light'] :is(.filter-select, .busqueda-tabla-clientes, .reserva-demo-campo-telefono) {
   background: var(--surface);
   border-color: var(--border);
   color: var(--ink);
@@ -381,7 +381,7 @@ html[data-theme='light'] :is(input, select, textarea, .form-control, .form-selec
   border-color: var(--border-strong);
 }
 html[data-theme='light'] :is(input, textarea)::placeholder { color: var(--muted); opacity: 1; }
-html[data-theme='light'] :is(.form-control, .form-select, .phone-input) { background-color: var(--surface); }
+html[data-theme='light'] :is(.form-control, .form-select, .reserva-demo-campo-telefono) { background-color: var(--surface); }
 html[data-theme='light'] :is(.soft-tag, .count-badge, .mes-etiqueta,
   .information-note, .compact-note, .form-separator, .app-table thead th) {
   background: var(--surface-soft);
@@ -405,40 +405,40 @@ html[data-theme='light'] .daily-insight :is(h2, p) { color: var(--ink); }
 html[data-theme='light'] .daily-insight :is(.eyebrow, .insight-icon) { color: var(--accent-dark); }
 html[data-theme='light'] .daily-insight .btn { background: var(--surface); border-color: #ecd5ca; }
 html[data-theme='light'] .bar-fill:not(.highlight) { background: #c5cbd0; }
-html[data-theme='light'] .booking-aside { background: var(--surface-soft); }
-html[data-theme='light'] .choice-radio { border-color: var(--border-strong); }
-html[data-theme='light'] .selected > .choice-radio { border-color: var(--accent); }
-html[data-theme='light'] :is(.booking-steps, .booking-controls,
-  .summary-items > div, .summary-price, .booking-trust) { border-color: var(--border); }
-html[data-theme='light'] :is(.booking-business > .soft-tag, .booking-step > span) {
+html[data-theme='light'] .reserva-demo-lateral { background: var(--surface-soft); }
+html[data-theme='light'] .reserva-demo-opcion-marca { border-color: var(--border-strong); }
+html[data-theme='light'] .selected > .reserva-demo-opcion-marca { border-color: var(--accent); }
+html[data-theme='light'] :is(.reserva-demo-pasos, .reserva-demo-controles,
+  .reserva-demo-resumen-elementos > div, .reserva-demo-resumen-precio, .reserva-demo-privacidad) { border-color: var(--border); }
+html[data-theme='light'] :is(.reserva-demo-negocio > .soft-tag, .reserva-demo-paso > span) {
   background: var(--surface-soft);
   border-color: var(--border);
 }
-html[data-theme='light'] .booking-step.current > span {
+html[data-theme='light'] .reserva-demo-paso.current > span {
   background: var(--accent);
   border-color: var(--accent);
   color: #fff;
 }
-html[data-theme='light'] :is(.booking-choice:hover, .booking-date:hover, .booking-slot:hover) {
+html[data-theme='light'] :is(.reserva-demo-opcion:hover, .reserva-demo-fecha:hover, .reserva-demo-horario:hover) {
   background: var(--surface-soft);
   border-color: var(--border-strong);
 }
-html[data-theme='light'] :is(.booking-choice.selected, .booking-date.selected, .booking-slot.selected) {
+html[data-theme='light'] :is(.reserva-demo-opcion.selected, .reserva-demo-fecha.selected, .reserva-demo-horario.selected) {
   background: var(--accent-soft);
   border-color: var(--accent);
   color: var(--accent-dark);
 }
-html[data-theme='light'] .booking-summary.glass-effect :is(h3, .summary-price > strong) { color: var(--ink); }
-html[data-theme='light'] .booking-aside .booking-trust p { color: var(--muted); }
+html[data-theme='light'] .reserva-demo-resumen.glass-effect :is(h3, .reserva-demo-resumen-precio > strong) { color: var(--ink); }
+html[data-theme='light'] .reserva-demo-lateral .reserva-demo-privacidad p { color: var(--muted); }
 html[data-theme='dark'] .app-dialog::backdrop { background: rgba(6, 6, 10, 0.72); }
-html[data-theme='dark'] .booking-summary.glass-effect { background: var(--glass-surface); border-color: var(--glass-border); }
-html[data-theme='dark'] .booking-summary.glass-effect :is(h3, p, .summary-items > div,
-  .summary-items > div.filled, .summary-price > strong) { color: var(--ink); }
-html[data-theme='dark'] .booking-step.current { color: #f1a287; }
-html[data-theme='dark'] .booking-layout :is(.booking-business p, .booking-title p,
-  .choice-content > p, .choice-content > small, .choice-meta, .booking-trust p,
-  .privacy-note, .portal-footer) { color: var(--muted); }
-html[data-theme='dark'] :is(.booking-choice.selected, .booking-date.selected, .booking-slot.selected) {
+html[data-theme='dark'] .reserva-demo-resumen.glass-effect { background: var(--glass-surface); border-color: var(--glass-border); }
+html[data-theme='dark'] .reserva-demo-resumen.glass-effect :is(h3, p, .reserva-demo-resumen-elementos > div,
+  .reserva-demo-resumen-elementos > div.filled, .reserva-demo-resumen-precio > strong) { color: var(--ink); }
+html[data-theme='dark'] .reserva-demo-paso.current { color: #f1a287; }
+html[data-theme='dark'] .reserva-demo :is(.reserva-demo-negocio p, .reserva-demo-titulo p,
+  .reserva-demo-opcion-texto > p, .reserva-demo-opcion-texto > small, .reserva-demo-opcion-datos, .reserva-demo-privacidad p,
+  .reserva-demo-nota-privacidad, .portal-demo-pie) { color: var(--muted); }
+html[data-theme='dark'] :is(.reserva-demo-opcion.selected, .reserva-demo-fecha.selected, .reserva-demo-horario.selected) {
   background: #523729;
   border-color: #e08b60;
   color: #fff1e5;
@@ -513,7 +513,7 @@ html[data-theme='dark'] .app-toast.glass-effect { background: var(--glass-surfac
   .breadcrumbs { min-width: 0; gap: 6px; }
   .breadcrumbs > span, .breadcrumbs > .icon { display: none; }
   .breadcrumbs strong { max-width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
-  .topbar .icon-btn, .portal-topbar .theme-toggle { min-width: 40px; min-height: 40px; }
+  .topbar .icon-btn, .portal-demo-barra .theme-toggle { min-width: 40px; min-height: 40px; }
   .main-content { padding: 18px 12px 28px; }
   .page-heading { gap: 12px; }
   .page-heading h1 { font-size: 24px; }
@@ -528,7 +528,7 @@ html[data-theme='dark'] .app-toast.glass-effect { background: var(--glass-surfac
   .segmented button { flex: 1; min-height: 40px; }
   .calendario-filtros { padding: 0 12px 12px; }
   .filter-select { min-width: 0; flex-basis: 100%; min-height: 42px; }
-  .calendario-panel, .surface, .booking-surface { min-width: 0; }
+  .calendario-panel, .surface, .reserva-demo-superficie { min-width: 0; }
   .calendario-desplazamiento, .table-responsive, .mes-desplazamiento { max-width: 100%; overflow-x: auto; }
   .calendario-semana { min-width: 760px; }
   .dia-unico { min-width: 0; }
@@ -537,20 +537,20 @@ html[data-theme='dark'] .app-toast.glass-effect { background: var(--glass-surfac
   .dialog-header, .dialog-body { padding: 16px; }
   .dialog-footer { padding: 12px 16px; flex-wrap: wrap; }
   .dialog-footer .btn { min-height: 42px; }
-  .portal-topbar { height: 60px; padding: 0 12px; gap: 8px; }
-  .portal-brand { font-size: 25px; }
-  .portal-brand img { width: 26px; height: 26px; }
-  .portal-topbar > .text-button { margin-left: auto; font-size: 0; gap: 0; }
-  .portal-topbar > .text-button .icon { width: 21px; height: 21px; }
-  .portal-topbar .demo-pill { display: none; }
-  .booking-main { padding: 20px 12px 28px; }
-  .booking-surface { padding: 20px 15px; }
-  .booking-steps { gap: 14px; justify-content: flex-start; }
-  .booking-steps { scrollbar-width: none; }
-  .booking-steps::-webkit-scrollbar { display: none; }
-  .booking-step { flex: 0 0 auto; min-width: 62px; }
-  .booking-step > strong { font-size: 11px; }
-  .booking-slot-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .booking-controls { gap: 8px; }
-  .booking-controls .btn { min-height: 44px; }
+  .portal-demo-barra { height: 60px; padding: 0 12px; gap: 8px; }
+  .portal-demo-marca { font-size: 25px; }
+  .portal-demo-marca img { width: 26px; height: 26px; }
+  .portal-demo-barra > .text-button { margin-left: auto; font-size: 0; gap: 0; }
+  .portal-demo-barra > .text-button .icon { width: 21px; height: 21px; }
+  .portal-demo-barra .demo-pill { display: none; }
+  .reserva-demo-contenido { padding: 20px 12px 28px; }
+  .reserva-demo-superficie { padding: 20px 15px; }
+  .reserva-demo-pasos { gap: 14px; justify-content: flex-start; }
+  .reserva-demo-pasos { scrollbar-width: none; }
+  .reserva-demo-pasos::-webkit-scrollbar { display: none; }
+  .reserva-demo-paso { flex: 0 0 auto; min-width: 62px; }
+  .reserva-demo-paso > strong { font-size: 11px; }
+  .reserva-demo-cuadricula-horarios { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .reserva-demo-controles { gap: 8px; }
+  .reserva-demo-controles .btn { min-height: 44px; }
 }

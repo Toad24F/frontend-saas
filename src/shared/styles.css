@@ -1672,36 +1672,36 @@ html[data-theme='dark'] .sidebar .brand .brand-logo-on-light { display: none; }
   .opciones-modo-agenda {
     gap: 12px;
   }
-  .booking-columns {
+  .reserva-demo-columnas {
     grid-template-columns: minmax(0, 1fr) 265px;
     gap: 20px;
   }
-  .booking-surface {
+  .reserva-demo-superficie {
     padding: 25px;
   }
-  .booking-summary {
+  .reserva-demo-resumen {
     padding: 22px;
   }
-  .booking-main {
+  .reserva-demo-contenido {
     padding: 28px 24px;
   }
-  .booking-choice {
+  .reserva-demo-opcion {
     padding: 18px 15px;
     gap: 13px;
   }
-  .choice-content > p {
+  .reserva-demo-opcion-texto > p {
     font-size: 11px;
   }
-  .booking-step > strong {
+  .reserva-demo-paso > strong {
     font-size: 11px;
   }
-  .booking-step {
+  .reserva-demo-paso {
     gap: 6px;
   }
-  .booking-title h2 {
+  .reserva-demo-titulo h2 {
     font-size: 22px;
   }
-  .booking-slot-grid {
+  .reserva-demo-cuadricula-horarios {
     grid-template-columns: repeat(3, 1fr);
   }
 }
@@ -1835,173 +1835,173 @@ html[data-theme='dark'] .sidebar .brand .brand-logo-on-light { display: none; }
     font-size: 12px;
     padding: 10px 12px;
   }
-  .portal-topbar {
+  .portal-demo-barra {
     height: 70px;
     padding: 0 20px;
     gap: 12px;
   }
-  .portal-topbar-caption {
+  .portal-demo-subtitulo {
     display: none;
   }
-  .portal-brand {
+  .portal-demo-marca {
     font-size: 30px;
   }
-  .portal-topbar > .text-button {
+  .portal-demo-barra > .text-button {
     font-size: 11px;
   }
-  .portal-topbar .demo-pill {
+  .portal-demo-barra .demo-pill {
     display: inline;
   }
-  .booking-main {
+  .reserva-demo-contenido {
     padding: 27px 18px 35px;
   }
-  .booking-business {
+  .reserva-demo-negocio {
     gap: 13px;
     margin-bottom: 25px;
   }
-  .booking-business > .avatar {
+  .reserva-demo-negocio > .avatar {
     width: 48px;
     height: 48px;
     font-size: 16px;
   }
-  .booking-business h1 {
+  .reserva-demo-negocio h1 {
     font-size: 20px;
   }
-  .booking-business p {
+  .reserva-demo-negocio p {
     font-size: 11px;
   }
-  .booking-business > .soft-tag {
+  .reserva-demo-negocio > .soft-tag {
     display: none;
   }
-  .booking-columns {
+  .reserva-demo-columnas {
     display: flex;
     flex-direction: column;
     gap: 20px;
   }
-  .booking-surface {
+  .reserva-demo-superficie {
     padding: 25px 20px;
     width: 100%;
   }
-  .booking-aside {
+  .reserva-demo-lateral {
     width: 100%;
   }
-  .booking-steps {
+  .reserva-demo-pasos {
     gap: 10px;
     overflow-x: auto;
     margin-bottom: 24px;
     padding: 20px 3px;
   }
-  .booking-step {
+  .reserva-demo-paso {
     flex-direction: column;
     gap: 9px;
     min-width: 51px;
   }
-  .booking-step > strong {
+  .reserva-demo-paso > strong {
     font-size: 9px;
     white-space: nowrap;
   }
-  .booking-step > span {
+  .reserva-demo-paso > span {
     width: 24px;
     height: 24px;
   }
-  .booking-title h2 {
+  .reserva-demo-titulo h2 {
     font-size: 23px;
     line-height: 1.5;
   }
-  .booking-title p {
+  .reserva-demo-titulo p {
     font-size: 13px;
     line-height: 1.8;
   }
-  .booking-choice {
+  .reserva-demo-opcion {
     gap: 12px;
     padding: 19px 14px;
   }
-  .booking-choice > .service-icon {
+  .reserva-demo-opcion > .service-icon {
     width: 35px;
     height: 35px;
     border-radius: 9px;
   }
-  .booking-choice > .service-icon > .icon {
+  .reserva-demo-opcion > .service-icon > .icon {
     width: 20px;
     height: 20px;
   }
-  .choice-content > strong {
+  .reserva-demo-opcion-texto > strong {
     font-size: 14px;
   }
-  .choice-content > p {
+  .reserva-demo-opcion-texto > p {
     font-size: 12px;
   }
-  .choice-meta {
+  .reserva-demo-opcion-datos {
     font-size: 11px;
     flex-wrap: wrap;
     gap: 5px;
   }
-  .choice-radio {
+  .reserva-demo-opcion-marca {
     width: 17px;
     height: 17px;
   }
-  .booking-controls .btn {
+  .reserva-demo-controles .btn {
     font-size: 13px;
     padding: 10px 14px;
   }
-  .summary-items {
+  .reserva-demo-resumen-elementos {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 18px;
   }
-  .booking-summary {
+  .reserva-demo-resumen {
     padding: 24px;
   }
-  .booking-trust {
+  .reserva-demo-privacidad {
     padding: 18px 4px;
   }
-  .booking-trust p {
+  .reserva-demo-privacidad p {
     font-size: 12px;
   }
-  .booking-slot-grid {
+  .reserva-demo-cuadricula-horarios {
     grid-template-columns: repeat(4, 1fr);
   }
-  .booking-date {
+  .reserva-demo-fecha {
     min-width: 59px;
   }
-  .portal-footer {
+  .portal-demo-pie {
     padding: 0 20px 25px;
     font-size: 10px;
     gap: 20px;
     align-items: center;
   }
-  .portal-footer > span:first-child {
+  .portal-demo-pie > span:first-child {
     max-width: 160px;
     line-height: 1.7;
   }
-  .booking-title .eyebrow {
+  .reserva-demo-titulo .eyebrow {
     font-size: 10px;
   }
-  .phone-input > span {
+  .reserva-demo-campo-telefono > span {
     font-size: 12px;
   }
-  .privacy-note {
+  .reserva-demo-nota-privacidad {
     font-size: 12px;
   }
-  .hold-notice {
+  .reserva-demo-aviso-apartado {
     font-size: 13px;
   }
-  .date-picker-heading {
+  .reserva-demo-encabezado-fecha {
     flex-wrap: wrap;
   }
-  .date-picker-heading > span {
+  .reserva-demo-encabezado-fecha > span {
     font-size: 11px;
   }
-  .confirmation-folio {
+  .reserva-demo-confirmacion-folio {
     padding: 19px 28px;
   }
-  .confirmation-folio > strong {
+  .reserva-demo-confirmacion-folio > strong {
     font-size: 17px;
   }
-  .confirmation-folio > .icon-btn {
+  .reserva-demo-confirmacion-folio > .icon-btn {
     right: 1px;
   }
-  .confirmation-details > span {
+  .reserva-demo-confirmacion-detalles > span {
     font-size: 13px;
     line-height: 1.7;
   }
@@ -2031,26 +2031,26 @@ html[data-theme='dark'] .sidebar .brand .brand-logo-on-light { display: none; }
   }
 }
 @media (max-width: 380px) {
-  .booking-slot-grid {
+  .reserva-demo-cuadricula-horarios {
     grid-template-columns: repeat(3, 1fr);
   }
-  .booking-choice {
+  .reserva-demo-opcion {
     padding: 17px 11px;
     gap: 8px;
   }
-  .booking-surface {
+  .reserva-demo-superficie {
     padding: 23px 16px;
   }
-  .booking-choice > .service-icon {
+  .reserva-demo-opcion > .service-icon {
     display: none;
   }
-  .summary-items {
+  .reserva-demo-resumen-elementos {
     grid-template-columns: 1fr;
   }
-  .booking-step {
+  .reserva-demo-paso {
     min-width: 44px;
   }
-  .portal-topbar > .text-button > .demo-pill {
+  .portal-demo-barra > .text-button > .demo-pill {
     display: none;
   }
   .heading-actions .btn {

@@ -47,7 +47,7 @@ function applyTheme() {
 }
 applyTheme();
 export function mountThemeToggle() {
-  const host = document.querySelector('.topbar-right, .portal-topbar');
+  const host = document.querySelector('.topbar-right, .portal-demo-barra');
   if (!host) return;
   if (host.querySelector('.theme-toggle')) return;
   const dark = theme === 'dark';
@@ -277,7 +277,7 @@ export function render() {
   document.title = `${import.meta.env.VITE_APP_NAME || 'Citalendar'} · ${location.pathname.startsWith('/reservas/') ? 'Reserva tu cita' : labels[state.page] || 'Agenda'}`;
   const path = location.pathname;
   if (path.startsWith('/reservas/')) {
-    if (booking) booking.renderPortal(path.split('/')[2]);
+    if (booking) booking.renderPortalReservas(path.split('/')[2]);
     document.querySelectorAll('a[href^="/admin/"], a[href^="/reservas/"]').forEach((link) => link.href = modeUrl(link.getAttribute('href')));
     mountThemeToggle();
     return;
@@ -511,7 +511,7 @@ export async function start() {
     state.businessId = state.page === 'negocio' ? Number(location.pathname.split('/')[3]) : null;
     [extraViews, booking, actions] = await Promise.all([
       isDemo ? import('../demo/screens/index.js') : import('../connected/screens/index.js'),
-      isDemo ? import('../demo/screens/reservas/booking.js') : Promise.resolve(null),
+      isDemo ? import('../demo/screens/reservas/reserva.vista.js') : Promise.resolve(null),
       import('./actions.js'),
     ]);
     render();

@@ -55,6 +55,8 @@ Una recarga con marcador consulta el resolutor antes de cargar catálogos: muest
 
 Límite actual del backend: obtener CSRF al recargar depende de la inicialización pública, que exige licencia para nuevas reservas. Si la licencia impide esa inicialización, se conserva el marcador y se informa de recuperación pendiente; el frontend no puede recuperar por sí solo el resultado en ese escenario. El ajuste necesario de la sesión existente se describe en el resultado T110–T114 y no se implementó en el backend. Las pruebas de este lote utilizan API ficticia/dobles, sin validar una base real.
 
+Para verificar la navegación y la reserva de demostración en Edge con respuestas HTTP simuladas, ejecuta `npm run dev` y luego `node tests/portal.navegacion-navegador.mjs`. La [nota de traducción del portal](docs/traduccion-nomenclaturas/resultado-portal-publico-2026-11-18.md) documenta las comprobaciones y el servidor simulado del flujo conectado.
+
 ## Pantallas de la demo
 
 | Ruta                          | Contenido                                                                                                                           |

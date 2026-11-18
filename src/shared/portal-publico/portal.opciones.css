@@ -1,0 +1,28 @@
+.portal-filtros-opciones { display: flex; flex-wrap: wrap; align-items: end; gap: 12px; margin-bottom: 20px; }
+.portal-filtros-opciones label { display: grid; gap: 7px; flex: 1 1 170px; min-width: 0; font-size: 13px; }
+.portal-filtros-opciones label:first-child { flex: 2 1 210px; }
+.portal-filtros-opciones :is(input,select,.btn) { min-height: 44px; }
+.portal-filtros-opciones .btn:disabled { opacity: .45; }
+.portal-paginacion { margin-top: 20px; font-size: 12px; }
+.portal-paginacion p, .portal-nota-automatica { color: var(--muted); }
+.portal-paginacion nav { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+.portal-paginacion .btn { min-height: 44px; }
+.portal-vacio { padding: 24px 0; line-height: 1.6; }
+.portal-vacio h3 { font-size: 18px; }
+.portal-vacio .btn { margin: 6px 8px 0 0; min-height: 44px; white-space: normal; }
+.portal-periodos { display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0; }
+.portal-periodos .btn { min-height: 44px; }
+.portal-periodos .btn[aria-pressed='true'] { border-color: var(--accent); background: var(--accent-soft); color: var(--ink); }
+.portal-opcion-elegida { flex: 1 1 100%; margin: 0; font-size: 13px; overflow-wrap: anywhere; }
+.portal-nota-automatica { margin-top: 20px; font-size: 13px; }
+.portal-esqueleto { display: grid; gap: 12px; margin: 16px 0; pointer-events: none; }
+.portal-esqueleto span { display: block; min-height: 94px; border-radius: 11px; background: var(--surface-soft); animation: portal-cargando 1.4s ease-in-out infinite alternate; }
+.portal-esqueleto-horarios { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.portal-esqueleto-horarios span { min-height: 48px; }
+@keyframes portal-cargando { to { opacity: .4; } }
+@media (prefers-reduced-motion: reduce) { .portal-esqueleto span { animation: none; } }
+@media (max-width: 575px) {
+  .portal-filtros-opciones label, .portal-filtros-opciones label:first-child { flex-basis: 100%; }
+  .portal-filtros-opciones > .btn { width: 100%; }
+  .portal-paginacion nav span { flex-basis: 100%; order: -1; text-align: center; }
+}

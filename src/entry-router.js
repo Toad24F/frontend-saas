@@ -13,11 +13,11 @@ export function resolveEntry(pathname, search) {
 
 // Las importaciones diferidas mantienen la demo y el producto en entradas separadas.
 export async function boot(location, loaders = {
-  public: () => import('./connected/public/entry.js'),
+  public: () => import('./connected/portal-publico/portal.entrada.js'),
   connected: () => import('./connected/entry.js'),
   demo: () => import('./demo/entry.js'),
 }) {
   const entry = resolveEntry(location.pathname, location.search);
   const module = await loaders[entry.mode]();
-  if (entry.mode === 'public') await module.startPublicPortal(entry.slug);
+  if (entry.mode === 'public') await module.iniciarPortalPublico(entry.slug);
 }

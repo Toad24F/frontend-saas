@@ -150,7 +150,7 @@ html[data-theme='dark'] .disponibilidad-error-campo { color: #ffb2a8; }
   color: #9a9fa7;
 }
 .opcion-modo-agenda > i,
-.choice-radio {
+.reserva-demo-opcion-marca {
   height: 19px;
   width: 19px;
   border: 1px solid #dce1dd;

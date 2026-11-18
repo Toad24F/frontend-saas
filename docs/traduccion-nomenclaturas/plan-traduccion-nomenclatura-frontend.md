@@ -1,7 +1,7 @@
 # Reglas y plan de traducción de la nomenclatura del frontend
 
 Fecha de definición: 2026-11-16  
-Estado: implementación por conjuntos; glosario, Sucursales, Servicios, Profesionales, Recepcionistas, Clientes, Catálogos compartidos y Disponibilidad terminados
+Estado: implementación por conjuntos; glosario, Sucursales, Servicios, Profesionales, Recepcionistas, Clientes, Catálogos compartidos, Disponibilidad, Agenda y Portal público y reservas terminados
 
 ## Objetivo
 
@@ -263,15 +263,17 @@ Resultado: conjunto cerrado el 2026-11-18 en [Agenda](resultado-agenda-2026-11-1
 
 Este flujo contiene estado de reserva, coordinación entre pestañas, persistencia temporal y contratos públicos. Los nombres contractuales, claves persistentes y valores usados para reanudar intentos no deben cambiar sin migración.
 
-- [ ] Traducir juntos `connected/public/entry.js`, `booking.js`, `booking-view.js` y `booking-lifecycle.js`.
-- [ ] Conservar `attempt-store.js` con el término técnico `store`, traduciendo los conceptos restantes.
-- [ ] Traducir juntos `selection.js`, `selection-view.js`, `contact.js`, `dates.js` y `submission.js`.
-- [ ] Traducir juntos `browser-session.js`, `hold-clock.js`, `business-identity.js` y `accessibility.js`.
-- [ ] Revisar `http.js` sin traducir términos HTTP ni el contrato del backend.
-- [ ] Traducir juntos `shared/public/options.js`, `options.css` y `connected/public/style.css`.
-- [ ] Traducir juntos `demo/screens/reservas/booking.js` y `style.css`.
-- [ ] Actualizar todas las pruebas `portal-publico-*`, `ala-portal-*` y pruebas de navegador del portal.
-- [ ] Verificar selección, apartado, expiración, reintento, envío, navegación, accesibilidad y múltiples pestañas.
+- [x] Traducir juntos `connected/public/entry.js`, `booking.js`, `booking-view.js` y `booking-lifecycle.js`.
+- [x] Conservar `attempt-store.js` con el término técnico `store`, traduciendo los conceptos restantes.
+- [x] Traducir juntos `selection.js`, `selection-view.js`, `contact.js`, `dates.js` y `submission.js`.
+- [x] Traducir juntos `browser-session.js`, `hold-clock.js`, `business-identity.js` y `accessibility.js`.
+- [x] Revisar `http.js` sin traducir términos HTTP ni el contrato del backend.
+- [x] Traducir juntos `shared/public/options.js`, `options.css` y `connected/public/style.css`.
+- [x] Traducir juntos `demo/screens/reservas/booking.js` y `style.css`.
+- [x] Actualizar todas las pruebas `portal-publico-*`, `ala-portal-*` y pruebas de navegador del portal.
+- [x] Verificar selección, apartado, expiración, reintento, envío, navegación, accesibilidad y múltiples pestañas.
+
+Resultado: conjunto cerrado el 2026-11-18 en [Portal público y reservas](resultado-portal-publico-2026-11-18.md).
 
 ### 10. Autenticación y sesión — REALIZAR CON CUIDADO
 

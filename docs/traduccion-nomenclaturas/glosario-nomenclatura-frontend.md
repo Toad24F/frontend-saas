@@ -1,7 +1,7 @@
 # Glosario definitivo de nomenclatura del frontend
 
 Fecha de cierre: 2026-11-17  
-Alcance: etapa 0 del plan de traducción; no implica renombrados de código
+Alcance: reglas de la etapa 0 y términos incorporados durante las migraciones.
 
 ## Regla general
 
@@ -21,6 +21,9 @@ Un nombre solo puede traducirse cuando se haya comprobado que es interno. Si atr
 | `schedule` | `horario` | Horario semanal o configuración horaria. |
 | `availability` | `disponibilidad` | Resultado o reglas de disponibilidad. |
 | `booking` / `reservation` | `reserva` | Flujo de reserva confirmado o en preparación. |
+| `public portal` | `portal publico` | Entrada pública de reservas y opciones compartidas. |
+| `attempt` | `intento` | Envío recuperable con un marcador temporal. |
+| `submission` | `envio` | Preparación, registro y resolución de un intento. |
 | `hold` | `apartado` | Retención temporal de un horario en el portal público. |
 | `license` | `licencia` | Licencia de acceso del negocio. |
 | `business` / `tenant` | `negocio` | Unidad de aislamiento. En la demo, `tenant` también se traduce como `negocio`; nunca como “inquilino”. |

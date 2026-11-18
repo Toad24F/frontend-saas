@@ -17,10 +17,10 @@
   100% { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-body[data-motion-direction='forward'] .booking-surface.motion-enter {
+body[data-motion-direction='forward'] .reserva-demo-superficie.motion-enter {
   animation-name: step-forward;
 }
-body[data-motion-direction='back'] .booking-surface.motion-enter {
+body[data-motion-direction='back'] .reserva-demo-superficie.motion-enter {
   animation-name: step-back;
 }
 @keyframes step-forward {
@@ -37,24 +37,24 @@ body[data-motion-direction='back'] .booking-surface.motion-enter {
 /* Small groups follow the screen instead of appearing as one solid block. */
 .motion-enter .entity-grid > :nth-child(-n + 6),
 .motion-enter .stats-grid > :nth-child(-n + 6),
-.booking-surface.motion-enter .booking-choices > :nth-child(-n + 6) {
+.reserva-demo-superficie.motion-enter .reserva-demo-opciones > :nth-child(-n + 6) {
   animation: tile-arrive 620ms var(--motion-glide) backwards;
 }
 .motion-enter .entity-grid > :nth-child(2),
 .motion-enter .stats-grid > :nth-child(2),
-.booking-surface.motion-enter .booking-choices > :nth-child(2) { animation-delay: 65ms; }
+.reserva-demo-superficie.motion-enter .reserva-demo-opciones > :nth-child(2) { animation-delay: 65ms; }
 .motion-enter .entity-grid > :nth-child(3),
 .motion-enter .stats-grid > :nth-child(3),
-.booking-surface.motion-enter .booking-choices > :nth-child(3) { animation-delay: 130ms; }
+.reserva-demo-superficie.motion-enter .reserva-demo-opciones > :nth-child(3) { animation-delay: 130ms; }
 .motion-enter .entity-grid > :nth-child(4),
 .motion-enter .stats-grid > :nth-child(4),
-.booking-surface.motion-enter .booking-choices > :nth-child(4) { animation-delay: 195ms; }
+.reserva-demo-superficie.motion-enter .reserva-demo-opciones > :nth-child(4) { animation-delay: 195ms; }
 .motion-enter .entity-grid > :nth-child(5),
 .motion-enter .stats-grid > :nth-child(5),
-.booking-surface.motion-enter .booking-choices > :nth-child(5) { animation-delay: 260ms; }
+.reserva-demo-superficie.motion-enter .reserva-demo-opciones > :nth-child(5) { animation-delay: 260ms; }
 .motion-enter .entity-grid > :nth-child(6),
 .motion-enter .stats-grid > :nth-child(6),
-.booking-surface.motion-enter .booking-choices > :nth-child(6) { animation-delay: 325ms; }
+.reserva-demo-superficie.motion-enter .reserva-demo-opciones > :nth-child(6) { animation-delay: 325ms; }
 
 @keyframes tile-arrive {
   0% { opacity: 0; transform: translateY(32px) scale(0.88) rotate(-1.5deg); }
@@ -103,14 +103,14 @@ body[data-motion-direction='back'] .booking-surface.motion-enter {
 /* Color changes retain the existing contrast and glass surfaces. */
 body,
 .topbar,
-.portal-topbar,
+.portal-demo-barra,
 .sidebar,
 .stat-card,
 .calendario-panel,
 .surface,
-.booking-layout,
-.booking-surface,
-.booking-summary,
+.reserva-demo,
+.reserva-demo-superficie,
+.reserva-demo-resumen,
 .app-dialog {
   transition: background-color var(--motion-snap) ease,
     border-color var(--motion-snap) ease,
@@ -128,9 +128,9 @@ body,
 .theme-toggle,
 .nav-item,
 .segmented button,
-.booking-choice,
-.booking-date,
-.booking-slot,
+.reserva-demo-opcion,
+.reserva-demo-fecha,
+.reserva-demo-horario,
 .opcion-modo-agenda,
 .calendario-evento,
 .entity-grid > .surface {
@@ -143,8 +143,8 @@ body,
 }
 
 @media (hover: hover) {
-  :is(.btn, .icon-btn, .theme-toggle, .booking-choice, .booking-date,
-    .booking-slot, .opcion-modo-agenda):not(:disabled):hover {
+  :is(.btn, .icon-btn, .theme-toggle, .reserva-demo-opcion, .reserva-demo-fecha,
+    .reserva-demo-horario, .opcion-modo-agenda):not(:disabled):hover {
     transform: translateY(-4px) scale(1.035);
   }
   .entity-grid > .surface:hover {
@@ -153,20 +153,20 @@ body,
   }
   .nav-item:not(.active):hover { transform: translateX(6px); }
   .calendario-evento:hover { transform: translateY(-3px) scale(1.035); }
-  :is(.booking-choice, .booking-date, .booking-slot, .opcion-modo-agenda):not(:disabled):hover {
+  :is(.reserva-demo-opcion, .reserva-demo-fecha, .reserva-demo-horario, .opcion-modo-agenda):not(:disabled):hover {
     box-shadow: 0 13px 25px rgba(27, 52, 36, 0.14);
   }
 }
 
-:is(.btn, .icon-btn, .theme-toggle, .booking-choice, .booking-date,
-  .booking-slot, .opcion-modo-agenda):not(:disabled):active {
+:is(.btn, .icon-btn, .theme-toggle, .reserva-demo-opcion, .reserva-demo-fecha,
+  .reserva-demo-horario, .opcion-modo-agenda):not(:disabled):active {
   transform: translateY(2px) scale(0.91);
   transition-duration: var(--motion-press);
 }
 .nav-item:active,
 .calendario-evento:active { transform: scale(0.96); }
 
-:is(.booking-choice, .booking-date, .booking-slot, .opcion-modo-agenda).selected {
+:is(.reserva-demo-opcion, .reserva-demo-fecha, .reserva-demo-horario, .opcion-modo-agenda).selected {
   animation: selection-pop 430ms var(--motion-glide) backwards;
 }
 @keyframes selection-pop {
@@ -184,7 +184,7 @@ body,
   .motion-enter,
   .motion-enter .entity-grid > *,
   .motion-enter .stats-grid > *,
-  .booking-surface.motion-enter .booking-choices > *,
+  .reserva-demo-superficie.motion-enter .reserva-demo-opciones > *,
   .app-dialog[open],
   .app-dialog[open]::backdrop,
   .auth-screen-transition > .dialog-header,
@@ -193,7 +193,7 @@ body,
   .app-toast.is-leaving,
   .theme-toggle .icon,
   .menu-open .sidebar-overlay,
-  :is(.booking-choice, .booking-date, .booking-slot, .opcion-modo-agenda).selected {
+  :is(.reserva-demo-opcion, .reserva-demo-fecha, .reserva-demo-horario, .opcion-modo-agenda).selected {
     animation: none !important;
   }
 }
