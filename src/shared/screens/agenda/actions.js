@@ -5,7 +5,7 @@ import { icon } from '../../icons.js';
 import { toast, escape as esc, avatar, badge } from '../../ui.js';
 import { agendaPanel as modal, agendaDraft, saveAgendaDraft, clearAgendaDraft } from './panels.js';
 import { field, select, formError, errorSlot } from '../../forms.js';
-import { slots, createAppointment, overlaps } from '../../../demo/availability.js';
+import { buscarHorariosDemo, crearCitaDemo, seEmpalman } from '../../../demo/disponibilidad.motor.js';
 import { moverCitaDemo } from '../../../demo/clientes.horario.js';
 export function detail(id) {
   const a = resource('appointments', id, state.tenantId),
@@ -46,7 +46,7 @@ export function detail(id) {
             b.professionalId === current.professionalId &&
             b.date === current.date &&
             !['cancelada', 'no_asistio'].includes(b.status) &&
-            overlaps(current.start, current.end, b.start, b.end),
+            seEmpalman(current.start, current.end, b.start, b.end),
         );
         if (conflict)
           throw new Error('No se puede reactivar: el horario está ocupado.');
@@ -141,7 +141,7 @@ export function manualAppointment(day = state.date, start = '') {
       .join('');
     let choices = [];
     if (people.length)
-      choices = slots({
+      choices = buscarHorariosDemo({
         tenantId: state.tenantId,
         serviceId,
         branchId,
@@ -168,7 +168,7 @@ export function manualAppointment(day = state.date, start = '') {
     e.preventDefault();
     try {
       const f = new FormData(form);
-      const a = createAppointment(
+      const a = crearCitaDemo(
         {
           tenantId: state.tenantId,
           serviceId: Number(f.get('serviceId')),

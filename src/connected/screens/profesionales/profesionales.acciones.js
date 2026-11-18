@@ -37,7 +37,7 @@ export async function accionProfesional(accion, id) {
     boton.textContent = 'Procesando…';
     try {
       await ejecutarAccionProfesional(persona.id, accion);
-      if (accion === 'inhabilitar' && state.scheduleProfessional === persona.id) state.scheduleProfessional = null;
+      if (accion === 'inhabilitar' && state.profesionalHorario === persona.id) state.profesionalHorario = null;
       dialogo.close();
       try { await loadBackendData(); render(); toast(operacion.exito); }
       catch (error) { toast(`${operacion.exito} No se pudo actualizar la lista: ${error.message}`); }

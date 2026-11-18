@@ -80,7 +80,7 @@ html[data-theme='dark'] .btn-danger-soft { background: #4a2a2d; border-color: #7
 
 html[data-theme='dark'] :is(
   .stat-card, .calendar-panel, .surface, .empty-state, .professional-card,
-  .service-card, .branch-card, .settings-card, .mode-card, .block-item,
+  .service-card, .branch-card, .settings-card, .opcion-modo-agenda, .bloqueo-entrada,
   .notification-card, .message-preview, .report-card, .report-filters,
   .booking-surface, .booking-choice, .booking-date, .booking-slot,
   .tenant-option, .section-card
@@ -128,19 +128,19 @@ html[data-theme='dark'] .status-badge.cancelada { background: #4b2d32; color: #f
 html[data-theme='dark'] .calendar-event.no_asistio,
 html[data-theme='dark'] .month-event.no_asistio,
 html[data-theme='dark'] .status-badge.no_asistio { background: #3c304d; color: #e0cff6; border-color: #8d72aa; }
-html[data-theme='dark'] .schedule-table tbody tr:not(.schedule-disabled) > td,
-html[data-theme='dark'] .schedule-table tbody tr.schedule-repeat:not(.schedule-disabled) > td {
+html[data-theme='dark'] .horario-tabla tbody tr:not(.horario-franja-inactiva) > td,
+html[data-theme='dark'] .horario-tabla tbody tr.horario-franja-adicional:not(.horario-franja-inactiva) > td {
   background: color-mix(in srgb, var(--schedule-accent) 10%, var(--surface));
 }
-html[data-theme='dark'] .schedule-table th:last-child,
-html[data-theme='dark'] .schedule-table td:last-child,
-html[data-theme='dark'] .schedule-table .schedule-disabled td:last-child { background: var(--surface); }
-html[data-theme='dark'] .schedule-table .schedule-day-label { color: color-mix(in srgb, var(--schedule-accent) 60%, white); }
-html[data-theme='dark'] .schedule-table .schedule-day-0 { --schedule-accent: #c17c62; }
-html[data-theme='dark'] .schedule-table .schedule-day-2 { --schedule-accent: #7799b7; }
-html[data-theme='dark'] .schedule-table .schedule-disabled,
-html[data-theme='dark'] .schedule-table .schedule-disabled > td,
-html[data-theme='dark'] .schedule-table .schedule-disabled td:last-child {
+html[data-theme='dark'] .horario-tabla th:last-child,
+html[data-theme='dark'] .horario-tabla td:last-child,
+html[data-theme='dark'] .horario-tabla .horario-franja-inactiva td:last-child { background: var(--surface); }
+html[data-theme='dark'] .horario-tabla .horario-dia-etiqueta { color: color-mix(in srgb, var(--schedule-accent) 60%, white); }
+html[data-theme='dark'] .horario-tabla .horario-dia-0 { --schedule-accent: #c17c62; }
+html[data-theme='dark'] .horario-tabla .horario-dia-2 { --schedule-accent: #7799b7; }
+html[data-theme='dark'] .horario-tabla .horario-franja-inactiva,
+html[data-theme='dark'] .horario-tabla .horario-franja-inactiva > td,
+html[data-theme='dark'] .horario-tabla .horario-franja-inactiva td:last-child {
   background: #292a30 !important;
   color: var(--muted) !important;
 }
@@ -182,7 +182,7 @@ html[data-theme='dark'] .app-toast.glass-effect { background: var(--glass-surfac
 }
 .main-layout :is(.stat-card, .calendar-panel, .surface, .empty-state,
   .professional-card, .service-card, .branch-card, .settings-card,
-  .mode-card, .block-item, .notification-card, .message-preview,
+  .opcion-modo-agenda, .bloqueo-entrada, .notification-card, .message-preview,
   .report-card, .report-filters, .section-card),
 .booking-layout :is(.booking-surface, .booking-choice, .booking-date, .booking-slot) {
   background-color: var(--surface);
@@ -463,12 +463,12 @@ html[data-theme='dark'] .app-toast.glass-effect { background: var(--glass-surfac
 }
 
 @media (max-width: 767px) {
-  #schedule-form > .table-responsive { overflow: visible; }
-  .schedule-table,
-  .schedule-table tbody { display: block; width: 100%; min-width: 0; }
-  .schedule-table thead { display: none; }
-  .schedule-table tbody { padding: 12px; }
-  .schedule-table tbody tr {
+  #formulario-horario > .table-responsive { overflow: visible; }
+  .horario-tabla,
+  .horario-tabla tbody { display: block; width: 100%; min-width: 0; }
+  .horario-tabla thead { display: none; }
+  .horario-tabla tbody { padding: 12px; }
+  .horario-tabla tbody tr {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     margin-bottom: 12px;
@@ -476,14 +476,14 @@ html[data-theme='dark'] .app-toast.glass-effect { background: var(--glass-surfac
     border-radius: 12px;
     overflow: hidden;
   }
-  .schedule-table tbody td {
+  .horario-tabla tbody td {
     display: block;
     min-width: 0;
     width: 100%;
     border: 0;
     padding: 8px 12px;
   }
-  .schedule-table tbody td::before {
+  .horario-tabla tbody td::before {
     content: attr(data-label);
     display: block;
     margin-bottom: 5px;
@@ -491,19 +491,19 @@ html[data-theme='dark'] .app-toast.glass-effect { background: var(--glass-surfac
     font-size: 11px;
     font-weight: 600;
   }
-  .schedule-table tbody td:first-child { grid-column: 1 / -1; padding: 12px; border-left: 4px solid var(--schedule-accent); border-bottom: 1px solid var(--border); }
-  .schedule-table tbody td:first-child::before { display: none; }
-  .schedule-table tbody td:nth-child(2),
-  .schedule-table tbody td:nth-child(4),
-  .schedule-table tbody td:last-child { grid-column: 1 / -1; }
-  .schedule-table tbody td:last-child { position: static; box-shadow: none; }
-  .schedule-table select,
-  .schedule-table input[type='time'] { width: 100%; max-width: none; min-width: 0; }
-  .schedule-table .time-pair { min-width: 0; }
-  .schedule-table .time-pair input { flex: 1 1 0; }
-  .schedule-table .schedule-actions { justify-content: flex-end; }
-  .schedule-table .schedule-add { min-height: 42px; min-width: 42px; }
-  html[data-theme='dark'] .schedule-table tbody td:last-child { background: color-mix(in srgb, var(--schedule-accent) 10%, var(--surface)); }
+  .horario-tabla tbody td:first-child { grid-column: 1 / -1; padding: 12px; border-left: 4px solid var(--schedule-accent); border-bottom: 1px solid var(--border); }
+  .horario-tabla tbody td:first-child::before { display: none; }
+  .horario-tabla tbody td:nth-child(2),
+  .horario-tabla tbody td:nth-child(4),
+  .horario-tabla tbody td:last-child { grid-column: 1 / -1; }
+  .horario-tabla tbody td:last-child { position: static; box-shadow: none; }
+  .horario-tabla select,
+  .horario-tabla input[type='time'] { width: 100%; max-width: none; min-width: 0; }
+  .horario-tabla .par-horas { min-width: 0; }
+  .horario-tabla .par-horas input { flex: 1 1 0; }
+  .horario-tabla .horario-acciones { justify-content: flex-end; }
+  .horario-tabla .horario-agregar-franja { min-height: 42px; min-width: 42px; }
+  html[data-theme='dark'] .horario-tabla tbody td:last-child { background: color-mix(in srgb, var(--schedule-accent) 10%, var(--surface)); }
 }
 
 @media (max-width: 480px) {

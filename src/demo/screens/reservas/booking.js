@@ -16,12 +16,12 @@ import { state, navigate, mountThemeToggle } from '../../../shared/app.js';
 import { icon } from '../../../shared/icons.js';
 import { escape as esc, avatar, empty, toast } from '../../../shared/ui.js';
 import {
-  slots,
-  nextDates,
-  holdSlot,
-  releaseHold,
-  createAppointment,
-} from '../../availability.js';
+  buscarHorariosDemo,
+  buscarFechasDemo,
+  apartarHorarioDemo,
+  liberarApartadoDemo,
+  crearCitaDemo,
+} from '../../disponibilidad.motor.js';
 
 let booking = {
   tenantId: null,
@@ -77,7 +77,7 @@ function options() {
 }
 function reset(id) {
   browse = Array.from({ length: 3 }, browseDefaults); automaticSteps = []; period = 'all';
-  if (booking.hold) releaseHold(booking.hold.id);
+  if (booking.hold) liberarApartadoDemo(booking.hold.id);
   booking = {
     tenantId: id,
     step: 1,
@@ -101,7 +101,7 @@ export function renderPortal(slug) {
   if (booking.tenantId !== tenant.id) reset(tenant.id);
   if (state.tenantId !== tenant.id) {
     state.branch = state.professional = state.status = 'all';
-    state.scheduleProfessional = null;
+    state.profesionalHorario = null;
   }
   state.tenantId = tenant.id;
   const previousStep = Number(lastRenderedStepKey.split(':')[1]);
@@ -153,7 +153,7 @@ function stepContent() {
   if (booking.step <= 3) return demoCatalog();
   if (booking.step === 4) {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(booking.day)) return '<p id="demo-date-error" role="alert">Elige una fecha válida para consultar horarios.</p>';
-    let dates = nextDates({ ...options(), from: TODAY }, 45);
+    let dates = buscarFechasDemo({ ...options(), from: TODAY }, 45);
     if (t.mode === 'compact') dates = dates.slice(0, 1);
 
     const available = dates.find((d) => d.day === booking.day)?.slots || [];
@@ -269,7 +269,7 @@ document.addEventListener('click', (e) => {
   }
   if (e.target.closest('[data-book-back]')) {
     if (booking.hold) {
-      releaseHold(booking.hold.id);
+      liberarApartadoDemo(booking.hold.id);
       booking.hold = null;
     }
     do { booking.step = Math.max(1, booking.step - 1); } while (booking.step > 1 && automaticSteps.includes(booking.step));
@@ -279,7 +279,7 @@ document.addEventListener('click', (e) => {
   if (e.target.closest('[data-book-next]')) {
     if (!canContinue()) return;
     try {
-      if (booking.step === 4) booking.hold = holdSlot(options(), booking.start);
+      if (booking.step === 4) booking.hold = apartarHorarioDemo(options(), booking.start);
       booking.step++;
       while ([2, 3].includes(booking.step) && demoOptions(booking.step).length === 1) {
         booking[booking.step === 2 ? 'branchId' : 'professionalId'] = demoOptions(booking.step)[0].id;
@@ -324,7 +324,7 @@ document.addEventListener('submit', (e) => {
   if (e.target.id !== 'contact-form') return;
   e.preventDefault();
   try {
-    booking.confirmed = createAppointment(
+    booking.confirmed = crearCitaDemo(
       { ...options(), start: booking.start },
       booking.contact,
       booking.hold?.id,
@@ -345,7 +345,7 @@ document.addEventListener('submit', (e) => {
 setInterval(() => {
   if (!booking.hold) return;
   if (!location.pathname.startsWith('/reservas/')) {
-    releaseHold(booking.hold.id);
+    liberarApartadoDemo(booking.hold.id);
     booking.hold = null;
     booking.step = 4;
     return;
@@ -360,7 +360,7 @@ setInterval(() => {
   const progress = document.querySelector('#hold-progress');
   if (progress) progress.value = Math.min(300, remaining);
   if (!remaining) {
-    releaseHold(booking.hold.id);
+    liberarApartadoDemo(booking.hold.id);
     booking.hold = null;
     booking.step = 4;
     booking.start = null;

@@ -1,5 +1,5 @@
 import { api } from '../auth/session.js';
-import { validateInclusiveRange, reasonText } from '../../../shared/screens/disponibilidad/operational-contract.js';
+import { validarRangoInclusivo, textoMotivoDisponibilidad } from '../../../shared/screens/disponibilidad/disponibilidad.contrato-operativo.js';
 
 const references = { profesionales: 'personal', sucursales: 'sucursal', servicios: 'servicio' };
 
@@ -9,7 +9,7 @@ const references = { profesionales: 'personal', sucursales: 'sucursal', servicio
 export async function readResourceEffects(type, id, from, to, request = api) {
   if (!references[type]) throw new Error('Este recurso no forma parte de la oferta de citas.');
   if (!Number.isSafeInteger(id) || id < 1) throw new Error('Identificador no válido.');
-  if (Object.keys(validateInclusiveRange(from, to)).length) throw new Error('Selecciona un rango válido de hasta 31 fechas.');
+  if (Object.keys(validarRangoInclusivo(from, to)).length) throw new Error('Selecciona un rango válido de hasta 31 fechas.');
   const params = new URLSearchParams({ desde: from, hasta: to });
   if (type === 'profesionales') params.set('personalId', String(id));
   if (type === 'sucursales') params.set('sucursalId', String(id));
@@ -27,5 +27,5 @@ export async function readResourceEffects(type, id, from, to, request = api) {
 }
 
 export function effectReasons(item) {
-  return item.causas.map((cause) => reasonText(cause.codigo));
+  return item.causas.map((cause) => textoMotivoDisponibilidad(cause.codigo));
 }

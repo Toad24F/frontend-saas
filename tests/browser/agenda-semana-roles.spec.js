@@ -29,9 +29,9 @@ test('FALA-T051: semana sin descanso ni excepciones; bloqueos permanecen', async
   page.on('request', (request) => { if (request.url().includes('/excepciones')) calls.push(request.url()); });
   await login(page, 'admin-qa-1@example.test');
   await page.getByRole('tab', { name: 'Horario semanal' }).click();
-  await expect(page.locator('#schedule-form')).toBeVisible();
-  await expect(page.locator('#schedule-form input[name^="break"]')).toHaveCount(0);
-  await expect(page.locator('#schedule-form')).not.toContainText('Descanso opcional');
+  await expect(page.locator('#formulario-horario')).toBeVisible();
+  await expect(page.locator('#formulario-horario input[name^="inicioDescanso-"]')).toHaveCount(0);
+  await expect(page.locator('#formulario-horario')).not.toContainText('Descanso opcional');
   // Revisión visual del horario real en escritorio/móvil y ambos temas.
   await page.screenshot({ path: 'test-results/semana-conectada-escritorio-claro.png' });
   await page.setViewportSize({ width: 390, height: 844 });
@@ -49,7 +49,7 @@ test('FALA-T051: semana sin descanso ni excepciones; bloqueos permanecen', async
   expect(calls).toEqual([]);
   await page.goto(`${origin()}/admin/disponibilidad/equipo?demo=1`);
   await page.getByRole('tab', { name: 'Horario semanal' }).click();
-  await expect(page.locator('#schedule-form input[name^="break"]')).not.toHaveCount(0);
+  await expect(page.locator('#formulario-horario input[name^="inicioDescanso-"]')).not.toHaveCount(0);
   await page.setViewportSize({ width: 390, height: 844 });
   await page.waitForTimeout(600);
   await page.screenshot({ path: 'test-results/semana-demo-movil.png' });
@@ -71,15 +71,15 @@ test('FALA-T052: Administrador, Recepción y Profesional ven solo su consulta pr
     try {
       await login(page, email, '/admin/disponibilidad/comprobar');
       await page.getByRole('tab', { name: 'Horarios disponibles' }).click();
-      await expect(page.locator('#availability-query-form')).toBeVisible();
-      await expect(page.locator('#availability-query-form [name="modalidad"] option[value="manual"]')).toHaveCount(1);
+      await expect(page.locator('#formulario-consulta-horarios')).toBeVisible();
+      await expect(page.locator('#formulario-consulta-horarios [name="modalidad"] option[value="manual"]')).toHaveCount(1);
       if (role === 'recepcion') await expect(page.getByRole('link', { name: 'Reglas del negocio' })).toHaveCount(0);
       if (role === 'profesional') {
-        await expect(page.locator('#availability-query-form [name="personalId"]')).toHaveAttribute('type', 'hidden');
-        await expect(page.locator('#availability-query-form input[readonly]')).toHaveCount(1);
+        await expect(page.locator('#formulario-consulta-horarios [name="personalId"]')).toHaveAttribute('type', 'hidden');
+        await expect(page.locator('#formulario-consulta-horarios input[readonly]')).toHaveCount(1);
       }
       if (role === 'admin') await expect(page.getByRole('link', { name: 'Reglas del negocio' })).toBeVisible();
-      const form = page.locator('#availability-query-form');
+      const form = page.locator('#formulario-consulta-horarios');
       if (role === 'recepcion') {
         await form.locator('[name="personalId"]').fill(String(person.id));
         await form.locator('[name="sucursalId"]').fill(String(branch.id));

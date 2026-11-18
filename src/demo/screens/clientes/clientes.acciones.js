@@ -1,7 +1,7 @@
 import { state } from '../../../shared/app.js';
 import { list, resource, appointmentInfo } from '../../../shared/data.js';
 import { field, basicForm } from '../../../shared/forms.js';
-import { validateContact } from '../../availability.js';
+import { validarContactoDemo } from '../../disponibilidad.motor.js';
 import { guardarRegistroCatalogo } from '../../../shared/screens/catalogos/catalogos.acciones.js';
 import { corregirClienteDemo } from '../../clientes.horario.js';
 import { agendaPanel } from '../../../shared/screens/agenda/panels.js';
@@ -12,7 +12,7 @@ export function nuevoCliente() {
     'Nuevo cliente',
     `${field('Nombre completo', 'nombreCompleto', '', 'text', 'required maxlength="150"')}${field('Teléfono de WhatsApp', 'telefono', '', 'tel', 'required pattern="[0-9]{10}" maxlength="10" inputmode="numeric"')}<p class="field-hint">Usa datos ficticios en esta demostración.</p>`,
     (formulario) => {
-      validateContact(formulario.get('nombreCompleto'), formulario.get('telefono'));
+      validarContactoDemo(formulario.get('nombreCompleto'), formulario.get('telefono'));
       // El teléfono no identifica por sí solo a una persona: cada alta crea una ficha independiente.
       guardarRegistroCatalogo('clients', null, {
         name: formulario.get('nombreCompleto').trim(),

@@ -149,5 +149,5 @@ html[data-theme='dark'] .profesional-menu-mas { box-shadow: 0 14px 34px rgba(0, 
 .paginacion-local { margin: 22px 0; font-size: 12px; }
 .paginacion-local p { margin: 0; color: var(--muted); }
 .paginacion-local .btn { min-height: 44px; }
-.profesionales-resultados, [data-block-results] { scroll-margin-top: 90px; }
+.profesionales-resultados, [data-resultados-bloqueos] { scroll-margin-top: 90px; }
 @media (max-width: 767px) { .paginacion-local nav { width: 100%; } }

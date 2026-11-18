@@ -131,7 +131,7 @@ body,
 .booking-choice,
 .booking-date,
 .booking-slot,
-.mode-card,
+.opcion-modo-agenda,
 .calendar-event,
 .entity-grid > .surface {
   transition: color var(--motion-snap) ease,
@@ -144,7 +144,7 @@ body,
 
 @media (hover: hover) {
   :is(.btn, .icon-btn, .theme-toggle, .booking-choice, .booking-date,
-    .booking-slot, .mode-card):not(:disabled):hover {
+    .booking-slot, .opcion-modo-agenda):not(:disabled):hover {
     transform: translateY(-4px) scale(1.035);
   }
   .entity-grid > .surface:hover {
@@ -153,20 +153,20 @@ body,
   }
   .nav-item:not(.active):hover { transform: translateX(6px); }
   .calendar-event:hover { transform: translateY(-3px) scale(1.035); }
-  :is(.booking-choice, .booking-date, .booking-slot, .mode-card):not(:disabled):hover {
+  :is(.booking-choice, .booking-date, .booking-slot, .opcion-modo-agenda):not(:disabled):hover {
     box-shadow: 0 13px 25px rgba(27, 52, 36, 0.14);
   }
 }
 
 :is(.btn, .icon-btn, .theme-toggle, .booking-choice, .booking-date,
-  .booking-slot, .mode-card):not(:disabled):active {
+  .booking-slot, .opcion-modo-agenda):not(:disabled):active {
   transform: translateY(2px) scale(0.91);
   transition-duration: var(--motion-press);
 }
 .nav-item:active,
 .calendar-event:active { transform: scale(0.96); }
 
-:is(.booking-choice, .booking-date, .booking-slot, .mode-card).selected {
+:is(.booking-choice, .booking-date, .booking-slot, .opcion-modo-agenda).selected {
   animation: selection-pop 430ms var(--motion-glide) backwards;
 }
 @keyframes selection-pop {
@@ -193,7 +193,7 @@ body,
   .app-toast.is-leaving,
   .theme-toggle .icon,
   .menu-open .sidebar-overlay,
-  :is(.booking-choice, .booking-date, .booking-slot, .mode-card).selected {
+  :is(.booking-choice, .booking-date, .booking-slot, .opcion-modo-agenda).selected {
     animation: none !important;
   }
 }

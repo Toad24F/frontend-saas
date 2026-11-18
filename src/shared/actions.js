@@ -1,7 +1,7 @@
 import { abrirEditorCatalogo } from './screens/catalogos/catalogos.acciones.js';
-import { newBlock, editBlock } from './screens/disponibilidad/actions.js';
+import { nuevoBloqueo, editarBloqueo } from './screens/disponibilidad/disponibilidad.acciones.js';
 import { switchTenant, newTenant } from './screens/plataforma/actions.js';
-import { isDemo, pending, api, user, loadBackendData, schedulePayload } from '../connected/backend.js';
+import { isDemo, pending, api, user, loadBackendData, crearPayloadHorario } from '../connected/backend.js';
 import { state, render, navigate } from './app.js';
 import {
   db,
@@ -16,11 +16,11 @@ import { icon } from './icons.js';
 import { modal, toast, escape as esc } from './ui.js';
 import { reportState } from '../demo/screens/reportes/state.js';
 import { appointmentTable } from './screens/agenda/table.js';
-import { scheduleRow, setBlockScope } from './screens/disponibilidad/view.js';
-import { readScheduleRows, setScheduleRowEnabled } from './screens/disponibilidad/schedule-rows.js';
+import { renderFranjaHorario, cambiarAlcanceBloqueos } from './screens/disponibilidad/disponibilidad.vista.js';
+import { leerFranjasHorario, cambiarEstadoFranja } from './screens/disponibilidad/disponibilidad.horario-franjas.js';
 import { appointmentCovered } from '../demo/schedule.js';
-import { clearAvailabilityErrors, clearAvailabilityField, showAvailabilityErrors, showAvailabilityGeneralError, validateScheduleRows, scheduleApiErrors } from './screens/disponibilidad/errors.js';
-import { validateConfiguration, validateInclusiveRange } from './screens/disponibilidad/operational-contract.js';
+import { limpiarErroresDisponibilidad, limpiarCampoDisponibilidad, mostrarErroresDisponibilidad, mostrarErrorGeneralDisponibilidad, validarFranjasHorario, interpretarErroresHorario } from './screens/disponibilidad/disponibilidad.errores.js';
+import { validarConfiguracionDemo, validarRangoInclusivo } from './screens/disponibilidad/disponibilidad.contrato-operativo.js';
 let draftScheduleId = -1;
 
 export async function handleClick(e) {
@@ -33,14 +33,14 @@ export async function handleClick(e) {
     if (!isDemo && e.target.closest('[data-retired-open], [data-retired-list], [data-retired-detail], [data-retired-restore], [data-retired-effects]') &&
       await (await import('../connected/screens/recursos/retired-view.js')).handleRetiredClick(e)) return;
     if (isDemo && state.page === 'disponibilidad') {
-      const slot = e.target.closest('[data-availability-slot]');
-      const operationalAction = e.target.closest('[data-availability-action]');
+      const slot = e.target.closest('[data-disponibilidad-horario]');
+      const operationalAction = e.target.closest('[data-disponibilidad-accion]');
       if (slot) {
-        (await import('../demo/screens/disponibilidad/view.js')).demoSelectSlot(slot.dataset.slotDate, slot.dataset.slotTime);
+        (await import('../demo/screens/disponibilidad/disponibilidad.vista.js')).seleccionarHorarioDemo(slot.dataset.fechaHorario, slot.dataset.horaHorario);
         return;
       }
-      if (operationalAction?.dataset.availabilityAction === 'switch-manual') {
-        (await import('../demo/screens/disponibilidad/view.js')).demoSwitchManual();
+      if (operationalAction?.dataset.disponibilidadAccion === 'cambiar-a-manual') {
+        (await import('../demo/screens/disponibilidad/disponibilidad.vista.js')).cambiarAModalidadManualDemo();
         return;
       }
     }
@@ -67,8 +67,8 @@ export async function handleClick(e) {
       }
     }
     if (!isDemo && state.page === 'disponibilidad') {
-      const availability = await import('../connected/screens/disponibilidad/actions.js');
-      if (await availability.handleAvailabilityClick(e)) return;
+      const availability = await import('../connected/screens/disponibilidad/disponibilidad.acciones.js');
+      if (await availability.handleClicDisponibilidad(e)) return;
     }
     if (!isDemo && user.rol === 'superadmin' && state.page === 'negocio') {
       const licenseRetry = e.target.closest('[data-license-retry]');
@@ -129,24 +129,24 @@ export async function handleClick(e) {
       } catch (error) { toast(error.message); alternarSucursal.disabled = false; }
       return;
     }
-    const addSchedule = e.target.closest('[data-add-schedule]');
+    const addSchedule = e.target.closest('[data-agregar-franja]');
     if (addSchedule) {
-      const day = Number(addSchedule.dataset.addSchedule);
-      const current = [...document.querySelectorAll(`[data-schedule-row][data-schedule-day="${day}"]`)];
-      const selected = resource('professionals', document.querySelector('#schedule-professional').value, state.tenantId);
+      const day = Number(addSchedule.dataset.agregarFranja);
+      const current = [...document.querySelectorAll(`[data-horario-franja][data-horario-dia="${day}"]`)];
+      const selected = resource('professionals', document.querySelector('#profesional-horario').value, state.tenantId);
       const row = current.at(-1);
       const id = draftScheduleId--;
-      row.insertAdjacentHTML('afterend', scheduleRow({ id, day, enabled: true, branchId: Number(row.querySelector('select').value), start: '', end: '', breakStart: '', breakEnd: '' }, selected, state.tenantId, true, current.length));
-      document.querySelector(`[data-schedule-row][data-id="${id}"] input[type="time"]`).focus();
+      row.insertAdjacentHTML('afterend', renderFranjaHorario({ id, day, enabled: true, branchId: Number(row.querySelector('select').value), start: '', end: '', breakStart: '', breakEnd: '' }, selected, state.tenantId, true, current.length));
+      document.querySelector(`[data-horario-franja][data-id="${id}"] input[type="time"]`).focus();
       return;
     }
-    const removeSchedule = e.target.closest('[data-remove-schedule]');
+    const removeSchedule = e.target.closest('[data-quitar-franja]');
     if (removeSchedule) {
-      const row = removeSchedule.closest('[data-schedule-row]');
-      const siblings = document.querySelectorAll(`[data-schedule-row][data-schedule-day="${row.dataset.scheduleDay}"]`);
+      const row = removeSchedule.closest('[data-horario-franja]');
+      const siblings = document.querySelectorAll(`[data-horario-franja][data-horario-dia="${row.dataset.horarioDia}"]`);
       if (!isDemo && siblings.length === 1 && Number(row.dataset.id) > 0) {
-        const selected = resource('professionals', document.querySelector('#schedule-professional').value, state.tenantId);
-        row.insertAdjacentHTML('afterend', scheduleRow({ id: draftScheduleId--, day: Number(row.dataset.scheduleDay), branchId: selected.branchIds[0] || null, enabled: false, start: '', end: '', breakStart: '', breakEnd: '' }, selected, state.tenantId));
+        const selected = resource('professionals', document.querySelector('#profesional-horario').value, state.tenantId);
+        row.insertAdjacentHTML('afterend', renderFranjaHorario({ id: draftScheduleId--, day: Number(row.dataset.horarioDia), branchId: selected.branchIds[0] || null, enabled: false, start: '', end: '', breakStart: '', breakEnd: '' }, selected, state.tenantId));
       }
       if (!isDemo || siblings.length > 1) row.remove();
       return;
@@ -167,7 +167,7 @@ export async function handleClick(e) {
       'nuevo-servicio': () => abrirEditorCatalogo('services'),
       'nueva-sucursal': () => abrirEditorCatalogo('branches'),
       'nuevo-profesional': () => abrirEditorCatalogo('professionals'),
-      'new-block': newBlock,
+      'nuevo-bloqueo': nuevoBloqueo,
       'switch-tenant': switchTenant,
       'new-tenant': newTenant,
       'copy-link': async () => {
@@ -252,11 +252,11 @@ export async function handleClick(e) {
       toast('Modo de agenda actualizado para este negocio.');
       return;
     }
-    const remove = e.target.closest('[data-remove-block]');
+    const remove = e.target.closest('[data-eliminar-bloqueo]');
     if (remove) {
       const b = resource(
         'blocks',
-        Number(remove.dataset.removeBlock),
+        Number(remove.dataset.eliminarBloqueo),
         state.tenantId,
       );
       const el = modal(
@@ -267,7 +267,7 @@ export async function handleClick(e) {
       el.querySelector('#confirm-remove-block').onclick = async () => {
         if (!isDemo) {
           const submit = el.querySelector('#confirm-remove-block'); submit.disabled = true;
-          try { await api(`/bloqueos/${b.id}`, 'DELETE'); (await import('../connected/screens/disponibilidad/view.js')).invalidateProjection(); el.close(); await loadBackendData(); render(); toast('Bloqueo eliminado.'); } catch (error) { toast(error.message); } finally { submit.disabled = false; }
+          try { await api(`/bloqueos/${b.id}`, 'DELETE'); (await import('../connected/screens/disponibilidad/disponibilidad.vista.js')).invalidarProyeccion(); el.close(); await loadBackendData(); render(); toast('Bloqueo eliminado.'); } catch (error) { toast(error.message); } finally { submit.disabled = false; }
           return;
         }
         db.blocks = db.blocks.filter(
@@ -279,11 +279,11 @@ export async function handleClick(e) {
       };
       return;
     }
-    const edit = e.target.closest('[data-edit-block]');
+    const edit = e.target.closest('[data-editar-bloqueo]');
     if (edit) {
-      const block = resource('blocks', Number(edit.dataset.editBlock), state.tenantId);
+      const block = resource('blocks', Number(edit.dataset.editarBloqueo), state.tenantId);
       if (!isDemo && user.rol === 'profesional' && block.professionalId !== user.id) throw new Error('Solo puedes editar tus propios bloqueos.');
-      editBlock(block);
+      editarBloqueo(block);
       return;
     }
     const toggle = e.target.closest('[data-toggle-tenant]');
@@ -336,59 +336,59 @@ document.addEventListener('input', (e) => {
   }
 });
 document.addEventListener('change', (e) => {
-  if (e.target.id === 'block-professional') {
-    setBlockScope(e.target.value);
-    if (e.target.value) state.scheduleProfessional = Number(e.target.value);
+  if (e.target.id === 'profesional-bloqueos') {
+    cambiarAlcanceBloqueos(e.target.value);
+    if (e.target.value) state.profesionalHorario = Number(e.target.value);
     render();
-  } else if (['schedule-professional', 'offering-professional', 'projection-professional'].includes(e.target.id)) {
-    state.scheduleProfessional = Number(e.target.value);
+  } else if (['profesional-horario', 'profesional-oferta', 'profesional-proyeccion'].includes(e.target.id)) {
+    state.profesionalHorario = Number(e.target.value);
     render();
   }
 });
 document.addEventListener('submit', async (e) => {
   const form = e.target;
-  if (isDemo && state.page === 'disponibilidad' && form.id === 'branch-assignments-form') {
+  if (isDemo && state.page === 'disponibilidad' && form.id === 'formulario-asignaciones-sucursales') {
     e.preventDefault();
     const submit = form.querySelector('[type="submit"]');
     if (submit.disabled) return;
     submit.disabled = true;
     try {
       const branchIds = [...new FormData(form).getAll('branchIds')].map(Number);
-      (await import('../demo/screens/disponibilidad/view.js')).saveDemoAssignedBranches(Number(form.dataset.personId), branchIds);
+      (await import('../demo/screens/disponibilidad/disponibilidad.vista.js')).guardarSucursalesAsignadasDemo(Number(form.dataset.personaId), branchIds);
     } catch (error) {
-      const target = form.querySelector('[data-assignment-error]');
+      const target = form.querySelector('[data-asignacion-error]');
       target.textContent = error.message;
       target.hidden = false;
       target.focus();
     } finally { submit.disabled = false; }
     return;
   }
-  if (isDemo && state.page === 'disponibilidad' && ['agenda-configuration-form', 'availability-query-form', 'availability-validation-form', 'affected-appointments-form'].includes(form.id)) {
+  if (isDemo && state.page === 'disponibilidad' && ['formulario-configuracion-agenda', 'formulario-consulta-horarios', 'formulario-validacion-horario', 'formulario-citas-afectadas'].includes(form.id)) {
     e.preventDefault();
-    const demo = await import('../demo/screens/disponibilidad/view.js');
+    const demo = await import('../demo/screens/disponibilidad/disponibilidad.vista.js');
     const data = new FormData(form);
-    if (form.id === 'agenda-configuration-form') {
+    if (form.id === 'formulario-configuracion-agenda') {
       const values = { modo: data.get('modo'), intervaloMinutos: Number(data.get('intervaloMinutos')), anticipacionMinutos: Number(data.get('anticipacionMinutos')), diasFuturos: Number(data.get('diasFuturos')) };
-      if (demo.demoSaveConfiguration(values, validateConfiguration(values))) toast('Reglas guardadas en esta demostración.');
-    } else if (form.id === 'availability-query-form') {
+      if (demo.guardarConfiguracionDemo(values, validarConfiguracionDemo(values))) toast('Reglas guardadas en esta demostración.');
+    } else if (form.id === 'formulario-consulta-horarios') {
       const values = { personalId: Number(data.get('personalId')), sucursalId: Number(data.get('sucursalId')), servicioId: Number(data.get('servicioId')), from: data.get('from'), to: data.get('to'), modalidad: data.get('modalidad') };
-      const errors = validateInclusiveRange(values.from, values.to);
+      const errors = validarRangoInclusivo(values.from, values.to);
       for (const key of ['personalId', 'sucursalId', 'servicioId']) if (!Number.isSafeInteger(values[key]) || values[key] <= 0) errors[key] = 'Selecciona un identificador válido.';
-      demo.demoQuery(values, errors);
-    } else if (form.id === 'availability-validation-form') {
-      demo.demoValidate({ personalId: Number(data.get('personalId')), sucursalId: Number(data.get('sucursalId')), servicioId: Number(data.get('servicioId')), fechaLocal: data.get('fechaLocal'), horaInicio: data.get('horaInicio'), modalidad: data.get('modalidad') });
+      demo.consultarHorariosDemo(values, errors);
+    } else if (form.id === 'formulario-validacion-horario') {
+      demo.validarHorarioDemo({ personalId: Number(data.get('personalId')), sucursalId: Number(data.get('sucursalId')), servicioId: Number(data.get('servicioId')), fechaLocal: data.get('fechaLocal'), horaInicio: data.get('horaInicio'), modalidad: data.get('modalidad') });
     } else {
       const values = { personalId: data.get('personalId') ? Number(data.get('personalId')) : '', sucursalId: data.get('sucursalId') ? Number(data.get('sucursalId')) : '', from: data.get('from'), to: data.get('to') };
-      demo.demoAffected(values, validateInclusiveRange(values.from, values.to));
+      demo.consultarAfectadasDemo(values, validarRangoInclusivo(values.from, values.to));
     }
     return;
   }
   if (
-    !['schedule-form', 'business-form', 'notification-form'].includes(form.id)
+    !['formulario-horario', 'business-form', 'notification-form'].includes(form.id)
   )
     return;
   e.preventDefault();
-  if (!isDemo && form.id !== 'schedule-form') { toast(pending); return; }
+  if (!isDemo && form.id !== 'formulario-horario') { toast(pending); return; }
   const submit = form.querySelector('[type="submit"]');
   if (submit.disabled) return;
   submit.disabled = true;
@@ -408,20 +408,20 @@ document.addEventListener('submit', async (e) => {
       t.reminders = f.has('remind');
       t.reminder = Number(f.get('hours'));
     }
-    if (form.id === 'schedule-form') {
-      const p = Number(document.querySelector('#schedule-professional').value);
+    if (form.id === 'formulario-horario') {
+      const p = Number(document.querySelector('#profesional-horario').value);
       const professional = resource('professionals', p, state.tenantId);
-      const updates = readScheduleRows(form, state.tenantId, p);
+      const updates = leerFranjasHorario(form, state.tenantId, p);
       scheduleRows = updates;
-      const scheduleErrors = validateScheduleRows(updates, professional.branchIds, isDemo);
+      const scheduleErrors = validarFranjasHorario(updates, professional.branchIds, isDemo);
       if (Object.keys(scheduleErrors).length) {
-        showAvailabilityErrors(form, scheduleErrors);
+        mostrarErroresDisponibilidad(form, scheduleErrors);
         return;
       }
-      clearAvailabilityErrors(form);
+      limpiarErroresDisponibilidad(form);
       if (!isDemo) {
-        await api(`/profesionales/${p}/horario`, 'PUT', schedulePayload(updates));
-        (await import('../connected/screens/disponibilidad/view.js')).invalidateProjection();
+        await api(`/profesionales/${p}/horario`, 'PUT', crearPayloadHorario(updates));
+        (await import('../connected/screens/disponibilidad/disponibilidad.vista.js')).invalidarProyeccion();
         try { await loadBackendData(); render(); toast('Horario guardado.'); } catch (error) { toast('Horario guardado. No se pudo actualizar la vista: ' + error.message); }
         return;
       }
@@ -437,22 +437,22 @@ document.addEventListener('submit', async (e) => {
     render();
     toast('Configuración guardada en esta demostración.');
   } catch (error) {
-    if (form.id === 'schedule-form') {
-      const errors = scheduleApiErrors(error, scheduleRows);
-      if (errors) showAvailabilityErrors(form, errors);
-      else showAvailabilityGeneralError(form, error, '#schedule-error');
+    if (form.id === 'formulario-horario') {
+      const errors = interpretarErroresHorario(error, scheduleRows);
+      if (errors) mostrarErroresDisponibilidad(form, errors);
+      else mostrarErrorGeneralDisponibilidad(form, error, '#horario-error');
     } else toast(error.message);
   } finally { submit.disabled = false; }
 });
 
 document.addEventListener('input', (event) => {
-  if (event.target.closest('#schedule-form')) clearAvailabilityField(event.target.form, event.target);
+  if (event.target.closest('#formulario-horario')) limpiarCampoDisponibilidad(event.target.form, event.target);
 });
 document.addEventListener('change', (event) => {
-  if (event.target.closest('#schedule-form')) {
-    if (event.target.matches('input[type="checkbox"][name^="enabled-"]')) {
-      setScheduleRowEnabled(event.target.closest('[data-schedule-row]'), event.target.checked);
+  if (event.target.closest('#formulario-horario')) {
+    if (event.target.matches('input[type="checkbox"][name^="activo-"]')) {
+      cambiarEstadoFranja(event.target.closest('[data-horario-franja]'), event.target.checked);
     }
-    clearAvailabilityField(event.target.form, event.target);
+    limpiarCampoDisponibilidad(event.target.form, event.target);
   }
 });

@@ -1,4 +1,4 @@
-import { zonedParts } from '../../../shared/screens/disponibilidad/operational-contract.js';
+import { partesEnZonaHoraria } from '../../../shared/screens/disponibilidad/disponibilidad.contrato-operativo.js';
 
 export const canManageAppointments = (role) => ['admin_negocio', 'recepcionista'].includes(role);
 const positiveId = (value) => {
@@ -44,7 +44,7 @@ export function manualSlots(response, selection) {
   try { new Intl.DateTimeFormat('es-MX', { timeZone: response.zonaHoraria }).format(); } catch { throw new Error('La zona de disponibilidad no es válida.'); }
   return response.ranuras.map((slot) => {
     if (!Number.isFinite(Date.parse(slot?.inicioUtc)) || !Number.isFinite(Date.parse(slot?.finUtc)) || Date.parse(slot.finUtc) <= Date.parse(slot.inicioUtc)) throw new Error('El horario recibido no es válido.');
-    const local = zonedParts(slot.inicioUtc, response.zonaHoraria);
+    const local = partesEnZonaHoraria(slot.inicioUtc, response.zonaHoraria);
     if (local.date !== selection.fechaLocal || !local.time) throw new Error('El horario recibido no corresponde a esta fecha.');
     return { inicioUtc: slot.inicioUtc, finUtc: slot.finUtc, fechaLocal: local.date, horaInicio: local.time };
   });

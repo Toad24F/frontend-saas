@@ -1656,20 +1656,20 @@ html[data-theme='dark'] .sidebar .brand .brand-logo-on-light { display: none; }
   .daily-insight p {
     max-width: 100%;
   }
-  .mode-card {
+  .opcion-modo-agenda {
     padding: 15px;
     gap: 10px;
   }
-  .mode-card strong {
+  .opcion-modo-agenda strong {
     font-size: 13px;
   }
-  .mode-card small {
+  .opcion-modo-agenda small {
     font-size: 11px;
   }
-  .mode-card > .icon {
+  .opcion-modo-agenda > .icon {
     display: none;
   }
-  .mode-options {
+  .opciones-modo-agenda {
     gap: 12px;
   }
   .booking-columns {
@@ -1712,7 +1712,7 @@ html[data-theme='dark'] .sidebar .brand .brand-logo-on-light { display: none; }
   .settings-grid,
   .notification-grid,
   .report-tables,
-  .mode-options {
+  .opciones-modo-agenda {
     grid-template-columns: 1fr;
   }
   .entity-grid {
@@ -1805,29 +1805,29 @@ html[data-theme='dark'] .sidebar .brand .brand-logo-on-light { display: none; }
   .section-form-footer > .btn {
     margin-left: auto;
   }
-  .mode-section {
+  .seccion-modo-agenda {
     padding: 20px;
   }
-  .mode-card > .icon {
+  .opcion-modo-agenda > .icon {
     display: block;
   }
-  .mode-card {
+  .opcion-modo-agenda {
     padding: 17px;
   }
-  .mode-card strong {
+  .opcion-modo-agenda strong {
     font-size: 14px;
   }
-  .mode-card small {
+  .opcion-modo-agenda small {
     font-size: 12px;
   }
   .professional-select {
     max-width: 100%;
     width: 100%;
   }
-  .block-item {
+  .bloqueo-entrada {
     padding: 17px 20px;
   }
-  .block-item small {
+  .bloqueo-entrada small {
     font-size: 12px;
     line-height: 1.8;
   }

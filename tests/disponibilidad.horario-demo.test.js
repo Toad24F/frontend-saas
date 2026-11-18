@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { db, TODAY } from '../src/shared/data.js';
 import { loadData } from '../src/demo/data.js';
-import { slots } from '../src/demo/availability.js';
+import { buscarHorariosDemo } from '../src/demo/disponibilidad.motor.js';
 import { validateSchedules, appointmentCovered } from '../src/demo/schedule.js';
 
 const fixture = JSON.parse(await readFile(new URL('../public/data/demo.json', import.meta.url), 'utf8'));
@@ -32,10 +32,10 @@ test('acepta comer y regresar a otra sucursal', () => {
   db.schedules = db.schedules.filter((s) => !(s.professionalId === 1 && s.day === 2));
   db.schedules.push(...rows.map((s, i) => ({ ...s, id: 100 + i, professionalId: 1, tenantId: 1 })));
   const base = { tenantId: 1, professionalId: 1, serviceId: 1, day: TODAY, mode: 'free' };
-  assert.ok(slots({ ...base, branchId: 1 }).includes('17:00'));
-  assert.ok(!slots({ ...base, branchId: 1 }).includes('12:00'));
-  assert.ok(slots({ ...base, branchId: 2 }).includes('12:00'));
-  assert.ok(!slots({ ...base, branchId: 2 }).includes('13:00'));
+  assert.ok(buscarHorariosDemo({ ...base, branchId: 1 }).includes('17:00'));
+  assert.ok(!buscarHorariosDemo({ ...base, branchId: 1 }).includes('12:00'));
+  assert.ok(buscarHorariosDemo({ ...base, branchId: 2 }).includes('12:00'));
+  assert.ok(!buscarHorariosDemo({ ...base, branchId: 2 }).includes('13:00'));
   assert.ok(appointmentCovered({ date: TODAY, branchId: 1, start: '14:00', end: '14:45' }, rows));
 });
 

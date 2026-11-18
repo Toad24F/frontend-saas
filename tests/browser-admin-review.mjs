@@ -160,21 +160,21 @@ try {
   const locked = page.locator('input[type=checkbox][name=branchIds][value="1"]');
   await locked.waitFor();
   assert.equal(await locked.isDisabled(), true);
-  const values = await page.locator('#branch-assignments-form').evaluate((form) => new FormData(form).getAll('branchIds'));
+  const values = await page.locator('#formulario-asignaciones-sucursales').evaluate((form) => new FormData(form).getAll('branchIds'));
   assert.deepEqual(values, ['1']);
   await page.locator('input[type=checkbox][name=branchIds][value="2"]').check();
   await page.getByRole('button', { name: 'Guardar asignaciones' }).click();
-  await page.waitForFunction(() => document.querySelector('[data-assignment-summary]')?.textContent === 'Sin cambios pendientes');
+  await page.waitForFunction(() => document.querySelector('[data-asignacion-resumen]')?.textContent === 'Sin cambios pendientes');
   assert.deepEqual(assigned, [1, 2]);
   await page.getByRole('tab', { name: 'Oferta por sucursal' }).click();
-  await page.locator('[data-offering-select]').waitFor();
-  await page.locator('[data-offering-select]').selectOption('2');
-  assert.equal(await page.locator('[data-offering-branch="2"]').isVisible(), true);
-  assert.equal(await page.locator('[data-offering-branch="1"]').isVisible(), false);
-  assert.equal(await page.locator('[data-availability-action=attention]:visible').getAttribute('class'), 'btn action-caution');
+  await page.locator('[data-oferta-selector]').waitFor();
+  await page.locator('[data-oferta-selector]').selectOption('2');
+  assert.equal(await page.locator('[data-oferta-sucursal="2"]').isVisible(), true);
+  assert.equal(await page.locator('[data-oferta-sucursal="1"]').isVisible(), false);
+  assert.equal(await page.locator('[data-disponibilidad-accion=atencion]:visible').getAttribute('class'), 'btn action-caution');
   await page.getByRole('tab', { name: 'Horario semanal' }).click();
   await page.locator('.app-toast').first().waitFor({ state: 'hidden' });
-  assert.equal(await page.locator('#schedule-form .section-form-footer .schedule-help').count(), 1);
+  assert.equal(await page.locator('#formulario-horario .section-form-footer .horario-ayuda').count(), 1);
   for (const width of [1366, 390, 320]) for (const theme of ['light', 'dark']) {
     await page.setViewportSize({ width, height: 900 });
     await page.evaluate((theme) => { localStorage.setItem('cita-theme', theme); document.documentElement.dataset.theme = theme; }, theme);
@@ -188,14 +188,14 @@ try {
   for (const width of [1366, 390, 320]) for (const theme of ['light', 'dark']) {
     await page.setViewportSize({ width, height: 900 });
     await page.evaluate((theme) => { localStorage.setItem('cita-theme', theme); document.documentElement.dataset.theme = theme; }, theme);
-    await page.locator('[data-action=new-block]').click();
+    await page.locator('[data-action=nuevo-bloqueo]').click();
     await page.locator('.form-drawer[open]').waitFor();
     await page.screenshot({ animations: 'disabled', path: `test-results/admin-review/${width}-${theme}-alta-bloqueo.png` });
     await page.getByRole('dialog').getByRole('button', { name: 'Cancelar', exact: true }).click();
   }
   await goto('disponibilidad/negocio');
-  await page.locator('.configuration-rounding').waitFor();
-  const configurationText = await page.locator('#agenda-configuration-form').innerText();
+  await page.locator('.configuracion-redondeo').waitFor();
+  const configurationText = await page.locator('#formulario-configuracion-agenda').innerText();
   for (const text of ['primer horario disponible de cada día', '10:02', '10:05', 'limpie o desinfecte', 'si son las 10:00', 'a partir de las 11:00', 'hasta 20 días en el futuro']) assert.ok(configurationText.includes(text), text);
   for (const width of [1366, 390, 320]) for (const theme of ['light', 'dark']) {
     await page.setViewportSize({ width, height: 900 });

@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { paginarLocalmente, renderPaginacionLocal } from '../src/shared/screens/paginacion.local.js';
-import { filteredBlocks, blockRangeError } from '../src/shared/screens/disponibilidad/block-filters.js';
-const filtrosBase = { search: '', type: 'all', branch: 'all', from: '', to: '' };
+import { filtrarBloqueos, errorRangoBloqueos } from '../src/shared/screens/disponibilidad/disponibilidad.filtros-bloqueos.js';
+const filtrosBase = { busqueda: '', tipo: 'todos', sucursal: 'todos', desde: '', hasta: '' };
 
 test('páginas locales: 0/1/10/11/21, límites y controles condicionales', () => {
   for (const cantidad of [0, 1, 10, 11, 21]) {
@@ -32,15 +32,15 @@ test('bloqueos: rango por solapamiento, búsqueda normalizada y globales aplicab
     { id: 3, professionalId: 8, branchId: 3, reason: 'Otra sede', type: 'emergencia', date: '2026-11-10', endDate: '2026-11-10' },
   ];
   const copia = structuredClone(registros);
-  const filtros = { ...filtrosBase, branch: '2', from: '2026-11-10', to: '2026-11-12' };
-  assert.deepEqual(filteredBlocks(registros, filtros, '7').map((registro) => registro.id), [2, 1]);
-  assert.deepEqual(filteredBlocks(registros, { ...filtros, type: 'dia_festivo' }, '7').map((registro) => registro.id), [2]);
-  assert.deepEqual(filteredBlocks(registros, { ...filtrosBase, search: ' VACACION ' }, '7').map((registro) => registro.id), [1]);
+  const filtros = { ...filtrosBase, sucursal: '2', desde: '2026-11-10', hasta: '2026-11-12' };
+  assert.deepEqual(filtrarBloqueos(registros, filtros, '7').map((registro) => registro.id), [2, 1]);
+  assert.deepEqual(filtrarBloqueos(registros, { ...filtros, tipo: 'dia_festivo' }, '7').map((registro) => registro.id), [2]);
+  assert.deepEqual(filtrarBloqueos(registros, { ...filtrosBase, busqueda: ' VACACION ' }, '7').map((registro) => registro.id), [1]);
   assert.deepEqual(registros, copia);
 });
 test('bloqueos: fechas inválidas y rango invertido son errores, no consultas vacías', () => {
-  assert.match(blockRangeError({ from: '2026-02-30', to: '' }), /válidas/);
-  assert.match(blockRangeError({ from: '2026-11-10', to: '2026-11-09' }), /posterior/);
-  assert.equal(blockRangeError({ from: '2026-01-01', to: '2027-01-01' }), '');
-  assert.equal(blockRangeError({ from: '', to: '' }), '');
+  assert.match(errorRangoBloqueos({ desde: '2026-02-30', hasta: '' }), /válidas/);
+  assert.match(errorRangoBloqueos({ desde: '2026-11-10', hasta: '2026-11-09' }), /posterior/);
+  assert.equal(errorRangoBloqueos({ desde: '2026-01-01', hasta: '2027-01-01' }), '');
+  assert.equal(errorRangoBloqueos({ desde: '', hasta: '' }), '');
 });

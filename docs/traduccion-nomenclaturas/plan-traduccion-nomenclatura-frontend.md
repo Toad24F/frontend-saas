@@ -1,7 +1,7 @@
 # Reglas y plan de traducción de la nomenclatura del frontend
 
 Fecha de definición: 2026-11-16  
-Estado: implementación por conjuntos; glosario, Sucursales, Servicios, Profesionales, Recepcionistas, Clientes y Catálogos compartidos terminados
+Estado: implementación por conjuntos; glosario, Sucursales, Servicios, Profesionales, Recepcionistas, Clientes, Catálogos compartidos y Disponibilidad terminados
 
 ## Objetivo
 
@@ -227,15 +227,17 @@ Resultado: conjunto cerrado el 2026-11-17 en [Catálogos compartidos](resultado-
 
 Este conjunto atraviesa código compartido, conectado, demo, estilos y numerosos contratos. Puede trabajarse por subgrupos, pero cada subgrupo debe quedar funcional antes de continuar.
 
-- [ ] Traducir como un primer subgrupo `shared/screens/disponibilidad/view.js`, `actions.js`, `errors.js` y `style.css`.
-- [ ] Traducir como un segundo subgrupo `schedule-rows.js`, `groups.js`, `offering.js` y `branch-assignments.js`.
-- [ ] Traducir juntos `block-directory.js` y `block-filters.js` con sus selectores y pruebas.
-- [ ] Traducir juntos `operational.js`, `operational-contract.js` y `operational.css`, sin cambiar el contrato operativo.
-- [ ] Traducir juntos `connected/screens/disponibilidad/view.js`, `actions.js`, `payload.js` y `style.css`; conservar `payload`.
-- [ ] Traducir juntos `connected/modules/disponibilidad/configuration.js` y `payload.js`; conservar `payload`.
-- [ ] Traducir `demo/availability.js` y `demo/screens/disponibilidad/view.js` sin presentar capacidades ficticias como conectadas.
-- [ ] Actualizar todas las pruebas de disponibilidad, horarios, grupos, bloqueos y asignaciones.
-- [ ] Verificar conectado/demo, roles, estados de error, escritorio/móvil y ambos temas.
+- [x] Traducir como un primer subgrupo `shared/screens/disponibilidad/view.js`, `actions.js`, `errors.js` y `style.css`.
+- [x] Traducir como un segundo subgrupo `schedule-rows.js`, `groups.js`, `offering.js` y `branch-assignments.js`.
+- [x] Traducir juntos `block-directory.js` y `block-filters.js` con sus selectores y pruebas.
+- [x] Traducir juntos `operational.js`, `operational-contract.js` y `operational.css`, sin cambiar el contrato operativo.
+- [x] Traducir juntos `connected/screens/disponibilidad/view.js`, `actions.js`, `payload.js` y `style.css`; conservar `payload`.
+- [x] Traducir juntos `connected/modules/disponibilidad/configuration.js` y `payload.js`; conservar `payload`.
+- [x] Traducir `demo/availability.js` y `demo/screens/disponibilidad/view.js` sin presentar capacidades ficticias como conectadas.
+- [x] Actualizar todas las pruebas de disponibilidad, horarios, grupos, bloqueos y asignaciones.
+- [x] Verificar conectado/demo, roles, estados de error, escritorio/móvil y ambos temas.
+
+Resultado: conjunto cerrado el 2026-11-17 en [Disponibilidad](resultado-disponibilidad-2026-11-17.md).
 
 ### 8. Agenda — REALIZAR CON MUCHO CUIDADO
 

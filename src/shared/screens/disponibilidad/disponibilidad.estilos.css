@@ -1,0 +1,390 @@
+.disponibilidad-espacio { min-width: 0; }
+.disponibilidad-error-campo { margin: 6px 0 0; color: #a43835; font-size: 11px; font-weight: 600; line-height: 1.35; }
+.disponibilidad-seccion-adicional { margin-top: 24px; padding: 24px; }
+.disponibilidad-seccion-adicional .section-heading { margin-bottom: 18px; }
+.disponibilidad-seccion-adicional .section-heading p, .disponibilidad-nota { color: var(--muted, #667085); font-size: 13px; }
+.disponibilidad-nota { margin: 16px 0 0; line-height: 1.5; }
+.sucursales-asignadas-lista { border-top: 1px solid var(--border); }
+.sucursal-asignada-fila { display: flex; justify-content: space-between; align-items: center; gap: 16px; min-height: 62px; padding: 12px 4px; border-bottom: 1px solid var(--border); cursor: pointer; }
+.sucursal-asignada-fila:has(input:disabled) { cursor: default; }
+.sucursal-asignada-nombre { display: grid; gap: 3px; min-width: 0; font-size: 13px; }
+.sucursal-asignada-nombre small, .sucursal-asignada-control > span { color: var(--muted); font-size: 12px; }
+.sucursal-asignada-control { display: flex; align-items: center; justify-content: flex-end; gap: 18px; white-space: nowrap; }
+.sucursal-asignada-control input { width: 20px; height: 20px; margin: 0; cursor: pointer; }
+.sucursal-asignada-control input:disabled { cursor: not-allowed; }
+.sucursal-asignada-control input:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.asignacion-pie { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 20px; }
+.asignacion-pie > span { color: var(--muted); font-size: 12px; }
+#formulario-asignaciones-sucursales .btn-primary:disabled { --bs-btn-disabled-bg: var(--accent); --bs-btn-disabled-border-color: var(--accent); opacity: .5; box-shadow: none; }
+#formulario-asignaciones-sucursales [data-asignacion-aviso] { padding: 12px 14px; border: 1px solid var(--border); border-radius: 8px; }
+@media (max-width: 767px) { .sucursal-asignada-fila { min-height: 64px; } .sucursal-asignada-control { gap: 10px; } .asignacion-pie { flex-wrap: wrap; } .asignacion-pie .btn { width: 100%; } }
+[data-disponibilidad-campo].has-error > :is(input, select, textarea),
+[data-disponibilidad-campo].has-error .form-control,
+[data-disponibilidad-campo].has-error .form-select,
+.oferta-opciones.has-error { border-color: #c6534b; }
+[data-disponibilidad-campo].has-error > :is(input, select, textarea):focus,
+[data-disponibilidad-campo].has-error .form-control:focus,
+[data-disponibilidad-campo].has-error .form-select:focus,
+[data-disponibilidad-campo].has-error:focus { outline: 2px solid #c6534b; outline-offset: 2px; box-shadow: none; }
+.horario-tabla td.has-error { box-shadow: inset 0 -2px #c6534b; }
+.horario-tabla .disponibilidad-error-campo { max-width: 180px; white-space: normal; }
+html[data-theme='dark'] .disponibilidad-error-campo { color: #ffb2a8; }
+.disponibilidad-espacio [data-disponibilidad-contexto][hidden] { display: none !important; }
+.disponibilidad-contexto-profesional {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+  margin: 0 0 22px;
+  padding: 16px 20px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+}
+.disponibilidad-avatar-profesional {
+  display: grid;
+  place-items: center;
+  flex: 0 0 46px;
+  width: 46px;
+  height: 46px;
+  border-radius: 10px;
+  background: var(--surface-soft);
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 17px;
+}
+.disponibilidad-avatar-profesional .icon { width: 22px; height: 22px; }
+.disponibilidad-datos-profesional { display: grid; gap: 3px; min-width: 0; flex: 1; }
+.disponibilidad-datos-profesional strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 15px; font-weight: 650; }
+.disponibilidad-datos-profesional small { color: var(--muted); font-size: 12px; }
+.disponibilidad-selector-profesional { display: grid; gap: 5px; flex: 0 1 250px; min-width: 190px; }
+.disponibilidad-selector-profesional span { color: var(--muted); font-size: 11px; font-weight: 650; }
+.disponibilidad-selector-profesional select { width: 100%; min-height: 42px; font-weight: 600; }
+.disponibilidad-pestanas {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  margin: 2px 0 20px;
+  padding: 0 2px 8px;
+  border-bottom: 1px solid var(--border);
+  scrollbar-width: thin;
+}
+.disponibilidad-pestanas button {
+  flex: 0 0 auto;
+  min-height: 42px;
+  padding: 9px 14px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 650;
+  transition: background .2s ease, color .2s ease;
+}
+.disponibilidad-pestanas button:hover { background: var(--surface-soft); color: var(--ink); }
+.disponibilidad-pestanas button.is-selected { background: var(--accent); color: #fff; }
+.disponibilidad-pestanas button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.disponibilidad-espacio [role='tabpanel'][hidden] { display: none !important; }
+.disponibilidad-espacio [role='tabpanel'] { min-width: 0; }
+.disponibilidad-espacio .disponibilidad-seccion + .disponibilidad-seccion,
+.disponibilidad-espacio .disponibilidad-seccion + .disponibilidad-seccion-adicional { margin-top: 18px; }
+.disponibilidad-espacio .seccion-modo-agenda { margin-bottom: 0; }
+.disponibilidad-espacio .disponibilidad-seccion-adicional { margin-top: 0; }
+.disponibilidad-espacio .section-heading { gap: 12px; }
+.disponibilidad-espacio .section-heading h2 { letter-spacing: -.025em; }
+.disponibilidad-espacio .section-heading p { text-wrap: pretty; }
+@media (max-width: 767px) {
+  .disponibilidad-seccion-adicional { padding: 18px; }
+  .disponibilidad-contexto-profesional { flex-wrap: wrap; gap: 11px; padding: 14px; margin-bottom: 16px; }
+  .disponibilidad-selector-profesional { flex-basis: 100%; min-width: 0; }
+  .disponibilidad-pestanas { gap: 4px; margin-bottom: 14px; }
+  .disponibilidad-pestanas button { min-height: 44px; padding: 8px 12px; white-space: nowrap; }
+  .disponibilidad-espacio .section-heading { align-items: stretch; flex-direction: column; }
+  .disponibilidad-espacio .section-heading > .btn,
+  .disponibilidad-espacio .section-heading > button { min-height: 44px; }
+  .disponibilidad-espacio .opciones-modo-agenda { grid-template-columns: minmax(0, 1fr); gap: 9px; }
+  .disponibilidad-espacio .section-form-footer > .btn { width: 100%; margin-left: 0; }
+}
+
+.seccion-modo-agenda {
+  padding: 24px;
+  margin-bottom: 24px;
+}
+.seccion-modo-agenda > div > p {
+  font-size: 13px;
+  margin-top: 7px;
+}
+.opciones-modo-agenda {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 23px;
+}
+.opcion-modo-agenda {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  border: 1px solid var(--border);
+  padding: 19px;
+  border-radius: 8px;
+  background: #fff;
+  text-align: left;
+}
+.opcion-modo-agenda > .icon {
+  color: #9da89f;
+  width: 25px;
+  height: 25px;
+}
+.opcion-modo-agenda > span {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  flex: 1;
+}
+.opcion-modo-agenda strong {
+  font-size: 14px;
+  font-weight: 600;
+}
+.opcion-modo-agenda small {
+  font-size: 12px;
+  color: #9a9fa7;
+}
+.opcion-modo-agenda > i,
+.choice-radio {
+  height: 19px;
+  width: 19px;
+  border: 1px solid #dce1dd;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.opcion-modo-agenda.selected {
+  border-color: #e6957a;
+  background: #fff9f6;
+  box-shadow: 0 0 0 1px #ed68430a;
+}
+.opcion-modo-agenda.selected > i {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: white;
+}
+.opcion-modo-agenda > i > .icon {
+  width: 12px;
+  height: 12px;
+}
+.professional-select {
+  width: auto;
+  max-width: 240px;
+  font-size: 13px;
+}
+.horario-tabla {
+  min-width: 1030px;
+}
+.horario-tabla select { min-width: 145px; }
+.horario-tabla .par-horas { min-width: 215px; }
+.horario-tabla th:last-child,
+.horario-tabla td:last-child {
+  position: sticky;
+  right: 0;
+  background: #fff;
+  box-shadow: -8px 0 14px -14px #344054;
+}
+.horario-tabla .horario-franja-inactiva td:last-child { background: #fafbfc; }
+.horario-tabla .horario-dia-0 { --schedule-accent: #57925b; --schedule-tint: #f0f8ee; }
+.horario-tabla .horario-dia-1 { --schedule-accent: #467fc2; --schedule-tint: #eef5fd; }
+.horario-tabla .horario-dia-2 { --schedule-accent: #278c80; --schedule-tint: #ebf8f5; }
+.horario-tabla .horario-dia-3 { --schedule-accent: #8664bf; --schedule-tint: #f3effa; }
+.horario-tabla .horario-dia-4 { --schedule-accent: #bd782c; --schedule-tint: #fff5e9; }
+.horario-tabla .horario-dia-5 { --schedule-accent: #b95883; --schedule-tint: #fdf0f5; }
+.horario-tabla .horario-dia-6 { --schedule-accent: #626db9; --schedule-tint: #f0f1fd; }
+.horario-tabla tbody tr:not(.horario-franja-inactiva) > td {
+  background: var(--schedule-tint);
+}
+.horario-tabla tbody tr.horario-franja-adicional:not(.horario-franja-inactiva) > td {
+  background: color-mix(in srgb, var(--schedule-tint), var(--schedule-accent) 7%);
+}
+.horario-tabla tbody tr > td:first-child {
+  border-left: 4px solid var(--schedule-accent);
+}
+.horario-dia-etiqueta {
+  color: var(--schedule-accent);
+  font-weight: 700;
+}
+.horario-tabla .horario-franja-inactiva .horario-dia-etiqueta { color: inherit; }
+.horario-acciones { display: flex; align-items: center; gap: 6px; }
+.horario-agregar-franja { min-width: 34px; padding: 4px 10px; font-size: 18px; line-height: 1.2; }
+.horario-ayuda { margin: 12px 20px 0; color: #667085; font-size: 13px; }
+.horario-tabla td {
+  padding: 12px;
+}
+.horario-tabla .form-check {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin: 0;
+  min-width: 100px;
+}
+.horario-tabla .form-check-input {
+  margin-top: 0;
+}
+.horario-tabla .form-control,
+.horario-tabla .form-select {
+  font-size: 12px;
+  min-height: 34px;
+}
+.horario-tabla input[type='time'] {
+  min-width: 95px;
+  max-width: 120px;
+}
+.horario-franja-inactiva {
+  background: #fafbfc !important;
+  color: #aaa !important;
+}
+.horario-franja-inactiva input:not([type='checkbox']),
+.horario-franja-inactiva select {
+  opacity: 0.6;
+}
+.par-horas {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.form-check-input:checked {
+  background-color: var(--accent);
+  border-color: var(--accent);
+}
+.form-switch .form-check-input {
+  width: 2.5em;
+  height: 1.3em;
+}
+.form-check-input {
+  cursor: pointer;
+}
+.section-form-footer {
+  border-top: 1px solid var(--border);
+  padding: 19px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+.section-form-footer > span {
+  font-size: 11px;
+  color: #98a098;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.section-form-footer > span > .icon {
+  width: 15px;
+  height: 15px;
+}
+.bloqueo-entrada {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 24px;
+  border-top: 1px solid var(--border);
+}
+.bloqueo-entrada > div {
+  flex: 1;
+}
+.bloqueo-entrada strong {
+  font-size: 13px;
+  font-weight: 500;
+}
+.bloqueo-entrada small {
+  display: block;
+  font-size: 11px;
+  color: #9a9fa8;
+  margin-top: 5px;
+}
+
+@media (max-width: 767px) {
+  #formulario-horario > .table-responsive { width: 100%; max-width: 100%; overflow: visible; }
+  #formulario-horario .horario-tabla,
+  #formulario-horario .horario-tabla tbody { display: block; width: 100%; min-width: 0; max-width: 100%; }
+  #formulario-horario .horario-tabla tbody { padding: 10px; }
+  #formulario-horario .horario-tabla tbody tr {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+    min-width: 0;
+    margin-bottom: 10px;
+    overflow: hidden;
+  }
+  #formulario-horario .horario-tabla tbody td { min-width: 0; width: auto; padding: 9px 12px; }
+  #formulario-horario .horario-tabla tbody td:first-child {
+    grid-column: 1;
+    grid-row: 1;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  #formulario-horario .horario-tabla tbody td:nth-child(2) { grid-column: 1 / -1; grid-row: 2; }
+  #formulario-horario .horario-tabla tbody td:nth-child(3) { grid-column: 1; grid-row: 3; }
+  #formulario-horario .horario-tabla tbody td:nth-child(5) { grid-column: 2; grid-row: 3; }
+  #formulario-horario .horario-tabla tbody td:nth-child(4) { grid-column: 1 / -1; grid-row: 4; padding-top: 3px; padding-bottom: 12px; }
+  #formulario-horario .horario-tabla tbody td:last-child {
+    grid-column: 2;
+    grid-row: 1;
+    position: static;
+    padding: 5px 10px;
+    border-bottom: 1px solid var(--border);
+    box-shadow: none;
+    background: var(--schedule-tint);
+  }
+  #formulario-horario .horario-tabla tbody td:last-child::before { display: none; }
+  #formulario-horario .horario-tabla .horario-acciones { justify-content: flex-end; }
+  #formulario-horario .horario-tabla .horario-agregar-franja { min-width: 34px; min-height: 34px; padding: 3px 8px; }
+  #formulario-horario .horario-tabla select,
+  #formulario-horario .horario-tabla input[type='time'] { display: block; width: 100%; max-width: 100%; min-width: 0; }
+  #formulario-horario .horario-tabla .par-horas { min-width: 0; gap: 6px; }
+  #formulario-horario .horario-tabla .par-horas input { flex: 1 1 0; min-width: 0; }
+  #formulario-horario .horario-tabla .par-horas > span { flex: 0 0 auto; }
+  #formulario-horario .horario-tabla tbody td:nth-child(3),
+  #formulario-horario .horario-tabla tbody td:nth-child(5) { padding-bottom: 6px; }
+  #formulario-horario .horario-tabla tbody td:nth-child(3) { padding-right: 5px; }
+  #formulario-horario .horario-tabla tbody td:nth-child(5) { padding-left: 5px; }
+  #formulario-horario .horario-tabla tbody td:nth-child(3)::before,
+  #formulario-horario .horario-tabla tbody td:nth-child(5)::before { margin-bottom: 4px; }
+  /* En la tabla conectada, Salida ocupa la cuarta celda al retirarse Descanso. */
+  #formulario-horario .horario-tabla--conectado tbody td:nth-child(4) {
+    grid-column: 2; grid-row: 3; padding: 9px 12px 6px 5px;
+  }
+  #formulario-horario .horario-tabla--conectado tbody td:nth-child(5) {
+    grid-column: 2; grid-row: 1; padding: 5px 10px;
+  }
+  #formulario-horario .horario-tabla--conectado tbody td:nth-child(4)::before { margin-bottom: 4px; }
+  html[data-theme='dark'] #formulario-horario .horario-tabla tbody td:last-child {
+    background: color-mix(in srgb, var(--schedule-accent) 10%, var(--surface));
+  }
+}
+.oferta-selector { display: grid; gap: 7px; max-width: 400px; font-size: 13px; }
+.oferta-resumen { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin: 20px 0; color: var(--muted); font-size: 13px; }
+.oferta-resumen p { margin: 0; }
+.oferta-tabla { width: 100%; min-width: 0; table-layout: fixed; }
+.oferta-tabla :is(td, th) { white-space: normal; overflow-wrap: anywhere; }
+.oferta-acciones { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+.oferta-espacio [data-oferta-sucursal][hidden] { display: none !important; }
+.horario-ayuda { max-width: 760px; line-height: 1.6; }
+@media (max-width: 767px) {
+  .oferta-tabla, .oferta-tabla tbody, .oferta-tabla tr, .oferta-tabla td { display: block; width: 100%; }
+  .oferta-tabla thead { display: none; }
+  .oferta-tabla tr { padding: 12px 0; border-bottom: 1px solid var(--border); }
+  .oferta-tabla td { padding: 7px 0; border: 0; }
+  .oferta-tabla td::before { content: attr(data-label) ': '; color: var(--muted); }
+  .oferta-acciones .btn { width: 100%; white-space: normal; min-height: 44px; }
+}
+.bloqueos-filtros { display: flex; flex-wrap: wrap; align-items: end; gap: 12px; }
+.bloqueos-directorio > .bloqueos-filtros { margin: 0 24px; }
+.bloqueos-directorio > .disponibilidad-nota { margin: 16px 24px; }
+.bloqueos-directorio .paginacion-local { margin: 22px 24px; }
+.bloqueos-directorio [role="alert"] { margin: 16px 24px; color: var(--danger, #b42318); }
+.bloqueos-filtros label { display: grid; gap: 6px; flex: 1 1 130px; min-width: 0; font-size: 12px; }
+.bloqueos-filtros label:first-child { flex: 2 1 190px; }
+.bloqueos-filtros :is(input, select, button) { min-height: 44px; }
+.bloqueos-directorio [data-limpiar-bloqueos]:disabled { opacity: .45; }
+.bloqueos-directorio .bloqueo-entrada small { display: block; overflow-wrap: anywhere; }
+@media (max-width: 767px) { .bloqueos-filtros label, .bloqueos-filtros label:first-child { flex-basis: 100%; } .bloqueos-filtros > button { width: 100%; } }
