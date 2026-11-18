@@ -25,6 +25,9 @@ Un nombre solo puede traducirse cuando se haya comprobado que es interno. Si atr
 | `attempt` | `intento` | Envío recuperable con un marcador temporal. |
 | `submission` | `envio` | Preparación, registro y resolución de un intento. |
 | `hold` | `apartado` | Retención temporal de un horario en el portal público. |
+| `quota` | `cupo` | Límite, consumo y disponibilidad confirmados por el servidor. |
+| `validity` | `vigencia` | Estado y tiempo de acceso de la licencia. |
+| `price publication` | `publicacion de precios` | Visibilidad de precios en el catálogo público. |
 | `license` | `licencia` | Licencia de acceso del negocio. |
 | `business` / `tenant` | `negocio` | Unidad de aislamiento. En la demo, `tenant` también se traduce como `negocio`; nunca como “inquilino”. |
 | `receptionist` | `recepcionista` | Cuenta de recepción. |

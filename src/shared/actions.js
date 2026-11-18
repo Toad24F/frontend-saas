@@ -71,18 +71,18 @@ export async function handleClick(e) {
       if (await availability.handleClicDisponibilidad(e)) return;
     }
     if (!isDemo && user.rol === 'superadmin' && state.page === 'negocio') {
-      const licenseRetry = e.target.closest('[data-license-retry]');
-      if (licenseRetry) {
-        licenseRetry.disabled = true;
-        try { await (await import('../connected/screens/negocio/actions.js')).retryLicenseOperation(); }
-        finally { licenseRetry.disabled = false; }
+      const reintentarLicencia = e.target.closest('[data-licencia-reintentar]');
+      if (reintentarLicencia) {
+        reintentarLicencia.disabled = true;
+        try { await (await import('../connected/screens/negocio/negocio.acciones.js')).reintentarOperacionLicencia(); }
+        finally { reintentarLicencia.disabled = false; }
         return;
       }
-      const businessAction = e.target.closest('[data-business-action]');
-      const retryDelivery = e.target.closest('[data-retry-delivery]');
-      if (businessAction || retryDelivery) {
-        const { businessAction: run } = await import('../connected/screens/negocio/actions.js');
-        run(businessAction?.dataset.businessAction || 'retry', retryDelivery?.dataset.retryDelivery);
+      const accionNegocio = e.target.closest('[data-accion-negocio]');
+      const reintentarEnvio = e.target.closest('[data-reintentar-envio]');
+      if (accionNegocio || reintentarEnvio) {
+        const { accionNegocio: ejecutarAccion } = await import('../connected/screens/negocio/negocio.acciones.js');
+        ejecutarAccion(accionNegocio?.dataset.accionNegocio || 'reintentar', reintentarEnvio?.dataset.reintentarEnvio);
         return;
       }
     }
@@ -156,11 +156,11 @@ export async function handleClick(e) {
     if (!isDemo && (['nueva-cita', 'nuevo-cliente', 'copy-link', 'filter-reports', 'export-report'].includes(action) || e.target.closest('[data-horario-fecha], button[data-mode]'))) { toast(pending); return; }
     const actionMap = {
       'nueva-recepcionista': async () => (await import('../connected/screens/recepcionistas/recepcionistas.acciones.js')).nuevaRecepcionista(),
-      'change-password': async () => (await import('../connected/screens/cuenta/actions.js')).changePassword(),
-      'cerrar-sesion-cuenta': async () => (await import('../connected/screens/cuenta/actions.js')).closeAccountSession(),
-      'refresh-license': async () => (await import('../connected/screens/cuenta/view.js')).refreshOwnLicense(),
+      'cambiar-contrasena-cuenta': async () => (await import('../connected/screens/cuenta/cuenta.acciones.js')).cambiarContrasena(),
+      'cerrar-sesion-cuenta': async () => (await import('../connected/screens/cuenta/cuenta.acciones.js')).cerrarSesionCuenta(),
+      'consultar-licencia-propia': async () => (await import('../connected/screens/cuenta/cuenta.vista.js')).consultarLicenciaPropia(),
       'back-platform': () => navigate('plataforma'),
-      'retry-business-detail': async () => (await import('../connected/screens/negocio/view.js')).refreshBusinessDetail(),
+      'consultar-detalle-negocio': async () => (await import('../connected/screens/negocio/negocio.vista.js')).consultarDetalleNegocio(),
       'nueva-cita': async () => (await import('./screens/agenda/agenda.acciones.js')).nuevaCitaManual(),
       'go-agenda': () => navigate('agenda'),
       'nuevo-cliente': async () => (await import('../demo/screens/clientes/clientes.acciones.js')).nuevoCliente(),

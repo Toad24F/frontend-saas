@@ -9,7 +9,7 @@ import { validarProfesional, interpretarErrorProfesional, mostrarErroresProfesio
 import { validarServicio, interpretarErrorServicio } from '../servicios/servicios.errores.js';
 import { validarSucursal, interpretarErrorSucursal } from '../sucursales/sucursales.errores.js';
 import { ZONAS_HORARIAS_MEXICO } from '../sucursales/sucursales.zonas-horarias.js';
-import { readOwnRoleQuota, ownQuotaNotice } from '../../../connected/screens/negocio/user-quota.js';
+import { leerCupoRolPropio, renderAvisoCupoPropio } from '../../../connected/screens/negocio/usuarios.cupo.js';
 
 const campoMarcado = (...argumentos) => field(...argumentos).replace('class="form-field"', `class="form-field" data-campo-profesional="${argumentos[1]}"`);
 const selectorMarcado = (...argumentos) => select(...argumentos).replace('class="form-field"', `class="form-field" data-campo-profesional="${argumentos[1]}"`);
@@ -111,7 +111,7 @@ export async function abrirEditorCatalogo(tipo, id) {
     if (!isDemo && !existente && user.rol === 'admin_negocio') {
       // El alta muestra el cupo de la ruta propia; una lectura fallida no se
       // convierte en un límite local supuesto.
-      try { introduccionCupo = ownQuotaNotice('profesionales', await readOwnRoleQuota('profesionales', api)); }
+      try { introduccionCupo = renderAvisoCupoPropio('profesionales', await leerCupoRolPropio('profesionales', api)); }
       catch { introduccionCupo = '<p class="form-intro">No se pudo consultar el cupo vigente. El servidor lo comprobará al guardar.</p>'; }
     }
     let idVigente = existente?.id;

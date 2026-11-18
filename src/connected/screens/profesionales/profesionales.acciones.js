@@ -4,7 +4,7 @@ import { render, state } from '../../../shared/app.js';
 import { resource } from '../../../shared/data.js';
 import { errorSlot } from '../../../shared/forms.js';
 import { escape, modal, toast } from '../../../shared/ui.js';
-import { readOwnRoleQuota, ownQuotaNotice } from '../negocio/user-quota.js';
+import { leerCupoRolPropio, renderAvisoCupoPropio } from '../negocio/usuarios.cupo.js';
 
 const operaciones = {
   desactivar: { titulo: 'Desactivar profesional', etiqueta: 'Desactivar', mensaje: 'Se cerrarán sus sesiones. Se conservan su perfil, horarios, asignaciones e historial.', exito: 'Profesional desactivado.' },
@@ -24,7 +24,7 @@ export async function accionProfesional(accion, id) {
   if (accion === 'reactivar') {
     // La reactivación puede consumir un lugar; se consulta el cupo propio justo
     // antes de confirmar y la respuesta final sigue siendo autoridad del servidor.
-    try { introduccionCupo = ownQuotaNotice('profesionales', await readOwnRoleQuota('profesionales', api)); }
+    try { introduccionCupo = renderAvisoCupoPropio('profesionales', await leerCupoRolPropio('profesionales', api)); }
     catch { introduccionCupo = '<p class="form-intro">No se pudo consultar el cupo vigente. El servidor lo comprobará al reactivar.</p>'; }
   }
   // El retiro conserva historial y no equivale a desactivar ni a borrar.
