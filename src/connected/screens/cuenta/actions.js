@@ -1,5 +1,5 @@
-import { api, forgetSession, logout } from '../../backend.js';
-import { validateNewPassword } from '../../modules/auth/password-policy.js';
+import { api, olvidarSesion, cerrarSesion } from '../../backend.js';
+import { validarContrasenaNueva } from '../../modules/autenticacion/contrasena.politica.js';
 import { field, errorSlot } from '../../../shared/forms.js';
 import { modal, toast } from '../../../shared/ui.js';
 import { refreshPricePublication, updatePricePublication } from './view.js';
@@ -24,9 +24,9 @@ export function changePassword() {
     try {
       const form = new FormData(event.currentTarget);
       const next = form.get('password');
-      validateNewPassword(next, form.get('confirm'));
+      validarContrasenaNueva(next, form.get('confirm'));
       await api('/auth/cambiar-contrasena', 'POST', { passwordActual: form.get('current'), nuevaPassword: next });
-      forgetSession();
+      olvidarSesion();
       dialog.close();
       location.reload();
     } catch (error) {
@@ -40,7 +40,7 @@ export function changePassword() {
 
 export async function closeAccountSession() {
   try {
-    await logout();
+    await cerrarSesion();
     location.reload();
   } catch (error) { toast(error.message); }
 }

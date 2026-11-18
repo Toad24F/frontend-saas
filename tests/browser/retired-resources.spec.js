@@ -5,7 +5,7 @@ const origin = () => process.env.PORTAL_TEST_ORIGIN;
 async function login(page, email) {
   await page.goto(`${origin()}/admin/profesionales`);
   await page.getByLabel('Correo electrónico').fill(email);
-  await page.locator('#login-password').fill('PruebaLicencia2026!');
+  await page.locator('#ingreso-contrasena').fill('PruebaLicencia2026!');
   await page.getByRole('button', { name: 'Entrar' }).click();
   // Esperar la transición autenticada evita que el siguiente goto cancele el
   // POST de login y produzca una falsa ausencia de controles.
@@ -79,7 +79,7 @@ test('FALA-T043: otro administrador no consulta el detalle retirado del negocio 
   const [account] = await rows("SELECT id FROM usuarios WHERE email='retiro-recep-qa@example.test'");
   await login(page, 'admin-qa-1@example.test');
   const result = await page.evaluate(async (id) => {
-    const { api } = await import('/src/connected/modules/auth/session.js');
+    const { api } = await import('/src/connected/modules/autenticacion/sesion.estado.js');
     try { await api(`/recepcionistas/inhabilitados/${id}`); return 200; }
     catch (error) { return error.status; }
   }, Number(account.id));

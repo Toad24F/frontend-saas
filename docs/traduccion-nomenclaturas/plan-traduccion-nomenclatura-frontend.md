@@ -1,7 +1,7 @@
 # Reglas y plan de traducción de la nomenclatura del frontend
 
 Fecha de definición: 2026-11-16  
-Estado: implementación por conjuntos; glosario, Sucursales, Servicios, Profesionales, Recepcionistas, Clientes, Catálogos compartidos, Disponibilidad, Agenda y Portal público y reservas terminados
+Estado: implementación por conjuntos; glosario, Sucursales, Servicios, Profesionales, Recepcionistas, Clientes, Catálogos compartidos, Disponibilidad, Agenda, Portal público y reservas, y Autenticación y sesión terminados
 
 ## Objetivo
 
@@ -277,11 +277,13 @@ Resultado: conjunto cerrado el 2026-11-18 en [Portal público y reservas](result
 
 ### 10. Autenticación y sesión — REALIZAR CON CUIDADO
 
-- [ ] Traducir juntos `connected/modules/auth/session.js`, `password-policy.js`, `connected/screens/auth/dialogs.js` y `style.css`.
-- [ ] Mantener intactas las claves de almacenamiento o implementar una migración explícita antes de cambiarlas.
-- [ ] Mantener intactos los campos, rutas, roles, códigos y mensajes contractuales del backend.
-- [ ] Actualizar pruebas de sesión, persistencia, ingreso, cierre de sesión y recuperación.
-- [ ] Verificar sesión persistente y temporal, expiración y limpieza segura.
+- [x] Traducir juntos `connected/modules/auth/session.js`, `password-policy.js`, `connected/screens/auth/dialogs.js` y `style.css`.
+- [x] Mantener intactas las claves de almacenamiento o implementar una migración explícita antes de cambiarlas.
+- [x] Mantener intactos los campos, rutas, roles, códigos y mensajes contractuales del backend.
+- [x] Actualizar pruebas de sesión, persistencia, ingreso, cierre de sesión y recuperación.
+- [x] Verificar sesión persistente y temporal, expiración y limpieza segura.
+
+Resultado: conjunto cerrado el 2026-11-18 en [Autenticación y sesión](resultado-autenticacion-sesion-2026-11-18.md).
 
 ### 11. Cuenta, negocio, licencias y publicación
 

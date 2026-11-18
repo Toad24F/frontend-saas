@@ -1,5 +1,5 @@
-import { isDemo, pending, modeUrl, user, roleLabel, availablePage, defaultPage, restoreSession, loadBackendData } from '../connected/backend.js';
-import { showConnectedLogin } from '../connected/screens/auth/dialogs.js';
+import { isDemo, pending, modeUrl, user, etiquetaRol, availablePage, defaultPage, restaurarSesion, loadBackendData } from '../connected/backend.js';
+import { renderAutenticacion } from '../connected/screens/autenticacion/autenticacion.vista.js';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './styles.css';
 import './theme.css';
@@ -153,12 +153,12 @@ function connectedAccountMenu() {
   return '<div class="account-menu"><button type="button" class="profile-button account-menu-trigger" aria-label="Opciones de ' +
     escape(name) + '" aria-expanded="false" aria-controls="account-menu-panel">' +
     avatar(initials, 'peach') + '<span><strong>' + escape(name) + '</strong><small>' +
-    escape(roleLabel(user.rol)) + '</small></span>' + icon('down') + '</button>' +
+    escape(etiquetaRol(user.rol)) + '</small></span>' + icon('down') + '</button>' +
     '<nav id="account-menu-panel" class="account-menu-panel" aria-label="Opciones de usuario" hidden>' +
     '<a href="' + modeUrl('/admin/cuenta') + '" data-nav="cuenta" ' +
     (state.page === 'cuenta' ? 'aria-current="page"' : '') + '>' +
     icon('user') + '<span>Mi cuenta</span></a>' +
-    '<button type="button" data-action="logout-account">' +
+    '<button type="button" data-action="cerrar-sesion-cuenta">' +
     icon('logout') + '<span>Cerrar sesión</span></button></nav></div>';
 }
 export function navigate(page, id = null) {
@@ -492,16 +492,16 @@ document.addEventListener('keydown', (event) => {
 document.addEventListener('focusin', (event) => {
   if (!event.target.closest?.('.account-menu')) setAccountMenuOpen(false);
 });
-function showLogin(message = '') {
-  showConnectedLogin(message, start);
+function mostrarIngresoConectado(message = '') {
+  renderAutenticacion(message, start);
 }
-window.addEventListener('cita-session-expired', () => { document.querySelector('#app-dialog')?.close(); showLogin('Tu sesión expiró. Inicia sesión nuevamente.'); });
+window.addEventListener('cita-sesion-expirada', () => { document.querySelector('#app-dialog')?.close(); mostrarIngresoConectado('Tu sesión expiró. Inicia sesión nuevamente.'); });
 export async function start() {
   try {
     document.documentElement.dataset.appMode = isDemo ? 'demo' : 'connected';
     if (isDemo) await (await import('../demo/data.js')).loadData();
     else {
-      if (!await restoreSession()) { showLogin(); return; }
+      if (!await restaurarSesion()) { mostrarIngresoConectado(); return; }
       state.tenantId = await loadBackendData();
     }
     state.page = location.pathname.startsWith('/admin/')
@@ -517,7 +517,7 @@ export async function start() {
     render();
     registerCalendarTool();
   } catch (error) {
-    if (!isDemo && !user) { showLogin(error.message); return; }
+    if (!isDemo && !user) { mostrarIngresoConectado(error.message); return; }
     document.querySelector('#app').innerHTML =
       `<div class="startup-error"><img src="/brand/citalendar-icon.svg" alt=""/><h1>No pudimos abrir tu agenda</h1><p>${escape(error.message)}</p><div class="startup-actions"><button class="btn btn-primary" onclick="location.reload()">Volver a intentar</button><a class="btn btn-light" href="${modeUrl(location.pathname, true)}">Ver demo</a></div></div>`;
   }

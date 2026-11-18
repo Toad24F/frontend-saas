@@ -157,7 +157,7 @@ export async function handleClick(e) {
     const actionMap = {
       'nueva-recepcionista': async () => (await import('../connected/screens/recepcionistas/recepcionistas.acciones.js')).nuevaRecepcionista(),
       'change-password': async () => (await import('../connected/screens/cuenta/actions.js')).changePassword(),
-      'logout-account': async () => (await import('../connected/screens/cuenta/actions.js')).closeAccountSession(),
+      'cerrar-sesion-cuenta': async () => (await import('../connected/screens/cuenta/actions.js')).closeAccountSession(),
       'refresh-license': async () => (await import('../connected/screens/cuenta/view.js')).refreshOwnLicense(),
       'back-platform': () => navigate('plataforma'),
       'retry-business-detail': async () => (await import('../connected/screens/negocio/view.js')).refreshBusinessDetail(),

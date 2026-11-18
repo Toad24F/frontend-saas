@@ -1,4 +1,4 @@
-import { api } from '../auth/session.js';
+import { api } from '../autenticacion/sesion.estado.js';
 
 // El servidor resuelve el negocio a partir del token; no enviamos un ID elegido por la UI.
 export async function readPricePublication(request = api) {

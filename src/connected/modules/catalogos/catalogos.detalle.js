@@ -1,4 +1,4 @@
-import { api } from '../auth/session.js';
+import { api } from '../autenticacion/sesion.estado.js';
 
 export async function consultarRegistroEditable(tipo, existente, solicitar = api) {
   const id = existente?.id;

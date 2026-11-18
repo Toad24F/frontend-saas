@@ -12,7 +12,7 @@ test('nuevo contexto de navegador restaura el acceso persistente y valida perfil
   const reopenedContext = await browser.newContext({ storageState: persisted });
   try {
     const reopened = await reopenedContext.newPage();
-    const { seen, errors } = await prepararSesion(reopened);
+    const { seen, errors } = await prepararSesion(reopened, 'recepcionista', 'light', false);
     await reopened.addInitScript(() => sessionStorage.removeItem('cita-session'));
     await reopened.goto('/admin/agenda');
     await expect(reopened.locator('[data-agenda-cita="7"]')).toBeVisible();
@@ -22,7 +22,7 @@ test('nuevo contexto de navegador restaura el acceso persistente y valida perfil
   } finally { await reopenedContext.close(); }
 });
 
-test('acceso persistido vencido exige login y limpia el almacenamiento', async ({ page }) => {
+test('acceso persistido vencido exige iniciar sesión y limpia el almacenamiento', async ({ page }) => {
   const { seen } = await prepararSesion(page);
   await page.addInitScript(() => { sessionStorage.removeItem('cita-session'); localStorage.setItem('cita-session', 'expired-test'); });
   await page.route((url) => url.pathname === '/auth/profile', (route) => route.fulfill({ status: 401, json: { message: 'Sesión no válida.' } }));
@@ -46,7 +46,7 @@ test('cerrar sesión en otra pestaña retira el panel de la pestaña abierta', a
   } finally { await other.close(); }
 });
 
-test('cerrar la sesión conectada no sustituye la demo abierta por un login', async ({ page, context }) => {
+test('cerrar la sesión conectada no sustituye la demo por el formulario de ingreso', async ({ page, context }) => {
   await prepararSesion(page); await page.goto('/admin/agenda');
   await expect(page.locator('[data-agenda-cita="7"]')).toBeVisible();
   const demo = await context.newPage();

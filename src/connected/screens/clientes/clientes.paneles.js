@@ -25,7 +25,7 @@ const identidadSesion = () =>
   user ? `${user.negocioId}:${user.id}:${user.sesionId || ''}` : '';
 const valorHistorico = (valor) =>
   valor == null ? 'Sin registro histórico' : String(valor);
-window.addEventListener('cita-session-expired', () => {
+window.addEventListener('cita-sesion-expirada', () => {
   generacion++;
   destinoFoco = null;
 });

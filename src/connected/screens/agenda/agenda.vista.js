@@ -71,7 +71,7 @@ function reiniciar() {
   cache.clear(); atencion.reset(); atencionColumnas.reset(); soloAfectadas = false; reiniciarNavegacionAgenda();
   store.reset(); opcionesDisponibles = { branches: new Map(), people: new Map() }; identidad = null; generacionDetalle++;
 }
-window.addEventListener('cita-session-expired', reiniciar);
+window.addEventListener('cita-sesion-expirada', reiniciar);
 function comprobarSesion() {
   const siguiente = `${user?.id}:${user?.negocioId}:${user?.sesionId}`;
   if (identidad !== siguiente) { reiniciar(); identidad = siguiente; estado.date = hoyCivil(); estado.branch = estado.professional = estado.status = 'all'; estado.search = ''; estado.agendaHistory = false; if (user.rol !== 'recepcionista') sincronizarSucursal(true); }

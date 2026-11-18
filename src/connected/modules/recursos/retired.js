@@ -1,4 +1,4 @@
-import { api } from '../auth/session.js';
+import { api } from '../autenticacion/sesion.estado.js';
 
 const types = new Set(['profesionales', 'recepcionistas', 'servicios', 'sucursales']);
 const validId = (id) => Number.isSafeInteger(id) && id > 0;

@@ -1,4 +1,4 @@
-import { api, user, roleLabel } from '../../backend.js';
+import { api, user, etiquetaRol } from '../../backend.js';
 import { render } from '../../../shared/app.js';
 import { icon } from '../../../shared/icons.js';
 import { escape, pageHead } from '../../../shared/ui.js';
@@ -114,7 +114,7 @@ export function account() {
     void refreshOwnLicense();
   }
   const name = escape(user.nombre || 'Mi cuenta');
-  const role = escape(roleLabel(user.rol));
+  const role = escape(etiquetaRol(user.rol));
   const email = escape(user.email || '—');
   return '<div class="account-page">' +
     pageHead('Mi cuenta', 'Consulta los datos de tu acceso y la vigencia de tu licencia.') +
@@ -133,7 +133,7 @@ export function account() {
     '<div><h2>Seguridad</h2><p>Controla el acceso a tu cuenta.</p></div></div>' +
     '<div class="account-security-actions"><button type="button" class="btn btn-primary" data-action="change-password">' +
     icon('lock') + 'Cambiar contraseña</button>' +
-    '<button type="button" class="btn btn-light" data-action="logout-account">Cerrar sesión</button></div></section></div>' +
+    '<button type="button" class="btn btn-light" data-action="cerrar-sesion-cuenta">Cerrar sesión</button></div></section></div>' +
     renderAccountPortal({ user, tenant: db.tenants.find((tenant) => tenant.id === user.negocioId), origin: location.origin }) +
     (user.rol === 'admin_negocio' ? pricePublicationPanel(publication) : '') +
     (user.rol === 'superadmin' ? '' :

@@ -16,7 +16,7 @@ async function login(page, email, path = '/admin/disponibilidad/equipo') {
   }
   await page.goto(`${origin()}${path}`);
   await page.getByLabel('Correo electrónico').fill(email);
-  await page.locator('#login-password').fill('PruebaLicencia2026!');
+  await page.locator('#ingreso-contrasena').fill('PruebaLicencia2026!');
   await page.getByRole('button', { name: 'Entrar' }).click();
   await expect(page.getByRole('heading', { name: 'Inicia sesión' })).toHaveCount(0);
   if (email === 'admin-qa-1@example.test') adminSession = await page.evaluate(() => sessionStorage.getItem('cita-session'));

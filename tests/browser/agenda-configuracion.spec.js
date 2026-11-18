@@ -5,7 +5,7 @@ import { test, expect } from './support.js';
 test('FALA-T048–T049: PUT completo y borrador estable ante 400/503', async ({ page }) => {
   await page.goto(`${process.env.PORTAL_TEST_ORIGIN}/admin/disponibilidad/negocio`);
   await page.getByLabel('Correo electrónico').fill('admin-qa-1@example.test');
-  await page.locator('#login-password').fill('PruebaLicencia2026!');
+  await page.locator('#ingreso-contrasena').fill('PruebaLicencia2026!');
   await page.getByRole('button', { name: 'Entrar' }).click();
   await expect(page.getByRole('heading', { name: 'Inicia sesión' })).toHaveCount(0);
   await page.goto(`${process.env.PORTAL_TEST_ORIGIN}/admin/disponibilidad/negocio`);
@@ -61,7 +61,7 @@ test('FALA-T048–T049: PUT completo y borrador estable ante 400/503', async ({ 
 test('FALA-T050: dos franjas semanales representan la pausa en la API', async ({ page }) => {
   await page.goto(`${process.env.PORTAL_TEST_ORIGIN}/admin/disponibilidad/equipo`);
   await page.getByLabel('Correo electrónico').fill('admin-qa-1@example.test');
-  await page.locator('#login-password').fill('PruebaLicencia2026!');
+  await page.locator('#ingreso-contrasena').fill('PruebaLicencia2026!');
   await page.getByRole('button', { name: 'Entrar' }).click();
   await expect(page.getByRole('heading', { name: 'Inicia sesión' })).toHaveCount(0);
   await page.goto(`${process.env.PORTAL_TEST_ORIGIN}/admin/disponibilidad/equipo`);

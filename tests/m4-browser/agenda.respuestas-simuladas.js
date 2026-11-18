@@ -1,8 +1,11 @@
 // Fixtures ficticias con los nombres exactos del contrato privado M4, incluidos snapshots nulos.
-export async function prepararSesion(page, role = 'recepcionista', theme = 'light') {
+export async function prepararSesion(page, role = 'recepcionista', theme = 'light', sembrarToken = true) {
   const seen = [], errors = [];
   page.on('pageerror', (error) => errors.push(error.message));
-  await page.addInitScript((theme) => { sessionStorage.setItem('cita-session', 'm4-test'); localStorage.setItem('cita-theme', theme); }, theme);
+  await page.addInitScript(({ tema, sembrarToken }) => {
+    if (sembrarToken) sessionStorage.setItem('cita-session', 'm4-test');
+    localStorage.setItem('cita-theme', tema);
+  }, { tema: theme, sembrarToken });
   await page.route((url) => url.port === '3000', async (route) => {
     const url = new URL(route.request().url()), path = url.pathname;
     seen.push(`${route.request().method()} ${path}`);

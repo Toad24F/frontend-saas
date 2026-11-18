@@ -5,7 +5,7 @@ const origin = () => process.env.PORTAL_TEST_ORIGIN;
 async function login(page, role = 'superadmin') {
   await page.goto(`${origin()}/admin/negocio/1`);
   await page.getByLabel('Correo electrónico').fill(`${role}-qa${role === 'superadmin' ? '' : '-1'}@example.test`);
-  await page.locator('#login-password').fill('PruebaLicencia2026!');
+  await page.locator('#ingreso-contrasena').fill('PruebaLicencia2026!');
   await page.getByRole('button', { name: 'Entrar' }).click();
 }
 
