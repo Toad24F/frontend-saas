@@ -4,9 +4,9 @@ import { field, basicForm } from '../../../shared/forms.js';
 import { validarContactoDemo } from '../../disponibilidad.motor.js';
 import { guardarRegistroCatalogo } from '../../../shared/screens/catalogos/catalogos.acciones.js';
 import { corregirClienteDemo } from '../../clientes.horario.js';
-import { agendaPanel } from '../../../shared/screens/agenda/panels.js';
+import { panelAgenda } from '../../../shared/screens/agenda/agenda.paneles.js';
 import { escape as esc } from '../../../shared/ui.js';
-import '../../../shared/screens/agenda/polish.css';
+import '../../../shared/screens/agenda/agenda.refinamientos.css';
 export function nuevoCliente() {
   basicForm(
     'Nuevo cliente',
@@ -26,6 +26,6 @@ export function nuevoCliente() {
 export function abrirFichaClienteDemo(id) {
   const cliente = resource('clients', id, state.tenantId);
   const citas = list('appointments', state.tenantId).filter((cita) => cita.clientId === id);
-  const dialogo = agendaPanel('Ficha del cliente', `<div class="dialog-body"><h3>${esc(cliente.name)}</h3><p>${esc(cliente.phone)} · Cliente #${id}</p><button class="btn btn-primary" data-ficha-demo-corregir>Corregir ficha</button><section class="historial-cliente"><h3>Historial de citas</h3><p class="field-hint">Solo datos ficticios. Las correcciones no alteran los contactos anteriores.</p>${citas.length ? `<ol>${citas.map((cita) => `<li><strong>${esc(cita.folio)}</strong><p>${esc(cita.date)} · ${esc(cita.start)} · ${esc(appointmentInfo(cita).client.name)}</p></li>`).join('')}</ol>` : '<p>Sin citas registradas para esta ficha.</p>'}</section></div>`);
+  const dialogo = panelAgenda('Ficha del cliente', `<div class="dialog-body"><h3>${esc(cliente.name)}</h3><p>${esc(cliente.phone)} · Cliente #${id}</p><button class="btn btn-primary" data-ficha-demo-corregir>Corregir ficha</button><section class="historial-cliente"><h3>Historial de citas</h3><p class="field-hint">Solo datos ficticios. Las correcciones no alteran los contactos anteriores.</p>${citas.length ? `<ol>${citas.map((cita) => `<li><strong>${esc(cita.folio)}</strong><p>${esc(cita.date)} · ${esc(cita.start)} · ${esc(appointmentInfo(cita).client.name)}</p></li>`).join('')}</ol>` : '<p>Sin citas registradas para esta ficha.</p>'}</section></div>`);
   dialogo.querySelector('[data-ficha-demo-corregir]').onclick = () => basicForm('Corregir ficha', `${field('Nombre completo', 'nombreCompleto', cliente.name, 'text', 'required maxlength="150"')}${field('Teléfono', 'telefono', cliente.phone, 'tel', 'required pattern="[0-9]{10}" maxlength="10"')}<p class="field-hint">Datos ficticios. Las citas anteriores conservan su contacto.</p>`, (valores) => corregirClienteDemo(id, state.tenantId, { nombreCompleto: valores.get('nombreCompleto'), telefono: valores.get('telefono') }), false, { drawer: true });
 }

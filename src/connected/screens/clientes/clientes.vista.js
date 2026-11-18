@@ -2,15 +2,15 @@ import { api, user } from '../../backend.js';
 import { state, render } from '../../../shared/app.js';
 import { pageHead, escape as esc, empty } from '../../../shared/ui.js';
 import { icon } from '../../../shared/icons.js';
-import { canManageAppointments } from '../../modules/agenda/manual-contract.js';
+import { puedeGestionarCitas } from '../../modules/agenda/agenda.contrato-manual.js';
 import { crearClientesClient } from '../../modules/clientes/clientes.client.js';
-import { createAgendaStore } from '../../modules/agenda/store.js';
+import { crearAgendaStore } from '../../modules/agenda/agenda.store.js';
 import { abrirFichaCliente, abrirEditorCliente } from './clientes.paneles.js';
 import '../../../shared/screens/clientes/clientes.estilos.css';
-import { privateError } from '../../modules/agenda/errors.js';
+import { errorSeguro } from '../../modules/agenda/agenda.errores.js';
 
 const clientesClient = crearClientesClient(api),
-  directorioStore = createAgendaStore(clientesClient.listar);
+  directorioStore = crearAgendaStore(clientesClient.listar);
 let identidad = '',
   filtros = { busqueda: '', pagina: 1 };
 let direccionFocoPendiente = null;
@@ -56,7 +56,7 @@ function renderPaginador(datos) {
 const renderBotonFicha = (ficha) =>
   `<button class="text-button" data-directorio-abrir="${ficha.id}" aria-label="Ver ficha de ${esc(ficha.nombreCompleto)}">Ver ficha ${icon('chevron')}</button>`;
 export function clientes() {
-  if (!canManageAppointments(user?.rol))
+  if (!puedeGestionarCitas(user?.rol))
     return empty(
       'Acceso no disponible',
       'Tu cuenta no permite consultar el directorio.',
@@ -70,9 +70,9 @@ export function clientes() {
   let contenido = '';
   if (modelo.busy)
     contenido =
-      '<div class="directorio-carga" role="status" aria-label="Cargando clientes"><span class="skeleton-fill"></span><span class="skeleton-fill"></span><p>Consultando clientes…</p></div>';
+      '<div class="directorio-carga" role="status" aria-label="Cargando clientes"><span class="esqueleto-relleno"></span><span class="esqueleto-relleno"></span><p>Consultando clientes…</p></div>';
   else if (modelo.error) {
-    const informacion = privateError(modelo.error);
+    const informacion = errorSeguro(modelo.error);
     contenido = `<div class="directorio-carga" role="alert"><strong>${informacion.title}</strong><p>${esc(informacion.message)}</p>${informacion.retry ? '<button class="btn btn-light" data-directorio-reintentar>Reintentar consulta</button>' : ''}</div>`;
   }
   else if (modelo.data) {
@@ -96,7 +96,7 @@ document.addEventListener('submit', (evento) => {
   if (
     evento.target.id !== 'filtros-directorio-conectado' ||
     state.page !== 'clientes' ||
-    !canManageAppointments(user?.rol)
+    !puedeGestionarCitas(user?.rol)
   )
     return;
   evento.preventDefault();
@@ -116,7 +116,7 @@ document.addEventListener('click', (evento) => {
   if (
     !control ||
     state.page !== 'clientes' ||
-    !canManageAppointments(user?.rol) ||
+    !puedeGestionarCitas(user?.rol) ||
     control.disabled
   )
     return;

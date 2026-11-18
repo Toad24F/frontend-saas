@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { setup as prepararSesion } from './agenda-fixture.js';
+import { prepararSesion } from './agenda.respuestas-simuladas.js';
 
 const FECHA = '2030-11-12';
 const REGLAS = { modo: 'ventana_libre', tiempoEntreCitasMinutos: 5, anticipacionMinutos: 15, diasFuturos: 60 };

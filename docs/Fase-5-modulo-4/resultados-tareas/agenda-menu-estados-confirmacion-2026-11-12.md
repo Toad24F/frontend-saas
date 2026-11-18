@@ -13,10 +13,10 @@ Fecha: 2026-11-12. Revisión base frontend: `e889f98c265a1bf5eb8dbef2eb74d68a93e
 
 ## Archivos
 
-- [Menú, restricciones orientativas y diálogo compartidos](../../../src/shared/screens/agenda/state-menu.js), [estilos](../../../src/shared/screens/agenda/state-menu.css), [tarjetas por hora](../../../src/shared/screens/agenda/timeline.js) y [mes](../../../src/shared/screens/agenda/month.js).
-- [Escritura conectada](../../../src/connected/screens/agenda/quick-state.js), [vista conectada](../../../src/connected/screens/agenda/view.js) y [editor existente](../../../src/connected/screens/agenda/state-editor.js).
-- [Acciones de demo](../../../src/demo/agenda-quick-state.js), [vista compartida](../../../src/shared/screens/agenda/view.js) y [detalle de demo](../../../src/shared/screens/agenda/actions.js).
-- [Once casos nuevos de navegador](../../../tests/m4-browser/state-menu.spec.js) y [regresión manual adaptada a la confirmación](../../../tests/m4-browser/manual.spec.js).
+- [Menú, restricciones orientativas y diálogo compartidos](../../../src/shared/screens/agenda/agenda.menu-estado.js), [estilos](../../../src/shared/screens/agenda/agenda.menu-estado.css), [tarjetas por hora](../../../src/shared/screens/agenda/agenda.linea-tiempo.js) y [mes](../../../src/shared/screens/agenda/agenda.mes.js).
+- [Escritura conectada](../../../src/connected/screens/agenda/agenda.estado-rapido.js), [vista conectada](../../../src/connected/screens/agenda/agenda.vista.js) y [editor existente](../../../src/connected/screens/agenda/agenda.editor-estado.js).
+- [Acciones de demo](../../../src/demo/agenda.estado-rapido.js), [vista compartida](../../../src/shared/screens/agenda/agenda.vista.js) y [detalle de demo](../../../src/shared/screens/agenda/agenda.acciones.js).
+- [Once casos nuevos de navegador](../../../tests/m4-browser/agenda.menu-estado.spec.js) y [regresión manual adaptada a la confirmación](../../../tests/m4-browser/agenda.alta-manual.spec.js).
 
 ## Ajuste puntual: sin tres puntos y pulsación larga
 

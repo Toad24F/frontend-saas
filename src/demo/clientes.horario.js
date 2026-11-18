@@ -1,7 +1,7 @@
 import { list, resource, minutes, time, TODAY } from '../shared/data.js';
 import { appointmentCovered } from './schedule.js';
 import { crearPayloadCliente } from '../connected/modules/clientes/clientes.client.js';
-import { scheduleChange } from '../connected/modules/agenda/schedule-change.js';
+import { crearPayloadCambioHorario } from '../connected/modules/agenda/agenda.cambio-horario.js';
 
 // La demo captura el contacto previo antes de corregir una ficha: sus citas mantienen la identidad histórica.
 export function corregirClienteDemo(id, negocioId, valores) {
@@ -15,7 +15,7 @@ export function corregirClienteDemo(id, negocioId, valores) {
 }
 // Simulación local: valida franjas, descansos y ocupación sin representar la transacción UTC del backend.
 export function moverCitaDemo(id, negocioId, valores) {
-  scheduleChange({ ...valores, version: 1 });
+  crearPayloadCambioHorario({ ...valores, version: 1 });
   const cita = resource('appointments', id, negocioId),
     duracion = minutes(cita.end) - minutes(cita.start);
   if (

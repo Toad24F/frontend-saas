@@ -106,7 +106,7 @@ body,
 .portal-topbar,
 .sidebar,
 .stat-card,
-.calendar-panel,
+.calendario-panel,
 .surface,
 .booking-layout,
 .booking-surface,
@@ -132,7 +132,7 @@ body,
 .booking-date,
 .booking-slot,
 .opcion-modo-agenda,
-.calendar-event,
+.calendario-evento,
 .entity-grid > .surface {
   transition: color var(--motion-snap) ease,
     background-color var(--motion-snap) ease,
@@ -152,7 +152,7 @@ body,
     box-shadow: 0 20px 36px rgba(17, 36, 23, 0.14);
   }
   .nav-item:not(.active):hover { transform: translateX(6px); }
-  .calendar-event:hover { transform: translateY(-3px) scale(1.035); }
+  .calendario-evento:hover { transform: translateY(-3px) scale(1.035); }
   :is(.booking-choice, .booking-date, .booking-slot, .opcion-modo-agenda):not(:disabled):hover {
     box-shadow: 0 13px 25px rgba(27, 52, 36, 0.14);
   }
@@ -164,7 +164,7 @@ body,
   transition-duration: var(--motion-press);
 }
 .nav-item:active,
-.calendar-event:active { transform: scale(0.96); }
+.calendario-evento:active { transform: scale(0.96); }
 
 :is(.booking-choice, .booking-date, .booking-slot, .opcion-modo-agenda).selected {
   animation: selection-pop 430ms var(--motion-glide) backwards;

@@ -236,3 +236,18 @@ Este glosario se aplica al código nuevo desde su fecha de cierre. La migración
 | `demo/availability.js`, `slots`, `holdSlot`, `createAppointment` de demo | `demo/disponibilidad.motor.js`, `buscarHorariosDemo`, `apartarHorarioDemo`, `crearCitaDemo` |
 | `data-availability-tab`, `data-availability-action`, `data-schedule-row`, `data-block-filter` | `data-disponibilidad-pestana`, `data-disponibilidad-accion`, `data-horario-franja`, `data-filtro-bloqueos` |
 
+## Equivalencias de Agenda
+
+| Nombre anterior | Nombre adoptado |
+| --- | --- |
+| `agendaView`, `agendaFrame`, `agendaToolbar`, `agendaPanel` | `vistaAgenda`, `estructuraAgenda`, `barraAgenda`, `panelAgenda` |
+| `calendarPeriod`, `renderTimeline`, `renderMonth`, `eventLayout` | `periodoCalendario`, `renderLineaTiempo`, `renderMes`, `distribuirEventos` |
+| `readAgendaView`, `saveAgendaView`, `resolveAgendaBranches` | `leerVistaAgenda`, `guardarVistaAgenda`, `resolverSucursalesAgenda` |
+| `createAgendaClient`, `createAgendaStore`, `createAgendaCache` | `crearAgendaClient`, `crearAgendaStore`, `crearCacheAgenda` |
+| `list`, `detail`, `history`, `clients` del cliente de Agenda | `listar`, `consultarDetalle`, `consultarHistorial`, `listarClientes` |
+| `manualSelection`, `stateChange`, `scheduleChange`, `privateError` | `seleccionManual`, `crearPayloadCambioEstado`, `crearPayloadCambioHorario`, `errorSeguro` |
+| `data-m4-view`, `data-view`, `data-m4-appointment`, `data-appointment` | `data-agenda-vista`, `data-agenda-vista-demo`, `data-agenda-cita`, `data-cita` |
+| `agenda-layout-change`, `m4-agenda-updated`, `m4-record-obsolete` | `agenda-cambio-distribucion`, `agenda-actualizada`, `registro-desactualizado` |
+
+El [resultado de Agenda](resultado-agenda-2026-11-18.md) registra la correspondencia de archivos y los contratos compartidos.
+

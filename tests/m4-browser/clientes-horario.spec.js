@@ -1,9 +1,9 @@
 import { test, expect } from '@playwright/test';
-import { setup } from './agenda-fixture.js';
+import { prepararSesion } from './agenda.respuestas-simuladas.js';
 
 // Todos los datos y mutaciones de esta suite son dobles HTTP; no escriben en el backend real.
 async function prepararEscenario(page, rol = 'recepcionista', tema = 'light') {
-  const { errors } = await setup(page, rol, tema);
+  const { errors } = await prepararSesion(page, rol, tema);
   const control = {
     escrituras: [],
     estadoHttp: 0,
@@ -115,7 +115,7 @@ test('T097: rechazo conserva horario y borrador; relectura explícita permite mo
 }) => {
   const { control } = await prepararEscenario(page);
   await page.goto('/admin/agenda');
-  await page.locator('[data-m4-appointment="7"]').click();
+  await page.locator('[data-agenda-cita="7"]').click();
   const panel = page.getByRole('dialog');
   await panel.getByLabel('Nueva fecha').fill('2030-12-21');
   await panel.getByLabel('Nueva hora').fill('10:00');
@@ -123,7 +123,7 @@ test('T097: rechazo conserva horario y borrador; relectura explícita permite mo
   await panel
     .getByRole('button', { name: 'Guardar horario', exact: true })
     .click();
-  await expect(panel.locator('[data-schedule-error]')).toContainText(
+  await expect(panel.locator('[data-horario-error]')).toContainText(
     'conflicto',
   );
   await expect(panel).toContainText('2030-12-20');
@@ -132,7 +132,7 @@ test('T097: rechazo conserva horario y borrador; relectura explícita permite mo
     panel.getByRole('button', { name: 'Guardar horario', exact: true }),
   ).toBeDisabled();
   await page.keyboard.press('Escape');
-  await page.locator('[data-m4-appointment="7"]').click();
+  await page.locator('[data-agenda-cita="7"]').click();
   await expect(panel.getByLabel('Nueva fecha')).toHaveValue('2030-12-21');
   control.estadoHttp = 0;
   await panel
@@ -143,7 +143,7 @@ test('T097: rechazo conserva horario y borrador; relectura explícita permite mo
   await panel
     .getByRole('button', { name: 'Guardar horario', exact: true })
     .click();
-  await expect(panel.locator('.m4-detail-fields')).toContainText('2030-12-21');
+  await expect(panel.locator('.agenda-campos-detalle')).toContainText('2030-12-21');
   expect(control.escrituras.at(-1)).toEqual({
     path: '/citas/7/horario',
     method: 'PATCH',
@@ -233,7 +233,7 @@ for (const ancho of [1366, 390])
       await page.locator('[data-directorio-abrir="1"]:visible').click();
       const panel = page.getByRole('dialog');
       await expect(panel).toContainText('Contacto histórico');
-      await expect(panel).toHaveClass(/agenda-drawer/);
+      await expect(panel).toHaveClass(/agenda-panel-lateral/);
       await expect
         .poll(() =>
           panel.evaluate(
@@ -259,7 +259,7 @@ for (const ancho of [1366, 390])
         page.locator('[data-directorio-abrir="1"]:visible'),
       ).toBeFocused();
       await page.goto('/admin/agenda');
-      await page.locator('[data-m4-appointment="7"]').click();
+      await page.locator('[data-agenda-cita="7"]').click();
       const saveSchedule = panel.getByRole('button', { name: 'Guardar horario', exact: true });
       await saveSchedule.scrollIntoViewIfNeeded(); await expect(saveSchedule).toBeInViewport();
       await page.screenshot({ path: `test-results/m4/horario-editor-${ancho}-${tema}.png` });
@@ -317,7 +317,7 @@ test('T097/T098: profesional no recibe editor de horario ni directorio', async (
 }) => {
   await prepararEscenario(page, 'profesional');
   await page.goto('/admin/agenda');
-  await page.locator('[data-m4-appointment="7"]').click();
+  await page.locator('[data-agenda-cita="7"]').click();
   await expect(page.getByLabel('Nueva fecha')).toHaveCount(0);
   await expect(
     page.getByRole('link', { name: 'Clientes', exact: true }),
@@ -375,12 +375,12 @@ test('T097: borrador de otra versión exige relectura; una cita cancelada no se 
 }) => {
   const { control } = await prepararEscenario(page);
   await page.goto('/admin/agenda');
-  await page.locator('[data-m4-appointment="7"]').click();
+  await page.locator('[data-agenda-cita="7"]').click();
   const panel = page.getByRole('dialog');
   await panel.getByLabel('Nueva hora').fill('11:00');
   await page.keyboard.press('Escape');
   control.version++;
-  await page.locator('[data-m4-appointment="7"]').click();
+  await page.locator('[data-agenda-cita="7"]').click();
   await expect(panel.getByLabel('Nueva hora')).toHaveValue('11:00');
   await expect(
     panel.getByRole('button', { name: 'Guardar horario', exact: true }),
@@ -402,7 +402,7 @@ test('T097: borrador de otra versión exige relectura; una cita cancelada no se 
         },
       }),
   );
-  await page.locator('[data-m4-appointment="7"]').click();
+  await page.locator('[data-agenda-cita="7"]').click();
   await expect(
     panel.getByRole('button', { name: 'Guardar horario', exact: true }),
   ).toBeDisabled();
@@ -423,7 +423,7 @@ for (const ancho of [1366, 390])
       const primeraFicha = page.locator('[data-ficha-demo-abrir]:visible').first();
       await primeraFicha.click();
       const panel = page.getByRole('dialog');
-      await expect(panel).toHaveClass(/agenda-drawer/);
+      await expect(panel).toHaveClass(/agenda-panel-lateral/);
       await panel
         .getByRole('button', { name: 'Corregir ficha', exact: true })
         .click();

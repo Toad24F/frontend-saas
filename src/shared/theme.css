@@ -68,9 +68,9 @@ html[data-theme='dark'] .icon-btn:hover { background: #34353d; color: #fff; }
 html[data-theme='dark'] .theme-toggle { background: #2a2b32; border-color: #44454f; color: #f1cc9c; }
 html[data-theme='dark'] .demo-pill { background: #302c2c; border-color: #544846; color: #ead0b8; }
 html[data-theme='dark'] .btn-light,
-html[data-theme='dark'] .btn-today { background: #2c2d34; border-color: #454650; color: var(--ink); }
+html[data-theme='dark'] .btn-hoy { background: #2c2d34; border-color: #454650; color: var(--ink); }
 html[data-theme='dark'] .btn-light:hover,
-html[data-theme='dark'] .btn-today:hover { background: #393a43; color: #fff; }
+html[data-theme='dark'] .btn-hoy:hover { background: #393a43; color: #fff; }
 html[data-theme='dark'] :is(.btn-primary:hover, .btn-primary:focus-visible, .profesional-disponibilidad:hover) {
   background: #a6402a;
   border-color: #a6402a;
@@ -79,7 +79,7 @@ html[data-theme='dark'] :is(.btn-primary:hover, .btn-primary:focus-visible, .pro
 html[data-theme='dark'] .btn-danger-soft { background: #4a2a2d; border-color: #7b4245; color: #ffd6d2; }
 
 html[data-theme='dark'] :is(
-  .stat-card, .calendar-panel, .surface, .empty-state, .professional-card,
+  .stat-card, .calendario-panel, .surface, .empty-state, .professional-card,
   .service-card, .branch-card, .settings-card, .opcion-modo-agenda, .bloqueo-entrada,
   .notification-card, .message-preview, .report-card, .report-filters,
   .booking-surface, .booking-choice, .booking-date, .booking-slot,
@@ -91,7 +91,7 @@ html[data-theme='dark'] :is(
 }
 html[data-theme='dark'] .service-tags > span { background: var(--surface-soft); color: #d6d3d5; }
 html[data-theme='dark'] :is(.stat-top, .stat-caption, .section-heading p, .subtle-text, .field-hint, .optional, .form-label, .booking-title p, .choice-content p, .booking-business p, .booking-trust p, .summary-items > div, .summary-items > div.filled) { color: var(--muted); }
-html[data-theme='dark'] :is(.segmented, .month-label, .muted-day, .app-table thead th, .form-separator, .calendar-toolbar, .information-note, .compact-note) { background: #292a31; border-color: var(--border); color: #c5c3c7; }
+html[data-theme='dark'] :is(.segmented, .mes-etiqueta, .dia-atenuado, .app-table thead th, .form-separator, .calendario-barra, .information-note, .compact-note) { background: #292a31; border-color: var(--border); color: #c5c3c7; }
 html[data-theme='dark'] .segmented button { color: #c4c1c6; }
 html[data-theme='dark'] .segmented button.selected { background: #454047; color: #fff; }
 html[data-theme='dark'] :is(.filter-select, .search-field, .busqueda-tabla-clientes, .phone-input) { background: #292a31; border-color: #484951; color: var(--ink); }
@@ -108,25 +108,25 @@ html[data-theme='dark'] option { background: #292a31; color: var(--ink); }
 html[data-theme='dark'] :is(.app-table, .app-table td, .app-table td strong, .app-table thead th, .detail-list strong, .detail-list small) { color: #dddadd; border-color: var(--border); }
 html[data-theme='dark'] .app-table td small { color: var(--muted); }
 html[data-theme='dark'] :is(.app-table tbody tr:hover, .app-table .table-active) { background: #303139; }
-html[data-theme='dark'] :is(.day-header, .day-column, .calendar-cell, .month-day) { background: var(--surface); color: #d1ced3; border-color: var(--border); }
-html[data-theme='dark'] :is(.day-column.is-today, .weekend, .muted-day) { background: #292a31 !important; }
-html[data-theme='dark'] .calendar-cell::after { border-color: #3e4049; }
-html[data-theme='dark'] .lunch-block { background: repeating-linear-gradient(135deg, #292a31, #292a31 4px, #363740 4px, #363740 5px); color: #c4c1c6; }
-html[data-theme='dark'] :is(.time-gutter > span, .time-header, .day-off, .legend > span, .timezone, .agenda-note, .month-date) { color: var(--muted); }
-html[data-theme='dark'] .calendar-event.confirmada,
-html[data-theme='dark'] .month-event.confirmada,
+html[data-theme='dark'] :is(.encabezado-dia, .columna-dia, .calendario-celda, .mes-dia) { background: var(--surface); color: #d1ced3; border-color: var(--border); }
+html[data-theme='dark'] :is(.columna-dia.es-hoy, .fin-de-semana, .dia-atenuado) { background: #292a31 !important; }
+html[data-theme='dark'] .calendario-celda::after { border-color: #3e4049; }
+html[data-theme='dark'] .bloque-descanso { background: repeating-linear-gradient(135deg, #292a31, #292a31 4px, #363740 4px, #363740 5px); color: #c4c1c6; }
+html[data-theme='dark'] :is(.columna-horas > span, .encabezado-hora, .dia-sin-atencion, .legend > span, .timezone, .agenda-nota, .mes-fecha) { color: var(--muted); }
+html[data-theme='dark'] .calendario-evento.confirmada,
+html[data-theme='dark'] .mes-evento.confirmada,
 html[data-theme='dark'] .status-badge.confirmada { background: #213c59; color: #c4deff; border-color: #4b82b6; }
-html[data-theme='dark'] .calendar-event.pendiente,
-html[data-theme='dark'] .month-event.pendiente,
+html[data-theme='dark'] .calendario-evento.pendiente,
+html[data-theme='dark'] .mes-evento.pendiente,
 html[data-theme='dark'] .status-badge.pendiente { background: #493b22; color: #f5dda6; border-color: #a78347; }
-html[data-theme='dark'] .calendar-event.completada,
-html[data-theme='dark'] .month-event.completada,
+html[data-theme='dark'] .calendario-evento.completada,
+html[data-theme='dark'] .mes-evento.completada,
 html[data-theme='dark'] .status-badge.completada { background: #2e3437; color: #bed8cb; border-color: #5d7569; }
-html[data-theme='dark'] .calendar-event.cancelada,
-html[data-theme='dark'] .month-event.cancelada,
+html[data-theme='dark'] .calendario-evento.cancelada,
+html[data-theme='dark'] .mes-evento.cancelada,
 html[data-theme='dark'] .status-badge.cancelada { background: #4b2d32; color: #ffced0; border-color: #a86770; }
-html[data-theme='dark'] .calendar-event.no_asistio,
-html[data-theme='dark'] .month-event.no_asistio,
+html[data-theme='dark'] .calendario-evento.no_asistio,
+html[data-theme='dark'] .mes-evento.no_asistio,
 html[data-theme='dark'] .status-badge.no_asistio { background: #3c304d; color: #e0cff6; border-color: #8d72aa; }
 html[data-theme='dark'] .horario-tabla tbody tr:not(.horario-franja-inactiva) > td,
 html[data-theme='dark'] .horario-tabla tbody tr.horario-franja-adicional:not(.horario-franja-inactiva) > td {
@@ -170,8 +170,8 @@ html[data-theme='dark'] .app-toast.glass-effect { background: var(--glass-surfac
 
 /* Shared color roles keep labels readable when the theme changes. */
 .main-layout :is(.breadcrumbs, .breadcrumbs strong, .topbar-date, .profile-button small,
-  .page-heading p, .stat-top, .stat-caption, .app-footer, .agenda-note, .timezone,
-  .legend > span, .month-date, .month-label, .time-gutter > span) {
+  .page-heading p, .stat-top, .stat-caption, .app-footer, .agenda-nota, .timezone,
+  .legend > span, .mes-fecha, .mes-etiqueta, .columna-horas > span) {
   color: var(--muted);
 }
 .booking-layout :is(.portal-topbar-caption, .portal-topbar > .text-button,
@@ -180,7 +180,7 @@ html[data-theme='dark'] .app-toast.glass-effect { background: var(--glass-surfac
   .summary-items > div, .booking-trust p, .privacy-note, .portal-footer) {
   color: var(--muted);
 }
-.main-layout :is(.stat-card, .calendar-panel, .surface, .empty-state,
+.main-layout :is(.stat-card, .calendario-panel, .surface, .empty-state,
   .professional-card, .service-card, .branch-card, .settings-card,
   .opcion-modo-agenda, .bloqueo-entrada, .notification-card, .message-preview,
   .report-card, .report-filters, .section-card),
@@ -189,7 +189,7 @@ html[data-theme='dark'] .app-toast.glass-effect { background: var(--glass-surfac
   border-color: var(--border);
   color: var(--ink);
 }
-.main-layout :is(.segmented, .month-label, .calendar-toolbar),
+.main-layout :is(.segmented, .mes-etiqueta, .calendario-barra),
 .booking-layout .phone-input > span {
   background-color: var(--surface-soft);
   border-color: var(--border);
@@ -199,7 +199,7 @@ html[data-theme='dark'] .app-toast.glass-effect { background: var(--glass-surfac
 .booking-layout :is(.text-button, .booking-date, .booking-slot) {
   color: var(--ink);
 }
-.main-layout :is(.stat-caption, .legend > span, .timezone, .agenda-note),
+.main-layout :is(.stat-caption, .legend > span, .timezone, .agenda-nota),
 .booking-layout :is(.choice-content > small, .choice-meta, .privacy-note,
   .summary-items > div, .portal-footer) {
   font-size: 12px;
@@ -344,17 +344,17 @@ html[data-theme='light'] :is(.page-heading h1, .section-heading h2,
 html[data-theme='light'] :is(.section-heading p, .subtle-text, .field-hint,
   .optional, .form-label, .eyebrow, .footer-logo, .bar-column,
   .app-table td small, .busqueda-tabla-clientes, .search-field, .filter-select > .icon,
-  .profile-button small, .profile-button > .icon, .day-header,
-  .time-header, .day-off, .date-picker-heading > span) { color: var(--muted); }
+  .profile-button small, .profile-button > .icon, .encabezado-dia,
+  .encabezado-hora, .dia-sin-atencion, .date-picker-heading > span) { color: var(--muted); }
 html[data-theme='light'] :is(.stat-number, .app-table, .summary-price,
-  .calendar-event, .month-event) { font-variant-numeric: tabular-nums; }
-html[data-theme='light'] :is(.stat-card, .calendar-panel, .surface) { box-shadow: var(--surface-shadow); }
-html[data-theme='light'] :is(.btn-light, .btn-today, .theme-toggle) {
+  .calendario-evento, .mes-evento) { font-variant-numeric: tabular-nums; }
+html[data-theme='light'] :is(.stat-card, .calendario-panel, .surface) { box-shadow: var(--surface-shadow); }
+html[data-theme='light'] :is(.btn-light, .btn-hoy, .theme-toggle) {
   background: var(--surface);
   border-color: var(--border);
   color: var(--ink);
 }
-html[data-theme='light'] :is(.btn-light:hover, .btn-today:hover,
+html[data-theme='light'] :is(.btn-light:hover, .btn-hoy:hover,
   .icon-btn:hover, .theme-toggle:hover) {
   background: var(--surface-soft);
   border-color: var(--border-strong);
@@ -366,7 +366,7 @@ html[data-theme='light'] .segmented button.selected {
   color: var(--ink);
   box-shadow: 0 1px 4px rgba(37, 42, 46, 0.1);
 }
-html[data-theme='light'] .calendar-toolbar { background: var(--surface); }
+html[data-theme='light'] .calendario-barra { background: var(--surface); }
 html[data-theme='light'] :is(.filter-select, .busqueda-tabla-clientes, .phone-input) {
   background: var(--surface);
   border-color: var(--border);
@@ -382,7 +382,7 @@ html[data-theme='light'] :is(input, select, textarea, .form-control, .form-selec
 }
 html[data-theme='light'] :is(input, textarea)::placeholder { color: var(--muted); opacity: 1; }
 html[data-theme='light'] :is(.form-control, .form-select, .phone-input) { background-color: var(--surface); }
-html[data-theme='light'] :is(.soft-tag, .count-badge, .month-label,
+html[data-theme='light'] :is(.soft-tag, .count-badge, .mes-etiqueta,
   .information-note, .compact-note, .form-separator, .app-table thead th) {
   background: var(--surface-soft);
   color: var(--muted);
@@ -521,17 +521,17 @@ html[data-theme='dark'] .app-toast.glass-effect { background: var(--glass-surfac
   .heading-actions > :is(.btn, a) { flex: 1 1 auto; justify-content: center; }
   .stat-card { padding: 12px; }
   .stat-caption { line-height: 1.3; }
-  .calendar-toolbar { padding: 12px; }
-  .calendar-date { flex-wrap: wrap; }
-  .calendar-date h2 { flex-basis: 100%; }
+  .calendario-barra { padding: 12px; }
+  .calendario-fecha { flex-wrap: wrap; }
+  .calendario-fecha h2 { flex-basis: 100%; }
   .segmented { width: 100%; justify-content: space-between; }
   .segmented button { flex: 1; min-height: 40px; }
-  .calendar-filters { padding: 0 12px 12px; }
+  .calendario-filtros { padding: 0 12px 12px; }
   .filter-select { min-width: 0; flex-basis: 100%; min-height: 42px; }
-  .calendar-panel, .surface, .booking-surface { min-width: 0; }
-  .calendar-scroll, .table-responsive, .month-scroll { max-width: 100%; overflow-x: auto; }
-  .week-calendar { min-width: 760px; }
-  .single-day { min-width: 0; }
+  .calendario-panel, .surface, .booking-surface { min-width: 0; }
+  .calendario-desplazamiento, .table-responsive, .mes-desplazamiento { max-width: 100%; overflow-x: auto; }
+  .calendario-semana { min-width: 760px; }
+  .dia-unico { min-width: 0; }
   .app-dialog { width: calc(100% - 20px); max-height: 94dvh; }
   .app-dialog.wide { width: calc(100% - 20px); }
   .dialog-header, .dialog-body { padding: 16px; }

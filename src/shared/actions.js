@@ -15,7 +15,7 @@ import {
 import { icon } from './icons.js';
 import { modal, toast, escape as esc } from './ui.js';
 import { reportState } from '../demo/screens/reportes/state.js';
-import { appointmentTable } from './screens/agenda/table.js';
+import { tablaCitas } from './screens/agenda/agenda.tabla.js';
 import { renderFranjaHorario, cambiarAlcanceBloqueos } from './screens/disponibilidad/disponibilidad.vista.js';
 import { leerFranjasHorario, cambiarEstadoFranja } from './screens/disponibilidad/disponibilidad.horario-franjas.js';
 import { appointmentCovered } from '../demo/schedule.js';
@@ -27,7 +27,7 @@ export async function handleClick(e) {
   try {
     // La agenda real usa sus propias lecturas; nunca abre diálogos de escritura de la demo.
     if (!isDemo && state.page === 'agenda' &&
-      (await import('../connected/screens/agenda/view.js')).handleAgendaClick(e)) return;
+      (await import('../connected/screens/agenda/agenda.vista.js')).handleClicAgenda(e)) return;
     // Solo los controles de la sección de inhabilitados cargan ese módulo;
     // navegación y acciones ordinarias conservan su flujo habitual.
     if (!isDemo && e.target.closest('[data-retired-open], [data-retired-list], [data-retired-detail], [data-retired-restore], [data-retired-effects]') &&
@@ -153,7 +153,7 @@ export async function handleClick(e) {
     }
     const action = e.target.closest('[data-action]')?.dataset.action;
     if (!isDemo && user.rol === 'profesional' && action === 'nuevo-profesional') { toast('Tu cuenta puede editar sus servicios desde Editar profesional.'); return; }
-    if (!isDemo && (['new-appointment', 'nuevo-cliente', 'copy-link', 'filter-reports', 'export-report'].includes(action) || e.target.closest('[data-slot-date], button[data-mode]'))) { toast(pending); return; }
+    if (!isDemo && (['nueva-cita', 'nuevo-cliente', 'copy-link', 'filter-reports', 'export-report'].includes(action) || e.target.closest('[data-horario-fecha], button[data-mode]'))) { toast(pending); return; }
     const actionMap = {
       'nueva-recepcionista': async () => (await import('../connected/screens/recepcionistas/recepcionistas.acciones.js')).nuevaRecepcionista(),
       'change-password': async () => (await import('../connected/screens/cuenta/actions.js')).changePassword(),
@@ -161,7 +161,7 @@ export async function handleClick(e) {
       'refresh-license': async () => (await import('../connected/screens/cuenta/view.js')).refreshOwnLicense(),
       'back-platform': () => navigate('plataforma'),
       'retry-business-detail': async () => (await import('../connected/screens/negocio/view.js')).refreshBusinessDetail(),
-      'new-appointment': async () => (await import('./screens/agenda/actions.js')).manualAppointment(),
+      'nueva-cita': async () => (await import('./screens/agenda/agenda.acciones.js')).nuevaCitaManual(),
       'go-agenda': () => navigate('agenda'),
       'nuevo-cliente': async () => (await import('../demo/screens/clientes/clientes.acciones.js')).nuevoCliente(),
       'nuevo-servicio': () => abrirEditorCatalogo('services'),
@@ -204,14 +204,14 @@ export async function handleClick(e) {
       await actionMap[action]();
       return;
     }
-    const app = e.target.closest('[data-appointment]');
+    const app = e.target.closest('[data-cita]');
     if (app) {
-      (await import('./screens/agenda/actions.js')).detail(Number(app.dataset.appointment));
+      (await import('./screens/agenda/agenda.acciones.js')).abrirDetalleDemo(Number(app.dataset.cita));
       return;
     }
-    const cell = e.target.closest('[data-slot-date]');
+    const cell = e.target.closest('[data-horario-fecha]');
     if (cell) {
-      (await import('./screens/agenda/actions.js')).manualAppointment(cell.dataset.slotDate, cell.dataset.slotTime);
+      (await import('./screens/agenda/agenda.acciones.js')).nuevaCitaManual(cell.dataset.horarioFecha, cell.dataset.horarioHora);
       return;
     }
     for (const [attr, type] of [
@@ -239,7 +239,7 @@ export async function handleClick(e) {
       );
       modal(
         esc(cliente.name),
-        `<div class="dialog-body"><p class="mb-4">${icon('message')} ${esc(cliente.phone)} · Historial de citas</p>${appointmentTable(list('appointments', state.tenantId).filter((a) => a.clientId === cliente.id))}</div>`,
+        `<div class="dialog-body"><p class="mb-4">${icon('message')} ${esc(cliente.phone)} · Historial de citas</p>${tablaCitas(list('appointments', state.tenantId).filter((a) => a.clientId === cliente.id))}</div>`,
         true,
       );
       return;

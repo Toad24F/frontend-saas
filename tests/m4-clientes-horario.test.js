@@ -1,14 +1,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  scheduleChange,
-  createScheduleClient,
-} from '../src/connected/modules/agenda/schedule-change.js';
+  crearPayloadCambioHorario,
+  crearClientCambioHorario,
+} from '../src/connected/modules/agenda/agenda.cambio-horario.js';
 import {
   crearPayloadCliente,
   crearClientesClient,
 } from '../src/connected/modules/clientes/clientes.client.js';
-import { createVersionedMutation } from '../src/connected/modules/agenda/versioned-mutation.js';
+import { crearMutacionVersionada } from '../src/connected/modules/agenda/agenda.mutacion-versionada.js';
 import { replaceData, appointmentInfo } from '../src/shared/data.js';
 import {
   corregirClienteDemo,
@@ -80,7 +80,7 @@ test('demo: corregir ficha conserva contactos previos y mover conserva identidad
 test('T097: cambio cerrado de fecha/hora/versión, sin aceptar combinación ni snapshots', async () => {
   const entrada = { fechaLocal: '2030-11-20', horaInicio: '09:17', version: 3 };
   assert.deepEqual(
-    scheduleChange({ ...entrada, costo: 1, personalId: 99, zonaHoraria: 'otra' }),
+    crearPayloadCambioHorario({ ...entrada, costo: 1, personalId: 99, zonaHoraria: 'otra' }),
     entrada,
   );
   for (const invalido of [
@@ -89,15 +89,15 @@ test('T097: cambio cerrado de fecha/hora/versión, sin aceptar combinación ni s
     { ...entrada, version: 0 },
     { ...entrada, version: '3' },
   ])
-    assert.throws(() => scheduleChange(invalido));
+    assert.throws(() => crearPayloadCambioHorario(invalido));
   const llamadas = [],
-    client = createScheduleClient(async (...argumentos) => {
+    client = crearClientCambioHorario(async (...argumentos) => {
       llamadas.push(argumentos);
       return { id: 7 };
     });
-  await client.change(7, entrada);
+  await client.cambiarHorario(7, entrada);
   assert.deepEqual(llamadas, [['/citas/7/horario', 'PATCH', entrada]]);
-  assert.throws(() => client.change('7/estado', entrada));
+  assert.throws(() => client.cambiarHorario('7/estado', entrada));
 });
 test('T099: alta sin versión, corrección con versión, teléfonos compartibles y nombre normalizado', () => {
   const entrada = {
@@ -226,7 +226,7 @@ test('T097/T099: doble clic conserva versión observada y un 409 exige releer', 
     liberar = resolver;
   });
   const llamadas = [];
-  const mutacion = createVersionedMutation(3, async (valores) => {
+  const mutacion = crearMutacionVersionada(3, async (valores) => {
     llamadas.push(valores);
     await espera;
     throw rechazo(409);
@@ -242,14 +242,14 @@ test('T097/T099: doble clic conserva versión observada y un 409 exige releer', 
 });
 test('T097/T099: 400 permite corregir, resultado incierto no se confirma ni reenvía', async () => {
   for (const estadoHttp of [400, 0, 403, 404, 500, 503]) {
-    const mutacion = createVersionedMutation(1, async () => {
+    const mutacion = crearMutacionVersionada(1, async () => {
       throw rechazo(estadoHttp);
     });
     await mutacion.submit({});
     assert.equal(mutacion.state.stale, estadoHttp !== 400);
     assert.equal(mutacion.state.result, null);
   }
-  const mutacion = createVersionedMutation(
+  const mutacion = crearMutacionVersionada(
     1,
     async () => ({}),
     () => false,
