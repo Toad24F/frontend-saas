@@ -10,14 +10,14 @@ import {
   minutes,
 } from '../src/shared/data.js';
 import {
-  slots,
-  holdSlot,
-  createAppointment,
-  releaseHold,
-  validateContact,
-  overlaps,
-  nextDates,
-} from '../src/demo/availability.js';
+  buscarHorariosDemo,
+  apartarHorarioDemo,
+  crearCitaDemo,
+  liberarApartadoDemo,
+  validarContactoDemo,
+  seEmpalman,
+  buscarFechasDemo,
+} from '../src/demo/disponibilidad.motor.js';
 import { loadData } from '../src/demo/data.js';
 import { escape } from '../src/shared/ui.js';
 const fixture = JSON.parse(
@@ -45,11 +45,11 @@ test('demo manual: ficha explícita y cliente nuevo no se fusionan por teléfono
   const original = db.clients[0];
   const other = { ...original, id: 100, name: 'Otra Persona' };
   db.clients.push(other);
-  const firstTime = slots(options())[0];
-  const appointment = createAppointment({ ...options(), start: firstTime, clientId: 100 }, { name: other.name, phone: other.phone });
+  const firstTime = buscarHorariosDemo(options())[0];
+  const appointment = crearCitaDemo({ ...options(), start: firstTime, clientId: 100 }, { name: other.name, phone: other.phone });
   assert.equal(appointment.clientId, 100);
-  const secondTime = slots(options())[0], count = db.clients.length;
-  const newAppointment = createAppointment({ ...options(), start: secondTime, newClient: true }, { name: 'Persona Nueva', phone: other.phone });
+  const secondTime = buscarHorariosDemo(options())[0], count = db.clients.length;
+  const newAppointment = crearCitaDemo({ ...options(), start: secondTime, newClient: true }, { name: 'Persona Nueva', phone: other.phone });
   assert.equal(db.clients.length, count + 1);
   assert.notEqual(newAppointment.clientId, original.id);
   assert.notEqual(newAppointment.clientId, 100);
@@ -61,20 +61,20 @@ test('rechaza recursos de otro tenant en el selector de demostración', () => {
 });
 test('rechaza una combinación de IDs de distintos negocios', () => {
   assert.throws(
-    () => slots({ ...options(), branchId: 3 }),
+    () => buscarHorariosDemo({ ...options(), branchId: 3 }),
     /no está disponible/,
   );
   assert.throws(
-    () => slots({ ...options(), serviceId: 5 }),
+    () => buscarHorariosDemo({ ...options(), serviceId: 5 }),
     /no está disponible/,
   );
 });
 test('un profesional solo atiende servicios asignados y en la sucursal del día', () => {
-  assert.deepEqual(slots({ ...options(), serviceId: 2 }), []);
-  assert.deepEqual(slots({ ...options(), branchId: 1 }), []);
+  assert.deepEqual(buscarHorariosDemo({ ...options(), serviceId: 2 }), []);
+  assert.deepEqual(buscarHorariosDemo({ ...options(), branchId: 1 }), []);
 });
 test('evita empalmes, respeta duración, descanso y cierre', () => {
-  const result = slots(options());
+  const result = buscarHorariosDemo(options());
   assert.ok(result.length);
   assert.ok(!result.includes('09:00'));
   assert.ok(result.includes('09:45'));
@@ -85,8 +85,8 @@ test('evita empalmes, respeta duración, descanso y cierre', () => {
   for (const t of result) assert.ok(minutes(t) + 45 <= 18 * 60);
 });
 test('los intervalos contiguos no se solapan', () => {
-  assert.equal(overlaps(540, 600, 600, 660), false);
-  assert.equal(overlaps(540, 615, 600, 660), true);
+  assert.equal(seEmpalman(540, 600, 600, 660), false);
+  assert.equal(seEmpalman(540, 615, 600, 660), true);
 });
 test('un bloqueo completo impide toda disponibilidad en ese día', () => {
   db.blocks.push({
@@ -99,7 +99,7 @@ test('un bloqueo completo impide toda disponibilidad en ese día', () => {
     start: null,
     end: null,
   });
-  assert.deepEqual(slots(options()), []);
+  assert.deepEqual(buscarHorariosDemo(options()), []);
 });
 test('los bloqueos por franja excluyen también solapamientos parciales', () => {
   db.blocks.push({
@@ -112,7 +112,7 @@ test('los bloqueos por franja excluyen también solapamientos parciales', () => 
     start: '10:00',
     end: '11:00',
   });
-  const result = slots(options());
+  const result = buscarHorariosDemo(options());
   assert.ok(!result.includes('09:45'));
   assert.ok(!result.includes('10:45'));
   assert.ok(result.includes('11:00'));
@@ -127,23 +127,23 @@ test('cancelar libera un horario y los bloqueos ajenos no afectan', () => {
     start: null,
     end: null,
   });
-  assert.ok(slots(options()).includes('09:00'));
+  assert.ok(buscarHorariosDemo(options()).includes('09:00'));
 });
 test('el apartamiento impide reservas solapadas en esta memoria', () => {
-  const hold = holdSlot(options(), '09:45');
-  assert.ok(!slots(options()).includes('09:45'));
-  assert.ok(!slots(options()).includes('10:00'));
-  assert.throws(() => holdSlot(options(), '10:00'), /no está disponible/);
-  releaseHold(hold.id);
-  assert.ok(slots(options()).includes('09:45'));
+  const hold = apartarHorarioDemo(options(), '09:45');
+  assert.ok(!buscarHorariosDemo(options()).includes('09:45'));
+  assert.ok(!buscarHorariosDemo(options()).includes('10:00'));
+  assert.throws(() => apartarHorarioDemo(options(), '10:00'), /no está disponible/);
+  liberarApartadoDemo(hold.id);
+  assert.ok(buscarHorariosDemo(options()).includes('09:45'));
 });
 test('un apartamiento vencido se ignora y no permite confirmar', () => {
-  const hold = holdSlot(options(), '09:45');
+  const hold = apartarHorarioDemo(options(), '09:45');
   hold.expiresAt = Date.now() - 1;
-  assert.ok(slots(options()).includes('09:45'));
+  assert.ok(buscarHorariosDemo(options()).includes('09:45'));
   assert.throws(
     () =>
-      createAppointment(
+      crearCitaDemo(
         { ...options(), start: '09:45' },
         { name: 'Prueba Apellido', phone: '6140001000' },
         hold.id,
@@ -152,8 +152,8 @@ test('un apartamiento vencido se ignora y no permite confirmar', () => {
   );
 });
 test('confirmar consume el lock, agrega una cita y evita doble envío', () => {
-  const hold = holdSlot(options(), '09:45');
-  const a = createAppointment(
+  const hold = apartarHorarioDemo(options(), '09:45');
+  const a = crearCitaDemo(
     { ...options(), start: '09:45' },
     { name: 'Prueba Apellido', phone: '6140001000' },
     hold.id,
@@ -163,7 +163,7 @@ test('confirmar consume el lock, agrega una cita y evita doble envío', () => {
   assert.ok(a.folio.startsWith('CB-'));
   assert.ok(!db.holds.some((h) => h.id === hold.id));
   assert.throws(() =>
-    createAppointment(
+    crearCitaDemo(
       { ...options(), start: '09:45' },
       { name: 'Prueba Apellido', phone: '6140001000' },
       hold.id,
@@ -171,10 +171,10 @@ test('confirmar consume el lock, agrega una cita y evita doble envío', () => {
   );
 });
 test('no permite usar el lock de otro profesional o servicio', () => {
-  const hold = holdSlot(options(), '09:45');
+  const hold = apartarHorarioDemo(options(), '09:45');
   assert.throws(
     () =>
-      createAppointment(
+      crearCitaDemo(
         { ...options(), professionalId: 2, serviceId: 2, start: '09:45' },
         { name: 'Prueba Apellido', phone: '6140001000' },
         hold.id,
@@ -184,14 +184,14 @@ test('no permite usar el lock de otro profesional o servicio', () => {
 });
 test('el nombre y el teléfono se validan antes de insertar', () => {
   const initial = db.appointments.length;
-  assert.throws(() => validateContact('Ana', '6140000000'));
-  assert.throws(() => validateContact('Ana Pérez', '+526140000000'));
-  assert.throws(() => validateContact('Ana Pérez', '614 000000'));
-  assert.doesNotThrow(() => validateContact('Ana Pérez', '6140000000'));
+  assert.throws(() => validarContactoDemo('Ana', '6140000000'));
+  assert.throws(() => validarContactoDemo('Ana Pérez', '+526140000000'));
+  assert.throws(() => validarContactoDemo('Ana Pérez', '614 000000'));
+  assert.doesNotThrow(() => validarContactoDemo('Ana Pérez', '6140000000'));
   assert.equal(db.appointments.length, initial);
 });
 test('compacta prioriza horas contiguas y busca otro día al saturarse', () => {
-  const result = slots({ ...options(), mode: 'compact' });
+  const result = buscarHorariosDemo({ ...options(), mode: 'compact' });
   assert.ok(result.includes('09:45'));
   assert.ok(!result.includes('11:00'));
   db.blocks.push({
@@ -203,13 +203,13 @@ test('compacta prioriza horas contiguas y busca otro día al saturarse', () => {
     start: null,
     end: null,
   });
-  const future = nextDates({ ...options(), mode: 'compact' }, 10);
+  const future = buscarFechasDemo({ ...options(), mode: 'compact' }, 10);
   assert.ok(future.length);
   assert.ok(future[0].day > TODAY);
 });
 test('no ofrece fechas anteriores ni domingos', () => {
-  assert.deepEqual(slots({ ...options(), day: addDays(TODAY, -1) }), []);
-  assert.deepEqual(slots({ ...options(), day: '2026-09-13' }), []);
+  assert.deepEqual(buscarHorariosDemo({ ...options(), day: addDays(TODAY, -1) }), []);
+  assert.deepEqual(buscarHorariosDemo({ ...options(), day: '2026-09-13' }), []);
 });
 test('el texto introducido por usuarios se escapa antes de insertarlo en HTML', () => {
   assert.equal(

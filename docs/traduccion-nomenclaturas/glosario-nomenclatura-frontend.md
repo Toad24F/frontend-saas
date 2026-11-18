@@ -224,3 +224,15 @@ Este glosario se aplica al código nuevo desde su fecha de cierre. La migración
 | `data-desktop-view`, `data-catalog-pagination`, `data-catalog-page`, `data-page-kind` | `data-vista-escritorio`, `data-paginacion-catalogo`, `data-pagina-catalogo`, `data-tipo-catalogo` |
 | Sufijos `-results` y `-reset` de catálogos | `-resultados` y `-limpiar` |
 
+## Equivalencias de Disponibilidad
+
+| Nombre anterior | Nombre adoptado |
+| --- | --- |
+| `view.js`, `actions.js`, `errors.js`, `style.css` de Disponibilidad | `disponibilidad.vista.js`, `disponibilidad.acciones.js`, `disponibilidad.errores.js`, `disponibilidad.estilos.css` |
+| `schedule-rows.js`, `groups.js`, `offering.js`, `branch-assignments.js` | `disponibilidad.horario-franjas.js`, `disponibilidad.grupos.js`, `disponibilidad.oferta.js`, `disponibilidad.asignaciones-sucursales.js` |
+| `block-directory.js`, `block-filters.js` | `disponibilidad.directorio-bloqueos.js`, `disponibilidad.filtros-bloqueos.js` |
+| `operational.js`, `operational-contract.js`, `operational.css` | `disponibilidad.operativa.js`, `disponibilidad.contrato-operativo.js`, `disponibilidad.operativa.css` |
+| `configuration.js`, `payload.js`, `schedulePayload` | `disponibilidad.configuracion.js`, `disponibilidad.payload.js`, `crearPayloadHorario` |
+| `demo/availability.js`, `slots`, `holdSlot`, `createAppointment` de demo | `demo/disponibilidad.motor.js`, `buscarHorariosDemo`, `apartarHorarioDemo`, `crearCitaDemo` |
+| `data-availability-tab`, `data-availability-action`, `data-schedule-row`, `data-block-filter` | `data-disponibilidad-pestana`, `data-disponibilidad-accion`, `data-horario-franja`, `data-filtro-bloqueos` |
+

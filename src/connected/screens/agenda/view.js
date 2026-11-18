@@ -8,7 +8,7 @@ import { state, render } from '../../../shared/app.js';
 import { list, statuses, tenantById } from '../../../shared/data.js';
 import { escape as esc, pageHead, badge } from '../../../shared/ui.js';
 import { icon } from '../../../shared/icons.js';
-import { reasonText } from '../../../shared/screens/disponibilidad/operational-contract.js';
+import { textoMotivoDisponibilidad } from '../../../shared/screens/disponibilidad/disponibilidad.contrato-operativo.js';
 import { createAgendaClient } from '../../modules/agenda/client.js';
 import { createAgendaStore } from '../../modules/agenda/store.js';
 import { calendarPeriod, civilAdd, moveCalendarDate, todayCivil } from '../../modules/agenda/calendar.js';
@@ -17,7 +17,7 @@ import { canManageAppointments } from '../../modules/agenda/manual-contract.js';
 import { hasPendingManual, openManualAppointment } from './manual-view.js';
 import { attachStateEditor } from './state-editor.js';
 import { attachScheduleEditor } from './schedule-editor.js';
-import { zonedParts } from '../../../shared/screens/disponibilidad/operational-contract.js';
+import { partesEnZonaHoraria } from '../../../shared/screens/disponibilidad/disponibilidad.contrato-operativo.js';
 import '../../../shared/screens/agenda/style.css';
 import './style.css';
 import '../../../shared/screens/agenda/polish.css';
@@ -211,7 +211,7 @@ export function agenda() {
 // Detalle e historial se consultan por separado: errores de eventos no ocultan el snapshot autorizado.
 function detailMarkup(item) {
   const fields = [ ['Folio', item.folio], ['Paciente', item.nombreContacto], ['Teléfono', item.telefonoContacto], ['Origen', item.origen === 'manual' ? 'Agendamiento manual' : 'Portal de reservas'], ['Servicio', item.nombreServicio], ['Profesional', item.nombreProfesional], ['Sucursal', item.nombreSucursal], ['Inicio', `${item.fechaLocal} · ${item.horaInicio}`], ['Fin', `${item.fechaFinLocal} · ${item.horaFin}`], ['Zona horaria', item.zonaHoraria], ['Costo histórico', item.costoAceptado], ['Notas de consulta', item.motivoConsulta] ];
-  return `${badge(item.estado)}<dl class="m4-detail-fields">${fields.map(([label, value]) => `<div><dt>${label}</dt><dd>${esc(historical(value))}</dd></div>`).join('')}</dl>${item.causas?.length ? `<ul>${item.causas.map((cause) => `<li>${esc(reasonText(cause.codigo))}</li>`).join('')}</ul>` : ''}`;
+  return `${badge(item.estado)}<dl class="m4-detail-fields">${fields.map(([label, value]) => `<div><dt>${label}</dt><dd>${esc(historical(value))}</dd></div>`).join('')}</dl>${item.causas?.length ? `<ul>${item.causas.map((cause) => `<li>${esc(textoMotivoDisponibilidad(cause.codigo))}</li>`).join('')}</ul>` : ''}`;
 }
 const actionLabels = { alta: 'Alta', cambio_estado: 'Cambio de estado', cancelacion: 'Cancelación', reactivacion: 'Reactivación', cambio_horario: 'Cambio de horario' };
 const valueLabels = { estado: 'Estado', version: 'Versión', origen: 'Origen', folio: 'Folio', clienteId: 'Cliente', sucursalId: 'Sucursal', servicioId: 'Servicio', personalId: 'Profesional', inicioUtc: 'Inicio UTC', finUtc: 'Fin UTC', separacionMinutos: 'Separación (minutos)', finOcupacionUtc: 'Fin de ocupación UTC', zonaHoraria: 'Zona horaria', costoAceptado: 'Costo histórico' };
@@ -243,7 +243,7 @@ export async function openAppointment(id) {
       isCurrent: () => Boolean(user) && sessionScope === `${user.negocioId}:${user.id}:${user.sesionId || ''}`,
       onReload: () => openAppointment(id),
       onChanged: async (result) => {
-        state.date = zonedParts(result.inicioUtc, result.zonaHoraria).date;
+        state.date = partesEnZonaHoraria(result.inicioUtc, result.zonaHoraria).date;
         state.search = ''; state.branch = state.professional = state.status = 'all';
         await load(true); if (active()) await openAppointment(id);
       },
@@ -292,7 +292,7 @@ export function handleAgendaClick(event) {
       catalogs: { services: list('services', state.tenantId), branches: list('branches', state.tenantId), people: list('professionals', state.tenantId) },
       onSaved: async (result) => {
         // Reconsultar después del commit, sin insertar resultados supuestos en el calendario.
-        state.date = zonedParts(result.inicioUtc, result.zonaHoraria).date;
+        state.date = partesEnZonaHoraria(result.inicioUtc, result.zonaHoraria).date;
         state.search = ''; state.branch = state.professional = state.status = 'all';
         await load(true);
       }, onCleared: () => render(),

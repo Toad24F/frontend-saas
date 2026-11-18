@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readPricePublication, savePricePublication } from '../src/connected/modules/publicacion/precios.js';
 import { pricePublicationPanel } from '../src/connected/screens/cuenta/price-publication.js';
-import { readConnectedConfiguration, validateConnectedConfiguration } from '../src/shared/screens/disponibilidad/operational-contract.js';
+import { leerConfiguracionConectada, validarConfiguracionConectada } from '../src/shared/screens/disponibilidad/disponibilidad.contrato-operativo.js';
 
 // La frontera usa el actor autenticado; nunca acepta un negocioId del navegador.
 test('T044: lee el booleano vigente y conserva el fallo de lectura', async () => {
@@ -26,8 +26,8 @@ test('T045: envía solo el booleano y exige confirmación de la respuesta', asyn
 
 test('T047: el nuevo tiempo admite cero y rechaza el campo anterior', () => {
   const base = { modo: 'ventana_libre', tiempoEntreCitasMinutos: 0, anticipacionMinutos: 15, diasFuturos: 60 };
-  assert.deepEqual(validateConnectedConfiguration(base), {});
-  assert.ok(validateConnectedConfiguration({ ...base, tiempoEntreCitasMinutos: undefined, intervaloMinutos: 15 }).tiempoEntreCitasMinutos);
-  assert.deepEqual(readConnectedConfiguration(base), base);
-  assert.throws(() => readConnectedConfiguration({ ...base, tiempoEntreCitasMinutos: undefined, intervaloMinutos: 15 }), /no es válida/);
+  assert.deepEqual(validarConfiguracionConectada(base), {});
+  assert.ok(validarConfiguracionConectada({ ...base, tiempoEntreCitasMinutos: undefined, intervaloMinutos: 15 }).tiempoEntreCitasMinutos);
+  assert.deepEqual(leerConfiguracionConectada(base), base);
+  assert.throws(() => leerConfiguracionConectada({ ...base, tiempoEntreCitasMinutos: undefined, intervaloMinutos: 15 }), /no es válida/);
 });

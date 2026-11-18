@@ -27,9 +27,9 @@ import { aplicarFiltrosProfesionales, restablecerFiltrosProfesionales, cambiarVi
 import { aplicarFiltrosRecepcionistas, restablecerFiltrosRecepcionistas, cambiarVistaRecepcionistas } from '../connected/screens/recepcionistas/recepcionistas.vista.js';
 import { aplicarFiltrosServicios, restablecerFiltrosServicios, cambiarVistaServicios } from './screens/servicios/servicios.vista.js';
 import { aplicarFiltrosSucursales, restablecerFiltrosSucursales, cambiarVistaSucursales } from './screens/sucursales/sucursales.vista.js';
-import { setAvailabilityTab } from './screens/disponibilidad/view.js';
-import { updateAssignmentDraft } from './screens/disponibilidad/branch-assignments.js';
-import { allowedAvailabilityGroups, resolveAvailabilityGroup } from './screens/disponibilidad/groups.js';
+import { cambiarPestanaDisponibilidad } from './screens/disponibilidad/disponibilidad.vista.js';
+import { actualizarBorradorAsignaciones } from './screens/disponibilidad/disponibilidad.asignaciones-sucursales.js';
+import { gruposDisponibilidadPermitidos, resolverGrupoDisponibilidad } from './screens/disponibilidad/disponibilidad.grupos.js';
 
 const themeKey = 'cita-theme';
 let theme = (() => {
@@ -78,7 +78,7 @@ export const state = {
   professional: 'all',
   status: 'all',
   search: '',
-  availabilityGroup: '',
+  grupoDisponibilidad: '',
 };
 window.addEventListener('agenda-layout-change', () => { if (state.page === 'agenda') renderAgendaPreserving(render); });
 matchMedia('(max-width: 767px)').addEventListener('change', ({ matches }) => {
@@ -111,10 +111,10 @@ labels.cuenta = 'Mi cuenta';
 labels.recepcionistas = 'Recepcionistas';
 labels.profesionales = 'Profesionales';
 let animateNextRoute = true;
-let availabilityMenuOpen = null;
+let menuDisponibilidadAbierto = null;
 let usersMenuOpen = null;
-const availabilityPath = (group) => `/admin/disponibilidad/${group}`;
-const selectedAvailabilityGroup = () => resolveAvailabilityGroup(state.availabilityGroup, isDemo, user?.rol);
+const rutaDisponibilidad = (group) => `/admin/disponibilidad/${group}`;
+const grupoDisponibilidadSeleccionado = () => resolverGrupoDisponibilidad(state.grupoDisponibilidad, isDemo, user?.rol);
 function navItem(item) {
   if (item.length === 2) return `<div class="nav-section">${item[1]}</div>`;
   if (item[0] === 'usuarios') {
@@ -123,9 +123,9 @@ function navItem(item) {
     return `<div class="nav-disclosure"><button type="button" class="nav-item nav-disclosure-trigger ${selected ? 'active' : ''}" data-users-menu aria-expanded="${open}" aria-controls="users-sidebar-submenu">${icon('users')}<span>Usuarios</span>${icon('chevron', 'nav-disclosure-arrow')}</button><div class="nav-submenu" id="users-sidebar-submenu" ${open ? '' : 'hidden'}>${[['profesionales', 'Profesionales'], ...(!isDemo && user?.rol === 'admin_negocio' ? [['recepcionistas', 'Recepcionistas']] : [])].map(([page, label]) => `<a href="/admin/${page}" data-nav="${page}" class="nav-subitem ${state.page === page ? 'is-current' : ''}" ${state.page === page ? 'aria-current="page"' : ''}>${label}</a>`).join('')}</div></div>`;
   }
   if (item[0] === 'disponibilidad') {
-    const open = availabilityMenuOpen ?? state.page === 'disponibilidad';
-    const children = allowedAvailabilityGroups(isDemo, user?.rol).map((group) => `<a href="${availabilityPath(group.id)}" data-availability-group="${group.id}" class="nav-subitem ${state.page === 'disponibilidad' && selectedAvailabilityGroup() === group.id ? 'is-current' : ''}" ${state.page === 'disponibilidad' && selectedAvailabilityGroup() === group.id ? 'aria-current="page"' : ''}>${group.label}</a>`).join('');
-    return `<div class="nav-disclosure"><button type="button" class="nav-item nav-disclosure-trigger ${state.page === 'disponibilidad' ? 'active' : ''}" data-availability-menu aria-expanded="${open}" aria-controls="availability-sidebar-submenu">${icon('clock')}<span>Disponibilidad</span>${icon('chevron', 'nav-disclosure-arrow')}</button><div class="nav-submenu" id="availability-sidebar-submenu" ${open ? '' : 'hidden'}>${children}</div></div>`;
+    const open = menuDisponibilidadAbierto ?? state.page === 'disponibilidad';
+    const children = gruposDisponibilidadPermitidos(isDemo, user?.rol).map((group) => `<a href="${rutaDisponibilidad(group.id)}" data-grupo-disponibilidad="${group.id}" class="nav-subitem ${state.page === 'disponibilidad' && grupoDisponibilidadSeleccionado() === group.id ? 'is-current' : ''}" ${state.page === 'disponibilidad' && grupoDisponibilidadSeleccionado() === group.id ? 'aria-current="page"' : ''}>${group.etiqueta}</a>`).join('');
+    return `<div class="nav-disclosure"><button type="button" class="nav-item nav-disclosure-trigger ${state.page === 'disponibilidad' ? 'active' : ''}" data-menu-disponibilidad aria-expanded="${open}" aria-controls="submenu-disponibilidad">${icon('clock')}<span>Disponibilidad</span>${icon('chevron', 'nav-disclosure-arrow')}</button><div class="nav-submenu" id="submenu-disponibilidad" ${open ? '' : 'hidden'}>${children}</div></div>`;
   }
   return `<a href="/admin/${item[0]}" data-nav="${item[0]}" class="nav-item ${state.page === item[0] ? 'active' : ''}" ${state.page === item[0] ? 'aria-current="page"' : ''}>${icon(item[1])}<span>${item[2]}</span>${isDemo && item[0] === 'agenda' ? `<span class="nav-count">${list('appointments', state.tenantId).filter((a) => a.date === TODAY).length}</span>` : ''}</a>`;
 }
@@ -165,10 +165,10 @@ export function navigate(page, id = null) {
   if (!isDemo && !availablePage(page)) page = defaultPage();
   if (page === 'negocio' && (!Number.isSafeInteger(Number(id)) || Number(id) < 1)) page = defaultPage();
   if (page === 'disponibilidad') {
-    state.availabilityGroup = selectedAvailabilityGroup();
-    availabilityMenuOpen = true;
+    state.grupoDisponibilidad = grupoDisponibilidadSeleccionado();
+    menuDisponibilidadAbierto = true;
   }
-  history.pushState({}, '', modeUrl(page === 'disponibilidad' ? availabilityPath(state.availabilityGroup) : `/admin/${page}${page === 'negocio' ? `/${id}` : ''}`));
+  history.pushState({}, '', modeUrl(page === 'disponibilidad' ? rutaDisponibilidad(state.grupoDisponibilidad) : `/admin/${page}${page === 'negocio' ? `/${id}` : ''}`));
   state.page = page;
   if (['profesionales', 'recepcionistas'].includes(page)) usersMenuOpen = true;
   state.businessId = page === 'negocio' ? Number(id) : null;
@@ -176,23 +176,23 @@ export function navigate(page, id = null) {
   animateNextRoute = true;
   render();
 }
-function navigateAvailabilityGroup(group) {
-  const resolved = resolveAvailabilityGroup(group, isDemo, user?.rol);
+function navegarGrupoDisponibilidad(group) {
+  const resolved = resolverGrupoDisponibilidad(group, isDemo, user?.rol);
   if (!resolved) return;
-  availabilityMenuOpen = true;
-  state.availabilityGroup = resolved;
+  menuDisponibilidadAbierto = true;
+  state.grupoDisponibilidad = resolved;
   state.page = 'disponibilidad';
   state.search = '';
-  history.pushState({}, '', modeUrl(availabilityPath(resolved)));
+  history.pushState({}, '', modeUrl(rutaDisponibilidad(resolved)));
   animateNextRoute = true;
   render();
 }
-function restoreAvailabilityGroup() {
+function restaurarGrupoDisponibilidad() {
   if (state.page !== 'disponibilidad') return;
   const requested = location.pathname.split('/')[3];
-  state.availabilityGroup = resolveAvailabilityGroup(requested, isDemo, user?.rol);
-  if (state.availabilityGroup && requested !== state.availabilityGroup) {
-    history.replaceState({}, '', modeUrl(availabilityPath(state.availabilityGroup)));
+  state.grupoDisponibilidad = resolverGrupoDisponibilidad(requested, isDemo, user?.rol);
+  if (state.grupoDisponibilidad && requested !== state.grupoDisponibilidad) {
+    history.replaceState({}, '', modeUrl(rutaDisponibilidad(state.grupoDisponibilidad)));
   }
 }
 export function renderShell(content) {
@@ -328,21 +328,21 @@ document.addEventListener('click', async (e) => {
     document.querySelector('#users-sidebar-submenu').hidden = !usersMenuOpen;
     return;
   }
-  const availabilityMenu = e.target.closest('[data-availability-menu]');
-  if (availabilityMenu) {
-    availabilityMenuOpen = availabilityMenu.getAttribute('aria-expanded') !== 'true';
-    availabilityMenu.setAttribute('aria-expanded', String(availabilityMenuOpen));
-    document.querySelector('#availability-sidebar-submenu').hidden = !availabilityMenuOpen;
+  const menuDisponibilidad = e.target.closest('[data-menu-disponibilidad]');
+  if (menuDisponibilidad) {
+    menuDisponibilidadAbierto = menuDisponibilidad.getAttribute('aria-expanded') !== 'true';
+    menuDisponibilidad.setAttribute('aria-expanded', String(menuDisponibilidadAbierto));
+    document.querySelector('#submenu-disponibilidad').hidden = !menuDisponibilidadAbierto;
     return;
   }
-  const availabilityGroup = e.target.closest('[data-availability-group]');
-  if (availabilityGroup) {
+  const enlaceGrupoDisponibilidad = e.target.closest('[data-grupo-disponibilidad]');
+  if (enlaceGrupoDisponibilidad) {
     e.preventDefault();
-    navigateAvailabilityGroup(availabilityGroup.dataset.availabilityGroup);
+    navegarGrupoDisponibilidad(enlaceGrupoDisponibilidad.dataset.grupoDisponibilidad);
     return;
   }
-  const availabilityTab = e.target.closest('[data-availability-tab]');
-  if (availabilityTab) { setAvailabilityTab(availabilityTab.dataset.availabilityTab); return; }
+  const pestanaDisponibilidad = e.target.closest('[data-disponibilidad-pestana]');
+  if (pestanaDisponibilidad) { cambiarPestanaDisponibilidad(pestanaDisponibilidad.dataset.disponibilidadPestana); return; }
   const vistaProfesionales = e.target.closest('[data-vista-profesionales]');
   if (vistaProfesionales) { cambiarVistaProfesionales(vistaProfesionales.dataset.vistaProfesionales); return; }
   if (e.target.closest('[data-profesional-limpiar]')) { restablecerFiltrosProfesionales(); return; }
@@ -363,7 +363,7 @@ document.addEventListener('click', async (e) => {
   const navEl = e.target.closest('[data-nav]');
   if (navEl) {
     e.preventDefault();
-    if (navEl.dataset.navProfessional) state.scheduleProfessional = Number(navEl.dataset.navProfessional);
+    if (navEl.dataset.navProfessional) state.profesionalHorario = Number(navEl.dataset.navProfessional);
     navigate(navEl.dataset.nav);
     return;
   }
@@ -425,7 +425,7 @@ document.addEventListener('click', async (e) => {
   if (actions) actions.handleClick(e);
 });
 document.addEventListener('change', (e) => {
-  if (e.target.closest('#branch-assignments-form')) { updateAssignmentDraft(e.target.form); return; }
+  if (e.target.closest('#formulario-asignaciones-sucursales')) { actualizarBorradorAsignaciones(e.target.form); return; }
   if (e.target.dataset.filtroProfesionales) { aplicarFiltrosProfesionales(); return; }
   if (e.target.dataset.filtroRecepcionistas) { aplicarFiltrosRecepcionistas(); return; }
   if (e.target.dataset.filtroServicios) { aplicarFiltrosServicios(); return; }
@@ -456,7 +456,7 @@ document.addEventListener('input', (e) => {
 });
 window.addEventListener('popstate', () => {
   state.page = location.pathname.split('/')[2] || (isDemo ? 'agenda' : defaultPage());
-  restoreAvailabilityGroup();
+  restaurarGrupoDisponibilidad();
   state.businessId = state.page === 'negocio' ? Number(location.pathname.split('/')[3]) : null;
   animateNextRoute = true;
   render();
@@ -467,12 +467,12 @@ document.addEventListener('keydown', (event) => {
     event.preventDefault();
     return;
   }
-  const availabilityTab = event.target.closest?.('[data-availability-tab]');
-  if (availabilityTab && ['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) {
-    const tabs = [...availabilityTab.closest('[role="tablist"]').querySelectorAll('[data-availability-tab]')];
-    const index = tabs.indexOf(availabilityTab);
+  const pestanaDisponibilidad = event.target.closest?.('[data-disponibilidad-pestana]');
+  if (pestanaDisponibilidad && ['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) {
+    const tabs = [...pestanaDisponibilidad.closest('[role="tablist"]').querySelectorAll('[data-disponibilidad-pestana]')];
+    const index = tabs.indexOf(pestanaDisponibilidad);
     const next = event.key === 'Home' ? 0 : event.key === 'End' ? tabs.length - 1 : (index + (event.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length;
-    setAvailabilityTab(tabs[next].dataset.availabilityTab, true);
+    cambiarPestanaDisponibilidad(tabs[next].dataset.disponibilidadPestana, true);
     event.preventDefault();
     return;
   }
@@ -507,7 +507,7 @@ export async function start() {
     state.page = location.pathname.startsWith('/admin/')
       ? location.pathname.split('/')[2]
       : isDemo ? 'agenda' : defaultPage();
-    restoreAvailabilityGroup();
+    restaurarGrupoDisponibilidad();
     state.businessId = state.page === 'negocio' ? Number(location.pathname.split('/')[3]) : null;
     [extraViews, booking, actions] = await Promise.all([
       isDemo ? import('../demo/screens/index.js') : import('../connected/screens/index.js'),

@@ -6,7 +6,7 @@ import { createLicenseOperations } from './license-operations.js';
 import { licenseStatusHtml } from './license-presentation.js';
 import { readUserQuota, quotaHtml } from './user-quota.js';
 import './style.css';
-import '../../../shared/screens/disponibilidad/style.css';
+import '../../../shared/screens/disponibilidad/disponibilidad.estilos.css';
 import { quotaMeter } from './quota-meter.js';
 import { mailHistoryHtml } from './mail-history.js';
 import { bindBusinessWorkspace, workspaceState } from './workspace.js';
@@ -90,7 +90,7 @@ export function businessDetail() {
   const mail = `<section class="business-general-section business-mail-section" aria-labelledby="business-mail-heading"><h2 id="business-mail-heading">Historial de correos</h2><p class="business-general-description">Invitaciones y avisos, del más reciente al más antiguo.</p>${mailHistoryHtml(deliveries, workspaceState.mail)}</section>`;
 
   const tabs = [['general', 'General', general], ['limits', 'Límites y uso', limits], ['mail', `Historial de correos${failed ? ` · ${failed} fallidos` : ''}`, mail]];
-  return `${pageHead(business.nombre, 'Administración del negocio y seguimiento de su acceso.', '<button type="button" class="btn btn-light" data-action="back-platform">' + icon('arrow') + 'Volver al panel</button>')}<div class="business-workspace"><nav class="availability-tabs" role="tablist" aria-label="Información del negocio">${tabs.map(([id, label]) => `<button type="button" role="tab" id="business-tab-${id}" aria-controls="business-panel-${id}" aria-selected="${workspaceState.tab === id}" tabindex="${workspaceState.tab === id ? 0 : -1}" data-business-tab="${id}" class="${workspaceState.tab === id ? 'is-selected' : ''}">${label}</button>`).join('')}</nav>${tabs.map(([id, , content]) => `<div role="tabpanel" tabindex="0" id="business-panel-${id}" aria-labelledby="business-tab-${id}" ${workspaceState.tab === id ? '' : 'hidden'}>${content}</div>`).join('')}</div>`;
+  return `${pageHead(business.nombre, 'Administración del negocio y seguimiento de su acceso.', '<button type="button" class="btn btn-light" data-action="back-platform">' + icon('arrow') + 'Volver al panel</button>')}<div class="business-workspace"><nav class="disponibilidad-pestanas" role="tablist" aria-label="Información del negocio">${tabs.map(([id, label]) => `<button type="button" role="tab" id="business-tab-${id}" aria-controls="business-panel-${id}" aria-selected="${workspaceState.tab === id}" tabindex="${workspaceState.tab === id ? 0 : -1}" data-business-tab="${id}" class="${workspaceState.tab === id ? 'is-selected' : ''}">${label}</button>`).join('')}</nav>${tabs.map(([id, , content]) => `<div role="tabpanel" tabindex="0" id="business-panel-${id}" aria-labelledby="business-tab-${id}" ${workspaceState.tab === id ? '' : 'hidden'}>${content}</div>`).join('')}</div>`;
 }
 
 bindBusinessWorkspace(() => snapshot, refreshBusinessDetail);

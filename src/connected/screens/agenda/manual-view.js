@@ -2,7 +2,7 @@ import { api, user } from '../../backend.js';
 import { escape as esc } from '../../../shared/ui.js';
 import { agendaPanel as modal, agendaDraft, saveAgendaDraft, clearAgendaDraft } from '../../../shared/screens/agenda/panels.js';
 import { icon } from '../../../shared/icons.js';
-import { formatZoned } from '../../../shared/screens/disponibilidad/operational-contract.js';
+import { formatearEnZonaHoraria } from '../../../shared/screens/disponibilidad/disponibilidad.contrato-operativo.js';
 import { createAgendaClient } from '../../modules/agenda/client.js';
 import { canManageAppointments, createManualClient, manualSelection, manualSlots } from '../../modules/agenda/manual-contract.js';
 import { createManualOperation } from '../../modules/agenda/manual-operation.js';
@@ -77,7 +77,7 @@ export async function openManualAppointment({ day, catalogs, onSaved, onCleared 
     form.querySelector('[data-manual-close]').disabled = state.busy;
     dialog.querySelector('[data-close]').disabled = state.busy;
     if (state.busy) panel.innerHTML = '<p role="status">Comprobando el envío de la cita…</p>';
-    else if (state.status === 'registered') panel.innerHTML = `<div class="information-note"><strong>Cita registrada · ${esc(state.result.folio)}</strong><p>${esc(formatZoned(state.result.inicioUtc, state.result.zonaHoraria))} · ${esc(state.result.zonaHoraria)}</p><p>Costo aceptado: ${esc(state.result.costoAceptado)}</p><button type="button" class="btn btn-primary" data-manual-done>Volver a la agenda</button></div>`;
+    else if (state.status === 'registered') panel.innerHTML = `<div class="information-note"><strong>Cita registrada · ${esc(state.result.folio)}</strong><p>${esc(formatearEnZonaHoraria(state.result.inicioUtc, state.result.zonaHoraria))} · ${esc(state.result.zonaHoraria)}</p><p>Costo aceptado: ${esc(state.result.costoAceptado)}</p><button type="button" class="btn btn-primary" data-manual-done>Volver a la agenda</button></div>`;
     else if (state.status === 'not_registered') panel.innerHTML = '<p>No se registró la cita. Puedes corregir los datos y consultar otro horario.</p><button type="button" class="btn btn-light" data-manual-edit>Corregir datos</button>';
     else if (state.status === 'uncertain') panel.innerHTML = `<p role="status">Hay un envío pendiente de comprobar. Comprueba el resultado antes de crear otra cita.</p>${state.error ? `<p>${esc(typeof state.error.status === 'number' ? `${privateError(state.error).title}. ${privateError(state.error).message}` : state.error.message)}</p>` : ''}<button type="button" class="btn btn-primary" data-manual-resolve>Comprobar resultado</button>`;
     else if (state.status === 'storage_error') panel.innerHTML = `<p role="alert">${esc(state.error.message)}</p>`;
@@ -105,7 +105,7 @@ export async function openManualAppointment({ day, catalogs, onSaved, onCleared 
       const response = await client.availability(values);
       if (!active() || current !== generation) return;
       slots = manualSlots(response, values); availability = response; queryIdentity = JSON.stringify(values);
-      slotsSelect.innerHTML = '<option value="">Selecciona un horario</option>' + slots.map((slot, index) => `<option value="${index}">${esc(formatZoned(slot.inicioUtc, response.zonaHoraria))} – ${esc(formatZoned(slot.finUtc, response.zonaHoraria))}</option>`).join('');
+      slotsSelect.innerHTML = '<option value="">Selecciona un horario</option>' + slots.map((slot, index) => `<option value="${index}">${esc(formatearEnZonaHoraria(slot.inicioUtc, response.zonaHoraria))} – ${esc(formatearEnZonaHoraria(slot.finUtc, response.zonaHoraria))}</option>`).join('');
       slotsSelect.disabled = !slots.length;
       form.querySelector('[data-manual-availability]').textContent = slots.length ? `${slots.length} horarios · ${response.zonaHoraria}` : 'Sin horarios disponibles para esta combinación y fecha.';
     } catch (error) { if (active() && current === generation) { form.querySelector('[data-manual-availability]').textContent = ''; fail(new Error(`No se pudo consultar la disponibilidad. ${privateError(error).title}. ${privateError(error).message}`)); } }

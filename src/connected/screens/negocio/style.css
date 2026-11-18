@@ -122,7 +122,7 @@ html[data-theme='dark'] :is(.mail-state-pendiente, .mail-state-tomado) { backgro
   .business-admin-facts { grid-template-columns: minmax(0, 1fr); gap: 20px; }
   .business-general-section { padding: 18px 0 24px; }
   .business-license-expiry { text-align: left; }
-  .business-workspace .availability-tabs button { min-height: 44px; }
+  .business-workspace .disponibilidad-pestanas button { min-height: 44px; }
   .mail-table, .mail-table tbody, .mail-table tr, .mail-table td { display: block; width: 100%; }
   .mail-table thead { display: none; }
   .mail-table tr { padding: 14px 0; border-bottom: 1px solid var(--border); }

@@ -9,9 +9,9 @@ test('FALA-T048–T049: PUT completo y borrador estable ante 400/503', async ({ 
   await page.getByRole('button', { name: 'Entrar' }).click();
   await expect(page.getByRole('heading', { name: 'Inicia sesión' })).toHaveCount(0);
   await page.goto(`${process.env.PORTAL_TEST_ORIGIN}/admin/disponibilidad/negocio`);
-  const form = page.locator('#agenda-configuration-form');
+  const form = page.locator('#formulario-configuracion-agenda');
   await expect(form).toBeVisible();
-  await form.locator('label.configuration-choice').nth(1).click();
+  await form.locator('label.configuracion-opcion').nth(1).click();
   await form.locator('[name="tiempoEntreCitasMinutos"]').selectOption('5');
   await form.locator('[name="anticipacionMinutos"]').fill('20');
   await form.locator('[name="diasFuturos"]').fill('30');
@@ -20,7 +20,7 @@ test('FALA-T048–T049: PUT completo y borrador estable ante 400/503', async ({ 
     ? route.fulfill({ status: 400, contentType: 'application/json', body: JSON.stringify({ message: 'tiempoEntreCitasMinutos inválido' }) })
     : route.continue());
   await form.getByRole('button', { name: 'Guardar reglas' }).click();
-  await expect(form.locator('[data-availability-field="tiempoEntreCitasMinutos"]')).toContainText('inválido');
+  await expect(form.locator('[data-disponibilidad-campo="tiempoEntreCitasMinutos"]')).toContainText('inválido');
   await expect(form.locator('[name="tiempoEntreCitasMinutos"]')).toHaveValue('5');
   await expect(form.locator('[name="anticipacionMinutos"]')).toHaveValue('20');
   await page.unroute('**/disponibilidad/configuracion');
@@ -66,16 +66,16 @@ test('FALA-T050: dos franjas semanales representan la pausa en la API', async ({
   await expect(page.getByRole('heading', { name: 'Inicia sesión' })).toHaveCount(0);
   await page.goto(`${process.env.PORTAL_TEST_ORIGIN}/admin/disponibilidad/equipo`);
   await page.getByRole('tab', { name: 'Horario semanal' }).click();
-  const monday = page.locator('[data-schedule-row][data-schedule-day="1"]');
+  const monday = page.locator('[data-horario-franja][data-horario-dia="1"]');
   await expect(monday.first()).toBeVisible();
   await monday.first().locator('input[name^="start-"]').fill('09:00');
   await monday.first().locator('input[name^="end-"]').fill('12:00');
-  await monday.first().locator('[data-add-schedule="1"]').click();
+  await monday.first().locator('[data-agregar-franja="1"]').click();
   await expect(monday).toHaveCount(2);
   await monday.nth(1).locator('input[name^="start-"]').fill('13:00');
   await monday.nth(1).locator('input[name^="end-"]').fill('17:00');
   const response = page.waitForResponse((item) => /\/profesionales\/\d+\/horario$/.test(item.url()) && item.request().method() === 'PUT');
-  await page.locator('#schedule-form').getByRole('button', { name: 'Guardar horario' }).click();
+  await page.locator('#formulario-horario').getByRole('button', { name: 'Guardar horario' }).click();
   const saved = await response;
   expect(saved.status()).toBe(200);
   const sent = saved.request().postDataJSON().franjas.filter((row) => row.diaSemana === 1 && row.activo);

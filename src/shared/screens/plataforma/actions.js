@@ -16,7 +16,7 @@ export function switchTenant() {
       (btn.onclick = () => {
         state.tenantId = Number(btn.dataset.chooseTenant);
         state.branch = state.professional = state.status = 'all';
-        state.scheduleProfessional = null;
+        state.profesionalHorario = null;
         reportState.branch = 'all';
         el.close();
         render();
