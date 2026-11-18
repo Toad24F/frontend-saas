@@ -30,6 +30,7 @@ Un nombre solo puede traducirse cuando se haya comprobado que es interno. Si atr
 | `receptionist` | `recepcionista` | Cuenta de recepción. |
 | `block` | `bloqueo` | Periodo sin atención. |
 | `catalog` | `catalogo` | Conjunto de recursos ofrecidos. En identificadores no se usan tildes. |
+| `authentication` / `session` | `autenticacion` / `sesion` | Acceso conectado y estado del acceso. Las rutas HTTP de autenticación y las claves persistidas quedan protegidas. |
 | `account` | `cuenta` | Cuenta del usuario actual. |
 | `user` | `usuario` | Identidad autenticada. |
 | `role` | `rol` | Rol contractual; sus valores literales quedan protegidos. |

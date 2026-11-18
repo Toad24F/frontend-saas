@@ -1,4 +1,4 @@
-import { api } from '../auth/session.js';
+import { api } from '../autenticacion/sesion.estado.js';
 import { validarRangoInclusivo, textoMotivoDisponibilidad } from '../../../shared/screens/disponibilidad/disponibilidad.contrato-operativo.js';
 
 const references = { profesionales: 'personal', sucursales: 'sucursal', servicios: 'servicio' };

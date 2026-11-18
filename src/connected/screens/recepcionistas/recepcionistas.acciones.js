@@ -1,5 +1,5 @@
 import { api, loadBackendData } from '../../backend.js';
-import { validateNewPassword } from '../../modules/auth/password-policy.js';
+import { validarContrasenaNueva } from '../../modules/autenticacion/contrasena.politica.js';
 import { list } from '../../../shared/data.js';
 import { escape } from '../../../shared/ui.js';
 import { render, state } from '../../../shared/app.js';
@@ -50,7 +50,7 @@ async function introduccionCupo() {
 export async function nuevaRecepcionista() {
   formularioRecepcionista('Nueva recepcionista', `${await introduccionCupo()}${campoMarcado('Nombre completo', 'name', '', 'text', 'required maxlength="150"')}${campoMarcado('Correo', 'email', '', 'email', 'required maxlength="150" autocomplete="email"')}${camposContrasena()}`, async (formulario) => {
     const password = formulario.get('password');
-    validateNewPassword(password);
+    validarContrasenaNueva(password);
     await api('/recepcionistas', 'POST', { nombre: formulario.get('name').trim(), emailRecepcionista: formulario.get('email').trim(), password });
   });
 }
@@ -59,7 +59,7 @@ export async function accionRecepcionista(accion, id) {
   if (accion === 'restablecer') {
     formularioRecepcionista('Restablecer contraseña', `${camposContrasena()}<p class="form-intro">Se cerrarán las sesiones de esta recepcionista.</p>`, async (formulario) => {
       const password = formulario.get('password');
-      validateNewPassword(password);
+      validarContrasenaNueva(password);
       await api(`/recepcionistas/${id}/restablecer-contrasena`, 'POST', { nuevaPassword: password });
     }, true);
     return;

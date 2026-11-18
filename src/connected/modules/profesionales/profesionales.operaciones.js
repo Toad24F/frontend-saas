@@ -1,4 +1,4 @@
-import { api } from '../auth/session.js';
+import { api } from '../autenticacion/sesion.estado.js';
 
 export async function ejecutarAccionProfesional(id, accion, peticion = api) {
   if (!Number.isSafeInteger(id) || id < 1 || !['desactivar', 'reactivar', 'inhabilitar'].includes(accion)) {

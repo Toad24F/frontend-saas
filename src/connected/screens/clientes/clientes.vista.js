@@ -21,7 +21,7 @@ function reiniciar() {
   identidad = '';
   filtros = { busqueda: '', pagina: 1 };
 }
-window.addEventListener('cita-session-expired', reiniciar);
+window.addEventListener('cita-sesion-expirada', reiniciar);
 
 // Una generación por filtro y una identidad por sesión impiden mostrar respuestas de consultas anteriores.
 async function cargarDirectorio(forzar = false) {

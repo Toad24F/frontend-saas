@@ -116,7 +116,7 @@ test('FALA-T012: precio oculto no aparece en catálogo, apartado ni resultado', 
 test('FALA-T044–T046: publicación global cambia el portal y conserva el importe histórico', async ({ page: pagina, browser: navegador }) => {
   await pagina.goto(`${process.env.PORTAL_TEST_ORIGIN}/admin/cuenta`);
   await pagina.getByLabel('Correo electrónico').fill('admin-qa-1@example.test');
-  await pagina.locator('#login-password').fill('PruebaLicencia2026!');
+  await pagina.locator('#ingreso-contrasena').fill('PruebaLicencia2026!');
   await pagina.getByRole('button', { name: 'Entrar' }).click();
   await expect(pagina.getByRole('heading', { name: 'Precios en el portal público' })).toBeVisible();
   await expect(pagina.getByText('Precios visibles')).toBeVisible();

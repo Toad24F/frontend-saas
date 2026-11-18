@@ -1,4 +1,4 @@
-import { user } from '../auth/session.js';
+import { usuarioActual as user } from '../autenticacion/sesion.estado.js';
 import { pagesForRole } from './roles.js';
 
 export function defaultPage() {

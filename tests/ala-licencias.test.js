@@ -17,7 +17,7 @@ test('FALA-T024: cliente privado añade cabecera solo cuando la llamada la pide'
       calls.push(options.headers);
       return new Response(JSON.stringify({ ok: true }), { status: 200 });
     };
-    const { api } = await import('../src/connected/modules/auth/session.js?ala-license-header');
+    const { api } = await import('../src/connected/modules/autenticacion/sesion.estado.js?ala-license-header');
     await api('/licencias/5/renovar', 'POST', {}, { headers: { 'Idempotency-Key': key } });
     await api('/negocios');
     assert.equal(calls[0]['Idempotency-Key'], key);

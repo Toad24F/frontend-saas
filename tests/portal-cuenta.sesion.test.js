@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { login, restoreSession, loadBackendData, forgetSession, user } from '../src/connected/backend.js';
+import { iniciarSesion, restaurarSesion, loadBackendData, olvidarSesion, user } from '../src/connected/backend.js';
 import { db } from '../src/shared/data.js';
 import { accountPortalUrl } from '../src/shared/account-portal.js';
 
@@ -22,12 +22,12 @@ async function withSession(run) {
     return Response.json([]);
   };
   try { await run({ calls, setIdentifier(value) { identifier = value; } }); }
-  finally { forgetSession(); global.fetch = originalFetch; global.sessionStorage = originalStorage; }
+  finally { olvidarSesion(); global.fetch = originalFetch; global.sessionStorage = originalStorage; }
 }
 
 test('perfil conectado: login carga el slug real y habilita enlace público sin consulta global', async () => {
   await withSession(async ({ calls }) => {
-    await login('admin@example.test', 'credencial-ficticia'); await loadBackendData();
+    await iniciarSesion('admin@example.test', 'credencial-ficticia'); await loadBackendData();
     assert.equal(db.tenants[0].slug, 'clinica-login');
     assert.equal(accountPortalUrl({ user, tenant: db.tenants[0], origin: 'https://citalendar.example' }), 'https://citalendar.example/reservas/clinica-login');
     assert.ok(!calls.some((path) => path.startsWith('/negocios')));
@@ -36,8 +36,8 @@ test('perfil conectado: login carga el slug real y habilita enlace público sin 
 
 test('perfil conectado: restauración reemplaza el identificador anterior por el vigente', async () => {
   await withSession(async ({ setIdentifier }) => {
-    await login('admin@example.test', 'credencial-ficticia'); await loadBackendData();
-    setIdentifier('clinica-actualizada'); await restoreSession(); await loadBackendData();
+    await iniciarSesion('admin@example.test', 'credencial-ficticia'); await loadBackendData();
+    setIdentifier('clinica-actualizada'); await restaurarSesion(); await loadBackendData();
     assert.equal(db.tenants[0].slug, 'clinica-actualizada');
   });
 });
@@ -45,8 +45,8 @@ test('perfil conectado: restauración reemplaza el identificador anterior por el
 test('perfil conectado: contrato antiguo o slug inválido bloquea sin reutilizar el enlace anterior', async () => {
   for (const identifier of [undefined, null, '', '../ajeno', 'clinica?demo=1', '<script>']) {
     await withSession(async ({ setIdentifier }) => {
-      await login('admin@example.test', 'credencial-ficticia'); await loadBackendData();
-      setIdentifier(identifier); await restoreSession(); await loadBackendData();
+      await iniciarSesion('admin@example.test', 'credencial-ficticia'); await loadBackendData();
+      setIdentifier(identifier); await restaurarSesion(); await loadBackendData();
       assert.equal(db.tenants[0].slug, '');
       assert.equal(accountPortalUrl({ user, tenant: db.tenants[0], origin: 'https://citalendar.example' }), null);
     });

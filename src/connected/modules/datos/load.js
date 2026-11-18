@@ -1,5 +1,5 @@
 import { replaceData, time } from '../../../shared/data.js';
-import { api, user } from '../auth/session.js';
+import { api, usuarioActual as user } from '../autenticacion/sesion.estado.js';
 import { cargarCuposPorRol, limpiarCuposPorRol } from '../catalogos/catalogos.cupo.js';
 import { establecerCupoSucursales } from '../sucursales/sucursales.cupo.js';
 

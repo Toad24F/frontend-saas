@@ -1,4 +1,4 @@
-import { api } from '../auth/session.js';
+import { api } from '../autenticacion/sesion.estado.js';
 import { leerConfiguracionConectada, validarConfiguracionConectada } from '../../../shared/screens/disponibilidad/disponibilidad.contrato-operativo.js';
 
 const CAMPOS_CONFIGURACION = ['modo', 'tiempoEntreCitasMinutos', 'anticipacionMinutos', 'diasFuturos'];

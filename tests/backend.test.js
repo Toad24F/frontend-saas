@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { api, login, restoreSession, loadBackendData, crearPayloadCatalogo, crearPayloadHorario, modeUrl, availablePage, defaultPage } from '../src/connected/backend.js';
+import { api, iniciarSesion, restaurarSesion, loadBackendData, crearPayloadCatalogo, crearPayloadHorario, modeUrl, availablePage, defaultPage } from '../src/connected/backend.js';
 import { db } from '../src/shared/data.js';
-import { validateNewPassword } from '../src/connected/modules/auth/password-policy.js';
+import { validarContrasenaNueva } from '../src/connected/modules/autenticacion/contrasena.politica.js';
 import { obtenerCupoSucursales } from '../src/connected/modules/sucursales/sucursales.cupo.js';
 
 test('semana completa: conserva IDs y orden por día sin descanso incrustado; excluye borradores vacíos', () => {
@@ -26,10 +26,10 @@ test('catálogos solo envían los campos admitidos por el backend', () => {
 });
 
 test('las contraseñas nuevas respetan longitud, bytes y confirmación', () => {
-  assert.doesNotThrow(() => validateNewPassword('clave-segura-123', 'clave-segura-123'));
-  assert.throws(() => validateNewPassword('corta'), /al menos 12/);
-  assert.throws(() => validateNewPassword('á'.repeat(40)), /72 bytes/);
-  assert.throws(() => validateNewPassword('clave-segura-123', 'otra-clave-123'), /no coinciden/);
+  assert.doesNotThrow(() => validarContrasenaNueva('clave-segura-123', 'clave-segura-123'));
+  assert.throws(() => validarContrasenaNueva('corta'), /al menos 12/);
+  assert.throws(() => validarContrasenaNueva('á'.repeat(40)), /72 bytes/);
+  assert.throws(() => validarContrasenaNueva('clave-segura-123', 'otra-clave-123'), /no coinciden/);
 });
 
 test('API interpreta 204 y errores de validación sin ocultarlos', async () => {
@@ -52,7 +52,7 @@ test('Recepción accede a disponibilidad privada y conserva cuenta', async () =>
   global.sessionStorage = { setItem() {}, removeItem() {} };
   try {
     global.fetch = async () => Response.json({ accessToken: 'reception-token', usuario: { id: 8, nombre: 'Recepción', rol: 'recepcionista', negocioId: 7 } });
-    await login('recepcion@example.com', 'test-password');
+    await iniciarSesion('recepcion@example.com', 'test-password');
     // M4-T088 incorpora Agenda como inicio sin retirar las capacidades anteriores.
     assert.equal(defaultPage(), 'agenda');
     assert.equal(availablePage('disponibilidad'), true);
@@ -86,8 +86,8 @@ test('carga datos reales aislados del negocio, sin inventar citas, y envía auto
       assert.ok(path in responses, `Ruta inesperada: ${path}`);
       return Response.json(responses[path]);
     };
-    await login('test@example.com', 'test-password');
-    await restoreSession();
+    await iniciarSesion('test@example.com', 'test-password');
+    await restaurarSesion();
     assert.equal(defaultPage(), 'agenda');
     assert.equal(availablePage('servicios'), true);
     assert.equal(availablePage('agenda'), true);
@@ -125,7 +125,7 @@ test('el profesional ve sus sucursales asignadas y la autoría real de servicios
   };
   try {
     global.fetch = async (url) => Response.json(responses[new URL(url).pathname]);
-    await login('ana@example.com', 'test-password');
+    await iniciarSesion('ana@example.com', 'test-password');
     assert.equal(defaultPage(), 'agenda');
     assert.equal(availablePage('profesionales'), false);
     assert.equal(availablePage('cuenta'), true);
@@ -162,7 +162,7 @@ test('el panel SA resume licencias y envíos reales sin datos de citas', async (
   };
   try {
     global.fetch = async (url) => Response.json(responses[new URL(url).pathname]);
-    await login('sa@example.com', 'test-password');
+    await iniciarSesion('sa@example.com', 'test-password');
     assert.equal(defaultPage(), 'plataforma');
     assert.equal(availablePage('negocio'), true);
     assert.equal(availablePage('recepcionistas'), false);

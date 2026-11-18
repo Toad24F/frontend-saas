@@ -33,11 +33,11 @@ export function confirmarCancelacion(elemento, motivo = '') {
     const abort = () => dialogo.close('keep');
     const padre = anterior?.closest('dialog');
     padre?.addEventListener('close', abort, { once: true });
-    window.addEventListener('cita-session-expired', abort, { once: true });
+    window.addEventListener('cita-sesion-expirada', abort, { once: true });
     dialogo.addEventListener('close', () => {
       const resultado = dialogo.returnValue === 'confirm' ? { motivo: dialogo.querySelector('textarea').value } : null;
       padre?.removeEventListener('close', abort);
-      window.removeEventListener('cita-session-expired', abort);
+      window.removeEventListener('cita-sesion-expirada', abort);
       dialogo.remove();
       if (anterior?.isConnected) anterior.focus({ preventScroll: true });
       resolver(resultado);
@@ -177,7 +177,7 @@ export function instalarMenuEstado({ active: activo, read: leer, change: cambiar
       if (disparador) { evento.preventDefault(); void mostrar(disparador, Number(disparador.dataset.agendaMenuEstado)); }
     }
   });
-  window.addEventListener('cita-session-expired', () => { cancelarPulsacion(); cerrar(); });
+  window.addEventListener('cita-sesion-expirada', () => { cancelarPulsacion(); cerrar(); });
   window.addEventListener('popstate', () => { cancelarPulsacion(); cerrar(); });
   document.addEventListener('click', (evento) => { if (evento.target.closest('[data-nav], [data-agenda-vista], [data-agenda-mover], [data-agenda-fecha], [data-agenda-hoy], [data-agenda-dia-demo]')) cerrar(); });
 }

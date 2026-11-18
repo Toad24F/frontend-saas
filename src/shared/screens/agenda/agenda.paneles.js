@@ -11,4 +11,4 @@ const borradores = new Map();
 export const borradorAgenda = (claveInterna) => borradores.get(claveInterna);
 export const guardarBorradorAgenda = (claveInterna, valor) => borradores.set(claveInterna, valor);
 export const borrarBorradorAgenda = (claveInterna) => borradores.delete(claveInterna);
-if (typeof window !== 'undefined') window.addEventListener('cita-session-expired', () => borradores.clear());
+if (typeof window !== 'undefined') window.addEventListener('cita-sesion-expirada', () => borradores.clear());
