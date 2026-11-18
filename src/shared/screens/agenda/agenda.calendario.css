@@ -1,0 +1,84 @@
+/* Give the weekly calendar room for readable appointment labels at every zoom level. */
+.calendario-semana:not(.dia-unico) {
+  width: max(100%, 1178px);
+  min-width: 1178px;
+}
+
+.calendario-semana.dia-unico {
+  width: 100%;
+  min-width: 0;
+}
+
+.calendario-desplazamiento {
+  scrollbar-color: var(--border) transparent;
+}
+
+.calendario-aviso-desplazamiento {
+  margin: 0;
+  padding: 8px 14px;
+  background: var(--surface-soft);
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+@media (min-width: 1500px) {
+  .calendario-aviso-desplazamiento { display: none; }
+}
+
+.calendario-evento {
+  container-type: inline-size;
+  gap: 1px;
+  padding: 6px 8px 5px;
+}
+
+.calendario-evento > :is(.evento-hora, strong, .evento-servicio, .evento-profesional) {
+  flex-shrink: 0;
+}
+
+.calendario-evento strong {
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.evento-hora {
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.25;
+  margin-bottom: 1px;
+  opacity: 1;
+}
+
+.evento-hora > span { min-width: 0; }
+
+.evento-servicio {
+  font-size: 12px;
+  line-height: 1.2;
+  opacity: 0.94;
+}
+
+.calendario-evento.evento-corto .evento-servicio,
+.calendario-evento.evento-corto .evento-profesional {
+  display: none;
+}
+
+.dia-unico .calendario-evento strong { font-size: 15px; }
+.dia-unico .evento-hora,
+.dia-unico .evento-servicio { font-size: 13px; }
+
+/* A narrow overlap keeps its time and name; the full details open on tap. */
+@container (max-width: 120px) {
+  .evento-fin-rango,
+  .evento-servicio,
+  .evento-profesional { display: none; }
+
+  .calendario-evento strong {
+    white-space: normal;
+    overflow-wrap: anywhere;
+    text-overflow: clip;
+  }
+}

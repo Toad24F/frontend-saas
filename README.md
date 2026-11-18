@@ -135,7 +135,7 @@ src/
     forms.js           # Formularios comunes
     styles.css         # Shell y componentes comunes
     screens/
-      agenda/          # view.js, table.js, actions.js y CSS
+      agenda/          # agenda.vista.js, agenda.tabla.js, agenda.acciones.js y CSS
       profesionales/   # view.js y style.css
       servicios/       # view.js y style.css
       sucursales/      # view.js y style.css

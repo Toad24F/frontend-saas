@@ -5,11 +5,11 @@ import './styles.css';
 import './theme.css';
 import './motion.css';
 import './mobile.css';
-import './screens/agenda/calendar.css';
+import './screens/agenda/agenda.calendario.css';
 import { icon } from './icons.js';
-import { handleAgendaNavigation, renderAgendaPreserving } from './screens/agenda/navigation.js';
-import { readAgendaView, saveAgendaView } from './screens/agenda/view-preference.js';
-import { agendaView } from './screens/agenda/view.js';
+import { handleNavegacionAgenda, renderAgendaConservandoPosicion } from './screens/agenda/agenda.navegacion.js';
+import { leerVistaAgenda, guardarVistaAgenda } from './screens/agenda/agenda.preferencia-vista.js';
+import { vistaAgenda } from './screens/agenda/agenda.vista.js';
 import {
   db,
   TODAY,
@@ -72,7 +72,7 @@ function toggleTheme() {
 export const state = {
   tenantId: 1,
   page: 'agenda',
-  calendarView: readAgendaView(matchMedia('(max-width: 767px)').matches, isDemo ? 'demo' : 'connected'),
+  calendarView: leerVistaAgenda(matchMedia('(max-width: 767px)').matches, isDemo ? 'demo' : 'connected'),
   date: TODAY,
   branch: 'all',
   professional: 'all',
@@ -80,7 +80,7 @@ export const state = {
   search: '',
   grupoDisponibilidad: '',
 };
-window.addEventListener('agenda-layout-change', () => { if (state.page === 'agenda') renderAgendaPreserving(render); });
+window.addEventListener('agenda-cambio-distribucion', () => { if (state.page === 'agenda') renderAgendaConservandoPosicion(render); });
 matchMedia('(max-width: 767px)').addEventListener('change', ({ matches }) => {
   document.querySelectorAll('.profesionales-espacio .profesionales-resultados[data-vista-escritorio]').forEach((resultados) => {
     resultados.classList.remove('profesionales-vista--lista', 'profesionales-vista--tarjetas');
@@ -286,7 +286,7 @@ export function render() {
     !isDemo && !availablePage(state.page)
       ? pageHead(labels[state.page] || 'Agenda', '') + empty(pending, 'Puedes comparar esta pantalla con la demo.', `<a class="btn btn-light" href="${modeUrl(location.pathname, true)}">Ver demo</a>`)
       : isDemo && state.page === 'agenda'
-      ? agendaView()
+      ? vistaAgenda()
       : extraViews
         ? extraViews.renderView(state.page)
         : empty('Preparando esta vista', 'La agenda ya está disponible.'),
@@ -374,18 +374,18 @@ document.addEventListener('click', async (e) => {
     render();
     return;
   }
-  const view = e.target.closest('[data-view]');
-  const viewChoice = e.target.closest('[data-m4-view], [data-view]');
-  if (state.page === 'agenda' && viewChoice) saveAgendaView(viewChoice.dataset.m4View || viewChoice.dataset.view, isDemo ? 'demo' : 'connected');
-  if (state.page === 'agenda' && handleAgendaNavigation(e, state, render)) return;
+  const view = e.target.closest('[data-agenda-vista-demo]');
+  const viewChoice = e.target.closest('[data-agenda-vista], [data-agenda-vista-demo]');
+  if (state.page === 'agenda' && viewChoice) guardarVistaAgenda(viewChoice.dataset.agendaVista || viewChoice.dataset.agendaVistaDemo, isDemo ? 'demo' : 'connected');
+  if (state.page === 'agenda' && handleNavegacionAgenda(e, state, render)) return;
   if (view) {
-    state.calendarView = view.dataset.view;
+    state.calendarView = view.dataset.agendaVistaDemo;
     render();
     return;
   }
-  const day = e.target.closest('[data-day]');
+  const day = e.target.closest('[data-agenda-dia-demo]');
   if (day) {
-    state.date = day.dataset.day;
+    state.date = day.dataset.agendaDiaDemo;
     state.calendarView = 'day';
     render();
     return;
@@ -401,13 +401,13 @@ document.addEventListener('click', async (e) => {
       setMobileMenuOpen(!document.querySelector('.admin-layout')?.classList.contains('menu-open'));
       return;
     }
-    if (action === 'today') {
+    if (action === 'agenda-hoy') {
       state.date = TODAY;
       render();
       return;
     }
-    if (action === 'previous' || action === 'next') {
-      const n = action === 'next' ? 1 : -1;
+    if (action === 'periodo-anterior' || action === 'periodo-siguiente') {
+      const n = action === 'periodo-siguiente' ? 1 : -1;
       if (state.calendarView === 'month') {
         const d = date(state.date);
         d.setDate(1);
@@ -430,9 +430,9 @@ document.addEventListener('change', (e) => {
   if (e.target.dataset.filtroRecepcionistas) { aplicarFiltrosRecepcionistas(); return; }
   if (e.target.dataset.filtroServicios) { aplicarFiltrosServicios(); return; }
   if (e.target.dataset.filtroSucursales) { aplicarFiltrosSucursales(); return; }
-  if (e.target.dataset.filter) {
-    state[e.target.dataset.filter] = e.target.value;
-    if (e.target.dataset.filter === 'professional') state.agendaHistory = false;
+  if (e.target.dataset.filtroAgenda) {
+    state[e.target.dataset.filtroAgenda] = e.target.value;
+    if (e.target.dataset.filtroAgenda === 'professional') state.agendaHistory = false;
     render();
   }
 });
@@ -441,11 +441,11 @@ document.addEventListener('input', (e) => {
   if (e.target.id === 'busqueda-recepcionistas') { aplicarFiltrosRecepcionistas(); return; }
   if (e.target.id === 'busqueda-servicios') { aplicarFiltrosServicios(); return; }
   if (e.target.id === 'busqueda-sucursales') { aplicarFiltrosSucursales(); return; }
-  if (e.target.id === 'agenda-search') {
+  if (e.target.id === 'agenda-busqueda') {
     const pos = e.target.selectionStart;
     state.search = e.target.value;
     render();
-    const input = document.querySelector('#agenda-search');
+    const input = document.querySelector('#agenda-busqueda');
     input.focus();
     try {
       input.setSelectionRange(pos, pos);
@@ -558,7 +558,7 @@ function registerCalendarTool() {
             )
               throw new Error('Vista o fecha inválida.');
             state.calendarView = input.view;
-            saveAgendaView(input.view, isDemo ? 'demo' : 'connected');
+            guardarVistaAgenda(input.view, isDemo ? 'demo' : 'connected');
             state.date = input.date;
             navigate('agenda');
             return {

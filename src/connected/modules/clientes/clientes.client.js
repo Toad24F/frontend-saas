@@ -1,4 +1,4 @@
-import { positiveId } from '../agenda/schedule-change.js';
+import { idPositivo } from '../agenda/agenda.cambio-horario.js';
 
 // La ficha actual es independiente de los contactos históricos guardados en las citas.
 export function crearPayloadCliente(valores, correccion = false) {
@@ -19,7 +19,7 @@ export function crearPayloadCliente(valores, correccion = false) {
   }
   if (!Object.keys(payload).length)
     throw new Error('Indica al menos un campo que corregir.');
-  if (correccion) payload.version = positiveId(valores.version);
+  if (correccion) payload.version = idPositivo(valores.version);
   return payload;
 }
 function validarFicha(valor, id) {
@@ -83,11 +83,11 @@ export function crearClientesClient(solicitar) {
       );
     },
     async consultar(id) {
-      positiveId(id);
+      idPositivo(id);
       return validarFicha(await solicitar(`/clientes/${id}`), id);
     },
     async consultarHistorial(id, numero = 1) {
-      positiveId(id);
+      idPositivo(id);
       validarNumeroPagina(numero);
       // No completar snapshots ausentes con la ficha actual ni con catálogos vigentes.
       return validarPagina(
@@ -114,7 +114,7 @@ export function crearClientesClient(solicitar) {
       );
     },
     async corregir(id, valores) {
-      positiveId(id);
+      idPositivo(id);
       return validarFicha(
         await solicitar(
           `/clientes/${id}`,

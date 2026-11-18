@@ -7,7 +7,7 @@ import { account } from './cuenta/view.js';
 import { businessDetail } from './negocio/view.js';
 import { recepcionistas } from './recepcionistas/recepcionistas.vista.js';
 import { empty } from '../../shared/ui.js';
-import { agenda } from './agenda/view.js';
+import { agenda } from './agenda/agenda.vista.js';
 import { clientes } from './clientes/clientes.vista.js';
 import './disponibilidad/disponibilidad.acciones.js';
 import './cuenta/actions.js';

@@ -2,21 +2,21 @@ import { api, user } from '../../backend.js';
 import { escape as esc } from '../../../shared/ui.js';
 import { field } from '../../../shared/forms.js';
 import {
-  agendaPanel,
-  agendaDraft,
-  saveAgendaDraft,
-  clearAgendaDraft,
-} from '../../../shared/screens/agenda/panels.js';
+  panelAgenda,
+  borradorAgenda,
+  guardarBorradorAgenda,
+  borrarBorradorAgenda,
+} from '../../../shared/screens/agenda/agenda.paneles.js';
 import {
   crearClientesClient,
   crearPayloadCliente,
 } from '../../modules/clientes/clientes.client.js';
-import { createVersionedMutation } from '../../modules/agenda/versioned-mutation.js';
-import { canManageAppointments } from '../../modules/agenda/manual-contract.js';
-import { watchRecord } from '../agenda/live.js';
-import { privateError } from '../../modules/agenda/errors.js';
-import '../../../shared/screens/agenda/polish.css';
-import '../agenda/style.css';
+import { crearMutacionVersionada } from '../../modules/agenda/agenda.mutacion-versionada.js';
+import { puedeGestionarCitas } from '../../modules/agenda/agenda.contrato-manual.js';
+import { observarRegistro } from '../agenda/agenda.actualizacion-viva.js';
+import { errorSeguro } from '../../modules/agenda/agenda.errores.js';
+import '../../../shared/screens/agenda/agenda.refinamientos.css';
+import '../agenda/agenda.estilos.css';
 
 const clientesClient = crearClientesClient(api);
 let generacion = 0,
@@ -34,8 +34,8 @@ window.addEventListener('cita-session-expired', () => {
 function abrirPanelCliente(titulo, contenido) {
   const anterior = document.querySelector('#app-dialog');
   if (!anterior?.open) destinoFoco = document.activeElement;
-  const dialogo = agendaPanel(titulo, contenido, true);
-  dialogo.classList.add('m4-appointment-dialog');
+  const dialogo = panelAgenda(titulo, contenido, true);
+  dialogo.classList.add('agenda-dialogo-cita');
   const id = destinoFoco?.dataset.directorioAbrir;
   dialogo.onclose = () => {
     generacion++;
@@ -51,12 +51,12 @@ function abrirPanelCliente(titulo, contenido) {
   encabezado.focus();
   return dialogo;
 }
-const renderError = (error) => { const informacion = privateError(error); return `<div role="alert"><strong>${informacion.title}</strong><p>${esc(informacion.message)}</p></div>${informacion.retry ? '<button class="btn btn-light" data-ficha-reintentar>Reintentar consulta</button>' : ''}`; };
+const renderError = (error) => { const informacion = errorSeguro(error); return `<div role="alert"><strong>${informacion.title}</strong><p>${esc(informacion.message)}</p></div>${informacion.retry ? '<button class="btn btn-light" data-ficha-reintentar>Reintentar consulta</button>' : ''}`; };
 function renderPaginacion(pagina, hayMas) {
-  return `<div class="m4-history-pages"><button class="btn btn-light" data-historial-cliente-anterior ${pagina === 1 ? 'disabled' : ''}>Página anterior</button><span>Página ${pagina}</span><button class="btn btn-light" data-historial-cliente-siguiente ${!hayMas ? 'disabled' : ''}>Siguiente página</button></div>`;
+  return `<div class="agenda-paginas-historial"><button class="btn btn-light" data-historial-cliente-anterior ${pagina === 1 ? 'disabled' : ''}>Página anterior</button><span>Página ${pagina}</span><button class="btn btn-light" data-historial-cliente-siguiente ${!hayMas ? 'disabled' : ''}>Siguiente página</button></div>`;
 }
 export async function abrirFichaCliente(id, alCambiar) {
-  if (!canManageAppointments(user?.rol)) return;
+  if (!puedeGestionarCitas(user?.rol)) return;
   const revisionPanel = ++generacion,
     identidad = identidadSesion();
   const dialogo = abrirPanelCliente(
@@ -69,7 +69,7 @@ export async function abrirFichaCliente(id, alCambiar) {
     const ficha = await clientesClient.consultar(id);
     if (!vigente()) return;
     dialogo.querySelector('.dialog-body').innerHTML =
-      `<dl class="m4-detail-fields"><div><dt>Nombre completo</dt><dd>${esc(ficha.nombreCompleto)}</dd></div><div><dt>Teléfono</dt><dd>${esc(ficha.telefono)}</dd></div><div><dt>Cliente</dt><dd>#${ficha.id}</dd></div><div><dt>Versión</dt><dd>${ficha.version}</dd></div></dl><button class="btn btn-primary" data-ficha-corregir>Corregir ficha</button><section class="historial-cliente" aria-label="Historial del cliente"><h3>Historial de citas</h3><p class="field-hint">Los contactos y costos de cada cita conservan su registro histórico, aunque se corrija esta ficha.</p><div data-ficha-historial></div></section>`;
+      `<dl class="agenda-campos-detalle"><div><dt>Nombre completo</dt><dd>${esc(ficha.nombreCompleto)}</dd></div><div><dt>Teléfono</dt><dd>${esc(ficha.telefono)}</dd></div><div><dt>Cliente</dt><dd>#${ficha.id}</dd></div><div><dt>Versión</dt><dd>${ficha.version}</dd></div></dl><button class="btn btn-primary" data-ficha-corregir>Corregir ficha</button><section class="historial-cliente" aria-label="Historial del cliente"><h3>Historial de citas</h3><p class="field-hint">Los contactos y costos de cada cita conservan su registro histórico, aunque se corrija esta ficha.</p><div data-ficha-historial></div></section>`;
     dialogo.querySelector('[data-ficha-corregir]').onclick = () =>
       abrirEditorCliente(ficha, alCambiar);
     let generacionHistorial = 0;
@@ -85,7 +85,7 @@ export async function abrirFichaCliente(id, alCambiar) {
           ? `<ol>${resultado.citas
               .map(
                 (cita) =>
-                  `<li><strong>${esc(valorHistorico(cita.folio))}</strong><p>${esc(cita.fechaLocal || cita.inicioUtc)} · ${esc(cita.horaInicio || '')} · ${esc(cita.zonaHoraria)}</p><dl class="m4-detail-fields">${[
+                  `<li><strong>${esc(valorHistorico(cita.folio))}</strong><p>${esc(cita.fechaLocal || cita.inicioUtc)} · ${esc(cita.horaInicio || '')} · ${esc(cita.zonaHoraria)}</p><dl class="agenda-campos-detalle">${[
                     ['Contacto histórico', cita.nombreContacto],
                     ['Teléfono histórico', cita.telefonoContacto],
                     ['Servicio', cita.nombreServicio],
@@ -125,11 +125,11 @@ export async function abrirFichaCliente(id, alCambiar) {
   }
 }
 export function abrirEditorCliente(ficha, alCambiar) {
-  if (!canManageAppointments(user?.rol)) return;
+  if (!puedeGestionarCitas(user?.rol)) return;
   const revisionPanel = ++generacion,
     identidad = identidadSesion(),
     clave = `cliente:${identidad}:${ficha?.id ?? 'nuevo'}`,
-    borrador = agendaDraft(clave);
+    borrador = borradorAgenda(clave);
   const dialogo = abrirPanelCliente(
     ficha ? 'Corregir ficha' : 'Nuevo cliente',
     `<form><div class="dialog-body"><p class="form-intro">${ficha ? 'Corrige los datos actuales de esta persona. Las citas anteriores no se modifican.' : 'Crea una ficha independiente. Dos personas pueden compartir el mismo teléfono.'}</p>${field('Nombre completo', 'nombreCompleto', borrador?.nombreCompleto ?? ficha?.nombreCompleto ?? '', 'text', 'required autocomplete="off"')}${field('Teléfono', 'telefono', borrador?.telefono ?? ficha?.telefono ?? '', 'tel', 'required autocomplete="off" inputmode="tel"')}<p class="field-hint">Nombre: hasta 150 caracteres. Teléfono: diez dígitos; puedes incluir +52, espacios o guiones.</p><p class="form-error" data-ficha-error role="alert" tabindex="-1" hidden></p><p class="field-hint aviso-cliente" data-ficha-alta-incierta hidden>El alta puede haberse guardado aunque no se reciba confirmación. Revisa elemento directorio antes de descartar este borrador y crear otra ficha.</p><button type="button" class="btn btn-light" data-ficha-releer hidden>${ficha ? 'Releer ficha' : 'Revisar directorio'}</button>${!ficha ? '<button type="button" class="btn btn-light" data-ficha-descartar hidden>Descartar borrador</button>' : ''}</div><div class="dialog-footer"><button type="button" class="btn btn-light" data-ficha-cerrar>Cerrar</button><button type="submit" class="btn btn-primary">Guardar ficha</button></div></form>`,
@@ -140,7 +140,7 @@ export function abrirEditorCliente(ficha, alCambiar) {
     releer = formulario.querySelector('[data-ficha-releer]');
   const vigente = () =>
     dialogo.open && revisionPanel === generacion && identidad === identidadSesion();
-  const mutacion = createVersionedMutation(
+  const mutacion = crearMutacionVersionada(
     ficha?.version,
     (valores) =>
       ficha ? clientesClient.corregir(ficha.id, valores) : clientesClient.crear(valores),
@@ -153,7 +153,7 @@ export function abrirEditorCliente(ficha, alCambiar) {
   );
   const recordarBorrador = () => {
     if (identidad === identidadSesion())
-      saveAgendaDraft(clave, {
+      guardarBorradorAgenda(clave, {
         nombreCompleto: formulario.elements.nombreCompleto.value,
         telefono: formulario.elements.telefono.value,
         version: ficha?.version,
@@ -185,11 +185,11 @@ export function abrirEditorCliente(ficha, alCambiar) {
   formulario.elements.nombreCompleto.focus();
   formulario.oninput = recordarBorrador;
   // Una ficha abierta no cambia de versión silenciosamente: preserva lo escrito y exige relectura explícita.
-  formulario.addEventListener('m4-record-obsolete', (evento) => {
+  formulario.addEventListener('registro-desactualizado', (evento) => {
     mutacion.state.stale = true; recordarBorrador();
     sincronizar(evento.detail.kind === 'stale' ? 'La ficha cambió en otra sesión. Conservamos tu borrador; relee antes de guardar.' : 'No se pudo comprobar la versión vigente. Relee la ficha antes de guardar.');
   });
-  if (ficha) watchRecord(formulario, { version: ficha.version, read: () => clientesClient.consultar(ficha.id), active: vigente });
+  if (ficha) observarRegistro(formulario, { version: ficha.version, read: () => clientesClient.consultar(ficha.id), active: vigente });
   dialogo.addEventListener(
     'close',
     () => {
@@ -201,7 +201,7 @@ export function abrirEditorCliente(ficha, alCambiar) {
   releer.onclick = () => {
     if (mutacion.state.busy || !vigente()) return;
     if (ficha) {
-      clearAgendaDraft(clave);
+      borrarBorradorAgenda(clave);
       void abrirFichaCliente(ficha.id, alCambiar);
     } else {
       dialogo.close();
@@ -211,7 +211,7 @@ export function abrirEditorCliente(ficha, alCambiar) {
   if (!ficha)
     formulario.querySelector('[data-ficha-descartar]').onclick = () => {
       if (!mutacion.state.busy && vigente()) {
-        clearAgendaDraft(clave);
+        borrarBorradorAgenda(clave);
         abrirEditorCliente(null, alCambiar);
       }
     };
@@ -233,7 +233,7 @@ export function abrirEditorCliente(ficha, alCambiar) {
     await envio;
     if (!vigente()) return;
     if (mutacion.state.result) {
-      clearAgendaDraft(clave);
+      borrarBorradorAgenda(clave);
       // Primero confirmar con la respuesta validada; después releer directorio, ficha e historial por ID.
       await alCambiar();
       if (vigente()) await abrirFichaCliente(mutacion.state.result.id, alCambiar);
@@ -241,7 +241,7 @@ export function abrirEditorCliente(ficha, alCambiar) {
     }
     recordarBorrador();
     sincronizar(
-      `${privateError(mutacion.state.error).title}. ${privateError(mutacion.state.error).message} Conservamos tu borrador.`,
+      `${errorSeguro(mutacion.state.error).title}. ${errorSeguro(mutacion.state.error).message} Conservamos tu borrador.`,
     );
     avisoError.focus();
   };

@@ -243,19 +243,21 @@ Resultado: conjunto cerrado el 2026-11-17 en [Disponibilidad](resultado-disponib
 
 La Agenda es el conjunto más grande y actualmente tiene archivos estrechamente relacionados. No debe hacerse un renombrado parcial que deje mezclados imports antiguos y nuevos. La traducción de cada subgrupo debe realizarse en una rama o estado de trabajo estable y con sus pruebas en el mismo cambio.
 
-- [ ] Esperar a que los cambios funcionales pendientes de Agenda estén confirmados o separados de esta migración.
-- [ ] Traducir juntos los archivos de estructura compartida: `view.js`, `frame.js`, `chrome.js`, `panels.js` y `style.css`.
-- [ ] Traducir juntos navegación y periodo: `navigation.js`, `calendar.css`, `month.js` y `view-preference.js`.
-- [ ] Traducir juntos presentación temporal: `timeline.js`, `table.js`, `presentation.js`, `polish.css`, `utility.js` y `utility.css`.
-- [ ] Traducir juntos acciones y filtros: `actions.js`, `filters.js`, `state-menu.js` y `state-menu.css`.
-- [ ] Traducir juntos los módulos conectados `attention.js`, `cache.js`, `calendar.js`, `errors.js` y `live-refresh.js`.
-- [ ] Conservar y adaptar los nombres compuestos de `client.js` y `store.js`.
-- [ ] Traducir juntos `manual-contract.js`, `manual-operation.js`, `schedule-change.js` y `versioned-mutation.js`.
-- [ ] Traducir juntos la pantalla conectada `view.js`, `live.js`, `manual-view.js`, `presentation.js`, `quick-state.js`, `schedule-editor.js`, `state-editor.js` y `style.css`.
-- [ ] Traducir juntos `demo/agenda-attention.js` y `demo/agenda-quick-state.js`.
-- [ ] Actualizar en el mismo proceso todas las pruebas unitarias `agenda-*`, `m4-agenda*`, `m4-manual*`, `m4-live*` y `ala-agenda*`.
-- [ ] Actualizar en el mismo proceso las pruebas `tests/m4-browser/agenda-*`, `state-menu`, `live-errors` y fixtures asociados.
-- [ ] Verificar vistas diaria, semanal y mensual; roles; actualización en vivo; estados; filtros; diálogos; escritorio/móvil; temas; conectado/demo.
+- [x] Esperar a que los cambios funcionales pendientes de Agenda estén confirmados o separados de esta migración.
+- [x] Traducir juntos los archivos de estructura compartida: `view.js`, `frame.js`, `chrome.js`, `panels.js` y `style.css`.
+- [x] Traducir juntos navegación y periodo: `navigation.js`, `calendar.css`, `month.js` y `view-preference.js`.
+- [x] Traducir juntos presentación temporal: `timeline.js`, `table.js`, `presentation.js`, `polish.css`, `utility.js` y `utility.css`.
+- [x] Traducir juntos acciones y filtros: `actions.js`, `filters.js`, `state-menu.js` y `state-menu.css`.
+- [x] Traducir juntos los módulos conectados `attention.js`, `cache.js`, `calendar.js`, `errors.js` y `live-refresh.js`.
+- [x] Conservar y adaptar los nombres compuestos de `client.js` y `store.js`.
+- [x] Traducir juntos `manual-contract.js`, `manual-operation.js`, `schedule-change.js` y `versioned-mutation.js`.
+- [x] Traducir juntos la pantalla conectada `view.js`, `live.js`, `manual-view.js`, `presentation.js`, `quick-state.js`, `schedule-editor.js`, `state-editor.js` y `style.css`.
+- [x] Traducir juntos `demo/agenda-attention.js` y `demo/agenda-quick-state.js`.
+- [x] Actualizar en el mismo proceso todas las pruebas unitarias `agenda-*`, `m4-agenda*`, `m4-manual*`, `m4-live*` y `ala-agenda*`.
+- [x] Actualizar en el mismo proceso las pruebas `tests/m4-browser/agenda-*`, `state-menu`, `live-errors` y fixtures asociados.
+- [x] Verificar vistas diaria, semanal y mensual; roles; actualización en vivo; estados; filtros; diálogos; escritorio/móvil; temas; conectado/demo.
+
+Resultado: conjunto cerrado el 2026-11-18 en [Agenda](resultado-agenda-2026-11-18.md).
 
 ### 9. Portal público y reservas — REALIZAR CON MUCHO CUIDADO
 

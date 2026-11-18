@@ -1,0 +1,71 @@
+/* Carga estable y resumen compacto, sin modificar la marca ni los colores semánticos. */
+.agenda-metricas .stat-card { min-height: 0; padding: 18px 20px; }
+.agenda-metricas .stat-number { margin-bottom: 0; }
+.agenda-metricas .metrica-no-disponible { color: var(--muted); font-size: 16px; font-weight: 500; }
+.esqueleto-relleno { display: block; border-radius: 5px; background: var(--border); animation: agenda-animacion-carga 1.4s ease-in-out infinite alternate; }
+.esqueleto-numero { width: 54px; height: 30px; margin: 6px 0; }
+.agenda-calendario > .agenda-barra { display: grid; grid-template-columns: max-content minmax(0, 1fr) max-content; gap: 16px; align-items: center; }
+.agenda-barra > .calendario-fecha { grid-column: 1; }
+.agenda-barra > .agenda-leyenda { justify-content: center; gap: 7px 12px; }
+.agenda-barra > .segmented { grid-column: 3; }
+.agenda-calendario .agenda-leyenda > span { font-size: 10px; white-space: nowrap; }
+.agenda-calendario .calendario-pie { justify-content: flex-end; padding: 10px 20px; }
+.esqueleto-encabezado-semana { display: grid; grid-template-columns: 58px repeat(var(--dias-esqueleto), minmax(0, 1fr)); height: 77px; border-block: 1px solid var(--border); }
+.esqueleto-encabezado-semana > span { display: grid; place-items: center; border-left: 1px solid var(--border); }
+.esqueleto-encabezado-semana i { width: 35px; height: 24px; }
+.esqueleto-cuerpo-semana { height: 864px; display: grid; grid-template-columns: 58px repeat(var(--dias-esqueleto), minmax(0, 1fr)); }
+.esqueleto-cuerpo-semana > span { border-left: 1px solid var(--border); background: repeating-linear-gradient(to bottom, transparent 0, transparent 95px, var(--border) 95px, var(--border) 96px); }
+.esqueleto-mes { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); min-width: 670px; }
+.esqueleto-etiqueta-mes { display: grid; place-items: center; height: 44px; border-top: 1px solid var(--border); }
+.esqueleto-etiqueta-mes > span { width: 30px; height: 12px; }
+.esqueleto-celda-mes { height: 120px; padding: 12px; border-top: 1px solid var(--border); border-right: 1px solid var(--border); }
+.esqueleto-celda-mes > span { width: 18px; height: 18px; }
+@keyframes agenda-animacion-carga { from { opacity: .4; } to { opacity: .85; } }
+
+/* Cuatro píxeles entre citas contiguas y referencia propia: el color conserva el estado. */
+.agenda-calendario .calendario-evento { padding: 4px 6px; border: 1px solid; border-left-width: 3px; border-radius: 6px; gap: 1px; }
+.agenda-calendario .calendario-evento .evento-hora { font-size: 11px; line-height: 13px; margin-bottom: 1px; gap: 4px; }
+.agenda-calendario .calendario-evento .evento-hora > span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.agenda-calendario .calendario-evento strong { font-size: 13px; line-height: 16px; }
+.agenda-calendario .calendario-evento .evento-folio, .agenda-calendario .mes-evento .evento-folio { flex: 0 0 auto; padding: 1px 3px; border-radius: 3px; background: rgba(255,255,255,.45); font-size: 9px; line-height: 12px; font-variant-numeric: tabular-nums; letter-spacing: .1px; }
+.agenda-calendario .mes-evento { display: flex; align-items: center; gap: 4px; margin-block: 4px; border-radius: 4px; }
+.agenda-calendario .mes-evento > .mes-etiqueta-evento { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+html[data-theme='dark'] .agenda-calendario .evento-folio { background: rgba(0,0,0,.18); }
+.agenda-calendario .calendario-evento.evento-corto :is(.evento-servicio, .evento-profesional) { display: none; }
+.agenda-calendario .calendario-evento:focus-visible { z-index: 5; outline: 3px solid var(--accent); outline-offset: 1px; }
+
+/* Panel lateral: cabecera y acciones fijas, contenido desplazable y pantalla completa en móvil. */
+.app-dialog.agenda-panel-lateral[open] { animation: agenda-entrada-panel 220ms ease-out both; background: var(--surface); color: var(--ink); }
+html[data-theme] .app-dialog.agenda-panel-lateral.glass-effect { background: var(--surface); }
+.agenda-panel-lateral > form { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; }
+.agenda-panel-lateral > .dialog-body, .agenda-panel-lateral > form > .dialog-body { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
+.agenda-panel-lateral > .dialog-footer, .agenda-panel-lateral > form > .dialog-footer { flex: 0 0 auto; padding-bottom: max(18px, env(safe-area-inset-bottom)); }
+.agenda-panel-lateral > .dialog-header { flex: 0 0 auto; }
+@keyframes agenda-entrada-panel { from { transform: translateX(100%); opacity: .7; } to { transform: translateX(0); opacity: 1; } }
+@media (max-width: 1250px) and (min-width: 768px) {
+  .agenda-calendario > .agenda-barra { grid-template-columns: 1fr auto; }
+  .agenda-barra > .calendario-fecha { grid-row: 1; }
+  .agenda-barra > .segmented { grid-column: 2; grid-row: 1; }
+  .agenda-barra > .agenda-leyenda { grid-column: 1 / -1; grid-row: 2; justify-content: flex-start; }
+}
+@media (max-width: 767px) {
+  .agenda-metricas .stat-card { padding: 12px; }
+  .agenda-calendario > .agenda-barra { grid-template-columns: minmax(0, 1fr); gap: 14px; }
+  .agenda-barra > :is(.calendario-fecha, .agenda-leyenda, .segmented) { grid-column: 1; }
+  .agenda-barra > .agenda-leyenda { justify-content: flex-start; }
+  .agenda-calendario .agenda-leyenda > span { font-size: 11px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .esqueleto-relleno, .app-dialog.agenda-panel-lateral[open] { animation: none; }
+}
+/* Mantener objetivos táctiles y foco visibles en formularios/paginadores sin alterar las tarjetas densas del calendario. */
+.agenda-panel-lateral :is(.btn, .form-control, .form-select), .directorio-paginacion .btn { min-height: 44px; }
+.agenda-panel-lateral :is(input, select, textarea, button):focus-visible,
+.directorio-clientes :is(input, button):focus-visible { outline: 2px solid var(--accent, #bd492b); outline-offset: 3px; }
+.agenda-panel-lateral :is(.form-error, .field-hint, dd), .agenda-error { overflow-wrap: anywhere; }
+.agenda-panel-lateral .agenda-paginas-historial { flex-wrap: wrap; gap: .6rem; }
+.agenda-panel-lateral .form-row-two > * { min-width: 0; }
+@media (max-width: 767px) {
+  .agenda-panel-lateral .dialog-footer { flex-wrap: wrap; }
+  .agenda-panel-lateral .dialog-footer > .btn { flex: 1; white-space: normal; }
+}

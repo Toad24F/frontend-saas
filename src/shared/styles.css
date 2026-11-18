@@ -907,16 +907,16 @@ html[data-theme='dark'] .sidebar .brand .brand-logo-on-light { display: none; }
   .topbar {
     padding: 0 44px;
   }
-  .calendar-event strong {
+  .calendario-evento strong {
     font-size: 12px;
   }
-  .event-service {
+  .evento-servicio {
     font-size: 10px;
   }
-  .event-time {
+  .evento-hora {
     font-size: 10px;
   }
-  .event-professional {
+  .evento-profesional {
     font-size: 9px;
   }
   .stat-caption {
@@ -956,19 +956,19 @@ html[data-theme='dark'] .sidebar .brand .brand-logo-on-light { display: none; }
   .stat-card {
     padding: 14px;
   }
-  .calendar-filters {
+  .calendario-filtros {
     flex-wrap: wrap;
   }
   .search-field {
     margin-top: 3px;
   }
-  .calendar-date h2 {
+  .calendario-fecha h2 {
     font-size: 14px;
   }
-  .calendar-toolbar {
+  .calendario-barra {
     padding: 17px;
   }
-  .calendar-date {
+  .calendario-fecha {
     gap: 6px;
   }
   .filter-group {
@@ -1012,10 +1012,10 @@ html[data-theme='dark'] .sidebar .brand .brand-logo-on-light { display: none; }
   .stat-caption {
     font-size: 9px;
   }
-  .calendar-date {
+  .calendario-fecha {
     flex-wrap: wrap;
   }
-  .calendar-footer {
+  .calendario-pie {
     align-items: flex-start;
   }
   .timezone {
@@ -1024,16 +1024,16 @@ html[data-theme='dark'] .sidebar .brand .brand-logo-on-light { display: none; }
   .legend {
     gap: 12px;
   }
-  .agenda-note > span {
+  .agenda-nota > span {
     display: none;
   }
   .app-footer {
     justify-content: flex-end;
   }
-  .calendar-filters {
+  .calendario-filtros {
     padding: 0 16px 15px;
   }
-  .calendar-toolbar {
+  .calendario-barra {
     gap: 6px;
   }
   .segmented button {
@@ -1118,20 +1118,20 @@ html[data-theme='dark'] .sidebar .brand .brand-logo-on-light { display: none; }
   .stat-number {
     font-size: 28px;
   }
-  .calendar-toolbar {
+  .calendario-barra {
     flex-wrap: wrap;
     gap: 15px;
     padding: 17px 14px;
   }
-  .calendar-date {
+  .calendario-fecha {
     width: 100%;
     gap: 8px;
   }
-  .calendar-date h2 {
+  .calendario-fecha h2 {
     font-size: 14px;
     flex: 1;
   }
-  .calendar-filters {
+  .calendario-filtros {
     padding: 0 14px 15px;
     gap: 13px;
   }
@@ -1160,7 +1160,7 @@ html[data-theme='dark'] .sidebar .brand .brand-logo-on-light { display: none; }
     width: 100%;
     font-size: 12px;
   }
-  .calendar-footer {
+  .calendario-pie {
     padding: 14px;
   }
   .legend {
@@ -1169,7 +1169,7 @@ html[data-theme='dark'] .sidebar .brand .brand-logo-on-light { display: none; }
   .legend > span {
     font-size: 10px;
   }
-  .agenda-note {
+  .agenda-nota {
     font-size: 10px;
     align-items: flex-start;
   }
@@ -1186,10 +1186,10 @@ html[data-theme='dark'] .sidebar .brand .brand-logo-on-light { display: none; }
   .app-dialog {
     max-height: 92vh;
   }
-  .week-calendar {
+  .calendario-semana {
     min-width: 900px;
   }
-  .single-day {
+  .dia-unico {
     min-width: 300px;
   }
 }
@@ -1575,31 +1575,31 @@ html[data-theme='dark'] .sidebar .brand .brand-logo-on-light { display: none; }
 .stat-caption {
   font-size: 11px;
 }
-.calendar-event strong {
+.calendario-evento strong {
   font-size: 11px;
 }
-.event-time {
+.evento-hora {
   font-size: 9px;
 }
-.event-service {
+.evento-servicio {
   font-size: 10px;
 }
-.calendar-event .event-professional {
+.calendario-evento .evento-profesional {
   display: none;
 }
 .legend > span {
   font-size: 11px;
 }
-.day-header > span {
+.encabezado-dia > span {
   font-size: 11px;
 }
-.time-gutter > span {
+.columna-horas > span {
   font-size: 10px;
 }
 .filter-select select {
   font-size: 12px;
 }
-.calendar-date h2 {
+.calendario-fecha h2 {
   font-size: 16px;
 }
 .segmented button {
@@ -2014,16 +2014,16 @@ html[data-theme='dark'] .sidebar .brand .brand-logo-on-light { display: none; }
   .stat-top {
     font-size: 12px;
   }
-  .calendar-date h2 {
+  .calendario-fecha h2 {
     font-size: 14px;
   }
-  .calendar-event strong {
+  .calendario-evento strong {
     font-size: 12px;
   }
-  .event-time {
+  .evento-hora {
     font-size: 10px;
   }
-  .event-service {
+  .evento-servicio {
     font-size: 11px;
   }
   .legend > span {
