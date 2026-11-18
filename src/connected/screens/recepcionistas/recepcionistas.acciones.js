@@ -7,7 +7,7 @@ import { field, basicForm, errorSlot } from '../../../shared/forms.js';
 import { modal, toast } from '../../../shared/ui.js';
 import { mostrarErroresProfesional, limpiarErroresProfesional, limpiarCampoProfesional } from '../../../shared/screens/profesionales/profesionales.errores.js';
 import { validarRecepcionista, interpretarErrorRecepcionista } from './recepcionistas.errores.js';
-import { readOwnRoleQuota, ownQuotaNotice } from '../negocio/user-quota.js';
+import { leerCupoRolPropio, renderAvisoCupoPropio } from '../negocio/usuarios.cupo.js';
 import { disableReceptionist } from '../../modules/recursos/retired.js';
 
 const campoMarcado = (...argumentos) => field(...argumentos).replace('class="form-field"', `class="form-field" data-campo-profesional="${argumentos[1]}"`);
@@ -43,7 +43,7 @@ function formularioRecepcionista(titulo, contenido, alGuardar, restablecimiento 
 async function introduccionCupo() {
   // Alta y reactivación comparten la lectura autorizada del negocio de sesión.
   // Si falla la lectura, la operación final aún deja validar el cupo al backend.
-  try { return ownQuotaNotice('recepcionistas', await readOwnRoleQuota('recepcionistas', api)); }
+  try { return renderAvisoCupoPropio('recepcionistas', await leerCupoRolPropio('recepcionistas', api)); }
   catch { return '<p class="form-intro">No se pudo consultar el cupo vigente. El servidor lo comprobará al guardar.</p>'; }
 }
 

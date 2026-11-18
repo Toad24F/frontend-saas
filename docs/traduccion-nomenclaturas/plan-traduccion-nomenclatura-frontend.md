@@ -1,7 +1,7 @@
 # Reglas y plan de traducción de la nomenclatura del frontend
 
 Fecha de definición: 2026-11-16  
-Estado: implementación por conjuntos; glosario, Sucursales, Servicios, Profesionales, Recepcionistas, Clientes, Catálogos compartidos, Disponibilidad, Agenda, Portal público y reservas, y Autenticación y sesión terminados
+Estado: implementación por conjuntos; glosario, Sucursales, Servicios, Profesionales, Recepcionistas, Clientes, Catálogos compartidos, Disponibilidad, Agenda, Portal público y reservas, Autenticación y sesión, y Cuenta, negocio, licencias y publicación terminados
 
 ## Objetivo
 
@@ -287,11 +287,13 @@ Resultado: conjunto cerrado el 2026-11-18 en [Autenticación y sesión](resultad
 
 ### 11. Cuenta, negocio, licencias y publicación
 
-- [ ] Traducir juntos `connected/screens/cuenta/view.js`, `actions.js`, `license-progress.js`, `price-publication.js` y `style.css`.
-- [ ] Traducir juntos los archivos de `connected/screens/negocio/`: vista, acciones, operaciones/presentación de licencia, historial de correo, cupos y espacio de trabajo.
-- [ ] Traducir `connected/modules/publicacion/precios.js` respetando los campos contractuales.
-- [ ] Actualizar pruebas de cuenta, licencias, publicación, cupos y detalle de negocio.
-- [ ] Verificar permisos, progreso, límites, estados y errores.
+- [x] Traducir juntos `connected/screens/cuenta/view.js`, `actions.js`, `license-progress.js`, `price-publication.js` y `style.css`.
+- [x] Traducir juntos los archivos de `connected/screens/negocio/`: vista, acciones, operaciones/presentación de licencia, historial de correo, cupos y espacio de trabajo.
+- [x] Traducir `connected/modules/publicacion/precios.js` respetando los campos contractuales.
+- [x] Actualizar pruebas de cuenta, licencias, publicación, cupos y detalle de negocio.
+- [x] Verificar permisos, progreso, límites, estados y errores.
+
+Resultado: conjunto cerrado el 2026-11-18 en [Cuenta, negocio, licencias y publicación](resultado-cuenta-negocio-2026-11-18.md).
 
 ### 12. Plataforma, permisos y recursos retirados
 

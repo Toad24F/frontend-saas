@@ -3,14 +3,14 @@ import { servicios } from './servicios/servicios.vista.js';
 import { sucursales } from './sucursales/sucursales.vista.js';
 import { renderDisponibilidadConectada } from './disponibilidad/disponibilidad.vista.js';
 import { platform } from '../../shared/screens/plataforma/view.js';
-import { account } from './cuenta/view.js';
-import { businessDetail } from './negocio/view.js';
+import { cuenta } from './cuenta/cuenta.vista.js';
+import { renderDetalleNegocio } from './negocio/negocio.vista.js';
 import { recepcionistas } from './recepcionistas/recepcionistas.vista.js';
 import { empty } from '../../shared/ui.js';
 import { agenda } from './agenda/agenda.vista.js';
 import { clientes } from './clientes/clientes.vista.js';
 import './disponibilidad/disponibilidad.acciones.js';
-import './cuenta/actions.js';
+import './cuenta/cuenta.acciones.js';
 
 const views = {
   agenda,
@@ -20,8 +20,8 @@ const views = {
   sucursales,
   disponibilidad: renderDisponibilidadConectada,
   plataforma: platform,
-  cuenta: account,
-  negocio: businessDetail,
+  cuenta,
+  negocio: renderDetalleNegocio,
   recepcionistas,
 };
 

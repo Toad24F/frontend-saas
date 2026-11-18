@@ -44,9 +44,9 @@ La paginación y los filtros operan sobre todo el historial descargado. No reduc
 - `actions.js`: confirmación de suspensión con la misma clase de peligro del botón de apertura, sin cambios de contrato, plazo ni envío.
 - `license-presentation.js`: presentación temporal, porcentaje real mediante `../cuenta/license-progress.js` y acciones de licencia; conserva la exportación de historial delegando en el nuevo renderizador.
 - `style.css`: estilos de detalle, indicadores, tabla/fichas y temas; se reutiliza el CSS de pestañas de Disponibilidad.
-- `tests/business-detail.test.js`: siete pruebas nuevas de reglas y renderizado.
-- `tests/ala-cupos-usuarios.test.js`: ajuste del texto esperado de consumo.
-- `tests/browser-business-detail.mjs`: prueba de interfaz aislada con API simulada.
+- `tests/negocio.detalle.test.js`: siete pruebas nuevas de reglas y renderizado.
+- `tests/ala-usuarios.cupo.test.js`: ajuste del texto esperado de consumo.
+- `tests/negocio.detalle-navegador.mjs`: prueba de interfaz aislada con API simulada.
 - `tests/browser/licenses.spec.js`, `tests/browser/user-quotas.spec.js`: selectores y navegación actualizados para las pestañas.
 
 ## Panel de negocios: indicadores y directorio
@@ -75,7 +75,7 @@ Con Vite ya iniciado en localhost:5173:
 ```sh
 npm test
 npm run build
-node tests/browser-business-detail.mjs
+node tests/negocio.detalle-navegador.mjs
 node tests/browser-platform.mjs
 git diff --check
 ```
