@@ -74,8 +74,8 @@ export function renderDetalleNegocio() {
     cargando = null;
   }
   if (!detalle && !fallo && !cargando) void consultarDetalleNegocio();
-  if (fallo) return `${renderEncabezadoPagina('Detalle de negocio', 'No pudimos cargar este negocio.')}<section class="surface negocio-seccion-detalle"><p role="alert">${escaparHtml(fallo.message)}</p><button class="btn btn-light" data-action="volver-plataforma">Volver al panel</button><button class="btn btn-primary" data-action="consultar-detalle-negocio">Reintentar</button></section>`;
-  if (!detalle) return `${renderEncabezadoPagina('Detalle de negocio', 'Consultando licencia, cupo e historial de envíos.')}<section class="surface negocio-seccion-detalle" role="status">Cargando datos del negocio…</section>`;
+  if (fallo) return `${renderEncabezadoPagina('Detalle de negocio', 'No pudimos cargar este negocio.')}<section class="superficie negocio-seccion-detalle"><p role="alert">${escaparHtml(fallo.message)}</p><button class="btn btn-light" data-action="volver-plataforma">Volver al panel</button><button class="btn btn-primary" data-action="consultar-detalle-negocio">Reintentar</button></section>`;
+  if (!detalle) return `${renderEncabezadoPagina('Detalle de negocio', 'Consultando licencia, cupo e historial de envíos.')}<section class="superficie negocio-seccion-detalle" role="status">Cargando datos del negocio…</section>`;
 
   const { negocio, cupoSucursales, cupoUsuarios, envios, vigencia } = detalle;
   const pendienteActivacion = !negocio.administrador?.activadoEn;

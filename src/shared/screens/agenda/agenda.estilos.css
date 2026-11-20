@@ -27,11 +27,11 @@
   gap: 2px;
   margin-left: 5px;
 }
-.flechas-fecha .icon-btn {
+.flechas-fecha .boton-icono {
   width: 25px;
   height: 29px;
 }
-.flechas-fecha .icon {
+.flechas-fecha .icono {
   width: 15px;
   height: 15px;
 }
@@ -43,14 +43,14 @@
   min-height: 28px;
   color: #777e89;
 }
-.segmented {
+.selector-segmentado {
   display: inline-flex;
   background: #f4f5f7;
   border: 1px solid #ebedf0;
   border-radius: 6px;
   padding: 3px;
 }
-.segmented button {
+.selector-segmentado button {
   background: transparent;
   border: 0;
   border-radius: 4px;
@@ -59,7 +59,7 @@
   font-size: 11px;
   font-weight: 600;
 }
-.segmented button.selected {
+.selector-segmentado button.seleccionado {
   background: #fff;
   color: #434a54;
   box-shadow: 0 1px 4px #15233414;
@@ -70,11 +70,11 @@
   gap: 12px;
   padding: 0 21px 18px;
 }
-.filter-group {
+.grupo-filtros {
   display: flex;
   gap: 10px;
 }
-.filter-select {
+.selector-filtro {
   display: flex;
   align-items: center;
   gap: 7px;
@@ -83,19 +83,19 @@
   border-radius: 6px;
   position: relative;
 }
-.filter-select > .icon {
+.selector-filtro > .icono {
   width: 14px;
   height: 14px;
   color: #9b9fa8;
 }
-.filter-select > .icon:last-child {
+.selector-filtro > .icono:last-child {
   width: 10px;
   height: 10px;
   position: absolute;
   right: 10px;
   pointer-events: none;
 }
-.filter-select select {
+.selector-filtro select {
   appearance: none;
   background: transparent;
   border: 0;
@@ -107,17 +107,17 @@
   padding-right: 20px;
   cursor: pointer;
 }
-.search-field {
+.campo-busqueda {
   display: flex;
   align-items: center;
   gap: 8px;
   color: #a2a7b0;
 }
-.search-field .icon {
+.campo-busqueda .icono {
   width: 16px;
   height: 16px;
 }
-.search-field input {
+.campo-busqueda input {
   border: 0;
   outline: 0;
   background: transparent;
@@ -125,7 +125,7 @@
   max-width: 160px;
   color: #515b66;
 }
-.search-field input::placeholder {
+.campo-busqueda input::placeholder {
   color: #a0a6af;
 }
 .calendario-desplazamiento {
@@ -138,8 +138,8 @@
   display: grid;
   grid-template-columns: 58px repeat(var(--dias), minmax(0, 1fr));
   height: 77px;
-  border-top: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
+  border-top: 1px solid var(--borde);
+  border-bottom: 1px solid var(--borde);
 }
 .encabezado-hora {
   font-size: 8px;
@@ -155,7 +155,7 @@
   justify-content: center;
   gap: 6px;
   border: 0;
-  border-left: 1px solid var(--border);
+  border-left: 1px solid var(--borde);
   position: relative;
   color: #7e8590;
 }
@@ -170,7 +170,7 @@
   line-height: 1;
 }
 .encabezado-dia.es-hoy > strong {
-  background: var(--accent);
+  background: var(--acento);
   color: #fff;
   width: 32px;
   height: 32px;
@@ -182,7 +182,7 @@
   margin: -5px 0;
 }
 .encabezado-dia.es-hoy > span {
-  color: var(--accent);
+  color: var(--acento);
   font-weight: 600;
 }
 .fin-de-semana {
@@ -214,7 +214,7 @@
   transform: translateY(-16px);
 }
 .columna-dia {
-  border-left: 1px solid var(--border);
+  border-left: 1px solid var(--borde);
   position: relative;
   min-width: 0;
   background: #fff;
@@ -227,7 +227,7 @@
   height: var(--alto-hora);
   width: 100%;
   border: 0;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--borde);
   background: transparent;
   position: relative;
 }
@@ -260,9 +260,9 @@
   gap: 5px;
   font-size: 9px;
   pointer-events: none;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--borde);
 }
-.bloque-descanso .icon {
+.bloque-descanso .icono {
   width: 12px;
   height: 12px;
 }
@@ -308,7 +308,7 @@
   margin-bottom: 2px;
   opacity: 0.85;
 }
-.evento-hora .icon {
+.evento-hora .icono {
   width: 10px;
   height: 10px;
 }
@@ -385,19 +385,19 @@
   pointer-events: none;
 }
 .calendario-pie {
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--borde);
   padding: 16px 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 15px;
 }
-.legend {
+.leyenda {
   display: flex;
   gap: 17px;
   flex-wrap: wrap;
 }
-.legend > span {
+.leyenda > span {
   font-size: 9px;
   display: flex;
   align-items: center;
@@ -426,7 +426,7 @@
 .legend-dot.no_asistio {
   color: #b5a4ca;
 }
-.timezone {
+.zona-horaria {
   font-size: 9px;
   color: #a3a9b1;
   white-space: nowrap;
@@ -439,7 +439,7 @@
   color: #a2a7b0;
   margin-top: 17px;
 }
-.agenda-nota .icon {
+.agenda-nota .icono {
   width: 13px;
   height: 13px;
 }
@@ -458,15 +458,15 @@
   text-align: center;
   background: #fafbfc;
   padding: 12px;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--borde);
   font-size: 12px;
   color: #8c939d;
 }
 .mes-dia {
   min-height: 120px;
   padding: 8px;
-  border-top: 1px solid var(--border);
-  border-right: 1px solid var(--border);
+  border-top: 1px solid var(--borde);
+  border-right: 1px solid var(--borde);
 }
 .mes-fecha {
   border: 0;
@@ -478,7 +478,7 @@
   margin-bottom: 5px;
 }
 .es-hoy > .mes-fecha {
-  background: var(--accent);
+  background: var(--acento);
   color: white;
 }
 .dia-atenuado {
@@ -501,7 +501,7 @@
 }
 .mes-mas {
   font-size: 10px;
-  color: var(--accent);
+  color: var(--acento);
   border: 0;
   background: transparent;
 }
@@ -518,20 +518,20 @@
 .dia-unico .evento-servicio {
   font-size: 11px;
 }
-.empty-state {
+.estado-vacio {
   text-align: center;
   padding: 70px 20px;
   background: #fff;
   border-radius: 10px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--borde);
 }
-.empty-state > .icon {
+.estado-vacio > .icono {
   width: 42px;
   height: 42px;
   color: #c8bbaa;
   margin-bottom: 18px;
 }
-.empty-state p {
+.estado-vacio p {
   margin: 8px auto 20px;
   max-width: 400px;
   font-size: 14px;

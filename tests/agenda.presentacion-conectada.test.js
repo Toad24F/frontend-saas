@@ -36,7 +36,7 @@ test('mes conserva 42 fechas, tres citas y acceso a las restantes como en demo',
 });
 test('métricas comparten la jerarquía de demo sin inventar cifras', () => {
   const html = renderMetricas([item], '2026-11-11');
-  assert.equal((html.match(/class="stat-card"/g) || []).length, 4);
-  assert.match(html, /Citas del día/); assert.match(html, /stat-number">01/);
+  assert.equal((html.match(/class="tarjeta-indicador"/g) || []).length, 4);
+  assert.match(html, /Citas del día/); assert.match(html, /indicador-valor">01/);
   assert.match(renderMetricas(null, '2026-11-11'), /esqueleto-numero/);
 });

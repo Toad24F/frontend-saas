@@ -20,8 +20,8 @@ export async function prepararSesion(page, role = 'recepcionista', theme = 'ligh
       let localToday;
       try { localToday = await page.evaluate(() => new Date().toLocaleDateString('en-CA')); }
       catch (error) {
-        if (!/context was destroyed|closed/i.test(error.message)) throw error;
-        await route.abort().catch(() => {}); return; // Petición de una navegación que ya terminó.
+        if (!/context was destroyed|closed|test ended/i.test(error.message)) throw error;
+        await route.abort().catch(() => {}); return; // La navegación o la prueba ya terminó.
       }
       const day = desde <= localToday && localToday <= hasta ? localToday : desde;
       const cita = { id: 7, version: 2, folio: 'M4-0007', estado: 'confirmada', origen: 'manual', nombreContacto: 'Paciente <QA>', nombreServicio: 'Consulta histórica', nombreSucursal: 'Sucursal histórica', nombreProfesional: 'Profesional QA', sucursalId: 1, personalId: 1, fechaLocal: day, horaInicio: '07:15:00', fechaFinLocal: day, horaFin: '08:00:00', zonaHoraria: 'America/Tijuana', causas: [{ codigo: 'servicio_inactivo' }] };

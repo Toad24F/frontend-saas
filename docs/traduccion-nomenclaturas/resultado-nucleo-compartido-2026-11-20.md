@@ -24,7 +24,7 @@ Se sincronizaron las claves del estado volátil con los filtros de Agenda, el de
 
 - Se conservaron los contratos HTTP, los roles, las rutas, `?demo=1`, las variables `VITE_*`, los datos persistidos y el contrato de la herramienta WebMCP. La revisión del backend se limitó a lectura.
 - Las claves del modelo de registros que comparten el fixture y los adaptadores permanecen vigentes. Sus funciones de acceso se tradujeron y el estado del panel tiene nombres propios en español.
-- Las clases e identificadores de componentes compartidos conservan la interfaz visual. La traducción coordinada de CSS global y de los selectores del portal de cuenta queda en la sección 15.
+- Las clases e identificadores de componentes compartidos conservan la interfaz visual. La actualización de estos nombres se registra en el [resultado del CSS global](resultado-css-global-2026-11-20.md).
 
 ## Verificación
 
@@ -33,4 +33,7 @@ Se sincronizaron las claves del estado volátil con los filtros de Agenda, el de
 - Pasaron seis recorridos independientes en Edge con API simulada. Cubrieron catálogos y paginación, Plataforma, Negocio, administración e inhabilitados, navegación pública y el flujo de reserva con servidor ficticio.
 - Se revisaron capturas de Agenda y Cuenta en escritorio y móvil en ambos temas. Una comprobación sobre `dist/` abrió el acceso conectado, la entrada pública y la demo desde sus URL. En el mismo entorno de vista previa se verificó el cambio rápido de estado de una cita de ejemplo.
 
-Para repetir la suite de navegador con API simulada, ejecutar `npm run test:browser -- --config tests/m4-playwright.config.js`. El runner de integración con MariaDB consta de 33 casos en seis archivos. Se enumeraron con `--list`. Su corrida queda pendiente porque prepara y escribe una base efímera y este trabajo mantiene el backend en solo lectura.
+- Los 33 casos de navegador con MariaDB pasaron entre la corrida completa y la repetición de FALA-T050. En la corrida completa pasaron 32 casos. FALA-T050 agotó el tiempo buscando los nombres antiguos de los campos de horario. Se actualizaron sus selectores a `entrada-` y `salida-` y la repetición verificó el guardado de ambas franjas en la API real.
+- La integración usó el backend ya compilado con `PORTAL_TEST_BACKEND_READ_ONLY=1` y una base efímera local por corrida. Se comprobó el aislamiento del portal conectado y la eliminación de las bases creadas para estas pruebas.
+
+Para repetir la suite de navegador con API simulada, ejecutar `npm run test:browser -- --config tests/m4-playwright.config.js`.

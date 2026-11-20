@@ -41,10 +41,10 @@ try {
       for (const pestana of ['general', 'limites', 'correo']) {
         await pagina.locator(`[data-negocio-pestana=${pestana}]`).click();
         assert.equal(await pagina.locator('[role=tabpanel]:visible').count(), 1);
-        assert.equal(await pagina.locator(`#negocio-panel-${pestana} .surface`).count(), 0);
+        assert.equal(await pagina.locator(`#negocio-panel-${pestana} .superficie`).count(), 0);
         assert.equal(await pagina.locator('.negocio-resumen-licencia').count(), 0);
         if (pestana === 'general') {
-          assert.equal(await pagina.locator('#negocio-panel-general .soft-tag').count(), 0);
+          assert.equal(await pagina.locator('#negocio-panel-general .etiqueta-suave').count(), 0);
           assert.equal(await pagina.locator('.negocio-etiqueta-licencia:visible').innerText(), 'Vigente');
           assert.equal(await pagina.locator('progress:visible').getAttribute('value'), '100');
         }
@@ -71,7 +71,7 @@ try {
           await suspender.click();
           const formulario = pagina.locator('#licencia-formulario-suspension');
           await formulario.waitFor();
-          assert.equal(await formulario.locator('.dialog-footer').evaluate((el) => getComputedStyle(el).backgroundColor), 'rgba(0, 0, 0, 0)');
+          assert.equal(await formulario.locator('.dialogo-pie').evaluate((el) => getComputedStyle(el).backgroundColor), 'rgba(0, 0, 0, 0)');
           const confirmar = formulario.getByRole('button', { name: 'Programar suspensión', exact: true });
           assert.deepEqual(await color(confirmar), { bg: rojoNormal, text: 'rgb(255, 255, 255)' });
           await confirmar.hover();
@@ -172,7 +172,7 @@ try {
   assert.equal(await pagina.evaluate((clave) => sessionStorage.getItem(clave), claveAlmacenamiento), null);
 
   await pagina.goto(`${origen}/admin/plataforma?demo=1`);
-  await pagina.locator('.page-heading').waitFor();
+  await pagina.locator('.encabezado-pagina').waitFor();
   assert.equal(await pagina.locator('.negocio-espacio-trabajo').count(), 0);
   assert.deepEqual(errores, []);
   console.log('OK: pestañas y teclado, 40 capturas, filtros, errores, actualización de cupos y recuperación de licencia con API simulada. Plataforma demo verificada.');

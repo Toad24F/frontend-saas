@@ -10,15 +10,15 @@
 }
 
 .calendario-desplazamiento {
-  scrollbar-color: var(--border) transparent;
+  scrollbar-color: var(--borde) transparent;
 }
 
 .calendario-aviso-desplazamiento {
   margin: 0;
   padding: 8px 14px;
-  background: var(--surface-soft);
-  border-top: 1px solid var(--border);
-  color: var(--muted);
+  background: var(--superficie-suave);
+  border-top: 1px solid var(--borde);
+  color: var(--texto-secundario);
   font-size: 12px;
   font-weight: 600;
   line-height: 1.4;

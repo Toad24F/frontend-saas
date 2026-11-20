@@ -134,7 +134,7 @@ test('FALA-T040: inhabilitados visibles en escritorio y móvil, claro y oscuro',
   await page.locator('[data-inhabilitados-abrir]').click();
   const section = page.getByRole('dialog');
   await expect(section).toContainText('Recepción Retiro QA');
-  await expect(page.locator('#toast-region .app-toast')).toHaveCount(0);
+  await expect(page.locator('#region-avisos .aviso-app')).toHaveCount(0);
   await page.evaluate(() => scrollTo(0, 0));
   await page.screenshot({ path: testInfo.outputPath('retired-desktop-light.png'), fullPage: true, animations: 'disabled' });
   await page.evaluate(() => { document.documentElement.dataset.theme = 'dark'; });

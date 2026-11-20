@@ -13,7 +13,7 @@ test('T088: navegación y rutas directas por los cuatro roles', async ({ page })
     } else {
       await expect(page.getByRole('heading', { name: 'Agenda', exact: true })).toBeVisible();
       await expect(page.locator('[data-agenda-cita="7"]')).toBeVisible();
-      await expect(page.locator('.sidebar [data-nav="clientes"]')).toHaveCount(role === 'profesional' ? 0 : 1);
+      await expect(page.locator('.barra-lateral [data-nav="clientes"]')).toHaveCount(role === 'profesional' ? 0 : 1);
       await page.goto('/admin/clientes');
       if (role === 'profesional') await expect(page).toHaveURL(/\/admin\/agenda/);
       else await expect(page.getByRole('heading', { name: 'Clientes', exact: true })).toBeVisible();
@@ -184,7 +184,7 @@ test('paridad con demo: métricas, filtros, cuadrícula y tarjetas en ambos tema
     await expect(connected.locator('[data-agenda-cita]').first()).toBeVisible();
     await expect(page.locator('[data-cita]').first()).toBeVisible();
     await connected.getByLabel('Sucursal', { exact: true }).selectOption(await page.getByLabel('Sucursal', { exact: true }).inputValue());
-    for (const selector of ['.page-heading h1', '.agenda-resumen', '.calendario-panel', '.calendario-barra', '.filter-select', '.segmented', '.semana-encabezado', '.calendario-evento.confirmada']) {
+    for (const selector of ['.encabezado-pagina h1', '.agenda-resumen', '.calendario-panel', '.calendario-barra', '.selector-filtro', '.selector-segmentado', '.semana-encabezado', '.calendario-evento.confirmada']) {
       await expect.poll(async () => JSON.stringify(await inspect(connected, selector))).toBe(JSON.stringify(await inspect(page, selector)));
     }
     await expect(connected.locator('.agenda-resumen strong')).toHaveText(await page.locator('.agenda-resumen strong').textContent());

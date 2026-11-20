@@ -4,10 +4,10 @@
 <body><main class="cuenta-pagina" style="max-width:1000px;margin:32px auto;padding:20px"><h1>Mi cuenta</h1><p>Revisión del componente con datos ficticios. Sin sesión ni API real.</p><button class="btn btn-light" id="theme">Cambiar tema</button><div id="fixture"></div></main>
 <script type="module">
   import 'bootstrap/dist/css/bootstrap.min.css';
-  import '../../src/shared/styles.css';
-  import '../../src/shared/theme.css';
+  import '../../src/shared/global.estilos.css';
+  import '../../src/shared/tema.estilos.css';
   import '../../src/connected/screens/cuenta/cuenta.estilos.css';
-  import '../../src/shared/account-portal.css';
+  import '../../src/shared/cuenta.portal.css';
   import { renderPortalCuenta, vincularPortalCuenta } from '../../src/shared/cuenta.portal.js';
   // El caso predeterminado reproduce el contrato actual: no expone el slug.
   // El caso demo comprueba controles con un enlace ficticio y ?demo=1 explícito.

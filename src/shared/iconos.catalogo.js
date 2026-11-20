@@ -54,4 +54,4 @@ const trazos = {
   logout: '<path d="M10 4H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h5M14 7l5 5-5 5m5-5H9"/>',
 };
 export const renderIcono = (nombre, clases = '') =>
-  `<svg class="icon ${clases}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${trazos[nombre] || trazos.calendar}</svg>`;
+  `<svg class="icono ${clases}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${trazos[nombre] || trazos.calendar}</svg>`;

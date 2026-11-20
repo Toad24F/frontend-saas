@@ -1,30 +1,30 @@
-.sucursales-espacio .page-heading { margin-bottom: 18px; }
+.sucursales-espacio .encabezado-pagina { margin-bottom: 18px; }
 .sucursales-cupo {
   display: grid;
   gap: 10px;
   max-width: 590px;
   margin: 0 0 23px;
   padding: 16px 18px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--borde);
   border-radius: 11px;
-  background: var(--surface);
+  background: var(--superficie);
 }
-.sucursales-cupo-encabezado { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; color: var(--muted); font-size: 12px; font-weight: 600; }
-.sucursales-cupo-encabezado strong { color: var(--ink); font-size: 18px; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.sucursales-cupo-progreso { display: block; width: 100%; height: 10px; appearance: none; border: 0; border-radius: 10px; overflow: hidden; background: var(--surface-soft); }
-.sucursales-cupo-progreso::-webkit-progress-bar { border-radius: 10px; background: var(--surface-soft); }
-.sucursales-cupo-progreso::-webkit-progress-value { border-radius: 10px; background: var(--accent); }
-.sucursales-cupo-progreso::-moz-progress-bar { border-radius: 10px; background: var(--accent); }
-.sucursales-cupo small { color: var(--muted); font-size: 11px; }
+.sucursales-cupo-encabezado { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; color: var(--texto-secundario); font-size: 12px; font-weight: 600; }
+.sucursales-cupo-encabezado strong { color: var(--texto); font-size: 18px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.sucursales-cupo-progreso { display: block; width: 100%; height: 10px; appearance: none; border: 0; border-radius: 10px; overflow: hidden; background: var(--superficie-suave); }
+.sucursales-cupo-progreso::-webkit-progress-bar { border-radius: 10px; background: var(--superficie-suave); }
+.sucursales-cupo-progreso::-webkit-progress-value { border-radius: 10px; background: var(--acento); }
+.sucursales-cupo-progreso::-moz-progress-bar { border-radius: 10px; background: var(--acento); }
+.sucursales-cupo small { color: var(--texto-secundario); font-size: 11px; }
 .sucursales-espacio .sucursales-herramientas { grid-template-columns: minmax(210px, 1fr) auto auto; }
-.sucursales-espacio .sucursal-icono { display: grid; place-items: center; flex: 0 0 46px; width: 46px; height: 46px; border-radius: 12px; color: var(--accent); background: var(--surface-soft); }
-.sucursales-espacio .sucursal-icono .icon { width: 21px; height: 21px; }
+.sucursales-espacio .sucursal-icono { display: grid; place-items: center; flex: 0 0 46px; width: 46px; height: 46px; border-radius: 12px; color: var(--acento); background: var(--superficie-suave); }
+.sucursales-espacio .sucursal-icono .icono { width: 21px; height: 21px; }
 .sucursales-espacio .profesional-identidad p { max-width: 46ch; }
 .sucursales-espacio .sucursal-detalles { align-items: flex-start; }
-.sucursales-espacio .sucursal-detalles a { display: inline-flex; align-items: center; gap: 4px; color: var(--accent); font-weight: 650; text-decoration: none; }
-.sucursales-espacio .sucursal-detalles a:hover { color: var(--accent-dark); text-decoration: underline; }
+.sucursales-espacio .sucursal-detalles a { display: inline-flex; align-items: center; gap: 4px; color: var(--acento); font-weight: 650; text-decoration: none; }
+.sucursales-espacio .sucursal-detalles a:hover { color: var(--acento-oscuro); text-decoration: underline; }
 .sucursales-espacio .sucursal-detalles .sucursal-llegada { flex-basis: 100%; white-space: normal; line-height: 1.4; }
-.sucursales-espacio .sucursal-detalles .sucursal-llegada .icon { flex: 0 0 14px; }
+.sucursales-espacio .sucursal-detalles .sucursal-llegada .icono { flex: 0 0 14px; }
 .sucursales-espacio .profesional-acciones .profesional-disponibilidad { border: 0; }
 .sucursales-espacio .profesional-acciones .profesional-disponibilidad:disabled { opacity: .55; cursor: not-allowed; }
 .sucursales-espacio .profesionales-vista--lista .sucursal-entrada { grid-template-columns: minmax(175px, 1.3fr) minmax(160px, 1fr) max-content max-content; }
@@ -37,13 +37,13 @@
 .sucursales-espacio .profesionales-vista--tarjetas .sucursal-detalles,
 .sucursales-espacio .profesionales-vista--tarjetas .profesional-acciones { margin-left: 18px; margin-right: 18px; }
 .sucursales-espacio .profesionales-vista--tarjetas .profesional-estado { grid-row: 3; }
-.sucursales-espacio .profesionales-vista--tarjetas .sucursal-detalles { grid-row: 4; padding-top: 10px; border-top: 1px solid var(--border); }
-.sucursales-espacio .profesionales-vista--tarjetas .profesional-acciones { grid-row: 5; margin-top: auto; padding-top: 10px; border-top: 1px solid var(--border); }
-.sucursal-mapa { position: relative; height: 166px; overflow: hidden; border-radius: 11px 11px 0 0; background: var(--surface-soft); }
+.sucursales-espacio .profesionales-vista--tarjetas .sucursal-detalles { grid-row: 4; padding-top: 10px; border-top: 1px solid var(--borde); }
+.sucursales-espacio .profesionales-vista--tarjetas .profesional-acciones { grid-row: 5; margin-top: auto; padding-top: 10px; border-top: 1px solid var(--borde); }
+.sucursal-mapa { position: relative; height: 166px; overflow: hidden; border-radius: 11px 11px 0 0; background: var(--superficie-suave); }
 .sucursal-mapa iframe { display: block; width: 100%; height: 100%; border: 0; }
-.sucursal-mapa-vacio { display: grid; place-content: center; justify-items: center; gap: 8px; height: 100%; color: var(--muted); font-size: 12px; }
-.sucursal-mapa-vacio .icon { width: 23px; height: 23px; color: var(--accent); }
-.sucursal-mapa-leyenda { position: absolute; right: 10px; bottom: 10px; padding: 3px 6px; border-radius: 5px; background: var(--surface); color: var(--muted); font-size: 10px; }
+.sucursal-mapa-vacio { display: grid; place-content: center; justify-items: center; gap: 8px; height: 100%; color: var(--texto-secundario); font-size: 12px; }
+.sucursal-mapa-vacio .icono { width: 23px; height: 23px; color: var(--acento); }
+.sucursal-mapa-leyenda { position: absolute; right: 10px; bottom: 10px; padding: 3px 6px; border-radius: 5px; background: var(--superficie); color: var(--texto-secundario); font-size: 10px; }
 @media (max-width: 1260px) {
   .sucursales-espacio .sucursales-herramientas { grid-template-columns: minmax(180px, 1fr) auto; }
   .sucursales-espacio .sucursales-herramientas .profesionales-filtros { grid-column: 1 / -1; grid-row: 2; }

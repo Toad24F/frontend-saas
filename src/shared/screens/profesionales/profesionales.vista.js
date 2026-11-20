@@ -21,7 +21,7 @@ function coincide(persona) {
 }
 
 function renderProfesional(persona, administrar, visible) {
-  return `<article class="surface profesional-entrada" data-profesional-id="${persona.id}" ${visible ? '' : 'hidden'}>
+  return `<article class="superficie profesional-entrada" data-profesional-id="${persona.id}" ${visible ? '' : 'hidden'}>
     <div class="profesional-persona">${avatar(persona.initials, persona.color, 'profesional-avatar')}<div class="profesional-identidad"><h2>${escapar(persona.name)}</h2><p>${escapar(persona.specialty || 'Sin especialidad')}</p>${persona.email ? `<small>${escapar(persona.email)}</small>` : ''}</div></div>
     <div class="profesional-asignacion"><span>${renderIcono('pin')}<strong>${persona.branchIds.length}</strong> ${persona.branchIds.length === 1 ? 'sucursal' : 'sucursales'}</span><span>${renderIcono('briefcase')}<strong>${persona.serviceIds.length}</strong> ${persona.serviceIds.length === 1 ? 'servicio' : 'servicios'}</span></div>
     <span class="profesional-estado ${estadoRecurso(persona).clase}"><i></i>${estadoRecurso(persona).etiqueta}</span>

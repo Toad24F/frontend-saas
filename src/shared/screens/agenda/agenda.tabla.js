@@ -9,17 +9,17 @@ export function tablaCitas(citas) {
       'Sin citas para mostrar',
       'Prueba otra fecha o agrega una nueva cita.',
     );
-  return `<div class="table-responsive"><table class="table app-table align-middle"><thead><tr><th>Paciente</th><th>Servicio y profesional</th><th>Fecha y hora</th><th>Sucursal</th><th>Estado</th><th><span class="visually-hidden">Acciones</span></th></tr></thead><tbody>${citas
+  return `<div class="table-responsive"><table class="table tabla-app align-middle"><thead><tr><th>Paciente</th><th>Servicio y profesional</th><th>Fecha y hora</th><th>Sucursal</th><th>Estado</th><th><span class="visually-hidden">Acciones</span></th></tr></thead><tbody>${citas
     .map((a) => {
       const e = ampliarDatosCita(a);
-      return `<tr><td><div class="person-cell">${avatar(
+      return `<tr><td><div class="celda-persona">${avatar(
         e.client.name
           .split(' ')
           .map((p) => p[0])
           .slice(0, 2)
           .join(''),
-        'mint',
-      )}<span><strong>${esc(e.client.name)}</strong><small>${a.folio}</small></span></div></td><td><strong>${esc(e.service.name)}</strong><small>${esc(e.professional.name)}</small></td><td><strong>${formatearFecha(a.date, { day: 'numeric', month: 'short' })}</strong><small>${a.start} – ${a.end}</small></td><td>${esc(e.branch.name)}</td><td>${renderEtiquetaEstado(a.status)}</td><td><button class="icon-btn" data-cita="${a.id}" aria-label="Ver cita de ${esc(e.client.name)}">${renderIcono('chevron')}</button></td></tr>`;
+        'menta',
+      )}<span><strong>${esc(e.client.name)}</strong><small>${a.folio}</small></span></div></td><td><strong>${esc(e.service.name)}</strong><small>${esc(e.professional.name)}</small></td><td><strong>${formatearFecha(a.date, { day: 'numeric', month: 'short' })}</strong><small>${a.start} – ${a.end}</small></td><td>${esc(e.branch.name)}</td><td>${renderEtiquetaEstado(a.status)}</td><td><button class="boton-icono" data-cita="${a.id}" aria-label="Ver cita de ${esc(e.client.name)}">${renderIcono('chevron')}</button></td></tr>`;
     })
     .join('')}</tbody></table></div>`;
 }

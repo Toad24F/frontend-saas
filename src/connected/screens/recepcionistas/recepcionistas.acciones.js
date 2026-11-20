@@ -10,7 +10,7 @@ import { validarRecepcionista, interpretarErrorRecepcionista } from './recepcion
 import { leerCupoRolPropio, renderAvisoCupoPropio } from '../negocio/usuarios.cupo.js';
 import { inhabilitarRecepcionista } from '../../modules/recursos/recursos.inhabilitados.js';
 
-const campoMarcado = (...argumentos) => renderCampo(...argumentos).replace('class="form-field"', `class="form-field" data-campo-profesional="${argumentos[1]}"`);
+const campoMarcado = (...argumentos) => renderCampo(...argumentos).replace('class="campo-formulario"', `class="campo-formulario" data-campo-profesional="${argumentos[1]}"`);
 const camposContrasena = () => campoMarcado('Contraseña', 'password', '', 'password', 'required minlength="12" autocomplete="new-password"');
 
 function formularioRecepcionista(titulo, contenido, alGuardar, restablecimiento = false) {
@@ -26,7 +26,7 @@ function formularioRecepcionista(titulo, contenido, alGuardar, restablecimiento 
       const errores = interpretarErrorRecepcionista(error);
       if (errores) mostrarErroresProfesional(formulario, errores);
       else {
-        const destino = formulario.querySelector('#form-error');
+        const destino = formulario.querySelector('#error-formulario');
         destino.textContent = error.message || 'No se pudieron guardar los cambios. Inténtalo de nuevo.';
         destino.hidden = false;
         destino.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -44,7 +44,7 @@ async function introduccionCupo() {
   // Alta y reactivación comparten la lectura autorizada del negocio de sesión.
   // Si falla la lectura, la operación final aún deja validar el cupo al backend.
   try { return renderAvisoCupoPropio('recepcionistas', await leerCupoRolPropio('recepcionistas', api)); }
-  catch { return '<p class="form-intro">No se pudo consultar el cupo vigente. El servidor lo comprobará al guardar.</p>'; }
+  catch { return '<p class="introduccion-formulario">No se pudo consultar el cupo vigente. El servidor lo comprobará al guardar.</p>'; }
 }
 
 export async function nuevaRecepcionista() {
@@ -57,7 +57,7 @@ export async function nuevaRecepcionista() {
 
 export async function accionRecepcionista(accion, id) {
   if (accion === 'restablecer') {
-    formularioRecepcionista('Restablecer contraseña', `${camposContrasena()}<p class="form-intro">Se cerrarán las sesiones de esta recepcionista.</p>`, async (formulario) => {
+    formularioRecepcionista('Restablecer contraseña', `${camposContrasena()}<p class="introduccion-formulario">Se cerrarán las sesiones de esta recepcionista.</p>`, async (formulario) => {
       const password = formulario.get('password');
       validarContrasenaNueva(password);
       await api(`/recepcionistas/${id}/restablecer-contrasena`, 'POST', { nuevaPassword: password });
@@ -71,7 +71,7 @@ export async function accionRecepcionista(accion, id) {
   const inhabilitando = accion === 'inhabilitar';
   // Inhabilitar retira la cuenta de la lista; desactivar conserva la cuenta
   // visible y reactivar sigue sujeto al cupo del servidor.
-  const dialogo = abrirDialogo(reactivando ? 'Reactivar recepcionista' : inhabilitando ? 'Inhabilitar recepcionista' : 'Desactivar recepcionista', `<div class="dialog-body">${reactivando ? await introduccionCupo() : ''}<p><strong>${escaparHtml(persona.name)}</strong>: ${reactivando ? 'Se habilitará de nuevo su cuenta. Tendrá que iniciar sesión.' : inhabilitando ? 'Se retirará de los listados operativos y se cerrarán sus sesiones. Podrás consultarla en Inhabilitados y restaurarla como inactiva más adelante.' : 'Se desactivará la cuenta y se cerrarán sus sesiones.'}</p>${espacioErrorFormulario}</div><div class="dialog-footer"><button class="btn btn-light" data-dismiss>Cancelar</button><button class="btn ${reactivando ? 'btn-primary' : inhabilitando ? 'action-danger' : 'action-caution'}" data-confirm>${reactivando ? 'Reactivar' : inhabilitando ? 'Inhabilitar' : 'Desactivar'}</button></div>`);
+  const dialogo = abrirDialogo(reactivando ? 'Reactivar recepcionista' : inhabilitando ? 'Inhabilitar recepcionista' : 'Desactivar recepcionista', `<div class="dialogo-cuerpo">${reactivando ? await introduccionCupo() : ''}<p><strong>${escaparHtml(persona.name)}</strong>: ${reactivando ? 'Se habilitará de nuevo su cuenta. Tendrá que iniciar sesión.' : inhabilitando ? 'Se retirará de los listados operativos y se cerrarán sus sesiones. Podrás consultarla en Inhabilitados y restaurarla como inactiva más adelante.' : 'Se desactivará la cuenta y se cerrarán sus sesiones.'}</p>${espacioErrorFormulario}</div><div class="dialogo-pie"><button class="btn btn-light" data-dismiss>Cancelar</button><button class="btn ${reactivando ? 'btn-primary' : inhabilitando ? 'accion-peligro' : 'accion-precaucion'}" data-confirm>${reactivando ? 'Reactivar' : inhabilitando ? 'Inhabilitar' : 'Desactivar'}</button></div>`);
   dialogo.querySelector('[data-dismiss]').onclick = () => dialogo.close();
   dialogo.querySelector('[data-confirm]').onclick = async (evento) => {
     const boton = evento.currentTarget;
@@ -85,7 +85,7 @@ export async function accionRecepcionista(accion, id) {
       render();
       mostrarAviso(reactivando ? 'Recepcionista reactivada.' : inhabilitando ? 'Recepcionista inhabilitada.' : 'Recepcionista desactivada.');
     } catch (error) {
-      const destino = dialogo.querySelector('#form-error');
+      const destino = dialogo.querySelector('#error-formulario');
       destino.textContent = error.message;
       destino.hidden = false;
       destino.focus();

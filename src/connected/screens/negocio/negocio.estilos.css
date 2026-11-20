@@ -2,11 +2,11 @@
 .negocio-seccion-detalle { padding: 22px; margin-bottom: 20px; min-width: 0; }
 .negocio-cuadricula-detalle .negocio-seccion-detalle { margin-bottom: 0; }
 .negocio-lista-detalle { display: grid; gap: 12px; }
-.negocio-lista-detalle > div { display: flex; justify-content: space-between; gap: 16px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
-.negocio-lista-detalle span { color: var(--muted); }
+.negocio-lista-detalle > div { display: flex; justify-content: space-between; gap: 16px; border-bottom: 1px solid var(--borde); padding-bottom: 10px; }
+.negocio-lista-detalle span { color: var(--texto-secundario); }
 .negocio-lista-detalle strong { text-align: right; overflow-wrap: anywhere; }
 .negocio-acciones-detalle { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
-.negocio-seccion-detalle .information-note { margin-top: 18px; }
+.negocio-seccion-detalle .nota-informativa { margin-top: 18px; }
 .negocio-espacio-trabajo { min-width: 0; }
 :is(.negocio-espacio-trabajo, #licencia-formulario-suspension) .negocio-boton-suspender {
   --bs-btn-bg: #5b151b;
@@ -38,17 +38,17 @@ html[data-theme='light'] :is(.negocio-espacio-trabajo, #licencia-formulario-susp
 :is(.negocio-espacio-trabajo, #licencia-formulario-suspension) .negocio-boton-suspender:is(:hover, :focus-visible):not(:disabled) { background: var(--bs-btn-hover-bg); border-color: var(--bs-btn-hover-border-color); color: #fff; }
 :is(.negocio-espacio-trabajo, #licencia-formulario-suspension) .negocio-boton-suspender:active:not(:disabled) { background: var(--bs-btn-active-bg); border-color: var(--bs-btn-active-border-color); color: #fff; }
 :is(.negocio-espacio-trabajo, #licencia-formulario-suspension) .negocio-boton-suspender:focus-visible { outline: 3px solid #d9656d; outline-offset: 3px; box-shadow: none; }
-#licencia-formulario-suspension .dialog-footer { background: transparent; border-top: 0; margin-top: 16px; padding: 18px 0 0; }
+#licencia-formulario-suspension .dialogo-pie { background: transparent; border-top: 0; margin-top: 16px; padding: 18px 0 0; }
 .negocio-espacio-trabajo [role='tabpanel'][hidden] { display: none !important; }
-.negocio-espacio-trabajo :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.negocio-espacio-trabajo :focus-visible { outline: 2px solid var(--acento); outline-offset: 3px; }
 .negocio-general { min-width: 0; }
-.negocio-seccion-general { padding: 22px 0 30px; border-bottom: 1px solid var(--border); }
+.negocio-seccion-general { padding: 22px 0 30px; border-bottom: 1px solid var(--borde); }
 .negocio-seccion-general + .negocio-seccion-general { padding-top: 30px; }
 .negocio-seccion-general h2 { margin: 0; font-size: 18px; font-weight: 650; }
-.negocio-descripcion-general { color: var(--muted); font-size: 13px; margin: 12px 0 0; }
+.negocio-descripcion-general { color: var(--texto-secundario); font-size: 13px; margin: 12px 0 0; }
 .negocio-estado-licencia { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 14px; font-size: 13px; }
-.negocio-estado-licencia span { color: var(--muted); }
-.negocio-etiqueta-licencia { display: inline-flex; align-items: center; gap: 8px; padding: 7px 12px; border-radius: 8px; background: var(--surface-soft); color: var(--ink); font-size: 14px; font-weight: 650; }
+.negocio-estado-licencia span { color: var(--texto-secundario); }
+.negocio-etiqueta-licencia { display: inline-flex; align-items: center; gap: 8px; padding: 7px 12px; border-radius: 8px; background: var(--superficie-suave); color: var(--texto); font-size: 14px; font-weight: 650; }
 .negocio-etiqueta-licencia::before { content: ''; width: 7px; height: 7px; flex: 0 0 7px; border-radius: 50%; background: currentColor; }
 .negocio-etiqueta-licencia-vigente { background: #e4f1e9; color: #286443; }
 .negocio-etiqueta-licencia-pendiente, .negocio-etiqueta-licencia-suspension_pendiente { background: #fbefcf; color: #805900; }
@@ -58,37 +58,37 @@ html[data-theme='dark'] :is(.negocio-etiqueta-licencia-pendiente, .negocio-etiqu
 html[data-theme='dark'] :is(.negocio-etiqueta-licencia-suspendida, .negocio-etiqueta-licencia-vencida) { background: #4e2b2a; color: #ffb6ae; }
 .negocio-limites .cupo-medidor { width: 100%; }
 .negocio-seccion-correo .correo-filtros { margin-top: 24px; }
-.negocio-seccion-correo > .information-note { margin-top: 18px; }
+.negocio-seccion-correo > .nota-informativa { margin-top: 18px; }
 .negocio-espacio-trabajo .negocio-acciones-detalle .btn { min-height: 44px; }
-.negocio-tiempo-licencia { --time-color: var(--accent); margin-top: 24px; width: 100%; }
+.negocio-tiempo-licencia { --time-color: var(--acento); margin-top: 24px; width: 100%; }
 .negocio-tiempo-licencia-aviso { --time-color: #956200; }
 .negocio-tiempo-licencia-vencido { --time-color: #b63838; }
 .negocio-encabezado-tiempo-licencia { display: flex; justify-content: space-between; align-items: end; flex-wrap: wrap; gap: 18px 32px; }
 .negocio-encabezado-tiempo-licencia > div { display: grid; gap: 5px; }
-.negocio-encabezado-tiempo-licencia span, .negocio-encabezado-tiempo-licencia small { color: var(--muted); font-size: 12px; }
+.negocio-encabezado-tiempo-licencia span, .negocio-encabezado-tiempo-licencia small { color: var(--texto-secundario); font-size: 12px; }
 .negocio-encabezado-tiempo-licencia > div:first-child > strong { font-size: clamp(22px, 3vw, 30px); line-height: 1.25; font-weight: 650; font-variant-numeric: tabular-nums; }
 .negocio-vencimiento-licencia { text-align: right; font-size: 13px; }
-.negocio-tiempo-licencia progress { appearance: none; display: block; width: 100%; height: 10px; border: none; border-radius: 6px; overflow: hidden; background: var(--surface-soft); color: var(--time-color); margin: 16px 0 9px; }
-.negocio-tiempo-licencia progress::-webkit-progress-bar { background: var(--surface-soft); border-radius: 6px; }
+.negocio-tiempo-licencia progress { appearance: none; display: block; width: 100%; height: 10px; border: none; border-radius: 6px; overflow: hidden; background: var(--superficie-suave); color: var(--time-color); margin: 16px 0 9px; }
+.negocio-tiempo-licencia progress::-webkit-progress-bar { background: var(--superficie-suave); border-radius: 6px; }
 .negocio-tiempo-licencia progress::-webkit-progress-value { background: var(--time-color); border-radius: 6px; }
 .negocio-tiempo-licencia progress::-moz-progress-bar { background: var(--time-color); border-radius: 6px; }
-.negocio-porcentaje-licencia { font-size: 12px; color: var(--muted); margin: 0; }
-.negocio-aviso-licencia { color: var(--muted); margin: 16px 0 0; font-size: 13px; max-width: 880px; }
+.negocio-porcentaje-licencia { font-size: 12px; color: var(--texto-secundario); margin: 0; }
+.negocio-aviso-licencia { color: var(--texto-secundario); margin: 16px 0 0; font-size: 13px; max-width: 880px; }
 .negocio-datos-administrador { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 40px; margin: 24px 0 0; max-width: 1000px; }
 .negocio-datos-administrador > div { min-width: 0; }
-.negocio-datos-administrador dt { color: var(--muted); font-size: 12px; font-weight: 400; margin-bottom: 6px; }
+.negocio-datos-administrador dt { color: var(--texto-secundario); font-size: 12px; font-weight: 400; margin-bottom: 6px; }
 .negocio-datos-administrador dd { margin: 0; overflow-wrap: anywhere; font-size: 14px; font-weight: 600; }
 .negocio-general .negocio-acciones-detalle .btn { min-height: 44px; }
 html[data-theme='dark'] .negocio-tiempo-licencia-aviso { --time-color: #e3b85d; }
 html[data-theme='dark'] .negocio-tiempo-licencia-vencido { --time-color: #f29189; }
-.cupo-medidor { --meter-color: var(--accent); margin-top: 22px; }
+.cupo-medidor { --meter-color: var(--acento); margin-top: 22px; }
 .cupo-medidor-aviso { --meter-color: #956200; }
 .cupo-medidor-lleno { --meter-color: #b63838; }
 .cupo-medidor-encabezado, .cupo-medidor-leyenda { display: flex; justify-content: space-between; gap: 12px; }
 .cupo-medidor-encabezado span, .cupo-medidor-leyenda { font-variant-numeric: tabular-nums; }
-.cupo-medidor-leyenda { color: var(--muted); font-size: 12px; }
+.cupo-medidor-leyenda { color: var(--texto-secundario); font-size: 12px; }
 .cupo-medidor meter { appearance: none; display: block; width: 100%; height: 15px; border: none; border-radius: 6px;  overflow: hidden; }
-.cupo-medidor meter::-webkit-meter-bar { background: var(--surface-soft); border: none; border-radius: 6px; }
+.cupo-medidor meter::-webkit-meter-bar { background: var(--superficie-suave); border: none; border-radius: 6px; }
 .cupo-medidor meter::-webkit-meter-optimum-value { background: var(--meter-color); border-radius: 6px; }
 .cupo-medidor meter::-moz-meter-bar { background: var(--meter-color); }
 .correo-filtros { display: flex; flex-wrap: wrap; align-items: end; gap: 12px; }
@@ -100,18 +100,18 @@ html[data-theme='dark'] .negocio-tiempo-licencia-vencido { --time-color: #f29189
 .correo-tabla th:nth-child(3) { width: 11%; }
 .correo-tabla :is(td, th) { overflow-wrap: anywhere; }
 .correo-seguimiento { display: grid; gap: 7px; justify-items: start; font-size: 12px; }
-.correo-error { color: var(--muted); }
+.correo-error { color: var(--texto-secundario); }
 html[data-theme='light'] .negocio-espacio-trabajo .correo-estado-enviado { background: #e4f1e9; color: #286443; }
 html[data-theme='light'] .negocio-espacio-trabajo .correo-estado-fallido { background: #fbe5e3; color: #9e302e; }
 html[data-theme='light'] .negocio-espacio-trabajo :is(.correo-estado-pendiente, .correo-estado-tomado) { background: #fbefcf; color: #805900; }
-.correo-estado-descartado { background: var(--surface-soft); color: var(--muted); }
+.correo-estado-descartado { background: var(--superficie-suave); color: var(--texto-secundario); }
 .correo-pie, .correo-pie nav { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
 .correo-pie { margin-top: 20px; }
-.correo-pie p { margin: 0; color: var(--muted); font-size: 12px; }
+.correo-pie p { margin: 0; color: var(--texto-secundario); font-size: 12px; }
 .correo-pie nav { font-size: 12px; }
 .correo-pie button, .correo-seguimiento button { min-height: 44px; }
-.correo-vacio { padding: 32px 0; color: var(--muted); }
-.correo-vacio h3 { font-size: 16px; color: var(--ink); }
+.correo-vacio { padding: 32px 0; color: var(--texto-secundario); }
+.correo-vacio h3 { font-size: 16px; color: var(--texto); }
 html[data-theme='dark'] .cupo-medidor-aviso { --meter-color: #e3b85d; }
 html[data-theme='dark'] .cupo-medidor-lleno { --meter-color: #f29189; }
 html[data-theme='dark'] .correo-estado-enviado { background: #253e32; color: #a5ddbb; }
@@ -125,9 +125,9 @@ html[data-theme='dark'] :is(.correo-estado-pendiente, .correo-estado-tomado) { b
   .negocio-espacio-trabajo .disponibilidad-pestanas button { min-height: 44px; }
   .correo-tabla, .correo-tabla tbody, .correo-tabla tr, .correo-tabla td { display: block; width: 100%; }
   .correo-tabla thead { display: none; }
-  .correo-tabla tr { padding: 14px 0; border-bottom: 1px solid var(--border); }
+  .correo-tabla tr { padding: 14px 0; border-bottom: 1px solid var(--borde); }
   .correo-tabla td { display: grid; grid-template-columns: 85px minmax(0, 1fr); gap: 12px; padding: 8px 0; border: 0; }
-  .correo-tabla td::before { content: attr(data-label); color: var(--muted); font-size: 12px; }
+  .correo-tabla td::before { content: attr(data-label); color: var(--texto-secundario); font-size: 12px; }
   .correo-tabla td:first-child strong { grid-column: 2; }
   .correo-tabla .correo-estado { justify-self: start; }
   .correo-pie nav { width: 100%; }

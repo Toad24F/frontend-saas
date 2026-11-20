@@ -9,15 +9,15 @@ test('edición de catálogos abre con la ficha individual reciente', async () =>
     '/sucursales/8': { nombre: 'Norte', direccion: 'Calle nueva', telefono: '6141234567', zonaHoraria: 'America/Chihuahua', urlGoogleMaps: null, notasLlegada: 'Planta baja', activo: true },
   };
   const solicitar = async (ruta) => { llamadas.push(ruta); return respuestas[ruta]; };
-  const servicio = await consultarRegistroEditable('services', { id: 7, name: 'Nombre viejo', color: 'blue' }, solicitar);
-  const sucursal = await consultarRegistroEditable('branches', { id: 8, name: 'Nombre viejo', color: 'orange' }, solicitar);
+  const servicio = await consultarRegistroEditable('services', { id: 7, name: 'Nombre viejo', color: 'azul' }, solicitar);
+  const sucursal = await consultarRegistroEditable('branches', { id: 8, name: 'Nombre viejo', color: 'naranja' }, solicitar);
   assert.deepEqual(llamadas, ['/servicios/7', '/sucursales/8']);
   assert.equal(servicio.name, 'Consulta nueva');
   assert.equal(servicio.price, 250);
-  assert.equal(servicio.color, 'blue');
+  assert.equal(servicio.color, 'azul');
   assert.equal(sucursal.name, 'Norte');
   assert.equal(sucursal.notes, 'Planta baja');
-  assert.equal(sucursal.color, 'orange');
+  assert.equal(sucursal.color, 'naranja');
 });
 
 test('edición de profesional refresca solo el perfil', async () => {

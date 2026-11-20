@@ -136,7 +136,7 @@ async function cargar(forzar = false, segundoPlano = false) {
       restaurarDesplazamientoAgenda(ancla, limiteSuperior);
       const formularioSiguiente = document.querySelector('#agenda-filtros-conectados');
       for (const [claveInterna, valor] of borrador || []) if (formularioSiguiente?.elements[claveInterna]) formularioSiguiente.elements[claveInterna].value = valor;
-      if (document.querySelector('#app-dialog')?.open) {
+      if (document.querySelector('#dialogo-app')?.open) {
         if (segundoPlano && anterior && store.state.data && JSON.stringify(anterior) !== JSON.stringify(store.state.data)) window.dispatchEvent(new Event('agenda-actualizada'));
         return;
       }
@@ -159,7 +159,7 @@ registrarRefrescoVivo(() => {
   if (usuarioActual && estado.pagina === 'agenda' && !store.state.busy && !store.state.refreshing) return Promise.all([cargar(true, true), cargarAtencion(true)]);
 });
 // Mismos filtros compactos e iconos que la demo; cambian únicamente los nombres del contrato HTTP.
-const selectorCampo = (nombre, etiqueta, etiquetaTodas, opciones, valor, imagen) => `<label class="filter-select">${renderIcono(imagen)}<select name="${nombre}" aria-label="${etiqueta}">${valor === 'none' ? '<option value="none" selected>Sin sucursales asignadas</option>' : ''}<option value="all" ${valor === 'all' ? 'selected' : ''}>${etiquetaTodas}</option>${[...opciones].map(([id, texto]) => `<option value="${esc(id)}" ${String(id) === String(valor) ? 'selected' : ''}>${esc(texto)}</option>`).join('')}</select>${renderIcono('down')}</label>`;
+const selectorCampo = (nombre, etiqueta, etiquetaTodas, opciones, valor, imagen) => `<label class="selector-filtro">${renderIcono(imagen)}<select name="${nombre}" aria-label="${etiqueta}">${valor === 'none' ? '<option value="none" selected>Sin sucursales asignadas</option>' : ''}<option value="all" ${valor === 'all' ? 'selected' : ''}>${etiquetaTodas}</option>${[...opciones].map(([id, texto]) => `<option value="${esc(id)}" ${String(id) === String(valor) ? 'selected' : ''}>${esc(texto)}</option>`).join('')}</select>${renderIcono('down')}</label>`;
 
 function calendario(datos) {
   const periodo = periodoCalendario(estado.vistaCalendario, estado.fecha);
@@ -219,8 +219,8 @@ const htmlValores = (valores) => valores == null ? '<p>Sin valores registrados.<
 export async function abrirCita(id) {
   const generacion = ++generacionDetalle;
   const ambitoAbierto = `${usuarioActual?.negocioId}:${usuarioActual?.id}:${usuarioActual?.sesionId || ''}`;
-  if (!document.querySelector('#app-dialog')?.open) focoRetornoCita = document.activeElement;
-  const dialogo = modal('Detalle de la cita', '<div class="dialog-body"><p role="status">Consultando detalle…</p></div>', true);
+  if (!document.querySelector('#dialogo-app')?.open) focoRetornoCita = document.activeElement;
+  const dialogo = modal('Detalle de la cita', '<div class="dialogo-cuerpo"><p role="status">Consultando detalle…</p></div>', true);
   // Una relectura reemplaza controles del panel; devolver el foco a la cita vigente al cerrar.
   dialogo.onclose = () => (focoRetornoCita?.isConnected ? focoRetornoCita : document.querySelector(`[data-agenda-cita="${id}"]`) || document.querySelector('[data-agenda-hoy]'))?.focus();
   // Un historial largo necesita una superficie opaca para mantener legible el texto al desplazarlo.
@@ -232,7 +232,7 @@ export async function abrirCita(id) {
     const detalle = await client.consultarDetalle(id);
     if (!activo()) return;
     if (!detalle || detalle.id !== id || !detalle.zonaHoraria) throw new Error('El detalle recibido no es válido.');
-    dialogo.querySelector('.dialog-body').innerHTML = `${htmlDetalle(detalle)}<section class="agenda-historial" aria-label="Historial de la cita"><h3>Historial de la cita</h3><div data-agenda-historial></div></section>`;
+    dialogo.querySelector('.dialogo-cuerpo').innerHTML = `${htmlDetalle(detalle)}<section class="agenda-historial" aria-label="Historial de la cita"><h3>Historial de la cita</h3><div data-agenda-historial></div></section>`;
     // Estado e historial conservan su autoridad de servidor; solo los roles de gestión reciben editor.
     montarEditorEstado(dialogo, detalle, { role: usuarioActual.rol, scope: ambitoAbierto, request: api, isCurrent: esVigente,
       onReload: () => abrirCita(id),
@@ -248,7 +248,7 @@ export async function abrirCita(id) {
         await cargar(true); if (activo()) await abrirCita(id);
       },
     });
-    observarRegistro(dialogo.querySelector('.dialog-body'), { version: detalle.version, read: () => client.consultarDetalle(id), active: activo });
+    observarRegistro(dialogo.querySelector('.dialogo-cuerpo'), { version: detalle.version, read: () => client.consultarDetalle(id), active: activo });
     let generacionHistorial = 0;
     async function mostrarHistorial(paginaActual = 1) {
       const revision = ++generacionHistorial, objetivo = dialogo.querySelector('[data-agenda-historial]');
@@ -272,7 +272,7 @@ export async function abrirCita(id) {
     await mostrarHistorial();
   } catch (error) {
     if (!activo()) return;
-    dialogo.querySelector('.dialog-body').innerHTML = panelError(error, 'data-detalle-reintentar');
+    dialogo.querySelector('.dialogo-cuerpo').innerHTML = panelError(error, 'data-detalle-reintentar');
     dialogo.querySelector('[data-detalle-reintentar]')?.addEventListener('click', () => void abrirCita(id));
   }
 }

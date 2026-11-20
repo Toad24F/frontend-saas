@@ -304,3 +304,18 @@ Las rutas de archivo, los cambios de selectores y sus comprobaciones se registra
 | `accountPortalUrl`, `renderAccountPortal`, `copyAccountPortal`, `bindAccountPortal` | `urlPortalCuenta`, `renderPortalCuenta`, `copiarEnlacePortalCuenta`, `vincularPortalCuenta` |
 | `isDemo`, `pending`, `modeUrl`, `loadBackendData`, `user` de la fachada | `esDemo`, `mensajePendiente`, `urlSegunModo`, `cargarDatosBackend`, `usuarioActual` |
 
+## Equivalencias del CSS global
+
+| Nombre anterior | Nombre adoptado |
+| --- | --- |
+| `styles.css`, `theme.css`, `mobile.css`, `motion.css`, `account-portal.css` | `global.estilos.css`, `tema.estilos.css`, `movil.estilos.css`, `movimiento.estilos.css`, `cuenta.portal.css` |
+| `admin-layout`, `main-content`, `sidebar`, `topbar`, `surface` | `estructura-admin`, `contenido-principal`, `barra-lateral`, `barra-superior`, `superficie` |
+| `page-heading`, `section-heading`, `app-table`, `app-dialog`, `app-toast` | `encabezado-pagina`, `encabezado-seccion`, `tabla-app`, `dialogo-app`, `aviso-app` |
+| `stats-grid`, `stat-card`, `stat-number`, `status-badge` | `cuadricula-indicadores`, `tarjeta-indicador`, `indicador-valor`, `distintivo-estado` |
+| `--accent`, `--ink`, `--muted`, `--canvas`, `--surface`, `--border` | `--acento`, `--texto`, `--texto-secundario`, `--fondo`, `--superficie`, `--borde` |
+| `mobile-tabbar`, `mobile-tab`, `is-current`, `--tab-count` | `navegacion-inferior`, `pestana-movil`, `es-actual`, `--cantidad-pestanas` |
+| `motion-enter`, `screen-arrive`, `data-motion-direction` | `animar-entrada`, `entrada-pantalla`, `data-direccion-animacion` |
+| `account-portal`, `account-portal-url`, `data-account-portal-copy` | `cuenta-portal`, `cuenta-portal-enlace`, `data-cuenta-portal-copiar` |
+
+El [resultado del CSS global](resultado-css-global-2026-11-20.md) registra las comprobaciones y las convenciones que mantiene el sistema de temas.
+

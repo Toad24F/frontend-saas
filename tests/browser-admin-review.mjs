@@ -50,13 +50,13 @@ try {
   });
   const page = await context.newPage();
   page.on('pageerror', (error) => errors.push(error.message));
-  const goto = async (path) => { await page.goto(`${origin}/admin/${path}`); await page.locator('.page-heading').waitFor(); };
+  const goto = async (path) => { await page.goto(`${origin}/admin/${path}`); await page.locator('.encabezado-pagina').waitFor(); };
   await goto('profesionales');
-  await page.locator('.account-menu-trigger').click();
+  await page.locator('.menu-cuenta-disparador').click();
   const shape = (selector) => page.locator(selector).evaluate((el) => { const c = getComputedStyle(el); return [c.borderRadius, c.padding, c.minHeight]; });
-  assert.deepEqual(await shape('#account-menu-panel a'), await shape('#account-menu-panel button'));
+  assert.deepEqual(await shape('#menu-cuenta-panel a'), await shape('#menu-cuenta-panel button'));
   await page.keyboard.press('Escape');
-  const nav = await page.locator('.sidebar nav').innerText();
+  const nav = await page.locator('.barra-lateral nav').innerText();
   assert.ok(nav.indexOf('Servicios') < nav.indexOf('Sucursales') && nav.indexOf('Sucursales') < nav.indexOf('Usuarios') && nav.indexOf('Usuarios') < nav.indexOf('Disponibilidad'));
   assert.equal(await page.locator('[data-users-menu]').getAttribute('aria-expanded'), 'true');
   for (const width of [1366, 1159, 390, 320]) {
@@ -81,30 +81,30 @@ try {
           assert.equal(await page.locator('.catalogo-indicador-cupo progress').evaluate((el) => getComputedStyle(el).height), '7px');
         }
         if (screen === 'recepcionistas') {
-          const caution = page.locator('.recepcionista-accion-estado.action-caution');
+          const caution = page.locator('.recepcionista-accion-estado.accion-precaucion');
           assert.equal(await caution.evaluate((el) => getComputedStyle(el).backgroundColor), theme === 'dark' ? 'rgb(73, 56, 22)' : 'rgb(255, 240, 194)');
           await caution.hover();
           await expect(caution).toHaveCSS('background-color', theme === 'dark' ? 'rgb(96, 74, 28)' : 'rgb(255, 228, 154)');
         }
         const action = { profesionales: 'nuevo-profesional', recepcionistas: 'nueva-recepcionista', servicios: 'nuevo-servicio', sucursales: 'nueva-sucursal' }[screen];
         await page.locator('[data-action="' + action + '"]').first().click();
-        await page.locator('.form-drawer[open]').waitFor();
-        const rect = await page.locator('.form-drawer').boundingBox();
+        await page.locator('.formulario-lateral[open]').waitFor();
+        const rect = await page.locator('.formulario-lateral').boundingBox();
         assert.ok(Math.abs(rect.x + rect.width - width) < 2);
         assert.ok(Math.abs(rect.y) < 2 && Math.abs(rect.height - 900) < 2);
-        const footerRect = await page.locator('.form-drawer #editor-form > .dialog-footer').boundingBox();
+        const footerRect = await page.locator('.formulario-lateral #editor-form > .dialogo-pie').boundingBox();
         assert.ok(footerRect.y + footerRect.height <= 901);
         await page.screenshot({ animations: 'disabled', path: `test-results/admin-review/${width}-${theme}-alta-${screen}.png` });
         await page.getByRole('dialog').getByRole('button', { name: 'Cancelar', exact: true }).click();
         await page.locator('.profesional-mas summary').first().click();
-        const danger = page.locator('.profesional-menu-mas button.action-danger').first();
+        const danger = page.locator('.profesional-menu-mas button.accion-peligro').first();
         assert.equal(await danger.evaluate((el) => getComputedStyle(el).color), theme === 'dark' ? 'rgb(255, 182, 190)' : 'rgb(165, 42, 50)');
         assert.equal(await danger.evaluate((el) => getComputedStyle(el).borderTopWidth), '0px');
         await danger.hover();
         assert.equal(await danger.evaluate((el) => getComputedStyle(el).backgroundColor), theme === 'dark' ? 'rgb(78, 43, 48)' : 'rgb(251, 227, 227)');
         await danger.click();
-        assert.equal(await page.locator('.form-drawer[open]').count(), 0);
-        await page.getByRole('dialog').locator('.action-danger[data-confirm]').waitFor();
+        assert.equal(await page.locator('.formulario-lateral[open]').count(), 0);
+        await page.getByRole('dialog').locator('.accion-peligro[data-confirm]').waitFor();
         await page.getByRole('dialog').getByRole('button', { name: 'Cancelar', exact: true }).click();
         assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), `${width}/${theme}/${screen}`);
         await page.screenshot({ animations: 'disabled', fullPage: true, path: `test-results/admin-review/${width}-${theme}-${screen}.png` });
@@ -115,28 +115,28 @@ try {
       await page.getByRole('dialog').getByRole('button', { name: 'Cerrar', exact: true }).click();
     }
   }
-  await page.locator('.mobile-tabbar [data-action=menu]').click();
+  await page.locator('.navegacion-inferior [data-action=menu]').click();
   await page.locator('[data-users-menu]').click();
-  await page.locator('.sidebar [data-nav=recepcionistas]').click();
+  await page.locator('.barra-lateral [data-nav=recepcionistas]').click();
   assert.equal(await page.locator('[data-users-menu]').getAttribute('aria-expanded'), 'true');
   await page.setViewportSize({ width: 1366, height: 900 });
   for (const [screen, edit] of [['profesionales', 'data-editar-profesional'], ['servicios', 'data-editar-servicio'], ['sucursales', 'data-editar-sucursal']]) {
     await goto(screen);
     await page.locator('[' + edit + ']').first().click();
-    await page.locator('.form-drawer[open]').waitFor();
+    await page.locator('.formulario-lateral[open]').waitFor();
     await page.getByRole('dialog').getByRole('button', { name: 'Cancelar', exact: true }).click();
   }
   await goto('recepcionistas');
   await page.locator('[data-action=nueva-recepcionista]').click();
   await page.locator('#f-name').fill('Borrador de prueba');
   await page.getByRole('dialog').getByRole('button', { name: 'Guardar', exact: true }).click();
-  assert.equal(await page.locator('.form-drawer[open]').count(), 1);
+  assert.equal(await page.locator('.formulario-lateral[open]').count(), 1);
   assert.equal(writes.length, 0);
   await page.getByRole('dialog').getByRole('button', { name: 'Cancelar', exact: true }).click();
   await page.locator('[data-discard-confirm]:visible').waitFor();
   await page.getByRole('button', { name: 'Seguir editando', exact: true }).click();
   assert.equal(await page.locator('#f-name').inputValue(), 'Borrador de prueba');
-  await page.locator('.form-drawer [data-close]').click();
+  await page.locator('.formulario-lateral [data-close]').click();
   await page.getByRole('button', { name: 'Seguir editando', exact: true }).click();
   await page.mouse.click(20, 100);
   await page.getByRole('button', { name: 'Seguir editando', exact: true }).click();
@@ -171,10 +171,10 @@ try {
   await page.locator('[data-oferta-selector]').selectOption('2');
   assert.equal(await page.locator('[data-oferta-sucursal="2"]').isVisible(), true);
   assert.equal(await page.locator('[data-oferta-sucursal="1"]').isVisible(), false);
-  assert.equal(await page.locator('[data-disponibilidad-accion=atencion]:visible').getAttribute('class'), 'btn action-caution');
+  assert.equal(await page.locator('[data-disponibilidad-accion=atencion]:visible').getAttribute('class'), 'btn accion-precaucion');
   await page.getByRole('tab', { name: 'Horario semanal' }).click();
-  await page.locator('.app-toast').first().waitFor({ state: 'hidden' });
-  assert.equal(await page.locator('#formulario-horario .section-form-footer .horario-ayuda').count(), 1);
+  await page.locator('.aviso-app').first().waitFor({ state: 'hidden' });
+  assert.equal(await page.locator('#formulario-horario .pie-formulario-seccion .horario-ayuda').count(), 1);
   for (const width of [1366, 390, 320]) for (const theme of ['light', 'dark']) {
     await page.setViewportSize({ width, height: 900 });
     await page.evaluate((theme) => { localStorage.setItem('cita-theme', theme); document.documentElement.dataset.theme = theme; }, theme);
@@ -189,7 +189,7 @@ try {
     await page.setViewportSize({ width, height: 900 });
     await page.evaluate((theme) => { localStorage.setItem('cita-theme', theme); document.documentElement.dataset.theme = theme; }, theme);
     await page.locator('[data-action=nuevo-bloqueo]').click();
-    await page.locator('.form-drawer[open]').waitFor();
+    await page.locator('.formulario-lateral[open]').waitFor();
     await page.screenshot({ animations: 'disabled', path: `test-results/admin-review/${width}-${theme}-alta-bloqueo.png` });
     await page.getByRole('dialog').getByRole('button', { name: 'Cancelar', exact: true }).click();
   }

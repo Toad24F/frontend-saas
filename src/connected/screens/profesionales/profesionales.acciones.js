@@ -25,10 +25,10 @@ export async function accionProfesional(accion, id) {
     // La reactivación puede consumir un lugar; se consulta el cupo propio justo
     // antes de confirmar y la respuesta final sigue siendo autoridad del servidor.
     try { introduccionCupo = renderAvisoCupoPropio('profesionales', await leerCupoRolPropio('profesionales', api)); }
-    catch { introduccionCupo = '<p class="form-intro">No se pudo consultar el cupo vigente. El servidor lo comprobará al reactivar.</p>'; }
+    catch { introduccionCupo = '<p class="introduccion-formulario">No se pudo consultar el cupo vigente. El servidor lo comprobará al reactivar.</p>'; }
   }
   // El retiro conserva historial y no equivale a desactivar ni a borrar.
-  const dialogo = abrirDialogo(operacion.titulo, `<div class="dialog-body">${introduccionCupo}<p><strong>${escaparHtml(persona.name)}</strong>: ${operacion.mensaje}</p>${espacioErrorFormulario}</div><div class="dialog-footer"><button type="button" class="btn btn-light" data-dismiss>Cancelar</button><button type="button" class="btn ${accion === 'reactivar' ? 'btn-primary' : accion === 'inhabilitar' ? 'action-danger' : 'action-caution'}" data-confirm>${operacion.etiqueta}</button></div>`);
+  const dialogo = abrirDialogo(operacion.titulo, `<div class="dialogo-cuerpo">${introduccionCupo}<p><strong>${escaparHtml(persona.name)}</strong>: ${operacion.mensaje}</p>${espacioErrorFormulario}</div><div class="dialogo-pie"><button type="button" class="btn btn-light" data-dismiss>Cancelar</button><button type="button" class="btn ${accion === 'reactivar' ? 'btn-primary' : accion === 'inhabilitar' ? 'accion-peligro' : 'accion-precaucion'}" data-confirm>${operacion.etiqueta}</button></div>`);
   dialogo.querySelector('[data-dismiss]').onclick = () => dialogo.close();
   dialogo.querySelector('[data-confirm]').onclick = async (evento) => {
     const boton = evento.currentTarget;
@@ -42,7 +42,7 @@ export async function accionProfesional(accion, id) {
       try { await cargarDatosBackend(); render(); mostrarAviso(operacion.exito); }
       catch (error) { mostrarAviso(`${operacion.exito} No se pudo actualizar la lista: ${error.message}`); }
     } catch (error) {
-      const destino = dialogo.querySelector('#form-error');
+      const destino = dialogo.querySelector('#error-formulario');
       destino.textContent = error.message;
       destino.hidden = false;
       destino.focus();

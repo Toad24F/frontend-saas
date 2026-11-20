@@ -29,7 +29,7 @@
   font-size: 12px;
   letter-spacing: 0.3px;
 }
-.portal-demo-barra > .text-button {
+.portal-demo-barra > .boton-texto {
   font-size: 12px;
   color: #8f998b;
 }
@@ -57,7 +57,7 @@
   margin: 0 6px;
   color: #c0c7b9;
 }
-.reserva-demo-negocio > .soft-tag {
+.reserva-demo-negocio > .etiqueta-suave {
   margin-left: auto;
   color: #879780;
   background: #eff3ec;
@@ -94,16 +94,16 @@
   font-size: 12px;
   font-weight: 500;
 }
-.reserva-demo-paso.current {
+.reserva-demo-paso.actual {
   color: #ce7656;
 }
-.reserva-demo-paso.current > span {
-  background: var(--accent);
+.reserva-demo-paso.actual > span {
+  background: var(--acento);
   color: #fff;
-  border-color: var(--accent);
+  border-color: var(--acento);
   box-shadow: 0 0 0 4px #f3e6dc;
 }
-.reserva-demo-paso.current > strong {
+.reserva-demo-paso.actual > strong {
   font-weight: 650;
 }
 .reserva-demo-paso.done {
@@ -113,8 +113,8 @@
   background: #e8f0e2;
   border-color: #d6e3cf;
 }
-.reserva-demo-paso > .icon,
-.reserva-demo-paso > span > .icon {
+.reserva-demo-paso > .icono,
+.reserva-demo-paso > span > .icono {
   width: 13px;
   height: 13px;
 }
@@ -141,7 +141,7 @@
 .reserva-demo-titulo {
   margin-bottom: 27px;
 }
-.reserva-demo-titulo .eyebrow {
+.reserva-demo-titulo .sobretitulo {
   color: #aba894;
   font-size: 10px;
   letter-spacing: 1.8px;
@@ -181,7 +181,7 @@
   border-color: #d0d9c8;
   background: #fcfdfb;
 }
-.reserva-demo-opcion.selected {
+.reserva-demo-opcion.seleccionado {
   border-color: #e58f6e;
   background: #fffbf8;
   box-shadow: 0 0 0 1px #e58f6e15;
@@ -216,7 +216,7 @@
   gap: 6px;
   margin-top: 12px;
 }
-.reserva-demo-opcion-datos > .icon {
+.reserva-demo-opcion-datos > .icono {
   width: 13px;
   height: 13px;
 }
@@ -227,12 +227,12 @@
   border-radius: 50%;
   margin: 0 4px;
 }
-.selected > .reserva-demo-opcion-marca {
-  background: var(--accent);
+.seleccionado > .reserva-demo-opcion-marca {
+  background: var(--acento);
   color: #fff;
-  border-color: var(--accent);
+  border-color: var(--acento);
 }
-.reserva-demo-opcion-marca .icon {
+.reserva-demo-opcion-marca .icono {
   width: 13px;
   height: 13px;
 }
@@ -259,20 +259,20 @@
   position: relative;
   overflow: hidden;
 }
-.reserva-demo-resumen.glass-effect {
-  background: var(--glass-surface);
-  border-color: var(--glass-border);
+.reserva-demo-resumen.efecto-cristal {
+  background: var(--cristal-superficie);
+  border-color: var(--cristal-borde);
   border-radius: 16px;
 }
-.reserva-demo-resumen.glass-effect .reserva-demo-resumen-encabezado h3 { color: #405d48; }
-.reserva-demo-resumen.glass-effect > p { color: #617362; }
-.reserva-demo-resumen.glass-effect .reserva-demo-resumen-elementos > div { color: #718273; }
-.reserva-demo-resumen.glass-effect .reserva-demo-resumen-elementos > div.filled { color: #506453; }
-.reserva-demo-resumen.glass-effect .reserva-demo-resumen-precio > strong { color: #4a6047; }
+.reserva-demo-resumen.efecto-cristal .reserva-demo-resumen-encabezado h3 { color: #405d48; }
+.reserva-demo-resumen.efecto-cristal > p { color: #617362; }
+.reserva-demo-resumen.efecto-cristal .reserva-demo-resumen-elementos > div { color: #718273; }
+.reserva-demo-resumen.efecto-cristal .reserva-demo-resumen-elementos > div.con-valor { color: #506453; }
+.reserva-demo-resumen.efecto-cristal .reserva-demo-resumen-precio > strong { color: #4a6047; }
 .reserva-demo-lateral .reserva-demo-privacidad p { color: #627465; }
 @supports not ((backdrop-filter: blur(10px)) or (-webkit-backdrop-filter: blur(10px))) {
-  .workspace-identity.glass-effect { background: #303a32; }
-  .reserva-demo-resumen.glass-effect { background: #f5f8f3; }
+  .identidad-espacio.efecto-cristal { background: #303a32; }
+  .reserva-demo-resumen.efecto-cristal { background: #f5f8f3; }
   .resumen-destacado::before { background: #f4f8f2; }
 }
 .reserva-demo-resumen-encabezado {
@@ -280,7 +280,7 @@
   gap: 10px;
   align-items: center;
 }
-.reserva-demo-resumen-encabezado > .icon {
+.reserva-demo-resumen-encabezado > .icono {
   width: 20px;
   height: 20px;
   color: #8f9c7e;
@@ -311,13 +311,13 @@
   font-size: 12px;
   line-height: 1.6;
 }
-.reserva-demo-resumen-elementos > div > .icon {
+.reserva-demo-resumen-elementos > div > .icono {
   width: 17px;
   height: 17px;
   color: #a2af93;
   margin-top: 1px;
 }
-.reserva-demo-resumen-elementos > div.filled {
+.reserva-demo-resumen-elementos > div.con-valor {
   color: #78846b;
 }
 .reserva-demo-resumen-precio {
@@ -357,7 +357,7 @@
   opacity: 0.055;
   transform: rotate(-25deg);
 }
-.reserva-demo-resumen-flor > .icon {
+.reserva-demo-resumen-flor > .icono {
   width: 175px;
   height: 175px;
 }
@@ -367,7 +367,7 @@
   gap: 10px;
   padding: 20px 7px;
 }
-.reserva-demo-privacidad > .icon {
+.reserva-demo-privacidad > .icono {
   width: 18px;
   height: 18px;
   color: #a0ad97;
@@ -386,7 +386,7 @@
   color: #90a383;
   margin-top: 12px;
 }
-.professional-available > .icon {
+.professional-available > .icono {
   width: 13px;
   height: 13px;
 }
@@ -400,26 +400,26 @@
 .reserva-demo-encabezado-fecha h3 {
   text-transform: capitalize;
   font-size: 15px;
-  color: var(--ink);
+  color: var(--texto);
 }
 .reserva-demo-encabezado-fecha > span {
   font-size: 10px;
-  color: var(--muted);
+  color: var(--texto-secundario);
   display: flex;
   align-items: center;
   gap: 5px;
 }
-.reserva-demo-encabezado-fecha .icon {
+.reserva-demo-encabezado-fecha .icono {
   width: 13px;
   height: 13px;
 }
-.reserva-demo-calendario-ayuda { margin: 0 0 10px; color: var(--muted); font-size: 12px; }
-.reserva-demo-calendario-cuadricula { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; width: min(100%, 440px); margin-bottom: 20px; padding: 12px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); text-align: center; }
-.reserva-demo-calendario-dia-semana { padding: 7px 0; color: var(--muted); font-size: 11px; font-weight: 700; }
-.reserva-demo-calendario-dia { min-width: 0; min-height: 42px; padding: 4px; border: 1px solid transparent; border-radius: 8px; color: var(--ink); background: var(--surface); font-variant-numeric: tabular-nums; }
-.reserva-demo-calendario-dia:hover:not(:disabled) { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, var(--surface)); }
-.reserva-demo-calendario-dia.selected:not(:disabled) { border-color: var(--accent); color: var(--accent); background: color-mix(in srgb, var(--accent) 18%, var(--surface)); font-weight: 700; }
-.reserva-demo-calendario-dia:disabled { color: var(--muted); background: color-mix(in srgb, var(--muted) 7%, var(--surface)); opacity: .48; cursor: not-allowed; }
+.reserva-demo-calendario-ayuda { margin: 0 0 10px; color: var(--texto-secundario); font-size: 12px; }
+.reserva-demo-calendario-cuadricula { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; width: min(100%, 440px); margin-bottom: 20px; padding: 12px; border: 1px solid var(--borde); border-radius: 12px; background: var(--superficie); text-align: center; }
+.reserva-demo-calendario-dia-semana { padding: 7px 0; color: var(--texto-secundario); font-size: 11px; font-weight: 700; }
+.reserva-demo-calendario-dia { min-width: 0; min-height: 42px; padding: 4px; border: 1px solid transparent; border-radius: 8px; color: var(--texto); background: var(--superficie); font-variant-numeric: tabular-nums; }
+.reserva-demo-calendario-dia:hover:not(:disabled) { border-color: var(--acento); background: color-mix(in srgb, var(--acento) 10%, var(--superficie)); }
+.reserva-demo-calendario-dia.seleccionado:not(:disabled) { border-color: var(--acento); color: var(--acento); background: color-mix(in srgb, var(--acento) 18%, var(--superficie)); font-weight: 700; }
+.reserva-demo-calendario-dia:disabled { color: var(--texto-secundario); background: color-mix(in srgb, var(--texto-secundario) 7%, var(--superficie)); opacity: .48; cursor: not-allowed; }
 .reserva-demo-cinta-fechas {
   display: flex;
   gap: 9px;
@@ -450,13 +450,13 @@
 .reserva-demo-fecha > small {
   font-size: 9px;
 }
-.reserva-demo-fecha.selected {
-  border-color: var(--accent);
+.reserva-demo-fecha.seleccionado {
+  border-color: var(--acento);
   background: #fef5ed;
   color: #cb9672;
 }
-.reserva-demo-fecha.selected > strong {
-  color: var(--accent);
+.reserva-demo-fecha.seleccionado > strong {
+  color: var(--acento);
 }
 .reserva-demo-encabezado-horarios {
   font-size: 14px;
@@ -480,9 +480,9 @@
   background: #f8faf5;
   border-color: #becbb1;
 }
-.reserva-demo-horario.selected {
+.reserva-demo-horario.seleccionado {
   background: #fff4ed;
-  border-color: var(--accent);
+  border-color: var(--acento);
   color: #d47c54;
 }
 .reserva-demo-aviso-apartado {
@@ -499,7 +499,7 @@
   font-size: 13px;
   line-height: 1.8;
 }
-.reserva-demo-aviso-apartado > .icon {
+.reserva-demo-aviso-apartado > .icono {
   width: 22px;
   height: 22px;
 }
@@ -509,8 +509,8 @@
 }
 .reserva-demo-progreso-apartado { display: block; flex: 0 0 100%; width: 100%; height: 7px; border: 0; border-radius: 999px; overflow: hidden; appearance: none; background: color-mix(in srgb, currentColor 18%, transparent); }
 .reserva-demo-progreso-apartado::-webkit-progress-bar { border-radius: 999px; background: color-mix(in srgb, currentColor 18%, transparent); }
-.reserva-demo-progreso-apartado::-webkit-progress-value { border-radius: 999px; background: var(--accent); }
-.reserva-demo-progreso-apartado::-moz-progress-bar { border-radius: 999px; background: var(--accent); }
+.reserva-demo-progreso-apartado::-webkit-progress-value { border-radius: 999px; background: var(--acento); }
+.reserva-demo-progreso-apartado::-moz-progress-bar { border-radius: 999px; background: var(--acento); }
 .reserva-demo-campo-telefono {
   display: flex;
   align-items: center;
@@ -551,7 +551,7 @@
   color: #8fa877;
   margin: 0 auto 24px;
 }
-.reserva-demo-confirmacion-marca > .icon {
+.reserva-demo-confirmacion-marca > .icono {
   height: 28px;
   width: 28px;
   stroke-width: 2;
@@ -588,7 +588,7 @@
   color: #7d8f68;
   letter-spacing: 1px;
 }
-.reserva-demo-confirmacion-folio > .icon-btn {
+.reserva-demo-confirmacion-folio > .boton-icono {
   position: absolute;
   right: 10px;
   top: 28px;
@@ -612,12 +612,12 @@
   font-weight: 600;
   color: #758560;
 }
-.reserva-demo-confirmacion-detalles .icon {
+.reserva-demo-confirmacion-detalles .icono {
   width: 18px;
   height: 18px;
   color: #a6b695;
 }
-.reserva-demo-confirmacion-contenido .information-note {
+.reserva-demo-confirmacion-contenido .nota-informativa {
   text-align: left;
 }
 .reserva-demo-confirmacion-panel {
@@ -651,7 +651,7 @@
   margin: 60px auto;
   padding: 20px;
 }
-.portal-demo-no-disponible .brand {
+.portal-demo-no-disponible .marca {
   margin-bottom: 35px;
 }
 .reportes-encabezado-impresion p {
@@ -663,7 +663,7 @@
 .reserva-demo button:focus-visible,
 .reserva-demo a:focus-visible,
 .reserva-demo .form-control:focus-visible {
-  outline: 3px solid var(--accent);
+  outline: 3px solid var(--acento);
   outline-offset: 3px;
 }
 
@@ -681,4 +681,4 @@
 
 .reserva-demo-resumen-desplegable > summary { cursor: pointer; padding: 16px; min-height: 44px; font-weight: 600; }
 @media (min-width: 768px) { .reserva-demo-resumen-desplegable > summary { display: none; } .reserva-demo-lateral { position: sticky; top: 24px; align-self: start; } }
-@media (max-width: 767px) { .reserva-demo-lateral { order: 0; } .reserva-demo-controles { position: sticky; bottom: 0; z-index: 2; padding-bottom: max(16px, env(safe-area-inset-bottom)); background: var(--surface); } }
+@media (max-width: 767px) { .reserva-demo-lateral { order: 0; } .reserva-demo-controles { position: sticky; bottom: 0; z-index: 2; padding-bottom: max(16px, env(safe-area-inset-bottom)); background: var(--superficie); } }

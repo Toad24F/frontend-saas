@@ -56,7 +56,7 @@ test('Reportes valida el rango, filtra por sucursal y conserva la vista de impre
   await expect(desde).toHaveValue('2000-01-01');
   await expect(hasta).toHaveValue('2000-01-02');
   await expect(sucursal).toHaveValue('2');
-  await expect(pagina.locator('#reportes-imprimible .stat-number')).toHaveText(['0', '0', '0', /\$\s*0/]);
+  await expect(pagina.locator('#reportes-imprimible .indicador-valor')).toHaveText(['0', '0', '0', /\$\s*0/]);
   await pagina.getByRole('button', { name: 'Guardar como PDF' }).click();
   await expect(pagina.locator('body')).toHaveAttribute('data-impresion-solicitada', 'true');
   await pagina.emulateMedia({ media: 'print' });
@@ -71,7 +71,7 @@ test('Configuración guarda en memoria y restablece la sucursal del reporte al c
   await pagina.goto('/admin/reportes?demo=1');
   await pagina.locator('#reportes-sucursal').selectOption('2');
   await pagina.getByRole('button', { name: 'Aplicar filtros' }).click();
-  await pagina.locator('.sidebar').getByRole('link', { name: 'Configuración' }).click();
+  await pagina.locator('.barra-lateral').getByRole('link', { name: 'Configuración' }).click();
   const nombre = pagina.getByLabel('Nombre del negocio');
   await nombre.fill('Consultorio de prueba');
   await pagina.getByLabel('Correo de contacto').fill('consultorio@example.test');
@@ -85,7 +85,7 @@ test('Configuración guarda en memoria y restablece la sucursal del reporte al c
   await pagina.getByRole('button', { name: 'Cambiar negocio' }).click();
   await pagina.getByRole('dialog').getByRole('button', { name: /Espacio Mente/ }).click();
   await expect(nombre).toHaveValue('Espacio Mente');
-  await pagina.locator('.sidebar').getByRole('link', { name: 'Reportes' }).click();
+  await pagina.locator('.barra-lateral').getByRole('link', { name: 'Reportes' }).click();
   await expect(pagina.locator('#reportes-sucursal')).toHaveValue('todas');
   await pagina.goto('/admin/configuracion?demo=1');
   await expect(nombre).toHaveValue('Clínica Bienestar');

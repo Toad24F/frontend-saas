@@ -2,8 +2,8 @@
   display: grid;
   grid-template-columns: minmax(0, 44%) minmax(0, 56%);
   min-height: 100dvh;
-  background: var(--canvas);
-  color: var(--ink);
+  background: var(--fondo);
+  color: var(--texto);
 }
 
 .autenticacion-contenido {
@@ -38,18 +38,18 @@ html[data-theme='dark'] .autenticacion-marca .autenticacion-logo-oscuro { displa
   flex: 0 0 42px;
   width: 42px;
   height: 42px;
-  background: var(--surface);
+  background: var(--superficie);
 }
 
 .autenticacion-enlace-demo {
   flex: 0 0 auto;
   padding: 9px 0;
-  color: var(--muted);
+  color: var(--texto-secundario);
   font-size: 13px;
   font-weight: 700;
   transition: color 180ms ease;
 }
-.autenticacion-enlace-demo:hover { color: var(--accent-dark); }
+.autenticacion-enlace-demo:hover { color: var(--acento-oscuro); }
 .autenticacion-enlace-demo span { margin-left: 4px; font-size: 16px; }
 
 .autenticacion-contenido-interior {
@@ -69,14 +69,14 @@ html[data-theme='dark'] .autenticacion-marca .autenticacion-logo-oscuro { displa
 .autenticacion-introduccion p {
   max-width: 39ch;
   margin-top: 11px;
-  color: var(--muted);
+  color: var(--texto-secundario);
   font-size: 15px;
   line-height: 1.55;
 }
 .autenticacion-formulario { display: grid; gap: 18px; }
 .autenticacion-campo { display: grid; gap: 8px; min-width: 0; }
 .autenticacion-campo label {
-  color: var(--ink);
+  color: var(--texto);
   font-size: 13px;
   font-weight: 700;
 }
@@ -85,18 +85,18 @@ html[data-theme='dark'] .autenticacion-marca .autenticacion-logo-oscuro { displa
   min-width: 0;
   height: 50px;
   padding: 0 15px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--borde);
   border-radius: 10px;
-  background: var(--surface);
-  color: var(--ink);
+  background: var(--superficie);
+  color: var(--texto);
   font: 500 15px 'DM Sans', sans-serif;
   outline: none;
   transition: border-color 180ms ease, box-shadow 180ms ease;
 }
-.autenticacion-campo input:hover { border-color: color-mix(in srgb, var(--ink) 32%, var(--border)); }
+.autenticacion-campo input:hover { border-color: color-mix(in srgb, var(--texto) 32%, var(--borde)); }
 .autenticacion-campo input:focus-visible {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent);
+  border-color: var(--acento);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--acento) 20%, transparent);
 }
 .autenticacion-control-contrasena { position: relative; }
 .autenticacion-control-contrasena input { padding-right: 94px; }
@@ -109,12 +109,12 @@ html[data-theme='dark'] .autenticacion-marca .autenticacion-logo-oscuro { displa
   border: 0;
   border-radius: 7px;
   background: transparent;
-  color: var(--muted);
+  color: var(--texto-secundario);
   font-size: 12px;
   font-weight: 750;
   cursor: pointer;
 }
-.autenticacion-control-contrasena button:hover { background: var(--surface-soft); color: var(--ink); }
+.autenticacion-control-contrasena button:hover { background: var(--superficie-suave); color: var(--texto); }
 .autenticacion-ayuda { display: flex; justify-content: flex-end; margin-top: -3px; }
 .autenticacion-ayuda button,
 .autenticacion-alternativa button,
@@ -122,7 +122,7 @@ html[data-theme='dark'] .autenticacion-marca .autenticacion-logo-oscuro { displa
   border: 0;
   padding: 2px 0;
   background: transparent;
-  color: var(--accent-dark);
+  color: var(--acento-oscuro);
   font-size: 13px;
   font-weight: 750;
   cursor: pointer;
@@ -138,11 +138,11 @@ html[data-theme='dark'] .autenticacion-marca .autenticacion-logo-oscuro { displa
   font-size: 13px;
   line-height: 1.45;
 }
-.autenticacion-aviso { background: color-mix(in srgb, var(--green) 13%, var(--surface)); color: var(--green); }
-.autenticacion-error { background: color-mix(in srgb, var(--accent) 12%, var(--surface)); color: var(--accent-dark); }
+.autenticacion-aviso { background: color-mix(in srgb, var(--verde) 13%, var(--superficie)); color: var(--verde); }
+.autenticacion-error { background: color-mix(in srgb, var(--acento) 12%, var(--superficie)); color: var(--acento-oscuro); }
 .autenticacion-aviso[hidden],
 .autenticacion-error[hidden] { display: none; }
-.autenticacion-indicacion { margin: -3px 0 0; color: var(--muted); font-size: 12px; }
+.autenticacion-indicacion { margin: -3px 0 0; color: var(--texto-secundario); font-size: 12px; }
 .autenticacion-enviar {
   display: flex;
   align-items: center;
@@ -150,23 +150,23 @@ html[data-theme='dark'] .autenticacion-marca .autenticacion-logo-oscuro { displa
   width: 100%;
   min-height: 50px;
   margin-top: 5px;
-  border: 1px solid var(--accent);
+  border: 1px solid var(--acento);
   border-radius: 10px;
-  background: var(--accent);
+  background: var(--acento);
   color: #fff;
   font-size: 14px;
   font-weight: 800;
   cursor: pointer;
-  box-shadow: 0 8px 18px color-mix(in srgb, var(--accent) 18%, transparent);
+  box-shadow: 0 8px 18px color-mix(in srgb, var(--acento) 18%, transparent);
   transition: background-color 180ms ease, transform 180ms ease, box-shadow 180ms ease;
 }
-.autenticacion-enviar:hover { background: #98371f; border-color: #98371f; box-shadow: 0 10px 22px color-mix(in srgb, var(--accent) 24%, transparent); }
+.autenticacion-enviar:hover { background: #98371f; border-color: #98371f; box-shadow: 0 10px 22px color-mix(in srgb, var(--acento) 24%, transparent); }
 .autenticacion-enviar:active { transform: translateY(1px); }
 .autenticacion-enviar:disabled { cursor: wait; opacity: .75; box-shadow: none; }
-.autenticacion-alternativa { margin: 22px 0 0; color: var(--muted); font-size: 13px; }
+.autenticacion-alternativa { margin: 22px 0 0; color: var(--texto-secundario); font-size: 13px; }
 .autenticacion-alternativa button { margin-left: 3px; }
 .autenticacion-volver { display: inline-block; margin-top: 22px; }
-.autenticacion-pie { color: var(--muted); font-size: 12px; }
+.autenticacion-pie { color: var(--texto-secundario); font-size: 12px; }
 
 .autenticacion-visual {
   grid-column: 1;

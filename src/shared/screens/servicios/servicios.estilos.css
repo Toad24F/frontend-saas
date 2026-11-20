@@ -6,7 +6,7 @@
   height: 46px;
   border-radius: 12px;
 }
-.servicios-espacio .servicio-icono .icon { width: 23px; height: 23px; }
+.servicios-espacio .servicio-icono .icono { width: 23px; height: 23px; }
 .servicios-espacio .servicios-herramientas { grid-template-columns: minmax(210px, 1fr) auto auto; }
 .servicios-espacio .servicio-detalles { column-gap: 14px; }
 .servicios-espacio .servicio-detalles strong { font-variant-numeric: tabular-nums; }
@@ -20,8 +20,8 @@
   opacity: .55;
   cursor: not-allowed;
 }
-.servicios-espacio .profesional-estado.sin-seleccionar { color: var(--muted); background: var(--surface-soft); }
-.servicios-espacio .information-note { margin-top: 20px; }
+.servicios-espacio .profesional-estado.sin-seleccionar { color: var(--texto-secundario); background: var(--superficie-suave); }
+.servicios-espacio .nota-informativa { margin-top: 20px; }
 @media (max-width: 1260px) {
   .servicios-espacio .servicios-herramientas { grid-template-columns: minmax(180px, 1fr) auto; }
   .servicios-espacio .servicios-herramientas .profesionales-filtros { grid-column: 1 / -1; grid-row: 2; }

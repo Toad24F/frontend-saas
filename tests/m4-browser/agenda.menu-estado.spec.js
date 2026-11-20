@@ -35,11 +35,11 @@ test('móvil: sin tres puntos, toque abre detalle y pulsación larga abre menú 
   const { writes } = await prepare(page);
   await expect(page.locator('.agenda-state-trigger')).toHaveCount(0);
   await trigger(page).click();
-  await expect(page.locator('#app-dialog')).toBeVisible();
+  await expect(page.locator('#dialogo-app')).toBeVisible();
   await page.keyboard.press('Escape');
   await longPress(trigger(page));
   await expect(menu(page)).toBeVisible();
-  await expect(page.locator('#app-dialog')).not.toBeVisible();
+  await expect(page.locator('#dialogo-app')).not.toBeVisible();
   expect(writes).toEqual([]);
 });
 
@@ -79,7 +79,7 @@ test('cambio rápido usa la versión observada, sin abrir el detalle ni duplicar
   await expect(page.getByText('Estado actualizado: Pendiente.', { exact: true })).toBeVisible();
   await expect(trigger(page)).toBeFocused();
   expect(writes).toEqual([{ estado: 'pendiente', motivo: null, version: 2 }]);
-  await expect(page.locator('#app-dialog')).not.toBeVisible();
+  await expect(page.locator('#dialogo-app')).not.toBeVisible();
   expect(errors).toEqual([]);
 });
 
@@ -119,7 +119,7 @@ test('cancelar exige confirmación; conservar y Escape no escriben; confirmar in
 test('cancelación desde el editor conserva el detalle y borrador al rechazar', async ({ page }) => {
   const { writes, errors } = await prepare(page);
   await page.locator('[data-agenda-cita="7"]').click();
-  const detail = page.locator('#app-dialog');
+  const detail = page.locator('#dialogo-app');
   await detail.getByLabel('Estado de la cita', { exact: true }).selectOption('cancelada');
   await detail.getByLabel('Motivo del cambio').fill('Borrador de motivo');
   await detail.getByRole('button', { name: 'Guardar estado', exact: true }).click();

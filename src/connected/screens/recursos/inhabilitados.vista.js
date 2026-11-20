@@ -43,7 +43,7 @@ async function abrirInhabilitados(tipo, conservarBusqueda = false) {
   const version = ++versionConsulta;
   const pagina = estadoAplicacion.pagina;
   const actor = usuarioActual.id;
-  const dialogo = abrirPanel('Inhabilitados de ' + nombres[tipo], `<div class="dialog-body"><p>Restaurar devuelve el recurso como inactivo; activar es una acción aparte.</p><label class="inhabilitados-busqueda">Buscar inhabilitados<input class="form-control" type="search" value="${escaparHtml(busquedaInhabilitados)}" data-inhabilitados-busqueda></label><div data-inhabilitados-resultados="${tipo}" aria-live="polite">Consultando inhabilitados…</div></div>`);
+  const dialogo = abrirPanel('Inhabilitados de ' + nombres[tipo], `<div class="dialogo-cuerpo"><p>Restaurar devuelve el recurso como inactivo; activar es una acción aparte.</p><label class="inhabilitados-busqueda">Buscar inhabilitados<input class="form-control" type="search" value="${escaparHtml(busquedaInhabilitados)}" data-inhabilitados-busqueda></label><div data-inhabilitados-resultados="${tipo}" aria-live="polite">Consultando inhabilitados…</div></div>`);
   const destino = dialogo.querySelector('[data-inhabilitados-resultados]');
   try {
     const recursos = await listarInhabilitados(tipo, api);
@@ -85,8 +85,8 @@ export async function handleClicInhabilitados(evento) {
     const nombre = botonRestaurar.closest('li')?.querySelector('strong')?.textContent || 'Recurso';
     // La confirmación distingue recuperar la fila de conceder acceso. El
     // servidor debe responder activo=false antes de mostrar el resultado.
-    const dialogo = abrirPanel('Restaurar recurso', `<div class="dialog-body"><p><strong>${escaparHtml(nombre)}</strong> volverá al listado habitual como inactivo. Para operar, tendrás que activarlo por separado; se volverán a validar cupos y conflictos.</p>${espacioErrorFormulario}</div>
-      <div class="dialog-footer"><button type="button" class="btn btn-light" data-inhabilitados-volver>Volver a inhabilitados</button><button type="button" class="btn btn-primary" data-confirm>Restaurar</button></div>`);
+    const dialogo = abrirPanel('Restaurar recurso', `<div class="dialogo-cuerpo"><p><strong>${escaparHtml(nombre)}</strong> volverá al listado habitual como inactivo. Para operar, tendrás que activarlo por separado; se volverán a validar cupos y conflictos.</p>${espacioErrorFormulario}</div>
+      <div class="dialogo-pie"><button type="button" class="btn btn-light" data-inhabilitados-volver>Volver a inhabilitados</button><button type="button" class="btn btn-primary" data-confirm>Restaurar</button></div>`);
 
     dialogo.querySelector('[data-confirm]').onclick = async (clic) => {
       const boton = clic.currentTarget;
@@ -98,7 +98,7 @@ export async function handleClicInhabilitados(evento) {
         render();
         mostrarAviso('Recurso restaurado como inactivo. Actívalo por separado cuando corresponda.');
       } catch (error) {
-        const aviso = dialogo.querySelector('#form-error');
+        const aviso = dialogo.querySelector('#error-formulario');
         aviso.textContent = error.message;
         aviso.hidden = false;
         aviso.focus();
@@ -125,19 +125,19 @@ export async function handleClicInhabilitados(evento) {
   }
   botonDetalle.disabled = true;
   const versionDetalle = ++versionConsulta;
-  const dialogoDetalle = document.querySelector('#app-dialog');
+  const dialogoDetalle = document.querySelector('#dialogo-app');
   try {
     const recurso = await consultarDetalleInhabilitado(tipo, Number(botonDetalle.dataset.inhabilitadosDetalle), api);
     if (versionDetalle !== versionConsulta || !dialogoDetalle.open || estadoAplicacion.pagina !== tipo) return true;
     // El detalle autorizado confirma la marca; restaurar se ejecuta solo
     // mediante su propio botón y no se confunde con reactivar.
-    const dialogo = abrirPanel('Detalle inhabilitado', `<div class="dialog-body"><p><strong>${escaparHtml(recurso.nombre)}</strong></p>
+    const dialogo = abrirPanel('Detalle inhabilitado', `<div class="dialogo-cuerpo"><p><strong>${escaparHtml(recurso.nombre)}</strong></p>
       <p>Estado: ${estadoRecurso(recurso).etiqueta}. Restaurarlo lo dejará inactivo; activar requiere otra acción.</p>
       ${recurso.email || recurso.correo ? `<p>Correo: ${escaparHtml(recurso.email || recurso.correo)}</p>` : ''}
       <p>Inhabilitado: ${escaparHtml(new Date(recurso.inhabilitadoEn).toLocaleDateString('es-MX'))}</p></div>
-      <div class="dialog-footer"><button type="button" class="btn btn-light" data-inhabilitados-volver>Volver a inhabilitados</button></div>`);
+      <div class="dialogo-pie"><button type="button" class="btn btn-light" data-inhabilitados-volver>Volver a inhabilitados</button></div>`);
 
-  } catch (error) { if (versionDetalle === versionConsulta && dialogoDetalle.open && estadoAplicacion.pagina === tipo) abrirPanel('No se pudo consultar el detalle', `<div class="dialog-body"><p role="alert">${escaparHtml(error.message)}</p><button type="button" class="btn btn-light" data-inhabilitados-volver>Volver a inhabilitados</button></div>`); }
+  } catch (error) { if (versionDetalle === versionConsulta && dialogoDetalle.open && estadoAplicacion.pagina === tipo) abrirPanel('No se pudo consultar el detalle', `<div class="dialogo-cuerpo"><p role="alert">${escaparHtml(error.message)}</p><button type="button" class="btn btn-light" data-inhabilitados-volver>Volver a inhabilitados</button></div>`); }
   finally { botonDetalle.disabled = false; }
   return true;
 }

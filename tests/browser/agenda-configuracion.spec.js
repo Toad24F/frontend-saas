@@ -42,11 +42,11 @@ test('FALA-T048–T049: PUT completo y borrador estable ante 400/503', async ({ 
   await expect(form.locator('[name="tiempoEntreCitasMinutos"]')).toHaveValue('5');
   await expect(page.getByText('Servicio no disponible')).toHaveCount(0);
   // Capturas de revisión del formulario conectado en los dos anchos y temas.
-  await expect(page.locator('.app-toast')).toHaveCount(0);
+  await expect(page.locator('.aviso-app')).toHaveCount(0);
   await page.screenshot({ path: 'test-results/agenda-desktop-light.png', fullPage: true });
   await page.getByRole('button', { name: 'Activar modo oscuro' }).click();
   await page.keyboard.press('Escape');
-  await expect(page.locator('.admin-layout')).not.toHaveClass(/menu-open/);
+  await expect(page.locator('.estructura-admin')).not.toHaveClass(/menu-abierto/);
   await page.screenshot({ path: 'test-results/agenda-desktop-dark.png', fullPage: true });
   await page.setViewportSize({ width: 390, height: 844 });
   await page.keyboard.press('Escape');
@@ -68,12 +68,12 @@ test('FALA-T050: dos franjas semanales representan la pausa en la API', async ({
   await page.getByRole('tab', { name: 'Horario semanal' }).click();
   const monday = page.locator('[data-horario-franja][data-horario-dia="1"]');
   await expect(monday.first()).toBeVisible();
-  await monday.first().locator('input[name^="start-"]').fill('09:00');
-  await monday.first().locator('input[name^="end-"]').fill('12:00');
+  await monday.first().locator('input[name^="entrada-"]').fill('09:00');
+  await monday.first().locator('input[name^="salida-"]').fill('12:00');
   await monday.first().locator('[data-agregar-franja="1"]').click();
   await expect(monday).toHaveCount(2);
-  await monday.nth(1).locator('input[name^="start-"]').fill('13:00');
-  await monday.nth(1).locator('input[name^="end-"]').fill('17:00');
+  await monday.nth(1).locator('input[name^="entrada-"]').fill('13:00');
+  await monday.nth(1).locator('input[name^="salida-"]').fill('17:00');
   const response = page.waitForResponse((item) => /\/profesionales\/\d+\/horario$/.test(item.url()) && item.request().method() === 'PUT');
   await page.locator('#formulario-horario').getByRole('button', { name: 'Guardar horario' }).click();
   const saved = await response;

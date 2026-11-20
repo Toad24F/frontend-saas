@@ -1,7 +1,7 @@
 # Reglas y plan de traducción de la nomenclatura del frontend
 
 Fecha de definición: 2026-11-16  
-Estado: implementación por conjuntos. Implementados los conjuntos 0 a 14. La integración de navegador con MariaDB queda pendiente.
+Estado: implementación por conjuntos. Implementados los conjuntos 0 a 15.
 
 ## Objetivo
 
@@ -323,7 +323,7 @@ Estos archivos son consumidos por gran parte de la aplicación. El conjunto no d
 - [x] Traducir `shared/calendar-layout.js`, `resource-status.js` y `account-portal.js` con sus pruebas.
 - [x] Revisar `connected/backend.js`, `mode.js` y `connected/modules/datos/load.js` sin cambiar contratos ni variables de entorno.
 - [x] Ejecutar todas las pruebas unitarias y las pruebas de navegador con API simulada.
-- [ ] Ejecutar la suite de navegador con MariaDB en un entorno autorizado para preparar una base efímera.
+- [x] Ejecutar la suite de navegador con MariaDB en un entorno autorizado para preparar una base efímera.
 
 Resultado del 2026-11-20 en [Núcleo compartido](resultado-nucleo-compartido-2026-11-20.md).
 
@@ -331,13 +331,15 @@ Resultado del 2026-11-20 en [Núcleo compartido](resultado-nucleo-compartido-202
 
 Los selectores globales y las propiedades personalizadas pueden afectar todas las pantallas. Bootstrap, HTML y ARIA quedan fuera de la traducción.
 
-- [ ] Traducir de manera coordinada las clases propias de `shared/styles.css` y sus usos en JavaScript/HTML.
-- [ ] Traducir las propiedades propias de `shared/theme.css` sin cambiar el sistema visual ni los valores de tema.
-- [ ] Traducir selectores propios de `shared/mobile.css` sin afectar la navegación inferior.
-- [ ] Traducir animaciones y selectores propios de `shared/motion.css` respetando preferencias de movimiento reducido.
-- [ ] Traducir `shared/account-portal.css` y actualizar sus selectores en `shared/cuenta.portal.js`.
-- [ ] Buscar cada selector anterior en `src/` y `tests/` antes de marcarlo como terminado.
-- [ ] Verificar todas las pantallas en escritorio y móvil, modo claro y oscuro.
+- [x] Traducir de manera coordinada las clases propias de `shared/styles.css` y sus usos en JavaScript/HTML.
+- [x] Traducir las propiedades propias de `shared/theme.css` sin cambiar el sistema visual ni los valores de tema.
+- [x] Traducir selectores propios de `shared/mobile.css` sin afectar la navegación inferior.
+- [x] Traducir animaciones y selectores propios de `shared/motion.css` respetando preferencias de movimiento reducido.
+- [x] Traducir `shared/account-portal.css` y actualizar sus selectores en `shared/cuenta.portal.js`.
+- [x] Buscar cada selector anterior en `src/` y `tests/` antes de marcarlo como terminado.
+- [x] Verificar las pantallas en escritorio y móvil, en modo claro y oscuro.
+
+Resultado del 2026-11-20 en [CSS global](resultado-css-global-2026-11-20.md).
 
 ### 16. Pruebas y fixtures finales
 

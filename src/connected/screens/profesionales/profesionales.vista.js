@@ -9,7 +9,7 @@ import { renderAccesoInhabilitados } from '../recursos/inhabilitados.vista.js';
 export function profesionales() {
   return `<div class="profesionales-conectados">${profesionalesCompartidos((persona) =>
     `<details class="profesional-mas"><summary aria-label="Más acciones para ${escaparHtml(persona.name)}">${renderIcono('more')}</summary><div class="profesional-menu-mas">
-      <button type="button" class="${persona.active === false ? '' : 'action-caution'}" data-accion-profesional="${persona.active === false ? 'reactivar' : 'desactivar'}" data-profesional-id="${persona.id}">${persona.active === false ? 'Reactivar' : 'Desactivar'}</button>
-      <button type="button" class="action-danger" data-accion-profesional="inhabilitar" data-profesional-id="${persona.id}">Inhabilitar</button>
+      <button type="button" class="${persona.active === false ? '' : 'accion-precaucion'}" data-accion-profesional="${persona.active === false ? 'reactivar' : 'desactivar'}" data-profesional-id="${persona.id}">${persona.active === false ? 'Reactivar' : 'Desactivar'}</button>
+      <button type="button" class="accion-peligro" data-accion-profesional="inhabilitar" data-profesional-id="${persona.id}">Inhabilitar</button>
     </div></details>`, { accionesEncabezado: renderAccesoInhabilitados('profesionales'), cupo: renderCupoCatalogo('Profesionales activos', consultarCupoRol('profesionales')) })}</div>`;
 }

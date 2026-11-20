@@ -11,10 +11,10 @@ for (const width of [1366, 390]) for (const theme of ['light', 'dark']) {
     await page.goto('/admin/agenda');
     await expect(page.locator('[data-agenda-esqueleto]')).toBeVisible();
     await expect(page.locator('.agenda-resumen')).toContainText('Cargando citas');
-    await expect(page.locator('.stat-caption')).toHaveCount(0);
-    await expect(page.locator('.calendario-barra .legend')).toContainText('Confirmada');
+    await expect(page.locator('.indicador-texto')).toHaveCount(0);
+    await expect(page.locator('.calendario-barra .leyenda')).toContainText('Confirmada');
     expect(await page.locator('.calendario-barra').evaluate((el) => {
-      const today = el.querySelector('.btn-hoy'), legend = el.querySelector('.legend'), views = el.querySelector('.segmented');
+      const today = el.querySelector('.btn-hoy'), legend = el.querySelector('.leyenda'), views = el.querySelector('.selector-segmentado');
       return Boolean(today.compareDocumentPosition(legend) & 4) && Boolean(legend.compareDocumentPosition(views) & 4);
     })).toBe(true);
     // El estado de carga se captura después de la entrada de pantalla existente, no durante su fundido.
@@ -77,8 +77,8 @@ test('paneles conservan borradores de alta y estado al cerrar sin guardar', asyn
 test('demo conserva las mismas mejoras y reduce animación cuando se solicita', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/admin/agenda?demo=1');
-  await expect(page.locator('.calendario-barra .legend')).toContainText('No asistió');
-  await expect(page.locator('.stat-caption')).toHaveCount(0);
+  await expect(page.locator('.calendario-barra .leyenda')).toContainText('No asistió');
+  await expect(page.locator('.indicador-texto')).toHaveCount(0);
   // El folio ya no aparece en las tarjetas, tampoco en el nombre accesible.
   await expect(page.locator('.calendario-evento').first()).not.toHaveAttribute('aria-label', /Folio/);
   await page.locator('[data-cita]').first().click();

@@ -79,7 +79,7 @@ test('FALA-T029–T030: avisos se muestran por estado y otro rol carece de accio
   await page.reload(); await detail(page);
   await page.getByRole('tab', { name: /Historial de correos/ }).click();
   await expect(page.getByRole('heading', { name: 'Historial de correos' })).toBeVisible();
-  for (const label of ['Pendiente', 'Fallido', 'Enviado']) await expect(page.locator('.soft-tag', { hasText: label }).first()).toBeVisible();
+  for (const label of ['Pendiente', 'Fallido', 'Enviado']) await expect(page.locator('.etiqueta-suave', { hasText: label }).first()).toBeVisible();
   const admin = await browser.newContext();
   try {
     const other = await admin.newPage();
@@ -101,7 +101,7 @@ test('FALA-T030: detalle y plazo visibles en escritorio y móvil, claro y oscuro
     await expect(page.getByRole('dialog')).toHaveCount(0);
     await expect(page.getByRole('button', { name: 'Programar suspensión' })).toBeVisible();
   }
-  await expect(page.locator('#toast-region .app-toast')).toHaveCount(0);
+  await expect(page.locator('#region-avisos .aviso-app')).toHaveCount(0);
   await page.evaluate(() => scrollTo(0, 0));
   await page.screenshot({ path: testInfo.outputPath('license-desktop-light.png'), fullPage: true, animations: 'disabled' });
   await page.getByRole('button', { name: 'Programar suspensión' }).click();

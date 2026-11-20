@@ -112,7 +112,7 @@ test('T095: pérdida en preparación y ausencia terminal permiten corregir sin r
 test('T096: motivo y versión observada; 409 conserva borrador sin sobrescribir', async ({ page }) => {
   const api = await fixture(page); await page.goto('/admin/agenda');
   await page.locator('[data-agenda-cita="7"]').click();
-  const dialog = page.locator('#app-dialog');
+  const dialog = page.locator('#dialogo-app');
   await dialog.getByLabel('Estado de la cita').selectOption('cancelada');
   await dialog.getByLabel('Motivo del cambio').fill('Solicitud de paciente');
   api.conflict = true;

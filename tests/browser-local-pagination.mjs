@@ -142,7 +142,7 @@ try {
   await blockResults.getByRole('heading', { name: 'Sin coincidencias' }).waitFor();
   await page.locator('.bloqueos-filtros [data-limpiar-bloqueos]').click();
   assert.equal(requests, blockRequests);
-  await page.locator('.app-toast').first().waitFor({ state: 'hidden' });
+  await page.locator('.aviso-app').first().waitFor({ state: 'hidden' });
   for (const width of [1366, 1159, 390, 320]) for (const theme of ['light', 'dark']) {
     await page.setViewportSize({ width, height: 900 });
     await page.evaluate((theme) => document.documentElement.dataset.theme = theme, theme);

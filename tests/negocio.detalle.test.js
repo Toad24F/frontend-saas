@@ -45,7 +45,7 @@ test('licencia: porcentaje real de varios años y sin mensajes duplicados en vig
   const html = renderEstadoLicencia({ estado: 'vigente', condicionAcceso: true, duracionTotalMs: 1000 * 86400000, tiempoRestante: { dias: 500, horas: 0, minutos: 0 } });
   assert.match(html, /value="50"/);
   assert.match(html, /500 días restantes/);
-  assert.doesNotMatch(html, /information-note|Bloqueo programado|La licencia permite el acceso/);
+  assert.doesNotMatch(html, /nota-informativa|Bloqueo programado|La licencia permite el acceso/);
   assert.doesNotMatch(renderEstadoLicencia({ estado: 'vigente', tiempoRestante: { dias: 3, horas: 0, minutos: 0 } }), /<progress/);
 });
 

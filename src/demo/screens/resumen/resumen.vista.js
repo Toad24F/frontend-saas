@@ -10,7 +10,7 @@ export function renderResumenDemo() {
       (cita) => cita.date === HOY,
     ),
     citasNegocio = listarRegistros('appointments', estadoAplicacion.negocioId);
-  return `${renderEncabezadoPagina('Buenos días, Adriana', 'Un nuevo día para hacer sentir bien a tus pacientes.', renderBoton('Nueva cita', 'nueva-cita'))}${resumenAgendaDemo()}<div class="resumen-cuadricula"><section class="surface"><div class="section-heading"><div><h2>Tu semana en perspectiva</h2><p>Citas por día · septiembre de 2026</p></div><span class="soft-tag">Esta semana</span></div><div class="resumen-grafica">${Array.from(
+  return `${renderEncabezadoPagina('Buenos días, Adriana', 'Un nuevo día para hacer sentir bien a tus pacientes.', renderBoton('Nueva cita', 'nueva-cita'))}${resumenAgendaDemo()}<div class="resumen-cuadricula"><section class="superficie"><div class="encabezado-seccion"><div><h2>Tu semana en perspectiva</h2><p>Citas por día · septiembre de 2026</p></div><span class="etiqueta-suave">Esta semana</span></div><div class="resumen-grafica">${Array.from(
     { length: 7 },
     (_, indice) => {
       const dia = sumarDias(HOY, indice - 1),
@@ -19,5 +19,5 @@ export function renderResumenDemo() {
     },
   ).join(
     '',
-  )}</div></section><section class="resumen-destacado"><span class="resumen-icono-destacado">${renderIcono('heart')}</span><span class="eyebrow">CADA ENCUENTRO CUENTA</span><h2>El cuidado empieza<br>con una buena agenda.</h2><p>Tienes ${citasHoy.filter((cita) => cita.status === 'confirmada').length} citas confirmadas para hoy. Prepara tu jornada y dedica tiempo a lo que más importa.</p><a href="/admin/agenda" class="btn btn-light" data-nav="agenda">Ver mi agenda ${renderIcono('arrow')}</a></section></div><section class="surface resumen-citas-hoy"><div class="section-heading"><div><h2>Citas de hoy</h2><p>${formatearFecha(HOY, { weekday: 'long', day: 'numeric', month: 'long' })}</p></div><span class="soft-tag">${citasHoy.length} citas</span></div>${tablaCitas(citasHoy)}</section>`;
+  )}</div></section><section class="resumen-destacado"><span class="resumen-icono-destacado">${renderIcono('heart')}</span><span class="sobretitulo">CADA ENCUENTRO CUENTA</span><h2>El cuidado empieza<br>con una buena agenda.</h2><p>Tienes ${citasHoy.filter((cita) => cita.status === 'confirmada').length} citas confirmadas para hoy. Prepara tu jornada y dedica tiempo a lo que más importa.</p><a href="/admin/agenda" class="btn btn-light" data-nav="agenda">Ver mi agenda ${renderIcono('arrow')}</a></section></div><section class="superficie resumen-citas-hoy"><div class="encabezado-seccion"><div><h2>Citas de hoy</h2><p>${formatearFecha(HOY, { weekday: 'long', day: 'numeric', month: 'long' })}</p></div><span class="etiqueta-suave">${citasHoy.length} citas</span></div>${tablaCitas(citasHoy)}</section>`;
 }

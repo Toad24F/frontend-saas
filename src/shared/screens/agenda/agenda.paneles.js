@@ -3,7 +3,7 @@ import { abrirDialogo } from '../../interfaz.componentes.js';
 // Conserva el dialog nativo (Escape, foco y capa superior) con la misma carcasa lateral de otros formularios.
 export function panelAgenda(titulo, cuerpo, ancho = true) {
   const panel = abrirDialogo(titulo, cuerpo, ancho);
-  panel.classList.add('form-drawer', 'agenda-panel-lateral');
+  panel.classList.add('formulario-lateral', 'agenda-panel-lateral');
   return panel;
 }
 // Borradores sin enviar solo en memoria de esta pestaña. No se mezclan con el marcador durable del escritor manual.

@@ -1,0 +1,556 @@
+/* Temas compartidos y ajustes finales para pantallas táctiles. */
+:root { --cristal-dialogo: rgba(255, 255, 255, 0.5); }
+/* Light surfaces share a neutral family; terracotta remains the brand accent.
+   Status colors are semantic and retain their calendar meaning. */
+html[data-theme='light'] {
+  color-scheme: light;
+  --texto: #252a2e;
+  --texto-secundario: #626970;
+  --borde: #dde1e4;
+  --fondo: #f4f5f6;
+  --superficie: #ffffff;
+  --superficie-suave: #eef0f2;
+  --barra-lateral: #fafbfc;
+  --barra-lateral-texto: var(--texto-secundario);
+  --acento-suave: #fbefea;
+  --borde-fuerte: #a3abb3;
+  --superficie-sombra: 0 2px 8px rgba(37, 42, 46, 0.035);
+  --cristal-superficie: rgba(255, 255, 255, 0.97);
+  --cristal-dialogo: rgba(255, 255, 255, 0.98);
+  --cristal-borde: #dde1e4;
+  --cristal-sombra: 0 18px 48px rgba(37, 42, 46, 0.12);
+  --bs-body-bg: var(--fondo);
+  --bs-body-color: var(--texto);
+  --bs-secondary-color: var(--texto-secundario);
+  --bs-border-color: var(--borde);
+}
+.selector-tema {
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--borde);
+  border-radius: 10px;
+  color: var(--texto);
+  cursor: pointer;
+}
+.selector-tema .icono { width: 19px; height: 19px; }
+.selector-tema:focus-visible { outline: 3px solid var(--acento); outline-offset: 2px; }
+.portal-demo-barra .selector-tema { margin-left: 4px; }
+
+html[data-theme='dark'] {
+  color-scheme: dark;
+  --cristal-dialogo: rgba(31, 32, 38, 0.94);
+  --acento: #ba4e34;
+  --acento-oscuro: #ef8c6d;
+  --texto: #f2f0ed;
+  --texto-secundario: #b4b3ba;
+  --borde: #3a3b43;
+  --fondo: #15161a;
+  --superficie: #202127;
+  --superficie-suave: #2b2c33;
+  --barra-lateral: #191a20;
+  --barra-lateral-texto: #b8b7bd;
+  --verde: #b6c7d4;
+  --cristal-superficie: rgba(33, 34, 40, 0.96);
+  --cristal-borde: rgba(240, 235, 231, 0.15);
+  --cristal-sombra: 0 18px 42px rgba(4, 4, 8, 0.4);
+  --bs-primary: var(--acento);
+  --bs-body-bg: var(--fondo);
+  --bs-body-color: var(--texto);
+  --bs-border-color: var(--borde);
+  --bs-secondary-color: var(--texto-secundario);
+}
+html[data-theme='dark'] body { color: var(--texto); }
+html[data-theme='dark'] :is(.barra-superior, .portal-demo-barra) { background: #1d1e24; border-color: var(--borde); }
+html[data-theme='dark'] :is(.migas-navegacion, .migas-navegacion strong, .barra-superior-fecha, .boton-perfil, .boton-perfil small, .boton-perfil > .icono, .encabezado-pagina p, .pie-app, .portal-demo-pie) { color: var(--texto-secundario); }
+html[data-theme='dark'] :is(.boton-icono, .btn-discreto, .boton-texto) { color: #d2d0d3; }
+html[data-theme='dark'] .boton-icono:hover { background: #34353d; color: #fff; }
+html[data-theme='dark'] .selector-tema { background: #2a2b32; border-color: #44454f; color: #f1cc9c; }
+html[data-theme='dark'] .indicador-demo { background: #302c2c; border-color: #544846; color: #ead0b8; }
+html[data-theme='dark'] .btn-light,
+html[data-theme='dark'] .btn-hoy { background: #2c2d34; border-color: #454650; color: var(--texto); }
+html[data-theme='dark'] .btn-light:hover,
+html[data-theme='dark'] .btn-hoy:hover { background: #393a43; color: #fff; }
+html[data-theme='dark'] :is(.btn-primary:hover, .btn-primary:focus-visible, .profesional-disponibilidad:hover) {
+  background: #a6402a;
+  border-color: #a6402a;
+  color: #fff;
+}
+html[data-theme='dark'] .btn-peligro-suave { background: #4a2a2d; border-color: #7b4245; color: #ffd6d2; }
+
+html[data-theme='dark'] :is(
+  .tarjeta-indicador, .calendario-panel, .superficie, .estado-vacio, .tarjeta-profesional,
+  .tarjeta-servicio, .tarjeta-sucursal, .tarjeta-configuracion, .opcion-modo-agenda, .bloqueo-entrada,
+  .tarjeta-notificacion, .notificaciones-vista-previa, .tarjeta-reporte, .reportes-filtros,
+  .reserva-demo-superficie, .reserva-demo-opcion, .reserva-demo-fecha, .reserva-demo-horario,
+  .opcion-negocio, .tarjeta-seccion
+) {
+  background: var(--superficie);
+  border-color: var(--borde);
+  color: var(--texto);
+}
+html[data-theme='dark'] .etiquetas-servicio > span { background: var(--superficie-suave); color: #d6d3d5; }
+html[data-theme='dark'] :is(.indicador-cabecera, .indicador-texto, .encabezado-seccion p, .texto-discreto, .ayuda-campo, .opcional, .form-label, .reserva-demo-titulo p, .reserva-demo-opcion-texto p, .reserva-demo-negocio p, .reserva-demo-privacidad p, .reserva-demo-resumen-elementos > div, .reserva-demo-resumen-elementos > div.con-valor) { color: var(--texto-secundario); }
+html[data-theme='dark'] :is(.selector-segmentado, .mes-etiqueta, .dia-atenuado, .tabla-app thead th, .separador-formulario, .calendario-barra, .nota-informativa, .nota-compacta) { background: #292a31; border-color: var(--borde); color: #c5c3c7; }
+html[data-theme='dark'] .selector-segmentado button { color: #c4c1c6; }
+html[data-theme='dark'] .selector-segmentado button.seleccionado { background: #454047; color: #fff; }
+html[data-theme='dark'] :is(.selector-filtro, .campo-busqueda, .busqueda-tabla-clientes, .reserva-demo-campo-telefono) { background: #292a31; border-color: #484951; color: var(--texto); }
+html[data-theme='dark'] :is(.selector-filtro select, .campo-busqueda input, .busqueda-tabla-clientes input) { color: var(--texto); }
+html[data-theme='dark'] :is(input, select, textarea, .form-control, .form-select) {
+  background-color: #292a31;
+  border-color: #484951;
+  color: var(--texto);
+}
+html[data-theme='dark'] :is(input, textarea)::placeholder { color: #a7a6ae; opacity: 1; }
+html[data-theme='dark'] :is(input, select, textarea):focus { background-color: #33343c; color: #fff; }
+html[data-theme='dark'] option { background: #292a31; color: var(--texto); }
+
+html[data-theme='dark'] :is(.tabla-app, .tabla-app td, .tabla-app td strong, .tabla-app thead th, .lista-detalle strong, .lista-detalle small) { color: #dddadd; border-color: var(--borde); }
+html[data-theme='dark'] .tabla-app td small { color: var(--texto-secundario); }
+html[data-theme='dark'] :is(.tabla-app tbody tr:hover, .tabla-app .table-active) { background: #303139; }
+html[data-theme='dark'] :is(.encabezado-dia, .columna-dia, .calendario-celda, .mes-dia) { background: var(--superficie); color: #d1ced3; border-color: var(--borde); }
+html[data-theme='dark'] :is(.columna-dia.es-hoy, .fin-de-semana, .dia-atenuado) { background: #292a31 !important; }
+html[data-theme='dark'] .calendario-celda::after { border-color: #3e4049; }
+html[data-theme='dark'] .bloque-descanso { background: repeating-linear-gradient(135deg, #292a31, #292a31 4px, #363740 4px, #363740 5px); color: #c4c1c6; }
+html[data-theme='dark'] :is(.columna-horas > span, .encabezado-hora, .dia-sin-atencion, .leyenda > span, .zona-horaria, .agenda-nota, .mes-fecha) { color: var(--texto-secundario); }
+html[data-theme='dark'] .calendario-evento.confirmada,
+html[data-theme='dark'] .mes-evento.confirmada,
+html[data-theme='dark'] .distintivo-estado.confirmada { background: #213c59; color: #c4deff; border-color: #4b82b6; }
+html[data-theme='dark'] .calendario-evento.pendiente,
+html[data-theme='dark'] .mes-evento.pendiente,
+html[data-theme='dark'] .distintivo-estado.pendiente { background: #493b22; color: #f5dda6; border-color: #a78347; }
+html[data-theme='dark'] .calendario-evento.completada,
+html[data-theme='dark'] .mes-evento.completada,
+html[data-theme='dark'] .distintivo-estado.completada { background: #2e3437; color: #bed8cb; border-color: #5d7569; }
+html[data-theme='dark'] .calendario-evento.cancelada,
+html[data-theme='dark'] .mes-evento.cancelada,
+html[data-theme='dark'] .distintivo-estado.cancelada { background: #4b2d32; color: #ffced0; border-color: #a86770; }
+html[data-theme='dark'] .calendario-evento.no_asistio,
+html[data-theme='dark'] .mes-evento.no_asistio,
+html[data-theme='dark'] .distintivo-estado.no_asistio { background: #3c304d; color: #e0cff6; border-color: #8d72aa; }
+html[data-theme='dark'] .horario-tabla tbody tr:not(.horario-franja-inactiva) > td,
+html[data-theme='dark'] .horario-tabla tbody tr.horario-franja-adicional:not(.horario-franja-inactiva) > td {
+  background: color-mix(in srgb, var(--acento-horario) 10%, var(--superficie));
+}
+html[data-theme='dark'] .horario-tabla th:last-child,
+html[data-theme='dark'] .horario-tabla td:last-child,
+html[data-theme='dark'] .horario-tabla .horario-franja-inactiva td:last-child { background: var(--superficie); }
+html[data-theme='dark'] .horario-tabla .horario-dia-etiqueta { color: color-mix(in srgb, var(--acento-horario) 60%, white); }
+html[data-theme='dark'] .horario-tabla .horario-dia-0 { --acento-horario: #c17c62; }
+html[data-theme='dark'] .horario-tabla .horario-dia-2 { --acento-horario: #7799b7; }
+html[data-theme='dark'] .horario-tabla .horario-franja-inactiva,
+html[data-theme='dark'] .horario-tabla .horario-franja-inactiva > td,
+html[data-theme='dark'] .horario-tabla .horario-franja-inactiva td:last-child {
+  background: #292a30 !important;
+  color: var(--texto-secundario) !important;
+}
+
+html[data-theme='dark'] .resumen-destacado { background: radial-gradient(circle at 85% 18%, #49414a, transparent 42%), radial-gradient(circle at 12% 88%, #5a3d39, transparent 46%), #2a272d; border-color: #51434a; }
+html[data-theme='dark'] .resumen-destacado::before { background: rgba(26, 24, 29, .52); border-color: rgba(241, 219, 209, .14); }
+html[data-theme='dark'] .resumen-destacado :is(h2, p) { color: var(--texto); }
+html[data-theme='dark'] .reserva-demo { background: var(--fondo); }
+html[data-theme='dark'] .portal-demo-marca { color: var(--texto); }
+html[data-theme='dark'] .reserva-demo :is(h1, h2, h3, h4, .reserva-demo-opcion-texto > strong, .reserva-demo-resumen-encabezado h3, .reserva-demo-encabezado-fecha h3) { color: var(--texto); }
+html[data-theme='dark'] .reserva-demo :is(.reserva-demo-opcion-datos, .reserva-demo-titulo .sobretitulo, .reserva-demo-encabezado-horarios, .reserva-demo-encabezado-fecha > span) { color: var(--texto-secundario); }
+html[data-theme='dark'] .reserva-demo-negocio > .etiqueta-suave { background: #343039; border-color: #514951; color: #e3d7d3; }
+html[data-theme='dark'] .reserva-demo-paso > span { background: #2d2d35; border-color: #4b4b55; color: var(--texto); }
+html[data-theme='dark'] .reserva-demo-paso.actual > span { background: var(--acento); border-color: var(--acento); color: #fff; }
+html[data-theme='dark'] .reserva-demo-lateral { background: radial-gradient(circle at 87% 14%, #46404a, transparent 42%), radial-gradient(circle at 8% 80%, #543b37, transparent 52%), #242329; }
+html[data-theme='dark'] .reserva-demo-resumen.efecto-cristal { background: rgba(33, 32, 39, .9); border-color: var(--cristal-borde); }
+html[data-theme='dark'] .reserva-demo-resumen.efecto-cristal :is(h3, p, .reserva-demo-resumen-elementos > div, .reserva-demo-resumen-elementos > div.con-valor, .reserva-demo-resumen-precio > strong) { color: #e4e0df; }
+html[data-theme='dark'] :is(.reserva-demo-opcion:hover, .reserva-demo-fecha:hover, .reserva-demo-horario:hover) { background: #303139; }
+html[data-theme='dark'] :is(.reserva-demo-opcion.seleccionado, .reserva-demo-fecha.seleccionado, .reserva-demo-horario.seleccionado) { background: #523729; border-color: #e08b60; color: #fff1e5; }
+html[data-theme='dark'] :is(.reserva-demo-paso, .portal-demo-subtitulo, .portal-demo-barra > .boton-texto) { color: var(--texto-secundario); }
+
+html[data-theme='dark'] .dialogo-app.efecto-cristal { background: var(--cristal-dialogo); border-color: var(--cristal-borde); color: var(--texto); text-shadow: none; }
+html[data-theme='dark'] .dialogo-app :is(.sobretitulo, .form-label, .ayuda-campo, .opcional, .separador-formulario > span, .lista-detalle small, .lista-detalle strong, .tabla-app td, .tabla-app td strong, .tabla-app td small, .tabla-app thead th) { color: #d1cdd1; }
+html[data-theme='dark'] .dialogo-cabecera,
+html[data-theme='dark'] .dialogo-pie { background: rgba(64, 61, 67, .3); border-color: var(--borde); }
+html[data-theme='dark'] .aviso-app.efecto-cristal { background: var(--cristal-superficie); color: var(--texto); border-color: var(--cristal-borde); }
+
+/* Shared color roles keep labels readable when the theme changes. */
+.estructura-principal :is(.migas-navegacion, .migas-navegacion strong, .barra-superior-fecha, .boton-perfil small,
+  .encabezado-pagina p, .indicador-cabecera, .indicador-texto, .pie-app, .agenda-nota, .zona-horaria,
+  .leyenda > span, .mes-fecha, .mes-etiqueta, .columna-horas > span) {
+  color: var(--texto-secundario);
+}
+.reserva-demo :is(.portal-demo-subtitulo, .portal-demo-barra > .boton-texto,
+  .reserva-demo-negocio p, .reserva-demo-titulo p, .reserva-demo-opcion-texto > p,
+  .reserva-demo-opcion-texto > small, .reserva-demo-opcion-datos, .reserva-demo-resumen > p,
+  .reserva-demo-resumen-elementos > div, .reserva-demo-privacidad p, .reserva-demo-nota-privacidad, .portal-demo-pie) {
+  color: var(--texto-secundario);
+}
+.estructura-principal :is(.tarjeta-indicador, .calendario-panel, .superficie, .estado-vacio,
+  .tarjeta-profesional, .tarjeta-servicio, .tarjeta-sucursal, .tarjeta-configuracion,
+  .opcion-modo-agenda, .bloqueo-entrada, .tarjeta-notificacion, .notificaciones-vista-previa,
+  .tarjeta-reporte, .reportes-filtros, .tarjeta-seccion),
+.reserva-demo :is(.reserva-demo-superficie, .reserva-demo-opcion, .reserva-demo-fecha, .reserva-demo-horario) {
+  background-color: var(--superficie);
+  border-color: var(--borde);
+  color: var(--texto);
+}
+.estructura-principal :is(.selector-segmentado, .mes-etiqueta, .calendario-barra),
+.reserva-demo .reserva-demo-campo-telefono > span {
+  background-color: var(--superficie-suave);
+  border-color: var(--borde);
+}
+.estructura-principal :is(.boton-icono, .btn-discreto, .boton-texto, .selector-filtro select,
+  .campo-busqueda input, .busqueda-tabla-clientes input),
+.reserva-demo :is(.boton-texto, .reserva-demo-fecha, .reserva-demo-horario) {
+  color: var(--texto);
+}
+.estructura-principal :is(.indicador-texto, .leyenda > span, .zona-horaria, .agenda-nota),
+.reserva-demo :is(.reserva-demo-opcion-texto > small, .reserva-demo-opcion-datos, .reserva-demo-nota-privacidad,
+  .reserva-demo-resumen-elementos > div, .portal-demo-pie) {
+  font-size: 12px;
+}
+.estructura-principal .barra-superior,
+.reserva-demo .portal-demo-barra {
+  background-color: var(--superficie);
+  border-color: var(--borde);
+}
+.reserva-demo { background-color: var(--fondo); }
+.estructura-principal .tarjeta-indicador { box-shadow: 0 5px 20px rgba(23, 43, 29, 0.04); }
+.reserva-demo-resumen.efecto-cristal {
+  background: var(--cristal-superficie);
+  border-color: var(--cristal-borde);
+  box-shadow: var(--cristal-sombra);
+}
+.dialogo-app.efecto-cristal,
+.aviso-app.efecto-cristal {
+  background: var(--cristal-superficie);
+  border-color: var(--cristal-borde);
+  box-shadow: var(--cristal-sombra);
+  color: var(--texto);
+}
+.dialogo-app.efecto-cristal {
+  background: var(--cristal-dialogo);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.dialogo-app .dialogo-cabecera,
+.dialogo-app .dialogo-pie {
+  background: color-mix(in srgb, var(--superficie-suave) 18%, transparent);
+  border-color: var(--borde);
+}
+.dialogo-app :is(.sobretitulo, .form-label, .ayuda-campo, .opcional,
+  .separador-formulario > span, .lista-detalle small, .tabla-app td small) {
+  color: var(--texto-secundario);
+}
+.dialogo-app :is(.lista-detalle strong, .tabla-app td, .tabla-app td strong),
+.dialogo-app h2 { color: var(--texto); }
+.dialogo-app .lista-casillas label { color: var(--texto); }
+.dialogo-app::backdrop { background: rgba(18, 34, 25, 0.4); }
+.identidad-espacio.efecto-cristal {
+  background: rgba(216, 240, 220, 0.13);
+  border-color: rgba(223, 244, 227, 0.24);
+  box-shadow: 0 12px 28px rgba(5, 18, 11, 0.16);
+}
+.barra-lateral :is(.navegacion-seccion, .tarjeta-portal p, .pie-lateral) {
+  color: var(--barra-lateral-texto);
+}
+.barra-lateral .navegacion-enlace.active { background: var(--acento); color: #fff; }
+.barra-lateral .navegacion-enlace.active > .icono { color: #fff; }
+.btn-primary { color: #fff; }
+.btn-primary:hover, .btn-primary:focus-visible { color: #fff; }
+.reserva-demo-paso.actual { color: var(--acento); }
+.reserva-demo-paso:not(.actual) { color: var(--texto-secundario); }
+.reserva-demo-paso:not(.actual) > span { color: var(--texto-secundario); }
+.reserva-demo :is(.reserva-demo-titulo .sobretitulo, .reserva-demo-negocio > .etiqueta-suave,
+  .reserva-demo-encabezado-fecha > span, .reserva-demo-encabezado-horarios) { color: var(--texto-secundario); }
+.reserva-demo-titulo .sobretitulo { font-size: 11px; }
+.reserva-demo-resumen.efecto-cristal > p,
+.reserva-demo-resumen.efecto-cristal .reserva-demo-resumen-elementos > div,
+.reserva-demo-resumen.efecto-cristal .reserva-demo-resumen-elementos > div.con-valor { color: var(--texto-secundario); }
+.reserva-demo .reserva-demo-privacidad p { font-size: 12px; }
+.reserva-demo-paso.actual > span,
+.seleccionado > .reserva-demo-opcion-marca { color: #fff; }
+
+html[data-theme='dark'] .efecto-cristal { color: var(--texto); }
+html[data-theme='dark'] .identidad-espacio.efecto-cristal {
+  background: rgba(232, 226, 225, 0.08);
+  border-color: rgba(232, 226, 225, 0.16);
+  color: var(--texto);
+}
+html[data-theme='dark'] .barra-lateral { background: radial-gradient(circle at 18% 10%, #313038 0, transparent 44%), var(--barra-lateral); }
+html[data-theme='dark'] .barra-lateral .navegacion-enlace:hover { background: #33343d; color: #fff; }
+html[data-theme='dark'] .barra-lateral .navegacion-enlace.active:hover { background: #a6402a; }
+html[data-theme='dark'] .barra-lateral .tarjeta-portal {
+  background: linear-gradient(125deg, #2a2a32, #24252b);
+  border-color: #42414a;
+}
+html[data-theme='dark'] .barra-lateral .icono-portal { color: #e1aa84; }
+html[data-theme='dark'] .barra-lateral .tarjeta-portal strong { color: var(--texto); }
+html[data-theme='dark'] .barra-lateral .tarjeta-portal p { color: var(--texto-secundario); }
+html[data-theme='dark'] .barra-lateral .tarjeta-portal a { color: #efac91; }
+html[data-theme='dark'] .punto-verde,
+html[data-theme='dark'] .etiqueta-disponibilidad > i { background: #d98b70; }
+html[data-theme='dark'] .etiqueta-disponibilidad { color: var(--texto-secundario); }
+html[data-theme='dark'] .menu-abierto .fondo-barra-lateral { background: rgba(8, 8, 12, .62); }
+html[data-theme='dark'] .avatar.avatar-espacio { background: #d5c8bf; color: #4b3934; }
+html[data-theme='dark'] .menta { background: #cfd9e4; color: #465c70; }
+html[data-theme='dark'] :is(.naranja, .azul, .ambar, .verde, .morado) { background: var(--superficie-suave); }
+html[data-theme='dark'] .verde { color: #bfd0dc; }
+html[data-theme='dark'] .punto-pequeno { background: #d98b70; }
+html[data-theme='light'] .barra-lateral {
+  background: var(--barra-lateral);
+  border-right: 1px solid var(--borde);
+  color: var(--texto);
+}
+html[data-theme='light'] .barra-lateral .marca { color: var(--texto); }
+html[data-theme='light'] .barra-lateral .identidad-espacio.efecto-cristal {
+  background: var(--superficie);
+  border-color: var(--borde);
+  box-shadow: var(--superficie-sombra);
+  color: var(--texto);
+}
+html[data-theme='light'] .barra-lateral :is(.navegacion-seccion, .pie-lateral) { color: var(--texto-secundario); }
+html[data-theme='light'] .barra-lateral .navegacion-enlace { color: var(--texto-secundario); }
+html[data-theme='light'] .barra-lateral .navegacion-enlace > .icono { color: currentColor; }
+html[data-theme='light'] .barra-lateral .navegacion-enlace:hover { background: var(--superficie-suave); color: var(--texto); }
+html[data-theme='light'] .barra-lateral .navegacion-enlace:hover > .icono { color: var(--texto); }
+html[data-theme='light'] .barra-lateral .navegacion-enlace.active,
+html[data-theme='light'] .barra-lateral .navegacion-enlace.active > .icono { color: var(--superficie); }
+html[data-theme='light'] .barra-lateral .navegacion-enlace.active {
+  background: var(--acento);
+  font-weight: 700;
+}
+html[data-theme='light'] .barra-lateral .navegacion-enlace.active:hover { background: #f6e3da; color: var(--acento-oscuro); }
+html[data-theme='light'] .barra-lateral .navegacion-enlace.active:hover > .icono { color: var(--acento-oscuro); }
+html[data-theme='light'] .barra-lateral .navegacion-submenu { border-color: var(--borde); }
+html[data-theme='light'] .barra-lateral .navegacion-subenlace { color: var(--texto-secundario); }
+html[data-theme='light'] .barra-lateral .navegacion-subenlace:hover { background: var(--superficie-suave); color: var(--texto); }
+html[data-theme='light'] .barra-lateral .navegacion-subenlace.es-actual { background: #f6e3da; color: var(--acento-oscuro); }
+html[data-theme='light'] .barra-lateral .navegacion-contador {
+  background: #f0d8cd;
+  color: var(--acento-oscuro);
+  font-variant-numeric: tabular-nums;
+}
+html[data-theme='light'] .barra-lateral .tarjeta-portal {
+  background: var(--superficie);
+  border-color: var(--borde);
+}
+html[data-theme='light'] .barra-lateral .tarjeta-portal strong { color: var(--texto); }
+html[data-theme='light'] .barra-lateral .tarjeta-portal p { color: var(--texto-secundario); }
+html[data-theme='light'] .barra-lateral .tarjeta-portal a,
+html[data-theme='light'] .barra-lateral .icono-portal { color: var(--acento); }
+
+/* Target legacy fixed colors without changing layout or dark-mode rules. */
+html[data-theme='light'] body { color: var(--texto); }
+html[data-theme='light'] .reserva-demo { background: var(--fondo); }
+html[data-theme='light'] :is(.encabezado-pagina h1, .encabezado-seccion h2,
+  .reserva-demo-titulo h2, .reserva-demo-opcion-texto > strong, .reserva-demo-resumen-encabezado h3,
+  .reserva-demo-resumen-precio > strong, .lista-detalle strong, .tabla-app td strong) { color: var(--texto); }
+html[data-theme='light'] :is(.encabezado-seccion p, .texto-discreto, .ayuda-campo,
+  .opcional, .form-label, .sobretitulo, .logo-pie, .resumen-columna,
+  .tabla-app td small, .busqueda-tabla-clientes, .campo-busqueda, .selector-filtro > .icono,
+  .boton-perfil small, .boton-perfil > .icono, .encabezado-dia,
+  .encabezado-hora, .dia-sin-atencion, .reserva-demo-encabezado-fecha > span) { color: var(--texto-secundario); }
+html[data-theme='light'] :is(.indicador-valor, .tabla-app, .reserva-demo-resumen-precio,
+  .calendario-evento, .mes-evento) { font-variant-numeric: tabular-nums; }
+html[data-theme='light'] :is(.tarjeta-indicador, .calendario-panel, .superficie) { box-shadow: var(--superficie-sombra); }
+html[data-theme='light'] :is(.btn-light, .btn-hoy, .selector-tema) {
+  background: var(--superficie);
+  border-color: var(--borde);
+  color: var(--texto);
+}
+html[data-theme='light'] :is(.btn-light:hover, .btn-hoy:hover,
+  .boton-icono:hover, .selector-tema:hover) {
+  background: var(--superficie-suave);
+  border-color: var(--borde-fuerte);
+  color: var(--texto);
+}
+html[data-theme='light'] :is(.btn-discreto, .selector-segmentado button) { color: var(--texto-secundario); }
+html[data-theme='light'] .selector-segmentado button.seleccionado {
+  background: var(--superficie);
+  color: var(--texto);
+  box-shadow: 0 1px 4px rgba(37, 42, 46, 0.1);
+}
+html[data-theme='light'] .calendario-barra { background: var(--superficie); }
+html[data-theme='light'] :is(.selector-filtro, .busqueda-tabla-clientes, .reserva-demo-campo-telefono) {
+  background: var(--superficie);
+  border-color: var(--borde);
+  color: var(--texto);
+}
+html[data-theme='light'] :is(.selector-filtro, .campo-busqueda, .busqueda-tabla-clientes):focus-within {
+  outline: 2px solid var(--acento);
+  outline-offset: 3px;
+}
+html[data-theme='light'] :is(input, select, textarea, .form-control, .form-select) {
+  color: var(--texto);
+  border-color: var(--borde-fuerte);
+}
+html[data-theme='light'] :is(input, textarea)::placeholder { color: var(--texto-secundario); opacity: 1; }
+html[data-theme='light'] :is(.form-control, .form-select, .reserva-demo-campo-telefono) { background-color: var(--superficie); }
+html[data-theme='light'] :is(.etiqueta-suave, .distintivo-cantidad, .mes-etiqueta,
+  .nota-informativa, .nota-compacta, .separador-formulario, .tabla-app thead th) {
+  background: var(--superficie-suave);
+  color: var(--texto-secundario);
+  border-color: var(--borde);
+}
+html[data-theme='light'] :is(.tabla-app td, .tabla-app thead th) {
+  --bs-table-color: var(--texto);
+  border-color: var(--borde);
+}
+html[data-theme='light'] .tabla-app td { color: var(--texto); }
+html[data-theme='light'] .tabla-app tbody tr:hover { background: var(--superficie-suave); }
+html[data-theme='light'] .dialogo-app :is(.dialogo-cabecera, .dialogo-pie) { background: var(--superficie-suave); }
+html[data-theme='light'] .dialogo-app::backdrop { background: rgba(37, 42, 46, 0.42); }
+html[data-theme='light'] .resumen-destacado {
+  background: var(--acento-suave);
+  border-color: #ecd5ca;
+}
+html[data-theme='light'] .resumen-destacado::before { content: none; }
+html[data-theme='light'] .resumen-destacado :is(h2, p) { color: var(--texto); }
+html[data-theme='light'] .resumen-destacado :is(.sobretitulo, .resumen-icono-destacado) { color: var(--acento-oscuro); }
+html[data-theme='light'] .resumen-destacado .btn { background: var(--superficie); border-color: #ecd5ca; }
+html[data-theme='light'] .resumen-barra:not(.resumen-barra-hoy) { background: #c5cbd0; }
+html[data-theme='light'] .reserva-demo-lateral { background: var(--superficie-suave); }
+html[data-theme='light'] .reserva-demo-opcion-marca { border-color: var(--borde-fuerte); }
+html[data-theme='light'] .seleccionado > .reserva-demo-opcion-marca { border-color: var(--acento); }
+html[data-theme='light'] :is(.reserva-demo-pasos, .reserva-demo-controles,
+  .reserva-demo-resumen-elementos > div, .reserva-demo-resumen-precio, .reserva-demo-privacidad) { border-color: var(--borde); }
+html[data-theme='light'] :is(.reserva-demo-negocio > .etiqueta-suave, .reserva-demo-paso > span) {
+  background: var(--superficie-suave);
+  border-color: var(--borde);
+}
+html[data-theme='light'] .reserva-demo-paso.actual > span {
+  background: var(--acento);
+  border-color: var(--acento);
+  color: #fff;
+}
+html[data-theme='light'] :is(.reserva-demo-opcion:hover, .reserva-demo-fecha:hover, .reserva-demo-horario:hover) {
+  background: var(--superficie-suave);
+  border-color: var(--borde-fuerte);
+}
+html[data-theme='light'] :is(.reserva-demo-opcion.seleccionado, .reserva-demo-fecha.seleccionado, .reserva-demo-horario.seleccionado) {
+  background: var(--acento-suave);
+  border-color: var(--acento);
+  color: var(--acento-oscuro);
+}
+html[data-theme='light'] .reserva-demo-resumen.efecto-cristal :is(h3, .reserva-demo-resumen-precio > strong) { color: var(--texto); }
+html[data-theme='light'] .reserva-demo-lateral .reserva-demo-privacidad p { color: var(--texto-secundario); }
+html[data-theme='dark'] .dialogo-app::backdrop { background: rgba(6, 6, 10, 0.72); }
+html[data-theme='dark'] .reserva-demo-resumen.efecto-cristal { background: var(--cristal-superficie); border-color: var(--cristal-borde); }
+html[data-theme='dark'] .reserva-demo-resumen.efecto-cristal :is(h3, p, .reserva-demo-resumen-elementos > div,
+  .reserva-demo-resumen-elementos > div.con-valor, .reserva-demo-resumen-precio > strong) { color: var(--texto); }
+html[data-theme='dark'] .reserva-demo-paso.actual { color: #f1a287; }
+html[data-theme='dark'] .reserva-demo :is(.reserva-demo-negocio p, .reserva-demo-titulo p,
+  .reserva-demo-opcion-texto > p, .reserva-demo-opcion-texto > small, .reserva-demo-opcion-datos, .reserva-demo-privacidad p,
+  .reserva-demo-nota-privacidad, .portal-demo-pie) { color: var(--texto-secundario); }
+html[data-theme='dark'] :is(.reserva-demo-opcion.seleccionado, .reserva-demo-fecha.seleccionado, .reserva-demo-horario.seleccionado) {
+  background: #523729;
+  border-color: #e08b60;
+  color: #fff1e5;
+}
+html[data-theme='dark'] .dialogo-app :is(.sobretitulo, .form-label, .ayuda-campo,
+  .opcional, .separador-formulario > span, .lista-detalle small, .tabla-app td small) {
+  color: var(--texto-secundario);
+}
+html[data-theme='dark'] .dialogo-app :is(.lista-detalle strong, .tabla-app td,
+  .tabla-app td strong, .tabla-app thead th) { color: var(--texto); }
+html[data-theme='dark'] .dialogo-app.efecto-cristal,
+html[data-theme='dark'] .aviso-app.efecto-cristal {
+  border-color: var(--cristal-borde);
+  color: var(--texto);
+}
+html[data-theme='dark'] .dialogo-app.efecto-cristal { background: var(--cristal-dialogo); }
+html[data-theme='dark'] .aviso-app.efecto-cristal { background: var(--cristal-superficie); }
+@supports not ((backdrop-filter: blur(10px)) or (-webkit-backdrop-filter: blur(10px))) {
+  .dialogo-app.efecto-cristal { background: var(--superficie); }
+  html[data-theme='dark'] .efecto-cristal { background: var(--superficie); }
+  html[data-theme='dark'] .identidad-espacio.efecto-cristal { background: #292a31; }
+}
+
+@media (max-width: 767px) {
+  #formulario-horario > .table-responsive { overflow: visible; }
+  .horario-tabla,
+  .horario-tabla tbody { display: block; width: 100%; min-width: 0; }
+  .horario-tabla thead { display: none; }
+  .horario-tabla tbody { padding: 12px; }
+  .horario-tabla tbody tr {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    margin-bottom: 12px;
+    border: 1px solid var(--borde);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .horario-tabla tbody td {
+    display: block;
+    min-width: 0;
+    width: 100%;
+    border: 0;
+    padding: 8px 12px;
+  }
+  .horario-tabla tbody td::before {
+    content: attr(data-label);
+    display: block;
+    margin-bottom: 5px;
+    color: var(--texto-secundario);
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .horario-tabla tbody td:first-child { grid-column: 1 / -1; padding: 12px; border-left: 4px solid var(--acento-horario); border-bottom: 1px solid var(--borde); }
+  .horario-tabla tbody td:first-child::before { display: none; }
+  .horario-tabla tbody td:nth-child(2),
+  .horario-tabla tbody td:nth-child(4),
+  .horario-tabla tbody td:last-child { grid-column: 1 / -1; }
+  .horario-tabla tbody td:last-child { position: static; box-shadow: none; }
+  .horario-tabla select,
+  .horario-tabla input[type='time'] { width: 100%; max-width: none; min-width: 0; }
+  .horario-tabla .par-horas { min-width: 0; }
+  .horario-tabla .par-horas input { flex: 1 1 0; }
+  .horario-tabla .horario-acciones { justify-content: flex-end; }
+  .horario-tabla .horario-agregar-franja { min-height: 42px; min-width: 42px; }
+  html[data-theme='dark'] .horario-tabla tbody td:last-child { background: color-mix(in srgb, var(--acento-horario) 10%, var(--superficie)); }
+}
+
+@media (max-width: 480px) {
+  html, body, #app { max-width: 100%; overflow-x: clip; }
+  .barra-superior { height: 60px; padding: 0 12px; }
+  .barra-superior-derecha { gap: 4px; }
+  .migas-navegacion { min-width: 0; gap: 6px; }
+  .migas-navegacion > span, .migas-navegacion > .icono { display: none; }
+  .migas-navegacion strong { max-width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
+  .barra-superior .boton-icono, .portal-demo-barra .selector-tema { min-width: 40px; min-height: 40px; }
+  .contenido-principal { padding: 18px 12px 28px; }
+  .encabezado-pagina { gap: 12px; }
+  .encabezado-pagina h1 { font-size: 24px; }
+  .acciones-encabezado { flex-wrap: wrap; }
+  .acciones-encabezado > :is(.btn, a) { flex: 1 1 auto; justify-content: center; }
+  .tarjeta-indicador { padding: 12px; }
+  .indicador-texto { line-height: 1.3; }
+  .calendario-barra { padding: 12px; }
+  .calendario-fecha { flex-wrap: wrap; }
+  .calendario-fecha h2 { flex-basis: 100%; }
+  .selector-segmentado { width: 100%; justify-content: space-between; }
+  .selector-segmentado button { flex: 1; min-height: 40px; }
+  .calendario-filtros { padding: 0 12px 12px; }
+  .selector-filtro { min-width: 0; flex-basis: 100%; min-height: 42px; }
+  .calendario-panel, .superficie, .reserva-demo-superficie { min-width: 0; }
+  .calendario-desplazamiento, .table-responsive, .mes-desplazamiento { max-width: 100%; overflow-x: auto; }
+  .calendario-semana { min-width: 760px; }
+  .dia-unico { min-width: 0; }
+  .dialogo-app { width: calc(100% - 20px); max-height: 94dvh; }
+  .dialogo-app.amplio { width: calc(100% - 20px); }
+  .dialogo-cabecera, .dialogo-cuerpo { padding: 16px; }
+  .dialogo-pie { padding: 12px 16px; flex-wrap: wrap; }
+  .dialogo-pie .btn { min-height: 42px; }
+  .portal-demo-barra { height: 60px; padding: 0 12px; gap: 8px; }
+  .portal-demo-marca { font-size: 25px; }
+  .portal-demo-marca img { width: 26px; height: 26px; }
+  .portal-demo-barra > .boton-texto { margin-left: auto; font-size: 0; gap: 0; }
+  .portal-demo-barra > .boton-texto .icono { width: 21px; height: 21px; }
+  .portal-demo-barra .indicador-demo { display: none; }
+  .reserva-demo-contenido { padding: 20px 12px 28px; }
+  .reserva-demo-superficie { padding: 20px 15px; }
+  .reserva-demo-pasos { gap: 14px; justify-content: flex-start; }
+  .reserva-demo-pasos { scrollbar-width: none; }
+  .reserva-demo-pasos::-webkit-scrollbar { display: none; }
+  .reserva-demo-paso { flex: 0 0 auto; min-width: 62px; }
+  .reserva-demo-paso > strong { font-size: 11px; }
+  .reserva-demo-cuadricula-horarios { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .reserva-demo-controles { gap: 8px; }
+  .reserva-demo-controles .btn { min-height: 44px; }
+}

@@ -5,12 +5,12 @@ import { leyendaAgenda, metricasAgenda, esqueletoCalendario, referenciaEvento, d
 // Regresión de las mejoras acordadas: datos reales separados de placeholders y geometría de tarjetas.
 test('métricas compactas sin frases auxiliares y skeleton sin números ficticios', () => {
   const html = metricasAgenda([{ date: '2026-11-11', status: 'confirmada' }], '2026-11-11');
-  assert.equal((html.match(/class="stat-card"/g) || []).length, 4);
-  assert.match(html, /stat-number">01/);
-  assert.doesNotMatch(html, /stat-caption|Tu jornada|Todo listo|Atención que/);
+  assert.equal((html.match(/class="tarjeta-indicador"/g) || []).length, 4);
+  assert.match(html, /indicador-valor">01/);
+  assert.doesNotMatch(html, /indicador-texto|Tu jornada|Todo listo|Atención que/);
   const pending = metricasAgenda(null, '2026-11-11');
   assert.match(pending, /aria-busy="true"/); assert.match(pending, /esqueleto-relleno/);
-  assert.doesNotMatch(pending, /stat-number">00/);
+  assert.doesNotMatch(pending, /indicador-valor">00/);
   const failed = metricasAgenda(null, '2026-11-11', { loading: false });
   assert.match(failed, /Sin datos/); assert.doesNotMatch(failed, /esqueleto-numero/);
 });

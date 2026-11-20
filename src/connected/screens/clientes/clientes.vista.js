@@ -43,7 +43,7 @@ async function cargarDirectorio(forzar = false) {
       if (cursor != null) entradaNueva?.setSelectionRange(cursor, cursor);
     }
     // Los controles de página se reconstruyen tras la consulta: conservar la dirección usada con teclado.
-    if (direccionFoco && !document.querySelector('#app-dialog')?.open) {
+    if (direccionFoco && !document.querySelector('#dialogo-app')?.open) {
       const boton = document.querySelector(`[data-directorio-pagina="${filtros.pagina + direccionFoco}"]:not(:disabled)`);
       const destinoAlternativo = document.querySelector('.directorio-paginacion button:not(:disabled), #busqueda-directorio-conectado');
       (boton || destinoAlternativo)?.focus();
@@ -54,7 +54,7 @@ function renderPaginador(datos) {
   return `<div class="table-footer directorio-paginacion"><span>${datos.clientes.length} fichas en esta página · Página ${datos.pagina}</span><div><button class="btn btn-light" data-directorio-pagina="${datos.pagina - 1}" ${datos.pagina === 1 ? 'disabled' : ''}>Página anterior</button><button class="btn btn-light" data-directorio-pagina="${datos.pagina + 1}" ${!datos.hayMas ? 'disabled' : ''}>Siguiente página</button></div></div>`;
 }
 const renderBotonFicha = (ficha) =>
-  `<button class="text-button" data-directorio-abrir="${ficha.id}" aria-label="Ver ficha de ${esc(ficha.nombreCompleto)}">Ver ficha ${renderIcono('chevron')}</button>`;
+  `<button class="boton-texto" data-directorio-abrir="${ficha.id}" aria-label="Ver ficha de ${esc(ficha.nombreCompleto)}">Ver ficha ${renderIcono('chevron')}</button>`;
 export function clientes() {
   if (!puedeGestionarCitas(usuarioActual?.rol))
     return renderEstadoVacio(
@@ -78,7 +78,7 @@ export function clientes() {
   else if (modelo.data) {
     const fichas = modelo.data.clientes;
     contenido = fichas.length
-      ? `<div class="table-responsive directorio-tabla"><table class="table app-table align-middle"><thead><tr><th>Nombre completo</th><th>WhatsApp</th><th>Acciones</th></tr></thead><tbody>${fichas.map((ficha) => `<tr><td><strong>${esc(ficha.nombreCompleto)}</strong><small class="directorio-identificador">Cliente #${ficha.id}</small></td><td>${esc(ficha.telefono)}</td><td>${renderBotonFicha(ficha)}</td></tr>`).join('')}</tbody></table></div><div class="directorio-tarjetas">${fichas.map((ficha) => `<article><h3>${esc(ficha.nombreCompleto)}</h3><p>Cliente #${ficha.id} · ${esc(ficha.telefono)}</p>${renderBotonFicha(ficha)}</article>`).join('')}</div>`
+      ? `<div class="table-responsive directorio-tabla"><table class="table tabla-app align-middle"><thead><tr><th>Nombre completo</th><th>WhatsApp</th><th>Acciones</th></tr></thead><tbody>${fichas.map((ficha) => `<tr><td><strong>${esc(ficha.nombreCompleto)}</strong><small class="directorio-identificador">Cliente #${ficha.id}</small></td><td>${esc(ficha.telefono)}</td><td>${renderBotonFicha(ficha)}</td></tr>`).join('')}</tbody></table></div><div class="directorio-tarjetas">${fichas.map((ficha) => `<article><h3>${esc(ficha.nombreCompleto)}</h3><p>Cliente #${ficha.id} · ${esc(ficha.telefono)}</p>${renderBotonFicha(ficha)}</article>`).join('')}</div>`
       : renderEstadoVacio(
           'Sin clientes',
           filtros.busqueda
@@ -87,7 +87,7 @@ export function clientes() {
         );
     contenido += renderPaginador(modelo.data);
   }
-  return `${renderEncabezadoPagina('Clientes', 'Conoce a las personas que confían en tu negocio.', '<button class="btn btn-primary" data-directorio-nuevo>Nuevo cliente</button>')}<section class="surface directorio-clientes" aria-label="Directorio de clientes"><div class="section-heading"><h2>Tu directorio</h2><form id="filtros-directorio-conectado"><label class="search-field">${renderIcono('search')}<input id="busqueda-directorio-conectado" name="busqueda" aria-label="Buscar clientes" placeholder="Nombre o teléfono…" type="search" maxlength="150" value="${esc(filtros.busqueda)}"></label><button type="submit" class="btn btn-light">Buscar</button></form></div><div aria-busy="${modelo.busy}" aria-live="polite">${contenido}</div></section>`;
+  return `${renderEncabezadoPagina('Clientes', 'Conoce a las personas que confían en tu negocio.', '<button class="btn btn-primary" data-directorio-nuevo>Nuevo cliente</button>')}<section class="superficie directorio-clientes" aria-label="Directorio de clientes"><div class="encabezado-seccion"><h2>Tu directorio</h2><form id="filtros-directorio-conectado"><label class="campo-busqueda">${renderIcono('search')}<input id="busqueda-directorio-conectado" name="busqueda" aria-label="Buscar clientes" placeholder="Nombre o teléfono…" type="search" maxlength="150" value="${esc(filtros.busqueda)}"></label><button type="submit" class="btn btn-light">Buscar</button></form></div><div aria-busy="${modelo.busy}" aria-live="polite">${contenido}</div></section>`;
 }
 const recargarDirectorio = async () => {
   await cargarDirectorio(true);

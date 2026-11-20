@@ -21,7 +21,7 @@ for (const width of [1366, 390]) for (const theme of ['light', 'dark']) {
           })).toBe(true);
         }
         await page.evaluate(() => window.scrollTo({ top: 1100, behavior: 'instant' }));
-        const boxes = await page.evaluate(() => ['.topbar', '.agenda-barra', '.calendario-filtros', '.semana-encabezado'].map((s) => {
+        const boxes = await page.evaluate(() => ['.barra-superior', '.agenda-barra', '.calendario-filtros', '.semana-encabezado'].map((s) => {
           const b = document.querySelector(s).getBoundingClientRect(); return { top: b.top, bottom: b.bottom };
         }));
         if (width < 768) {

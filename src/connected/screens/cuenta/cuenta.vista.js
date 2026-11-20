@@ -6,7 +6,7 @@ import { progresoLicencia } from './licencia.progreso.js';
 import './cuenta.estilos.css';
 import { datosAplicacion } from '../../../shared/aplicacion.datos.js';
 import { renderPortalCuenta, vincularPortalCuenta } from '../../../shared/cuenta.portal.js';
-import '../../../shared/account-portal.css';
+import '../../../shared/cuenta.portal.css';
 import { leerPublicacionPrecios, guardarPublicacionPrecios } from '../../modules/publicacion/publicacion.precios.js';
 import { renderPublicacionPrecios } from './cuenta.publicacion-precios.js';
 
@@ -118,17 +118,17 @@ export function cuenta() {
   const correo = escaparHtml(usuario.email || '—');
   return '<div class="cuenta-pagina">' +
     renderEncabezadoPagina('Mi cuenta', 'Consulta los datos de tu acceso y la vigencia de tu licencia.') +
-    '<section class="surface cuenta-identidad" aria-label="Perfil de cuenta">' +
+    '<section class="superficie cuenta-identidad" aria-label="Perfil de cuenta">' +
     '<span class="cuenta-avatar" aria-hidden="true">' + escaparHtml(iniciales(usuario.nombre)) + '</span>' +
     '<div class="cuenta-texto-identidad"><span class="cuenta-antetitulo">Perfil de cuenta</span><h2>' + nombre +
     '</h2><p>' + correo + '</p></div><span class="cuenta-rol">' + rol + '</span></section>' +
-    '<div class="cuenta-cuadricula"><section class="surface cuenta-seccion"><div class="cuenta-encabezado-seccion">' +
+    '<div class="cuenta-cuadricula"><section class="superficie cuenta-seccion"><div class="cuenta-encabezado-seccion">' +
     '<span class="cuenta-icono-seccion" aria-hidden="true">' + renderIcono('user') + '</span>' +
     '<div><h2>Datos de acceso</h2><p>Información vinculada a tu sesión.</p></div></div>' +
     '<dl class="cuenta-datos"><div><dt>Nombre</dt><dd>' + nombre + '</dd></div>' +
     '<div><dt>Correo electrónico</dt><dd>' + correo + '</dd></div>' +
     '<div><dt>Rol</dt><dd>' + rol + '</dd></div></dl></section>' +
-    '<section class="surface cuenta-seccion cuenta-seguridad"><div class="cuenta-encabezado-seccion">' +
+    '<section class="superficie cuenta-seccion cuenta-seguridad"><div class="cuenta-encabezado-seccion">' +
     '<span class="cuenta-icono-seccion" aria-hidden="true">' + renderIcono('lock') + '</span>' +
     '<div><h2>Seguridad</h2><p>Controla el acceso a tu cuenta.</p></div></div>' +
     '<div class="cuenta-acciones-seguridad"><button type="button" class="btn btn-primary" data-action="cambiar-contrasena-cuenta">' +
@@ -137,7 +137,7 @@ export function cuenta() {
     renderPortalCuenta({ usuario: usuario, negocio: datosAplicacion.tenants.find((tenant) => tenant.id === usuario.negocioId), origen: location.origin }) +
     (usuario.rol === 'admin_negocio' ? renderPublicacionPrecios(publicacion) : '') +
     (usuario.rol === 'superadmin' ? '' :
-      '<section class="surface cuenta-seccion cuenta-licencia"><div class="cuenta-encabezado-seccion">' +
+      '<section class="superficie cuenta-seccion cuenta-licencia"><div class="cuenta-encabezado-seccion">' +
       '<span class="cuenta-icono-seccion" aria-hidden="true">' + renderIcono('calendar') + '</span>' +
       '<div><h2>Licencia del negocio</h2><p>Estado de vigencia de tu acceso.</p></div>' +
       '<button type="button" class="btn btn-light cuenta-actualizar" data-action="consultar-licencia-propia">Actualizar estado</button>' +

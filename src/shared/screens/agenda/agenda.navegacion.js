@@ -23,7 +23,7 @@ export function renderAgendaConservandoPosicion(render) {
   const siguiente = nombre ? document.getElementsByName(nombre)[0] : atributo ? [...document.querySelectorAll(`[${atributo.name}]`)].find((x) => x.getAttribute(atributo.name) === atributo.value) : null;
   siguiente?.focus({ preventScroll: true });
 }
-const limiteSuperiorAgenda = () => (document.querySelector('.topbar')?.getBoundingClientRect().height || 0) + (matchMedia('(max-width: 767px)').matches ? ['.semana-encabezado'] : ['.agenda-barra', '.calendario-filtros', '.semana-encabezado']).reduce((suma, selector) => suma + (document.querySelector('.agenda-calendario ' + selector)?.getBoundingClientRect().height || 0), 0) + 12;
+const limiteSuperiorAgenda = () => (document.querySelector('.barra-superior')?.getBoundingClientRect().height || 0) + (matchMedia('(max-width: 767px)').matches ? ['.semana-encabezado'] : ['.agenda-barra', '.calendario-filtros', '.semana-encabezado']).reduce((suma, selector) => suma + (document.querySelector('.agenda-calendario ' + selector)?.getBoundingClientRect().height || 0), 0) + 12;
 const contenedorDesplazable = () => document.querySelector('.agenda-calendario .calendario-desplazamiento');
 export function handleNavegacionAgenda(evento, estado, render) {
   const grupo = evento.target.closest('[data-agenda-densidad]');
@@ -59,7 +59,7 @@ export function aplicarEfectosAgenda() {
       });
       observador.observe(raiz);
       for (const el of raiz.querySelectorAll('.agenda-barra, .calendario-filtros, .agenda-desplazamiento-encabezado')) observador.observe(el);
-      const barraSuperior = document.querySelector('.topbar');
+      const barraSuperior = document.querySelector('.barra-superior');
       if (barraSuperior) observador.observe(barraSuperior);
       const sonda = document.createElement('span');
       sonda.className = 'agenda-sonda-escala';
@@ -147,7 +147,7 @@ function montarEncabezadoAgenda(raiz) {
 }
 function actualizarDimensionesAgenda(raiz) {
   const ancho = Math.max(1, ((raiz.querySelector('.calendario-desplazamiento')?.clientWidth || raiz.clientWidth) - 58) / 3);
-  const alto = document.querySelector('.topbar')?.getBoundingClientRect().height || 0;
+  const alto = document.querySelector('.barra-superior')?.getBoundingClientRect().height || 0;
   const barra = raiz.querySelector('.agenda-barra')?.getBoundingClientRect().height || 0;
   const filtros = raiz.querySelector('.calendario-filtros')?.getBoundingClientRect().height || 0;
   const altoEncabezado = raiz.querySelector('.semana-encabezado')?.getBoundingClientRect().height || 0;

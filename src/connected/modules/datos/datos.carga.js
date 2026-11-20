@@ -36,15 +36,15 @@ export async function cargarDatosBackend() {
     ]);
     const sucursalesIds = oferta.sucursales.map((sucursal) => sucursal.id);
     const detallesSucursales = new Map((catalogoSucursales || []).map((sucursal) => [sucursal.id, sucursal]));
-    datos.services = servicios.map((registro) => ({ id: registro.id, tenantId: negocioId, name: registro.nombre, duration: registro.duracionMinutos, price: Number(registro.costo), active: registro.activo, description: registro.descripcion || '', creatorId: registro.creadorPersonalId, icon: 'briefcase', color: 'blue' }));
-    datos.professionals = [{ id: usuarioActual.id, tenantId: negocioId, name: usuarioActual.nombre, email: usuarioActual.email, active: oferta.cuentaActiva, specialty: '', initials: iniciales(usuarioActual.nombre), color: 'peach', branchIds: sucursalesIds, serviceIds: servicios.filter((registro) => registro.seleccionado).map((registro) => registro.id) }];
+    datos.services = servicios.map((registro) => ({ id: registro.id, tenantId: negocioId, name: registro.nombre, duration: registro.duracionMinutos, price: Number(registro.costo), active: registro.activo, description: registro.descripcion || '', creatorId: registro.creadorPersonalId, icon: 'briefcase', color: 'azul' }));
+    datos.professionals = [{ id: usuarioActual.id, tenantId: negocioId, name: usuarioActual.nombre, email: usuarioActual.email, active: oferta.cuentaActiva, specialty: '', initials: iniciales(usuarioActual.nombre), color: 'durazno', branchIds: sucursalesIds, serviceIds: servicios.filter((registro) => registro.seleccionado).map((registro) => registro.id) }];
     datos.branches = oferta.sucursales.map((sucursal) => {
       const detalle = detallesSucursales.get(sucursal.id);
       return { id: sucursal.id, tenantId: negocioId, name: detalle?.nombre || sucursal.nombre,
         address: detalle?.direccion || '', phone: detalle?.telefono || '',
         timezone: detalle?.zonaHoraria || '', maps: detalle?.urlGoogleMaps || '',
         notes: detalle?.notasLlegada || '', active: sucursal.atencionActiva,
-        globalActive: sucursal.sucursalActiva, color: 'orange' };
+        globalActive: sucursal.sucursalActiva, color: 'naranja' };
     });
     // La semana conectada lee solo franjas completas; los descansos históricos no son editables.
     datos.schedules = horarios.map((registro) => ({ id: registro.id, tenantId: negocioId, professionalId: usuarioActual.id, day: registro.diaSemana, branchId: registro.sucursalId, start: formatearMinutos(registro.inicioMinutos), end: formatearMinutos(registro.finMinutos), enabled: registro.activo }));
@@ -54,11 +54,11 @@ export async function cargarDatosBackend() {
     const [servicios, sucursales, cupo, profesionales, recepcionistas, bloqueos] = await Promise.all([api('/servicios'), api('/sucursales'), api('/sucursales/cupo'), api('/profesionales'), api('/recepcionistas'), api('/bloqueos')]);
     establecerCupoSucursales(cupo);
     datos.receptionists = recepcionistas.map((registro) => ({ id: registro.id, tenantId: negocioId, name: registro.nombre, email: registro.email, active: registro.activo, activatedAt: registro.activadoEn, initials: iniciales(registro.nombre) }));
-    datos.services = servicios.map((registro) => ({ id: registro.id, tenantId: negocioId, name: registro.nombre, duration: registro.duracionMinutos, price: Number(registro.costo), active: registro.activo, description: registro.descripcion || '', creatorId: registro.creadorPersonalId, icon: 'briefcase', color: 'blue' }));
-    datos.branches = sucursales.map((registro) => ({ id: registro.id, tenantId: negocioId, name: registro.nombre, address: registro.direccion, phone: registro.telefono, timezone: registro.zonaHoraria, maps: registro.urlGoogleMaps, notes: registro.notasLlegada || '', active: registro.activo, color: 'orange' }));
+    datos.services = servicios.map((registro) => ({ id: registro.id, tenantId: negocioId, name: registro.nombre, duration: registro.duracionMinutos, price: Number(registro.costo), active: registro.activo, description: registro.descripcion || '', creatorId: registro.creadorPersonalId, icon: 'briefcase', color: 'azul' }));
+    datos.branches = sucursales.map((registro) => ({ id: registro.id, tenantId: negocioId, name: registro.nombre, address: registro.direccion, phone: registro.telefono, timezone: registro.zonaHoraria, maps: registro.urlGoogleMaps, notes: registro.notasLlegada || '', active: registro.activo, color: 'naranja' }));
     await Promise.all(profesionales.map(async (profesional, indice) => {
       const [sucursalesIds, servicios, horarios] = await Promise.all([api(`/profesionales/${profesional.id}/sucursales`), api(`/profesionales/${profesional.id}/servicios`), api(`/profesionales/${profesional.id}/horario`)]);
-      datos.professionals.push({ id: profesional.id, tenantId: negocioId, name: profesional.nombre, email: profesional.correo, active: profesional.activo, specialty: profesional.especialidad || '', initials: iniciales(profesional.nombre), color: ['peach', 'mint', 'blue'][indice % 3], branchIds: sucursalesIds, serviceIds: servicios.filter((registro) => registro.seleccionado).map((registro) => registro.id) });
+      datos.professionals.push({ id: profesional.id, tenantId: negocioId, name: profesional.nombre, email: profesional.correo, active: profesional.activo, specialty: profesional.especialidad || '', initials: iniciales(profesional.nombre), color: ['durazno', 'menta', 'azul'][indice % 3], branchIds: sucursalesIds, serviceIds: servicios.filter((registro) => registro.seleccionado).map((registro) => registro.id) });
       datos.schedules.push(...horarios.map((registro) => ({ id: registro.id, tenantId: negocioId, professionalId: profesional.id, day: registro.diaSemana, branchId: registro.sucursalId, start: formatearMinutos(registro.inicioMinutos), end: formatearMinutos(registro.finMinutos), enabled: registro.activo })));
     }));
     datos.professionals.sort((primero, registro) => primero.id - registro.id);

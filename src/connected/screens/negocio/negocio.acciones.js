@@ -19,7 +19,7 @@ async function ejecutarAccionNegocio(solicitar, mensaje) {
 }
 
 function confirmarAccionNegocio(titulo, descripcion, etiqueta, solicitar, mensajeExito) {
-  const dialogo = abrirDialogo(titulo, `<div class="dialog-body"><p>${descripcion}</p>${espacioErrorFormulario}</div><div class="dialog-footer"><button type="button" class="btn btn-light" data-dismiss>Cancelar</button><button type="button" class="btn btn-primary" data-confirm>${etiqueta}</button></div>`);
+  const dialogo = abrirDialogo(titulo, `<div class="dialogo-cuerpo"><p>${descripcion}</p>${espacioErrorFormulario}</div><div class="dialogo-pie"><button type="button" class="btn btn-light" data-dismiss>Cancelar</button><button type="button" class="btn btn-primary" data-confirm>${etiqueta}</button></div>`);
   dialogo.querySelector('[data-dismiss]').onclick = () => dialogo.close();
   dialogo.querySelector('[data-confirm]').onclick = async (evento) => {
     const botonEnviar = evento.currentTarget;
@@ -28,7 +28,7 @@ function confirmarAccionNegocio(titulo, descripcion, etiqueta, solicitar, mensaj
       await ejecutarAccionNegocio(solicitar, mensajeExito);
       dialogo.close();
     } catch (error) {
-      const destino = dialogo.querySelector('#form-error');
+      const destino = dialogo.querySelector('#error-formulario');
       destino.textContent = error.message;
       destino.hidden = false;
       destino.focus();
@@ -44,7 +44,7 @@ export function accionNegocio(accion, valor = null) {
   if (!Number.isSafeInteger(id) || id < 1) return;
   const detalle = datosDetalleNegocio();
   if (accion === 'correo') {
-    abrirFormulario('Corregir correo de invitación', `<p class="form-intro">Se invalidará el código anterior y se encolará un nuevo correo si cambias el destinatario.</p>${campo('Nuevo correo del administrador', 'correo', detalle?.negocio.administrador?.email || detalle?.negocio.emailContacto || '', 'email', 'required autocomplete="email"')}`, async (formulario) => {
+    abrirFormulario('Corregir correo de invitación', `<p class="introduccion-formulario">Se invalidará el código anterior y se encolará un nuevo correo si cambias el destinatario.</p>${campo('Nuevo correo del administrador', 'correo', detalle?.negocio.administrador?.email || detalle?.negocio.emailContacto || '', 'email', 'required autocomplete="email"')}`, async (formulario) => {
       await api(`/negocios/${id}/correo-administrador`, 'PATCH', { correo: formulario.get('correo').trim() });
       invalidarDetalleNegocio();
     });
@@ -58,7 +58,7 @@ export function accionNegocio(accion, valor = null) {
   if (accion === 'limites-usuarios' && detalle?.cupoUsuarios) {
     // El diálogo conserva el borrador ante 400/409. Nunca sustituye el cupo
     // leído del servidor por una cuenta calculada desde listas locales.
-    abrirFormulario('Cambiar cupos de usuarios', `<p class="form-intro">El mínimo de cada rol es uno. No puedes reducir un límite por debajo de las cuentas activas.</p>
+    abrirFormulario('Cambiar cupos de usuarios', `<p class="introduccion-formulario">El mínimo de cada rol es uno. No puedes reducir un límite por debajo de las cuentas activas.</p>
       ${campo('Límite de profesionales activos', 'profesionales', detalle.cupoUsuarios.profesionales.limite, 'number', 'required min="1" step="1"')}
       ${campo('Límite de recepcionistas activos', 'recepcionistas', detalle.cupoUsuarios.recepcionistas.limite, 'number', 'required min="1" step="1"')}`, async (formulario) => {
       await guardarLimitesUsuarios(id, { profesionales: Number(formulario.get('profesionales')),
@@ -74,7 +74,7 @@ export function accionNegocio(accion, valor = null) {
   }, 'Recuperación encolada.');
   if (accion === 'suspender' && detalle?.vigencia?.estado === 'vigente') {
     // Se muestra un borrador; el cuerpo exacto queda congelado al primer POST.
-    const dialogo = abrirDialogo('Programar suspensión', `<form id="licencia-formulario-suspension" class="dialog-body"><p>El plazo inicia en dos días. Cero bloquea el acceso inmediatamente; el bloqueo programado que responda el servidor será la fecha efectiva.</p><label for="licencia-plazo">Plazo en días</label><input class="form-control" id="licencia-plazo" name="plazoDias" type="number" min="0" max="30" step="1" value="2" required>${espacioErrorFormulario}<div class="dialog-footer"><button type="button" class="btn btn-light" data-dismiss>Cancelar</button><button type="submit" class="btn btn-danger negocio-boton-suspender">Programar suspensión</button></div></form>`);
+    const dialogo = abrirDialogo('Programar suspensión', `<form id="licencia-formulario-suspension" class="dialogo-cuerpo"><p>El plazo inicia en dos días. Cero bloquea el acceso inmediatamente; el bloqueo programado que responda el servidor será la fecha efectiva.</p><label for="licencia-plazo">Plazo en días</label><input class="form-control" id="licencia-plazo" name="plazoDias" type="number" min="0" max="30" step="1" value="2" required>${espacioErrorFormulario}<div class="dialogo-pie"><button type="button" class="btn btn-light" data-dismiss>Cancelar</button><button type="submit" class="btn btn-danger negocio-boton-suspender">Programar suspensión</button></div></form>`);
     dialogo.querySelector('[data-dismiss]').onclick = () => dialogo.close();
     dialogo.querySelector('form').onsubmit = async (evento) => {
       evento.preventDefault();
@@ -85,7 +85,7 @@ export function accionNegocio(accion, valor = null) {
           { plazoDias: dias }), 'Suspensión solicitada. Consulta el historial para comprobar el correo.');
         dialogo.close();
       } catch (error) {
-        const destino = dialogo.querySelector('#form-error'); destino.textContent = error.message;
+        const destino = dialogo.querySelector('#error-formulario'); destino.textContent = error.message;
         destino.hidden = false; destino.focus();
       } finally { botonEnviar.disabled = false; }
     };
