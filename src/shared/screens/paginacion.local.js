@@ -1,4 +1,4 @@
-import { escape } from '../ui.js';
+import { escaparHtml } from '../interfaz.componentes.js';
 
 const TAMANO_PAGINA = 10;
 
@@ -17,5 +17,5 @@ export function renderPaginacionLocal(resultado, etiqueta, tipo, atributo = 'dat
   if (!resultado.total) return '';
   const primeraFila = (resultado.pagina - 1) * TAMANO_PAGINA + 1;
   const ultimaFila = Math.min(resultado.pagina * TAMANO_PAGINA, resultado.total);
-  return `<div class="paginacion-local"><p role="status">Mostrando ${primeraFila}–${ultimaFila} de ${resultado.total} ${escape(etiqueta)}</p>${resultado.total > TAMANO_PAGINA ? `<nav aria-label="Paginación de ${escape(etiqueta)}"><button type="button" class="btn btn-light" ${atributo}="${resultado.pagina - 1}" data-tipo-catalogo="${escape(tipo)}" ${resultado.pagina === 1 ? 'disabled' : ''}>Anterior</button><span>Página ${resultado.pagina} de ${resultado.paginas}</span><button type="button" class="btn btn-light" ${atributo}="${resultado.pagina + 1}" data-tipo-catalogo="${escape(tipo)}" ${resultado.pagina === resultado.paginas ? 'disabled' : ''}>Siguiente</button></nav>` : ''}</div>`;
+  return `<div class="paginacion-local"><p role="status">Mostrando ${primeraFila}–${ultimaFila} de ${resultado.total} ${escaparHtml(etiqueta)}</p>${resultado.total > TAMANO_PAGINA ? `<nav aria-label="Paginación de ${escaparHtml(etiqueta)}"><button type="button" class="btn btn-light" ${atributo}="${resultado.pagina - 1}" data-tipo-catalogo="${escaparHtml(tipo)}" ${resultado.pagina === 1 ? 'disabled' : ''}>Anterior</button><span>Página ${resultado.pagina} de ${resultado.paginas}</span><button type="button" class="btn btn-light" ${atributo}="${resultado.pagina + 1}" data-tipo-catalogo="${escaparHtml(tipo)}" ${resultado.pagina === resultado.paginas ? 'disabled' : ''}>Siguiente</button></nav>` : ''}</div>`;
 }

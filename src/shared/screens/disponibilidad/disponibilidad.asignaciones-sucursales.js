@@ -1,4 +1,4 @@
-import { escape as esc } from '../../ui.js';
+import { escaparHtml as esc } from '../../interfaz.componentes.js';
 
 const borradores = new Map();
 const ordenarIds = (ids) => [...ids].map(Number).sort((a, b) => a - b);

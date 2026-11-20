@@ -1,11 +1,11 @@
-import { api, user as usuario, etiquetaRol } from '../../backend.js';
-import { render } from '../../../shared/app.js';
-import { icon } from '../../../shared/icons.js';
-import { escape, pageHead } from '../../../shared/ui.js';
+import { api, usuarioActual as usuario, etiquetaRol } from '../../backend.js';
+import { render } from '../../../shared/aplicacion.nucleo.js';
+import { renderIcono } from '../../../shared/iconos.catalogo.js';
+import { escaparHtml, renderEncabezadoPagina } from '../../../shared/interfaz.componentes.js';
 import { progresoLicencia } from './licencia.progreso.js';
 import './cuenta.estilos.css';
-import { db } from '../../../shared/data.js';
-import { renderAccountPortal, bindAccountPortal } from '../../../shared/account-portal.js';
+import { datosAplicacion } from '../../../shared/aplicacion.datos.js';
+import { renderPortalCuenta, vincularPortalCuenta } from '../../../shared/cuenta.portal.js';
 import '../../../shared/account-portal.css';
 import { leerPublicacionPrecios, guardarPublicacionPrecios } from '../../modules/publicacion/publicacion.precios.js';
 import { renderPublicacionPrecios } from './cuenta.publicacion-precios.js';
@@ -81,31 +81,31 @@ export async function consultarLicenciaPropia() {
 function renderContenidoLicencia() {
   if (!licencia) {
     return '<p class="cuenta-licencia-mensaje" role="' + (error ? 'alert' : 'status') + '">' +
-      (error ? escape(error.message) : cargando ? 'Consultando vigencia…' : 'Sin datos de licencia.') + '</p>';
+      (error ? escaparHtml(error.message) : cargando ? 'Consultando vigencia…' : 'Sin datos de licencia.') + '</p>';
   }
   const progreso = progresoLicencia(licencia);
   const estado = licencia.estado || 'pendiente';
   const tiempo = licencia.tiempoRestante;
   const contenidoProgreso = progreso
     ? '<div class="cuenta-licencia-progreso"><div class="cuenta-encabezado-progreso"><span>Vigencia restante</span><strong>' +
-      escape(textoTiempoRestante(tiempo)) + '</strong></div><progress max="100" value="' +
+      escaparHtml(textoTiempoRestante(tiempo)) + '</strong></div><progress max="100" value="' +
       progreso.valor + '" aria-label="Porcentaje restante de la vigencia total de la licencia">' +
       progreso.valor + '%</progress><p>' +
       'Calculada sobre la vigencia total de tu licencia, incluidas renovaciones.' +
       '</p></div>'
     : '<p class="cuenta-licencia-mensaje">Aún no hay tiempo restante disponible.</p>';
   return '<div class="cuenta-licencia-resumen"><div><span class="cuenta-antetitulo">Tiempo restante</span>' +
-    '<strong class="cuenta-licencia-dias">' + (tiempo ? escape(String(tiempo.dias)) : '—') +
+    '<strong class="cuenta-licencia-dias">' + (tiempo ? escaparHtml(String(tiempo.dias)) : '—') +
     '<span> días</span></strong><p>Tu acceso al negocio</p></div>' +
-    '<span class="cuenta-licencia-estado is-' + escape(estado) + '">' + escape(nombreEstadoLicencia(estado)) + '</span></div>' +
+    '<span class="cuenta-licencia-estado is-' + escaparHtml(estado) + '">' + escaparHtml(nombreEstadoLicencia(estado)) + '</span></div>' +
     contenidoProgreso +
-    '<div class="cuenta-licencia-datos"><div><span>Vencimiento</span><strong>' + escape(textoFecha(licencia.venceEn)) +
+    '<div class="cuenta-licencia-datos"><div><span>Vencimiento</span><strong>' + escaparHtml(textoFecha(licencia.venceEn)) +
     '</strong></div><div><span>Bloqueo programado</span><strong>' +
-    escape(textoFecha(licencia.bloqueoProgramadoEn)) + '</strong></div></div>';
+    escaparHtml(textoFecha(licencia.bloqueoProgramadoEn)) + '</strong></div></div>';
 }
 
 export function cuenta() {
-  bindAccountPortal(document);
+  vincularPortalCuenta(document);
   if (usuario.rol === 'admin_negocio' && publicacion.usuarioId !== usuario.id && !publicacion.cargando) void consultarPublicacionPrecios();
   if (usuario.rol !== 'superadmin' && usuarioIdLicencia !== usuario.id) {
     usuarioIdLicencia = usuario.id;
@@ -113,32 +113,32 @@ export function cuenta() {
     cargando = true;
     void consultarLicenciaPropia();
   }
-  const nombre = escape(usuario.nombre || 'Mi cuenta');
-  const rol = escape(etiquetaRol(usuario.rol));
-  const correo = escape(usuario.email || '—');
+  const nombre = escaparHtml(usuario.nombre || 'Mi cuenta');
+  const rol = escaparHtml(etiquetaRol(usuario.rol));
+  const correo = escaparHtml(usuario.email || '—');
   return '<div class="cuenta-pagina">' +
-    pageHead('Mi cuenta', 'Consulta los datos de tu acceso y la vigencia de tu licencia.') +
+    renderEncabezadoPagina('Mi cuenta', 'Consulta los datos de tu acceso y la vigencia de tu licencia.') +
     '<section class="surface cuenta-identidad" aria-label="Perfil de cuenta">' +
-    '<span class="cuenta-avatar" aria-hidden="true">' + escape(iniciales(usuario.nombre)) + '</span>' +
+    '<span class="cuenta-avatar" aria-hidden="true">' + escaparHtml(iniciales(usuario.nombre)) + '</span>' +
     '<div class="cuenta-texto-identidad"><span class="cuenta-antetitulo">Perfil de cuenta</span><h2>' + nombre +
     '</h2><p>' + correo + '</p></div><span class="cuenta-rol">' + rol + '</span></section>' +
     '<div class="cuenta-cuadricula"><section class="surface cuenta-seccion"><div class="cuenta-encabezado-seccion">' +
-    '<span class="cuenta-icono-seccion" aria-hidden="true">' + icon('user') + '</span>' +
+    '<span class="cuenta-icono-seccion" aria-hidden="true">' + renderIcono('user') + '</span>' +
     '<div><h2>Datos de acceso</h2><p>Información vinculada a tu sesión.</p></div></div>' +
     '<dl class="cuenta-datos"><div><dt>Nombre</dt><dd>' + nombre + '</dd></div>' +
     '<div><dt>Correo electrónico</dt><dd>' + correo + '</dd></div>' +
     '<div><dt>Rol</dt><dd>' + rol + '</dd></div></dl></section>' +
     '<section class="surface cuenta-seccion cuenta-seguridad"><div class="cuenta-encabezado-seccion">' +
-    '<span class="cuenta-icono-seccion" aria-hidden="true">' + icon('lock') + '</span>' +
+    '<span class="cuenta-icono-seccion" aria-hidden="true">' + renderIcono('lock') + '</span>' +
     '<div><h2>Seguridad</h2><p>Controla el acceso a tu cuenta.</p></div></div>' +
     '<div class="cuenta-acciones-seguridad"><button type="button" class="btn btn-primary" data-action="cambiar-contrasena-cuenta">' +
-    icon('lock') + 'Cambiar contraseña</button>' +
+    renderIcono('lock') + 'Cambiar contraseña</button>' +
     '<button type="button" class="btn btn-light" data-action="cerrar-sesion-cuenta">Cerrar sesión</button></div></section></div>' +
-    renderAccountPortal({ user: usuario, tenant: db.tenants.find((tenant) => tenant.id === usuario.negocioId), origin: location.origin }) +
+    renderPortalCuenta({ usuario: usuario, negocio: datosAplicacion.tenants.find((tenant) => tenant.id === usuario.negocioId), origen: location.origin }) +
     (usuario.rol === 'admin_negocio' ? renderPublicacionPrecios(publicacion) : '') +
     (usuario.rol === 'superadmin' ? '' :
       '<section class="surface cuenta-seccion cuenta-licencia"><div class="cuenta-encabezado-seccion">' +
-      '<span class="cuenta-icono-seccion" aria-hidden="true">' + icon('calendar') + '</span>' +
+      '<span class="cuenta-icono-seccion" aria-hidden="true">' + renderIcono('calendar') + '</span>' +
       '<div><h2>Licencia del negocio</h2><p>Estado de vigencia de tu acceso.</p></div>' +
       '<button type="button" class="btn btn-light cuenta-actualizar" data-action="consultar-licencia-propia">Actualizar estado</button>' +
       '</div>' + renderContenidoLicencia() + '</section>') +

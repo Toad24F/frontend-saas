@@ -1,16 +1,16 @@
-import { loadBackendData, user } from '../../backend.js';
+import { cargarDatosBackend, usuarioActual } from '../../backend.js';
 import { inhabilitarSucursal } from '../../modules/sucursales/sucursales.operaciones.js';
-import { render, state } from '../../../shared/app.js';
-import { resource } from '../../../shared/data.js';
-import { errorSlot } from '../../../shared/forms.js';
-import { escape, modal, toast } from '../../../shared/ui.js';
+import { render, estadoAplicacion } from '../../../shared/aplicacion.nucleo.js';
+import { obtenerRecurso } from '../../../shared/aplicacion.datos.js';
+import { espacioErrorFormulario } from '../../../shared/formularios.componentes.js';
+import { escaparHtml, abrirDialogo, mostrarAviso } from '../../../shared/interfaz.componentes.js';
 
 export function confirmarInhabilitacionSucursal(id) {
-  if (user?.rol !== 'admin_negocio' || state.page !== 'sucursales') return;
-  const sucursal = resource('branches', id, state.tenantId);
+  if (usuarioActual?.rol !== 'admin_negocio' || estadoAplicacion.pagina !== 'sucursales') return;
+  const sucursal = obtenerRecurso('branches', id, estadoAplicacion.negocioId);
   // No se promete que el retiro libere un cupo: la lectura posterior del
   // servidor decide cuántas sucursales activas quedan disponibles.
-  const dialogo = modal('Inhabilitar sucursal', `<div class="dialog-body"><p><strong>${escape(sucursal.name)}</strong> saldrá de los listados operativos. Podrás consultarla en Inhabilitados y restaurarla como inactiva más adelante.</p>${errorSlot}</div><div class="dialog-footer"><button type="button" class="btn btn-light" data-dismiss>Cancelar</button><button type="button" class="btn action-danger" data-confirm>Inhabilitar sucursal</button></div>`);
+  const dialogo = abrirDialogo('Inhabilitar sucursal', `<div class="dialog-body"><p><strong>${escaparHtml(sucursal.name)}</strong> saldrá de los listados operativos. Podrás consultarla en Inhabilitados y restaurarla como inactiva más adelante.</p>${espacioErrorFormulario}</div><div class="dialog-footer"><button type="button" class="btn btn-light" data-dismiss>Cancelar</button><button type="button" class="btn action-danger" data-confirm>Inhabilitar sucursal</button></div>`);
   dialogo.querySelector('[data-dismiss]').onclick = () => dialogo.close();
   dialogo.querySelector('[data-confirm]').onclick = async (evento) => {
     const boton = evento.currentTarget;
@@ -20,8 +20,8 @@ export function confirmarInhabilitacionSucursal(id) {
     try {
       await inhabilitarSucursal(sucursal.id);
       dialogo.close();
-      try { await loadBackendData(); render(); toast('Sucursal inhabilitada.'); }
-      catch (error) { toast(`Sucursal inhabilitada. No se pudo actualizar la lista y el cupo: ${error.message}`); }
+      try { await cargarDatosBackend(); render(); mostrarAviso('Sucursal inhabilitada.'); }
+      catch (error) { mostrarAviso(`Sucursal inhabilitada. No se pudo actualizar la lista y el cupo: ${error.message}`); }
     } catch (error) {
       const destino = dialogo.querySelector('#form-error');
       destino.textContent = error.message;

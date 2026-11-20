@@ -1,4 +1,4 @@
-import { replaceData } from '../../../shared/data.js';
+import { reemplazarDatos } from '../../../shared/aplicacion.datos.js';
 
 const baseApi = (import.meta.env?.VITE_API_URL || 'http://localhost:3000').replace(/\/$/, '');
 const claveSesion = 'cita-session';
@@ -46,7 +46,7 @@ export async function api(ruta, method = 'GET', cuerpo, opciones = {}) {
 }
 function limpiarSesion(limpiarPersistente = true) {
   const tokenAnterior = token;
-  token = null; usuarioActual = null; replaceData(undefined);
+  token = null; usuarioActual = null; reemplazarDatos(undefined);
   guardarToken('sessionStorage', null);
   if (limpiarPersistente && (!leerToken('localStorage') || leerToken('localStorage') === tokenAnterior)) guardarToken('localStorage', null);
 }

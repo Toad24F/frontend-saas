@@ -1,9 +1,9 @@
-import { api, loadBackendData, user } from '../../backend.js';
+import { api, cargarDatosBackend, usuarioActual } from '../../backend.js';
 import { ejecutarAccionProfesional } from '../../modules/profesionales/profesionales.operaciones.js';
-import { render, state } from '../../../shared/app.js';
-import { resource } from '../../../shared/data.js';
-import { errorSlot } from '../../../shared/forms.js';
-import { escape, modal, toast } from '../../../shared/ui.js';
+import { render, estadoAplicacion } from '../../../shared/aplicacion.nucleo.js';
+import { obtenerRecurso } from '../../../shared/aplicacion.datos.js';
+import { espacioErrorFormulario } from '../../../shared/formularios.componentes.js';
+import { escaparHtml, abrirDialogo, mostrarAviso } from '../../../shared/interfaz.componentes.js';
 import { leerCupoRolPropio, renderAvisoCupoPropio } from '../negocio/usuarios.cupo.js';
 
 const operaciones = {
@@ -13,10 +13,10 @@ const operaciones = {
 };
 
 export async function accionProfesional(accion, id) {
-  if (user?.rol !== 'admin_negocio' || state.page !== 'profesionales' || !operaciones[accion]) return;
-  const persona = resource('professionals', id, state.tenantId);
+  if (usuarioActual?.rol !== 'admin_negocio' || estadoAplicacion.pagina !== 'profesionales' || !operaciones[accion]) return;
+  const persona = obtenerRecurso('professionals', id, estadoAplicacion.negocioId);
   if (accion === 'desactivar' && persona.active === false || accion === 'reactivar' && persona.active !== false) {
-    toast('El estado de este profesional cambió. Actualiza la lista.');
+    mostrarAviso('El estado de este profesional cambió. Actualiza la lista.');
     return;
   }
   const operacion = operaciones[accion];
@@ -28,7 +28,7 @@ export async function accionProfesional(accion, id) {
     catch { introduccionCupo = '<p class="form-intro">No se pudo consultar el cupo vigente. El servidor lo comprobará al reactivar.</p>'; }
   }
   // El retiro conserva historial y no equivale a desactivar ni a borrar.
-  const dialogo = modal(operacion.titulo, `<div class="dialog-body">${introduccionCupo}<p><strong>${escape(persona.name)}</strong>: ${operacion.mensaje}</p>${errorSlot}</div><div class="dialog-footer"><button type="button" class="btn btn-light" data-dismiss>Cancelar</button><button type="button" class="btn ${accion === 'reactivar' ? 'btn-primary' : accion === 'inhabilitar' ? 'action-danger' : 'action-caution'}" data-confirm>${operacion.etiqueta}</button></div>`);
+  const dialogo = abrirDialogo(operacion.titulo, `<div class="dialog-body">${introduccionCupo}<p><strong>${escaparHtml(persona.name)}</strong>: ${operacion.mensaje}</p>${espacioErrorFormulario}</div><div class="dialog-footer"><button type="button" class="btn btn-light" data-dismiss>Cancelar</button><button type="button" class="btn ${accion === 'reactivar' ? 'btn-primary' : accion === 'inhabilitar' ? 'action-danger' : 'action-caution'}" data-confirm>${operacion.etiqueta}</button></div>`);
   dialogo.querySelector('[data-dismiss]').onclick = () => dialogo.close();
   dialogo.querySelector('[data-confirm]').onclick = async (evento) => {
     const boton = evento.currentTarget;
@@ -37,10 +37,10 @@ export async function accionProfesional(accion, id) {
     boton.textContent = 'Procesando…';
     try {
       await ejecutarAccionProfesional(persona.id, accion);
-      if (accion === 'inhabilitar' && state.profesionalHorario === persona.id) state.profesionalHorario = null;
+      if (accion === 'inhabilitar' && estadoAplicacion.profesionalHorario === persona.id) estadoAplicacion.profesionalHorario = null;
       dialogo.close();
-      try { await loadBackendData(); render(); toast(operacion.exito); }
-      catch (error) { toast(`${operacion.exito} No se pudo actualizar la lista: ${error.message}`); }
+      try { await cargarDatosBackend(); render(); mostrarAviso(operacion.exito); }
+      catch (error) { mostrarAviso(`${operacion.exito} No se pudo actualizar la lista: ${error.message}`); }
     } catch (error) {
       const destino = dialogo.querySelector('#form-error');
       destino.textContent = error.message;

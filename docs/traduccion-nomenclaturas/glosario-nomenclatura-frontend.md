@@ -258,3 +258,49 @@ Este glosario se aplica al código nuevo desde su fecha de cierre. La migración
 
 El [resultado de Agenda](resultado-agenda-2026-11-18.md) registra la correspondencia de archivos y los contratos compartidos.
 
+## Equivalencias de Plataforma, permisos y recursos inhabilitados
+
+| Nombre anterior | Nombre adoptado |
+| --- | --- |
+| `platform`, `switchTenant`, `newTenant` | `plataforma`, `cambiarEspacioTrabajo`, `registrarNegocio` |
+| `directoryState`, `directoryHtml`, `directoryResults`, `bindDirectory` | `estadoDirectorio`, `renderDirectorio`, `renderResultadosDirectorio`, `vincularDirectorio` |
+| `directoryPage`, `matchesFollowUp`, `remainingLabel` | `paginarDirectorio`, `coincideSeguimiento`, `textoTiempoRestante` |
+| `query`, `license`, `followUp`, `page` del directorio | `busqueda`, `estadoLicencia`, `seguimiento`, `pagina` |
+| `pending`, `expiring`, `blocked`, `failed` de seguimiento | `por-activar`, `por-vencer`, `acceso-bloqueado`, `correos-fallidos` |
+| `pagesForRole`, `defaultPage`, `availablePage` | `paginasPorRol`, `paginaInicial`, `paginaPermitida` |
+| `canConsultRetired`, `readRetiredList`, `readRetiredDetail`, `restoreRetired`, `disableReceptionist` | `puedeConsultarInhabilitados`, `listarInhabilitados`, `consultarDetalleInhabilitado`, `restaurarInhabilitado`, `inhabilitarRecepcionista` |
+| `retiredSection`, `handleRetiredClick`, `readResourceEffects`, `effectReasons` | `renderAccesoInhabilitados`, `handleClicInhabilitados`, `consultarCitasAfectadas`, `motivosAfectacion` |
+| Prefijos CSS y `data-*` de estas vistas | `platform-` → `plataforma-`, `retired-` → `inhabilitados-` |
+
+El [resultado de Plataforma, permisos y recursos inhabilitados](resultado-plataforma-permisos-recursos-2026-11-20.md) registra las rutas de archivo y las interfaces conservadas.
+
+## Equivalencias de las pantallas restantes de la demo
+
+| Nombre anterior | Nombre adoptado |
+| --- | --- |
+| `loadData`, `validateSchedules`, `appointmentCovered` | `cargarDatosDemo`, `validarFranjasDemo`, `citaCubiertaPorHorarioDemo` |
+| `overview`, `reports`, `settings`, `notifications` | `renderResumenDemo`, `renderReportesDemo`, `renderConfiguracionDemo`, `renderNotificacionesDemo` |
+| `reportData`, `reportState` | `filtrarCitasReporte`, `estadoReportes` |
+| `from`, `to`, `branch`, `all` en los filtros de Reportes | `desde`, `hasta`, `sucursal`, `todas` |
+| `filter-reports`, `export-report` | `filtrar-reportes`, `imprimir-reporte` |
+| `business-form`, `notification-form` | `formulario-negocio-demo`, `formulario-notificaciones-demo` |
+| `confirmations`, `reminders`, `reminder` del negocio ficticio | `confirmacionesActivas`, `recordatoriosActivos`, `horasRecordatorio` |
+
+Las rutas de archivo, los cambios de selectores y sus comprobaciones se registran en el [resultado de la demo](resultado-demo-restante-2026-11-20.md).
+
+## Equivalencias del núcleo compartido
+
+| Nombre anterior | Nombre adoptado |
+| --- | --- |
+| `boot`, `resolveEntry`, `start`, `renderView` | `iniciarEntrada`, `resolverEntrada`, `iniciarAplicacion`, `renderPantalla` |
+| `state`, `navigate`, `renderShell`, `handleClick` | `estadoAplicacion`, `navegar`, `renderEstructuraAplicacion`, `handleClicAplicacion` |
+| `tenantId`, `page`, `calendarView`, `date` del estado volátil | `negocioId`, `pagina`, `vistaCalendario`, `fecha` |
+| `branch`, `professional`, `status`, `search`, `agendaHistory`, `businessId` del estado volátil | `sucursal`, `profesional`, `estadoCita`, `busqueda`, `historialAgenda`, `detalleNegocioId` |
+| `db`, `replaceData`, `list`, `resource`, `tenantById`, `appointmentInfo` | `datosAplicacion`, `reemplazarDatos`, `listarRegistros`, `obtenerRecurso`, `obtenerNegocio`, `ampliarDatosCita` |
+| `TODAY`, `date`, `iso`, `addDays`, `time`, `minutes` | `HOY`, `crearFecha`, `fechaIso`, `sumarDias`, `minutosAHora`, `horaAMinutos` |
+| `escape`, `modal`, `toast`, `pageHead`, `empty`, `badge`, `button`, `icon` | `escaparHtml`, `abrirDialogo`, `mostrarAviso`, `renderEncabezadoPagina`, `renderEstadoVacio`, `renderEtiquetaEstado`, `renderBoton`, `renderIcono` |
+| `field`, `select`, `basicForm`, `errorSlot`, `formError` | `renderCampo`, `renderSelector`, `abrirFormulario`, `espacioErrorFormulario`, `mostrarErrorFormulario` |
+| `calendarColumns`, `resourceStatus` | `columnasCalendario`, `estadoRecurso` |
+| `accountPortalUrl`, `renderAccountPortal`, `copyAccountPortal`, `bindAccountPortal` | `urlPortalCuenta`, `renderPortalCuenta`, `copiarEnlacePortalCuenta`, `vincularPortalCuenta` |
+| `isDemo`, `pending`, `modeUrl`, `loadBackendData`, `user` de la fachada | `esDemo`, `mensajePendiente`, `urlSegunModo`, `cargarDatosBackend`, `usuarioActual` |
+

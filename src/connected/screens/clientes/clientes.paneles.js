@@ -1,6 +1,6 @@
-import { api, user } from '../../backend.js';
-import { escape as esc } from '../../../shared/ui.js';
-import { field } from '../../../shared/forms.js';
+import { api, usuarioActual } from '../../backend.js';
+import { escaparHtml as esc } from '../../../shared/interfaz.componentes.js';
+import { renderCampo } from '../../../shared/formularios.componentes.js';
 import {
   panelAgenda,
   borradorAgenda,
@@ -22,7 +22,7 @@ const clientesClient = crearClientesClient(api);
 let generacion = 0,
   destinoFoco;
 const identidadSesion = () =>
-  user ? `${user.negocioId}:${user.id}:${user.sesionId || ''}` : '';
+  usuarioActual ? `${usuarioActual.negocioId}:${usuarioActual.id}:${usuarioActual.sesionId || ''}` : '';
 const valorHistorico = (valor) =>
   valor == null ? 'Sin registro histórico' : String(valor);
 window.addEventListener('cita-sesion-expirada', () => {
@@ -56,7 +56,7 @@ function renderPaginacion(pagina, hayMas) {
   return `<div class="agenda-paginas-historial"><button class="btn btn-light" data-historial-cliente-anterior ${pagina === 1 ? 'disabled' : ''}>Página anterior</button><span>Página ${pagina}</span><button class="btn btn-light" data-historial-cliente-siguiente ${!hayMas ? 'disabled' : ''}>Siguiente página</button></div>`;
 }
 export async function abrirFichaCliente(id, alCambiar) {
-  if (!puedeGestionarCitas(user?.rol)) return;
+  if (!puedeGestionarCitas(usuarioActual?.rol)) return;
   const revisionPanel = ++generacion,
     identidad = identidadSesion();
   const dialogo = abrirPanelCliente(
@@ -125,14 +125,14 @@ export async function abrirFichaCliente(id, alCambiar) {
   }
 }
 export function abrirEditorCliente(ficha, alCambiar) {
-  if (!puedeGestionarCitas(user?.rol)) return;
+  if (!puedeGestionarCitas(usuarioActual?.rol)) return;
   const revisionPanel = ++generacion,
     identidad = identidadSesion(),
     clave = `cliente:${identidad}:${ficha?.id ?? 'nuevo'}`,
     borrador = borradorAgenda(clave);
   const dialogo = abrirPanelCliente(
     ficha ? 'Corregir ficha' : 'Nuevo cliente',
-    `<form><div class="dialog-body"><p class="form-intro">${ficha ? 'Corrige los datos actuales de esta persona. Las citas anteriores no se modifican.' : 'Crea una ficha independiente. Dos personas pueden compartir el mismo teléfono.'}</p>${field('Nombre completo', 'nombreCompleto', borrador?.nombreCompleto ?? ficha?.nombreCompleto ?? '', 'text', 'required autocomplete="off"')}${field('Teléfono', 'telefono', borrador?.telefono ?? ficha?.telefono ?? '', 'tel', 'required autocomplete="off" inputmode="tel"')}<p class="field-hint">Nombre: hasta 150 caracteres. Teléfono: diez dígitos; puedes incluir +52, espacios o guiones.</p><p class="form-error" data-ficha-error role="alert" tabindex="-1" hidden></p><p class="field-hint aviso-cliente" data-ficha-alta-incierta hidden>El alta puede haberse guardado aunque no se reciba confirmación. Revisa elemento directorio antes de descartar este borrador y crear otra ficha.</p><button type="button" class="btn btn-light" data-ficha-releer hidden>${ficha ? 'Releer ficha' : 'Revisar directorio'}</button>${!ficha ? '<button type="button" class="btn btn-light" data-ficha-descartar hidden>Descartar borrador</button>' : ''}</div><div class="dialog-footer"><button type="button" class="btn btn-light" data-ficha-cerrar>Cerrar</button><button type="submit" class="btn btn-primary">Guardar ficha</button></div></form>`,
+    `<form><div class="dialog-body"><p class="form-intro">${ficha ? 'Corrige los datos actuales de esta persona. Las citas anteriores no se modifican.' : 'Crea una ficha independiente. Dos personas pueden compartir el mismo teléfono.'}</p>${renderCampo('Nombre completo', 'nombreCompleto', borrador?.nombreCompleto ?? ficha?.nombreCompleto ?? '', 'text', 'required autocomplete="off"')}${renderCampo('Teléfono', 'telefono', borrador?.telefono ?? ficha?.telefono ?? '', 'tel', 'required autocomplete="off" inputmode="tel"')}<p class="field-hint">Nombre: hasta 150 caracteres. Teléfono: diez dígitos; puedes incluir +52, espacios o guiones.</p><p class="form-error" data-ficha-error role="alert" tabindex="-1" hidden></p><p class="field-hint aviso-cliente" data-ficha-alta-incierta hidden>El alta puede haberse guardado aunque no se reciba confirmación. Revisa elemento directorio antes de descartar este borrador y crear otra ficha.</p><button type="button" class="btn btn-light" data-ficha-releer hidden>${ficha ? 'Releer ficha' : 'Revisar directorio'}</button>${!ficha ? '<button type="button" class="btn btn-light" data-ficha-descartar hidden>Descartar borrador</button>' : ''}</div><div class="dialog-footer"><button type="button" class="btn btn-light" data-ficha-cerrar>Cerrar</button><button type="submit" class="btn btn-primary">Guardar ficha</button></div></form>`,
   );
   const formulario = dialogo.querySelector('form'),
     guardar = formulario.querySelector('[type="submit"]'),
@@ -145,7 +145,7 @@ export function abrirEditorCliente(ficha, alCambiar) {
     (valores) =>
       ficha ? clientesClient.corregir(ficha.id, valores) : clientesClient.crear(valores),
     (resultado) =>
-      resultado.negocioId === user?.negocioId &&
+      resultado.negocioId === usuarioActual?.negocioId &&
       (!ficha || resultado.version >= ficha.version),
   );
   mutacion.state.stale = Boolean(

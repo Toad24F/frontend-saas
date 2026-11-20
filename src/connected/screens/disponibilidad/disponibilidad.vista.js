@@ -1,7 +1,7 @@
-import { api, user } from '../../backend.js';
-import { state, render } from '../../../shared/app.js';
-import { list, TODAY, addDays, formatDate } from '../../../shared/data.js';
-import { escape as esc, empty } from '../../../shared/ui.js';
+import { api, usuarioActual } from '../../backend.js';
+import { estadoAplicacion, render } from '../../../shared/aplicacion.nucleo.js';
+import { listarRegistros, HOY, sumarDias, formatearFecha } from '../../../shared/aplicacion.datos.js';
+import { escaparHtml as esc, renderEstadoVacio } from '../../../shared/interfaz.componentes.js';
 import { renderDisponibilidadSemanal } from '../../../shared/screens/disponibilidad/disponibilidad.vista.js';
 import { renderPanelOferta } from '../../../shared/screens/disponibilidad/disponibilidad.oferta.js';
 import { renderFormularioAsignaciones, bloqueosDeAsignacion } from '../../../shared/screens/disponibilidad/disponibilidad.asignaciones-sucursales.js';
@@ -14,27 +14,27 @@ import { guardarReglasAgenda } from '../../modules/disponibilidad/disponibilidad
 let datosPerfil = null;
 let cargaPerfil = null;
 let proyeccion = null;
-let rango = { from: TODAY, to: addDays(TODAY, 13) };
+let rango = { from: HOY, to: sumarDias(HOY, 13) };
 let configuracion = { cargado: false, ocupado: false, datos: null, borrador: null, errores: {}, error: '' };
 let consulta = {
   ocupado: false, resultado: null, error: '', errores: {}, desactualizado: false,
-  filtros: { personalId: '', sucursalId: '', servicioId: '', from: TODAY, to: addDays(TODAY, 6), modalidad: 'publica' },
+  filtros: { personalId: '', sucursalId: '', servicioId: '', from: HOY, to: sumarDias(HOY, 6), modalidad: 'publica' },
   validacion: { ocupado: false, resultado: null, error: '', date: '', time: '' },
 };
 let afectadas = {
   ocupado: false, resultado: null, error: '', errores: {}, desactualizado: false,
-  filtros: { personalId: '', sucursalId: '', from: TODAY, to: addDays(TODAY, 6) },
+  filtros: { personalId: '', sucursalId: '', from: HOY, to: sumarDias(HOY, 6) },
 };
 
 export function consultarProfesionalHorario() {
-  const profesionales = list('professionals', state.tenantId);
-  return profesionales.find((persona) => persona.id === Number(state.profesionalHorario)) || profesionales[0];
+  const profesionales = listarRegistros('professionals', estadoAplicacion.negocioId);
+  return profesionales.find((persona) => persona.id === Number(estadoAplicacion.profesionalHorario)) || profesionales[0];
 }
 
 const mensajeSeguro = (error) => [403, 404].includes(error.status)
   ? 'La operación o el recurso no está disponible.' : error.message;
 const esFalloTecnico = (error) => !error.status || error.status === 500 || error.status === 503;
-const renderSiDisponible = () => { if (state.page === 'disponibilidad') render(); };
+const renderSiDisponible = () => { if (estadoAplicacion.pagina === 'disponibilidad') render(); };
 
 export async function actualizarDatosDisponibilidad(forzar = false) {
   const persona = consultarProfesionalHorario();
@@ -68,29 +68,29 @@ const ETIQUETAS_MOTIVOS = {
   servicio_inactivo: 'Servicio inactivo', servicio_no_seleccionado: 'No seleccionado en general',
   atencion_inactiva: 'Atención pausada', servicio_no_ofrecido_en_sucursal: 'No seleccionado en esta sucursal',
 };
-const formatearFechaProyeccion = (valor) => formatDate(valor, { day: 'numeric', month: 'short', year: 'numeric' });
-const nombreSucursal = (id) => list('branches', state.tenantId).find((sucursal) => sucursal.id === id)?.name || `Sucursal ${id}`;
+const formatearFechaProyeccion = (valor) => formatearFecha(valor, { day: 'numeric', month: 'short', year: 'numeric' });
+const nombreSucursal = (id) => listarRegistros('branches', estadoAplicacion.negocioId).find((sucursal) => sucursal.id === id)?.name || `Sucursal ${id}`;
 
-function renderSeccionOferta(persona) { return renderPanelOferta(persona, datosPerfil?.oferta, false, user.rol === 'admin_negocio'); }
+function renderSeccionOferta(persona) { return renderPanelOferta(persona, datosPerfil?.oferta, false, usuarioActual.rol === 'admin_negocio'); }
 
 function renderSeccionAsignaciones(persona) {
-  const sucursales = list('branches', state.tenantId);
+  const sucursales = listarRegistros('branches', estadoAplicacion.negocioId);
   return `<section class="surface disponibilidad-seccion-adicional"><div class="section-heading"><div><h2>Sucursales asignadas</h2><p>Elige las sucursales donde puede atender ${esc(persona.name)}. Después configura sus horarios y servicios.</p></div></div>
-    ${sucursales.length ? renderFormularioAsignaciones(persona, sucursales, false, bloqueosDeAsignacion(persona, list('schedules', state.tenantId))) : empty('Sin sucursales disponibles', 'Crea una sucursal en el catálogo antes de asignarla.')}</section>`;
+    ${sucursales.length ? renderFormularioAsignaciones(persona, sucursales, false, bloqueosDeAsignacion(persona, listarRegistros('schedules', estadoAplicacion.negocioId))) : renderEstadoVacio('Sin sucursales disponibles', 'Crea una sucursal en el catálogo antes de asignarla.')}</section>`;
 }
 
 function renderSeccionProyeccion(persona) {
   const datos = proyeccion?.id === persona.id ? proyeccion.resultado : null;
-  return `<section class="surface disponibilidad-seccion-adicional"><div class="section-heading"><div><h2>Proyección de atención</h2><p>Muestra tramos de trabajo; no representa espacios reservables.</p></div></div><form id="formulario-proyeccion" class="proyeccion-filtros" novalidate><label data-disponibilidad-campo="from">Desde<input class="form-control" type="date" name="from" required value="${rango.from}"></label><label data-disponibilidad-campo="to">Hasta<input class="form-control" type="date" name="to" required value="${rango.to}"></label><button class="btn btn-primary" type="submit">Consultar proyección</button><p id="proyeccion-error" class="form-error disponibilidad-error-general" role="alert" tabindex="-1" hidden></p></form><p class="disponibilidad-nota">La proyección no aplica la selección de servicios ni el interruptor individual de atención por sucursal.</p>${datos ? `<div class="proyeccion-resultados"><h3>Intervalos (${datos.intervalos.length})</h3>${datos.intervalos.length ? `<div class="table-responsive"><table class="table app-table align-middle"><thead><tr><th>Fecha</th><th>Sucursal</th><th>Horario local</th></tr></thead><tbody>${datos.intervalos.map((elemento) => `<tr><td>${esc(formatearFechaProyeccion(elemento.fecha))}</td><td>${esc(nombreSucursal(elemento.sucursalId))}</td><td>${etiquetaHoraDesdeMinutos(elemento.inicioMinutos)}–${etiquetaHoraDesdeMinutos(elemento.finMinutos)}</td></tr>`).join('')}</tbody></table></div>` : empty('Sin intervalos', 'No hay tramos de atención en este rango.')}<h3>Omisiones (${datos.omisiones.length})</h3>${datos.omisiones.length ? `<div class="blocks-list">${datos.omisiones.map((elemento) => `<div class="bloqueo-entrada"><div><strong>${esc(formatearFechaProyeccion(elemento.fecha))} · ${esc(nombreSucursal(elemento.sucursalId))}</strong><small>${esc(elemento.motivo)}</small></div></div>`).join('')}</div>` : '<p class="disponibilidad-nota">No se reportaron omisiones.</p>'}</div>` : ''}</section>`;
+  return `<section class="surface disponibilidad-seccion-adicional"><div class="section-heading"><div><h2>Proyección de atención</h2><p>Muestra tramos de trabajo; no representa espacios reservables.</p></div></div><form id="formulario-proyeccion" class="proyeccion-filtros" novalidate><label data-disponibilidad-campo="from">Desde<input class="form-control" type="date" name="from" required value="${rango.from}"></label><label data-disponibilidad-campo="to">Hasta<input class="form-control" type="date" name="to" required value="${rango.to}"></label><button class="btn btn-primary" type="submit">Consultar proyección</button><p id="proyeccion-error" class="form-error disponibilidad-error-general" role="alert" tabindex="-1" hidden></p></form><p class="disponibilidad-nota">La proyección no aplica la selección de servicios ni el interruptor individual de atención por sucursal.</p>${datos ? `<div class="proyeccion-resultados"><h3>Intervalos (${datos.intervalos.length})</h3>${datos.intervalos.length ? `<div class="table-responsive"><table class="table app-table align-middle"><thead><tr><th>Fecha</th><th>Sucursal</th><th>Horario local</th></tr></thead><tbody>${datos.intervalos.map((elemento) => `<tr><td>${esc(formatearFechaProyeccion(elemento.fecha))}</td><td>${esc(nombreSucursal(elemento.sucursalId))}</td><td>${etiquetaHoraDesdeMinutos(elemento.inicioMinutos)}–${etiquetaHoraDesdeMinutos(elemento.finMinutos)}</td></tr>`).join('')}</tbody></table></div>` : renderEstadoVacio('Sin intervalos', 'No hay tramos de atención en este rango.')}<h3>Omisiones (${datos.omisiones.length})</h3>${datos.omisiones.length ? `<div class="blocks-list">${datos.omisiones.map((elemento) => `<div class="bloqueo-entrada"><div><strong>${esc(formatearFechaProyeccion(elemento.fecha))} · ${esc(nombreSucursal(elemento.sucursalId))}</strong><small>${esc(elemento.motivo)}</small></div></div>`).join('')}</div>` : '<p class="disponibilidad-nota">No se reportaron omisiones.</p>'}</div>` : ''}</section>`;
 }
 
 function prepararFiltrosIniciales() {
-  const profesionales = list('professionals', state.tenantId);
-  const sucursales = list('branches', state.tenantId);
-  const servicios = list('services', state.tenantId);
-  const persona = user.rol === 'profesional' ? profesionales[0] : profesionales.find((elemento) => elemento.id === Number(consulta.filtros.personalId)) || profesionales[0];
+  const profesionales = listarRegistros('professionals', estadoAplicacion.negocioId);
+  const sucursales = listarRegistros('branches', estadoAplicacion.negocioId);
+  const servicios = listarRegistros('services', estadoAplicacion.negocioId);
+  const persona = usuarioActual.rol === 'profesional' ? profesionales[0] : profesionales.find((elemento) => elemento.id === Number(consulta.filtros.personalId)) || profesionales[0];
   if (persona && !consulta.filtros.personalId) consulta.filtros.personalId = persona.id;
-  if (persona && !afectadas.filtros.personalId && user.rol === 'profesional') afectadas.filtros.personalId = persona.id;
+  if (persona && !afectadas.filtros.personalId && usuarioActual.rol === 'profesional') afectadas.filtros.personalId = persona.id;
   const sucursalesPermitidas = persona ? sucursales.filter((elemento) => persona.branchIds?.includes(elemento.id)) : sucursales;
   const serviciosPermitidos = persona ? servicios.filter((elemento) => persona.serviceIds?.includes(elemento.id)) : servicios;
   if (!consulta.filtros.sucursalId && sucursalesPermitidas[0]) consulta.filtros.sucursalId = sucursalesPermitidas[0].id;
@@ -99,7 +99,7 @@ function prepararFiltrosIniciales() {
 }
 
 export async function actualizarConfiguracionAgenda() {
-  if (user.rol !== 'admin_negocio' || configuracion.ocupado) return;
+  if (usuarioActual.rol !== 'admin_negocio' || configuracion.ocupado) return;
   configuracion = { ...configuracion, ocupado: true, error: '' };
   renderSiDisponible();
   try {
@@ -112,7 +112,7 @@ export async function actualizarConfiguracionAgenda() {
 }
 
 export async function guardarConfiguracionConectada(valores) {
-  if (user.rol !== 'admin_negocio' || configuracion.ocupado || !configuracion.datos) return false;
+  if (usuarioActual.rol !== 'admin_negocio' || configuracion.ocupado || !configuracion.datos) return false;
   // La frontera valida el reemplazo completo y devuelve el borrador ante 400/503.
   const anterior = configuracion;
   configuracion = { ...anterior, ocupado: true, borrador: valores, error: '', errores: {} };
@@ -175,14 +175,14 @@ export async function consultarCitasAfectadas(filtros = afectadas.filtros) {
 
 export function renderDisponibilidadConectada() {
   const catalogos = prepararFiltrosIniciales();
-  if (user.rol === 'admin_negocio' && !configuracion.cargado && !configuracion.ocupado) void actualizarConfiguracionAgenda();
+  if (usuarioActual.rol === 'admin_negocio' && !configuracion.cargado && !configuracion.ocupado) void actualizarConfiguracionAgenda();
   const panelesOperativos = [];
-  if (user.rol === 'admin_negocio') panelesOperativos.push({ id: 'configuracion', etiqueta: 'Reglas de agenda', contexto: false, contenido: renderPanelConfiguracion(configuracion) });
+  if (usuarioActual.rol === 'admin_negocio') panelesOperativos.push({ id: 'configuracion', etiqueta: 'Reglas de agenda', contexto: false, contenido: renderPanelConfiguracion(configuracion) });
   panelesOperativos.push(
-    { id: 'horarios', etiqueta: 'Horarios disponibles', contexto: false, contenido: renderPanelConsultaHorario({ ...consulta, rol: user.rol, profesionales: catalogos.people, sucursales: catalogos.sucursales, servicios: catalogos.servicios }) },
-    { id: 'afectadas', etiqueta: 'Citas afectadas', contexto: false, contenido: renderPanelCitasAfectadas({ ...afectadas, rol: user.rol, profesionales: catalogos.people, sucursales: catalogos.sucursales, servicios: catalogos.servicios }) },
+    { id: 'horarios', etiqueta: 'Horarios disponibles', contexto: false, contenido: renderPanelConsultaHorario({ ...consulta, rol: usuarioActual.rol, profesionales: catalogos.people, sucursales: catalogos.sucursales, servicios: catalogos.servicios }) },
+    { id: 'afectadas', etiqueta: 'Citas afectadas', contexto: false, contenido: renderPanelCitasAfectadas({ ...afectadas, rol: usuarioActual.rol, profesionales: catalogos.people, sucursales: catalogos.sucursales, servicios: catalogos.servicios }) },
   );
-  if (user.rol === 'recepcionista') return renderDisponibilidadSemanal({ panelesAdicionales: panelesOperativos });
+  if (usuarioActual.rol === 'recepcionista') return renderDisponibilidadSemanal({ panelesAdicionales: panelesOperativos });
 
   const persona = consultarProfesionalHorario();
   if (!persona) return renderDisponibilidadSemanal({ panelesAdicionales: panelesOperativos });
@@ -195,7 +195,7 @@ export function renderDisponibilidadConectada() {
       : null;
   return renderDisponibilidadSemanal({
     panelesAdicionales: [
-      ...(user.rol === 'admin_negocio' ? [{ id: 'sucursales', etiqueta: 'Sucursales asignadas', contenido: renderSeccionAsignaciones(persona) }] : []),
+      ...(usuarioActual.rol === 'admin_negocio' ? [{ id: 'sucursales', etiqueta: 'Sucursales asignadas', contenido: renderSeccionAsignaciones(persona) }] : []),
       { id: 'oferta', etiqueta: 'Oferta por sucursal', contenido: contenidoPendiente || renderSeccionOferta(persona) },
       { id: 'proyeccion', etiqueta: 'Proyección de atención', contenido: contenidoPendiente || renderSeccionProyeccion(persona) },
       ...panelesOperativos,

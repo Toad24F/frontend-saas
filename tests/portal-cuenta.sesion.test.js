@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { iniciarSesion, restaurarSesion, loadBackendData, olvidarSesion, user } from '../src/connected/backend.js';
-import { db } from '../src/shared/data.js';
-import { accountPortalUrl } from '../src/shared/account-portal.js';
+import { iniciarSesion, restaurarSesion, cargarDatosBackend, olvidarSesion, usuarioActual } from '../src/connected/backend.js';
+import { datosAplicacion } from '../src/shared/aplicacion.datos.js';
+import { urlPortalCuenta } from '../src/shared/cuenta.portal.js';
 
 // Solo HTTP doble: sesión privada y catálogos vacíos del negocio propio. Una
 // consulta a /negocios sería un error: sigue siendo exclusiva de superadmin.
@@ -27,28 +27,28 @@ async function withSession(run) {
 
 test('perfil conectado: login carga el slug real y habilita enlace público sin consulta global', async () => {
   await withSession(async ({ calls }) => {
-    await iniciarSesion('admin@example.test', 'credencial-ficticia'); await loadBackendData();
-    assert.equal(db.tenants[0].slug, 'clinica-login');
-    assert.equal(accountPortalUrl({ user, tenant: db.tenants[0], origin: 'https://citalendar.example' }), 'https://citalendar.example/reservas/clinica-login');
+    await iniciarSesion('admin@example.test', 'credencial-ficticia'); await cargarDatosBackend();
+    assert.equal(datosAplicacion.tenants[0].slug, 'clinica-login');
+    assert.equal(urlPortalCuenta({ usuario: usuarioActual, negocio: datosAplicacion.tenants[0], origen: 'https://citalendar.example' }), 'https://citalendar.example/reservas/clinica-login');
     assert.ok(!calls.some((path) => path.startsWith('/negocios')));
   });
 });
 
 test('perfil conectado: restauración reemplaza el identificador anterior por el vigente', async () => {
   await withSession(async ({ setIdentifier }) => {
-    await iniciarSesion('admin@example.test', 'credencial-ficticia'); await loadBackendData();
-    setIdentifier('clinica-actualizada'); await restaurarSesion(); await loadBackendData();
-    assert.equal(db.tenants[0].slug, 'clinica-actualizada');
+    await iniciarSesion('admin@example.test', 'credencial-ficticia'); await cargarDatosBackend();
+    setIdentifier('clinica-actualizada'); await restaurarSesion(); await cargarDatosBackend();
+    assert.equal(datosAplicacion.tenants[0].slug, 'clinica-actualizada');
   });
 });
 
 test('perfil conectado: contrato antiguo o slug inválido bloquea sin reutilizar el enlace anterior', async () => {
   for (const identifier of [undefined, null, '', '../ajeno', 'clinica?demo=1', '<script>']) {
     await withSession(async ({ setIdentifier }) => {
-      await iniciarSesion('admin@example.test', 'credencial-ficticia'); await loadBackendData();
-      setIdentifier(identifier); await restaurarSesion(); await loadBackendData();
-      assert.equal(db.tenants[0].slug, '');
-      assert.equal(accountPortalUrl({ user, tenant: db.tenants[0], origin: 'https://citalendar.example' }), null);
+      await iniciarSesion('admin@example.test', 'credencial-ficticia'); await cargarDatosBackend();
+      setIdentifier(identifier); await restaurarSesion(); await cargarDatosBackend();
+      assert.equal(datosAplicacion.tenants[0].slug, '');
+      assert.equal(urlPortalCuenta({ usuario: usuarioActual, negocio: datosAplicacion.tenants[0], origen: 'https://citalendar.example' }), null);
     });
   }
 });

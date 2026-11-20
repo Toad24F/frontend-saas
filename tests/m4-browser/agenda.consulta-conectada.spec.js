@@ -147,7 +147,7 @@ for (const width of [1366, 390]) for (const theme of ['light', 'dark']) {
 test('paridad con demo: métricas, filtros, cuadrícula y tarjetas en ambos temas y tamaños', async ({ page, context }) => {
   await page.goto('/admin/agenda?demo=1');
   await expect(page.locator('[data-cita]').first()).toBeVisible();
-  const demo = await page.evaluate(async () => (await import('/src/shared/data.js')).db);
+  const demo = await page.evaluate(async () => (await import('/src/shared/aplicacion.datos.js')).datosAplicacion);
   const connected = await context.newPage();
   await connected.clock.setFixedTime(new Date('2026-09-08T18:00:00Z'));
   await prepararSesion(connected);

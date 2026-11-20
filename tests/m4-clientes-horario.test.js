@@ -9,7 +9,7 @@ import {
   crearClientesClient,
 } from '../src/connected/modules/clientes/clientes.client.js';
 import { crearMutacionVersionada } from '../src/connected/modules/agenda/agenda.mutacion-versionada.js';
-import { replaceData, appointmentInfo } from '../src/shared/data.js';
+import { reemplazarDatos, ampliarDatosCita } from '../src/shared/aplicacion.datos.js';
 import {
   corregirClienteDemo,
   moverCitaDemo,
@@ -40,7 +40,7 @@ test('demo: corregir ficha conserva contactos previos y mover conserva identidad
     start: '09:00',
     end: '09:30',
   };
-  replaceData({
+  reemplazarDatos({
     clients: [{ id: 1, tenantId: 1, name: 'Antes', phone: '6145550101' }],
     appointments: [cita],
     services: [{ id: 1, tenantId: 1 }],
@@ -64,7 +64,7 @@ test('demo: corregir ficha conserva contactos previos y mover conserva identidad
     nombreCompleto: 'Después',
     telefono: '6145550101',
   });
-  assert.equal(appointmentInfo(cita).client.name, 'Antes');
+  assert.equal(ampliarDatosCita(cita).client.name, 'Antes');
   moverCitaDemo(7, 1, { fechaLocal: '2030-12-20', horaInicio: '10:00' });
   assert.equal(cita.start, '10:00');
   assert.equal(cita.end, '10:30');

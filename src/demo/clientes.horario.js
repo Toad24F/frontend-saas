@@ -1,13 +1,13 @@
-import { list, resource, minutes, time, TODAY } from '../shared/data.js';
-import { appointmentCovered } from './schedule.js';
+import { listarRegistros, obtenerRecurso, horaAMinutos, minutosAHora, HOY } from '../shared/aplicacion.datos.js';
+import { citaCubiertaPorHorarioDemo } from './demo.horario.js';
 import { crearPayloadCliente } from '../connected/modules/clientes/clientes.client.js';
 import { crearPayloadCambioHorario } from '../connected/modules/agenda/agenda.cambio-horario.js';
 
 // La demo captura el contacto previo antes de corregir una ficha: sus citas mantienen la identidad histórica.
 export function corregirClienteDemo(id, negocioId, valores) {
   const payload = crearPayloadCliente(valores),
-    cliente = resource('clients', id, negocioId);
-  for (const cita of list('appointments', negocioId).filter(
+    cliente = obtenerRecurso('clients', id, negocioId);
+  for (const cita of listarRegistros('appointments', negocioId).filter(
     (fila) => fila.clientId === id,
   ))
     cita.contactoHistorico ??= { ...cliente };
@@ -16,28 +16,28 @@ export function corregirClienteDemo(id, negocioId, valores) {
 // Simulación local: valida franjas, descansos y ocupación sin representar la transacción UTC del backend.
 export function moverCitaDemo(id, negocioId, valores) {
   crearPayloadCambioHorario({ ...valores, version: 1 });
-  const cita = resource('appointments', id, negocioId),
-    duracion = minutes(cita.end) - minutes(cita.start);
+  const cita = obtenerRecurso('appointments', id, negocioId),
+    duracion = horaAMinutos(cita.end) - horaAMinutos(cita.start);
   if (
     cita.status === 'cancelada' ||
-    cita.date < TODAY ||
-    valores.fechaLocal < TODAY
+    cita.date < HOY ||
+    valores.fechaLocal < HOY
   )
     throw new Error('Solo puedes mover citas futuras no canceladas.');
   const propuesta = {
     ...cita,
     date: valores.fechaLocal,
     start: valores.horaInicio,
-    end: time(minutes(valores.horaInicio) + duracion),
+    end: minutosAHora(horaAMinutos(valores.horaInicio) + duracion),
   };
-  const franjas = list('schedules', negocioId).filter(
+  const franjas = listarRegistros('schedules', negocioId).filter(
     (fila) => fila.professionalId === cita.professionalId,
   );
   const conflicto = [
-    ...list('appointments', negocioId).filter(
+    ...listarRegistros('appointments', negocioId).filter(
       (fila) => fila.id !== cita.id && fila.status !== 'cancelada',
     ),
-    ...list('holds', negocioId).filter((fila) => fila.expiresAt > Date.now()),
+    ...listarRegistros('holds', negocioId).filter((fila) => fila.expiresAt > Date.now()),
   ].some(
     (fila) =>
       fila.professionalId === cita.professionalId &&
@@ -45,7 +45,7 @@ export function moverCitaDemo(id, negocioId, valores) {
       fila.start < propuesta.end &&
       fila.end > propuesta.start,
   );
-  const bloqueo = list('blocks', negocioId).some(
+  const bloqueo = listarRegistros('blocks', negocioId).some(
     (fila) =>
       (!fila.professionalId || fila.professionalId === cita.professionalId) &&
       (!fila.branchId || fila.branchId === cita.branchId) &&
@@ -54,8 +54,8 @@ export function moverCitaDemo(id, negocioId, valores) {
       (!fila.start || (fila.start < propuesta.end && fila.end > propuesta.start)),
   );
   if (
-    minutes(propuesta.end) >= 1440 ||
-    !appointmentCovered(propuesta, franjas) ||
+    horaAMinutos(propuesta.end) >= 1440 ||
+    !citaCubiertaPorHorarioDemo(propuesta, franjas) ||
     conflicto ||
     bloqueo
   )

@@ -1,4 +1,4 @@
-import { escape as escapar } from '../../../shared/ui.js';
+import { escaparHtml as escapar } from '../../../shared/interfaz.componentes.js';
 
 export const estadosCorreo = {
   pendiente: 'Pendiente',

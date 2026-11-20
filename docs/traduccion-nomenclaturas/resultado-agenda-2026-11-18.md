@@ -22,7 +22,7 @@ Se aplicó la convención `agenda.responsabilidad.extensión` a la estructura co
 
 Se contrastaron el controlador de citas, las entradas de consulta, cambios de estado y horario y la consulta de atención. Se conservaron `/admin/agenda`, `?demo=1`, las rutas HTTP de citas, atención y disponibilidad, los roles y estados del servidor, y campos como `sucursalId`, `personalId`, `fechaLocal`, `horaInicio` y `version`. La demo conserva el esquema compartido de datos ficticios. Las claves `cita-agenda-view:demo`, `cita-agenda-view:connected` y `citalendar:manual:v1:<negocioId>:<actorId>`, sus valores y el formato de marcadores existentes mantienen su compatibilidad.
 
-Se conservan las convenciones técnicas `client`, `store`, `payload`, `render` y `handle`, las API de navegador, las clases de Bootstrap y los nombres de las interfaces generales de enrutado, tema y datos que son responsabilidad de otros conjuntos. La distribución genérica de columnas en `src/shared/calendar-layout.js` corresponde al apartado 14.
+Se conservan las convenciones técnicas `client`, `store`, `payload`, `render` y `handle`, las API de navegador y las clases de Bootstrap. La traducción de las interfaces generales de enrutado, tema, datos y distribución de columnas se registra en el [resultado del núcleo compartido](resultado-nucleo-compartido-2026-11-20.md).
 
 Se reprodujeron fallos en cuatro archivos de pruebas en una copia del commit previo. Las pruebas de atención y orden de columnas ahora fijan el reloj en un lunes porque su API simulada devuelve citas en el primer día del periodo. La prueba móvil de escala comprueba el ancho vigente de 310 px y que la página no desborde. La prueba del calendario diario acota el selector a la cuadrícula para distinguirla de su cabecera fija.
 

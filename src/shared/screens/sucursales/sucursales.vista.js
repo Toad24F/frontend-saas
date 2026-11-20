@@ -1,12 +1,12 @@
 import { configurarPaginacionCatalogo, renderPaginacionCatalogo, actualizarPaginaCatalogo } from '../catalogos/catalogos.paginacion.js';
 import { renderEncabezadoCatalogo, renderCupoCatalogo, renderBotonLimpiarCatalogo, hayFiltrosCatalogo } from '../catalogos/catalogos.encabezado.js';
-import { isDemo, user } from '../../../connected/backend.js';
-import { state, render } from '../../app.js';
+import { esDemo, usuarioActual } from '../../../connected/backend.js';
+import { estadoAplicacion, render } from '../../aplicacion.nucleo.js';
 import { consultarVistaCatalogos, cambiarVistaCatalogos } from '../catalogos/catalogos.vista.js';
-import { list } from '../../data.js';
-import { icon } from '../../icons.js';
-import { resourceStatus } from '../../resource-status.js';
-import { escape as escapar, pageHead, button, empty } from '../../ui.js';
+import { listarRegistros } from '../../aplicacion.datos.js';
+import { renderIcono } from '../../iconos.catalogo.js';
+import { estadoRecurso } from '../../recursos.estado.js';
+import { escaparHtml as escapar, renderEncabezadoPagina, renderBoton, renderEstadoVacio } from '../../interfaz.componentes.js';
 import '../profesionales/profesionales.estilos.css';
 import './sucursales.estilos.css';
 
@@ -34,7 +34,7 @@ function mapaGoogle(sucursal) {
 }
 
 function barraCupo(sucursales, propias, cupo) {
-  if (!isDemo && !propias && !cupo) return '<p class="catalogo-cupo-error">Cupo de sucursales no disponible.</p>';
+  if (!esDemo && !propias && !cupo) return '<p class="catalogo-cupo-error">Cupo de sucursales no disponible.</p>';
   if (cupo) return renderCupoCatalogo('Sucursales activas', { activos: Number(cupo.sucursalesActivas), limite: Number(cupo.limiteSucursalesActivas), disponibles: Number(cupo.disponibles) });
   const activas = sucursales.filter((sucursal) => sucursal.active !== false).length;
   const limite = cupo && Number.isFinite(Number(cupo.limiteSucursalesActivas)) ? Number(cupo.limiteSucursalesActivas) : sucursales.length;
@@ -47,42 +47,42 @@ function renderSucursal(sucursal, profesionales, propia, administrar, visible) {
   const activa = sucursal.active !== false;
   const personas = profesionales.filter((persona) => persona.branchIds.includes(sucursal.id));
   const mapa = mapaGoogle(sucursal);
-  const estado = propia ? !sucursal.globalActive ? 'Sucursal inactiva' : activa ? 'Atención activa' : 'Atención pausada' : resourceStatus(sucursal).label === 'Activo' ? 'Activa' : resourceStatus(sucursal).label === 'Inactivo' ? 'Inactiva' : 'Inhabilitada';
+  const estado = propia ? !sucursal.globalActive ? 'Sucursal inactiva' : activa ? 'Atención activa' : 'Atención pausada' : estadoRecurso(sucursal).etiqueta === 'Activo' ? 'Activa' : estadoRecurso(sucursal).etiqueta === 'Inactivo' ? 'Inactiva' : 'Inhabilitada';
   const etiquetaAlternar = propia ? activa ? 'Pausar atención' : 'Activar atención' : activa ? 'Desactivar' : 'Activar';
   const alternar = `<button type="button" class="${activa ? 'action-caution' : ''}" data-alternar-sucursal="${sucursal.id}" aria-label="${etiquetaAlternar} ${escapar(sucursal.name)}" ${propia && !sucursal.globalActive ? 'disabled title="Sucursal inactiva en el negocio"' : ''}>${etiquetaAlternar}</button>`;
   const acciones = propia
-    ? `<button type="button" class="profesional-disponibilidad" data-alternar-sucursal="${sucursal.id}" aria-label="${etiquetaAlternar} ${escapar(sucursal.name)}" ${!sucursal.globalActive ? 'disabled title="Sucursal inactiva en el negocio"' : ''}>${etiquetaAlternar} ${icon('arrow')}</button>`
-    : `<button type="button" class="profesional-disponibilidad" data-editar-sucursal="${sucursal.id}">Editar ${icon('arrow')}</button><details class="profesional-mas"><summary aria-label="Más acciones para ${escapar(sucursal.name)}">${icon('more')}</summary><div class="profesional-menu-mas">${alternar}${administrar(sucursal)}</div></details>`;
+    ? `<button type="button" class="profesional-disponibilidad" data-alternar-sucursal="${sucursal.id}" aria-label="${etiquetaAlternar} ${escapar(sucursal.name)}" ${!sucursal.globalActive ? 'disabled title="Sucursal inactiva en el negocio"' : ''}>${etiquetaAlternar} ${renderIcono('arrow')}</button>`
+    : `<button type="button" class="profesional-disponibilidad" data-editar-sucursal="${sucursal.id}">Editar ${renderIcono('arrow')}</button><details class="profesional-mas"><summary aria-label="Más acciones para ${escapar(sucursal.name)}">${renderIcono('more')}</summary><div class="profesional-menu-mas">${alternar}${administrar(sucursal)}</div></details>`;
   return `<article class="surface profesional-entrada sucursal-entrada" data-sucursal-entrada="${sucursal.id}" ${visible ? '' : 'hidden'}>
-    <div class="sucursal-mapa">${mapa?.insercion ? `<iframe title="Mapa de ${escapar(sucursal.name)}" src="${escapar(mapa.insercion)}" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>${mapa.aproximado ? '<span class="sucursal-mapa-leyenda">Vista por dirección</span>' : ''}` : `<div class="sucursal-mapa-vacio">${icon('pin')}<span>${sucursal.maps ? 'Enlace de mapa no compatible' : 'Mapa no agregado'}</span></div>`}</div>
-    <div class="profesional-persona"><span class="sucursal-icono">${icon('pin')}</span><div class="profesional-identidad"><h2>${escapar(sucursal.name)}</h2><p>${escapar(sucursal.address || 'Dirección no disponible')}</p>${sucursal.phone ? `<small>${escapar(sucursal.phone)}</small>` : ''}</div></div>
-    <div class="profesional-asignacion sucursal-detalles"><span>${icon('users')}<strong>${personas.length}</strong> ${personas.length === 1 ? 'profesional' : 'profesionales'}</span>${mapa ? `<a href="${escapar(mapa.enlace)}" target="_blank" rel="noopener noreferrer">${icon('pin')}Abrir en Google Maps</a>` : ''}${sucursal.notes ? `<span class="sucursal-llegada">${icon('info')}${escapar(sucursal.notes)}</span>` : ''}</div>
+    <div class="sucursal-mapa">${mapa?.insercion ? `<iframe title="Mapa de ${escapar(sucursal.name)}" src="${escapar(mapa.insercion)}" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>${mapa.aproximado ? '<span class="sucursal-mapa-leyenda">Vista por dirección</span>' : ''}` : `<div class="sucursal-mapa-vacio">${renderIcono('pin')}<span>${sucursal.maps ? 'Enlace de mapa no compatible' : 'Mapa no agregado'}</span></div>`}</div>
+    <div class="profesional-persona"><span class="sucursal-icono">${renderIcono('pin')}</span><div class="profesional-identidad"><h2>${escapar(sucursal.name)}</h2><p>${escapar(sucursal.address || 'Dirección no disponible')}</p>${sucursal.phone ? `<small>${escapar(sucursal.phone)}</small>` : ''}</div></div>
+    <div class="profesional-asignacion sucursal-detalles"><span>${renderIcono('users')}<strong>${personas.length}</strong> ${personas.length === 1 ? 'profesional' : 'profesionales'}</span>${mapa ? `<a href="${escapar(mapa.enlace)}" target="_blank" rel="noopener noreferrer">${renderIcono('pin')}Abrir en Google Maps</a>` : ''}${sucursal.notes ? `<span class="sucursal-llegada">${renderIcono('info')}${escapar(sucursal.notes)}</span>` : ''}</div>
     <span class="profesional-estado ${activa && (!propia || sucursal.globalActive) ? 'is-active' : 'is-inactive'}"><i></i>${estado}</span>
     <div class="profesional-acciones">${acciones}</div>
   </article>`;
 }
 
 export function sucursales({ cupo = null, administrar = () => '', accionesEncabezado = '' } = {}) {
-  const propia = !isDemo && user?.rol === 'profesional';
-  const alcanceActual = `${state.tenantId}:${propia ? user.id : 'admin'}`;
+  const propia = !esDemo && usuarioActual?.rol === 'profesional';
+  const alcanceActual = `${estadoAplicacion.negocioId}:${propia ? usuarioActual.id : 'admin'}`;
   if (alcance !== alcanceActual) { Object.assign(interfaz, { busqueda: '', estado: 'todos' }); alcance = alcanceActual; }
-  const profesional = propia ? list('professionals', state.tenantId)[0] : null;
-  const sucursales = list('branches', state.tenantId).filter((sucursal) => !propia || profesional?.branchIds.includes(sucursal.id));
-  const profesionales = list('professionals', state.tenantId);
+  const profesional = propia ? listarRegistros('professionals', estadoAplicacion.negocioId)[0] : null;
+  const sucursales = listarRegistros('branches', estadoAplicacion.negocioId).filter((sucursal) => !propia || profesional?.branchIds.includes(sucursal.id));
+  const profesionales = listarRegistros('professionals', estadoAplicacion.negocioId);
   const activas = sucursales.filter((sucursal) => sucursal.active !== false).length;
   const visibles = sucursales.filter(coincide);
-  const pagina = configurarPaginacionCatalogo('sucursal', state.tenantId, sucursales, () => list('branches', state.tenantId).filter((sucursal) => (!propia || profesional?.branchIds.includes(sucursal.id)) && coincide(sucursal)), (sucursal) => renderSucursal(sucursal, profesionales, propia, administrar, true), 'sucursales');
+  const pagina = configurarPaginacionCatalogo('sucursal', estadoAplicacion.negocioId, sucursales, () => listarRegistros('branches', estadoAplicacion.negocioId).filter((sucursal) => (!propia || profesional?.branchIds.includes(sucursal.id)) && coincide(sucursal)), (sucursal) => renderSucursal(sucursal, profesionales, propia, administrar, true), 'sucursales');
   const vistaEscritorio = consultarVistaCatalogos();
   const vistaResultados = matchMedia('(max-width: 767px)').matches ? 'tarjetas' : vistaEscritorio;
-  return `<div class="profesionales-espacio sucursales-espacio">${renderEncabezadoCatalogo('Sucursales', propia ? 'Consulta y activa la disponibilidad de tus sucursales asignadas.' : 'Gestiona las ubicaciones de tu negocio.', accionesEncabezado + (propia ? '' : button('Nueva sucursal', 'nueva-sucursal')), barraCupo(sucursales, propia, cupo))}
+  return `<div class="profesionales-espacio sucursales-espacio">${renderEncabezadoCatalogo('Sucursales', propia ? 'Consulta y activa la disponibilidad de tus sucursales asignadas.' : 'Gestiona las ubicaciones de tu negocio.', accionesEncabezado + (propia ? '' : renderBoton('Nueva sucursal', 'nueva-sucursal')), barraCupo(sucursales, propia, cupo))}
     <div class="profesionales-resumen"><strong>${sucursales.length}</strong> ${sucursales.length === 1 ? 'sucursal' : 'sucursales'}<span aria-hidden="true">·</span><strong>${activas}</strong> activas<span aria-hidden="true">·</span><strong>${sucursales.length - activas}</strong> inactivas</div>
     <section class="profesionales-herramientas sucursales-herramientas" aria-label="Buscar y filtrar sucursales">
-      <label class="profesionales-busqueda">${icon('search')}<span class="visually-hidden">Buscar sucursales</span><input id="busqueda-sucursales" type="search" placeholder="Buscar por nombre, dirección o teléfono" value="${escapar(interfaz.busqueda)}" autocomplete="off"></label>
+      <label class="profesionales-busqueda">${renderIcono('search')}<span class="visually-hidden">Buscar sucursales</span><input id="busqueda-sucursales" type="search" placeholder="Buscar por nombre, dirección o teléfono" value="${escapar(interfaz.busqueda)}" autocomplete="off"></label>
       <div class="profesionales-filtros"><label><span>Estado</span><select data-filtro-sucursales="estado"><option value="todos">Todas</option><option value="activo" ${interfaz.estado === 'activo' ? 'selected' : ''}>Activas</option><option value="inactivo" ${interfaz.estado === 'inactivo' ? 'selected' : ''}>Inactivas</option></select></label>${renderBotonLimpiarCatalogo('sucursal', interfaz)}</div>
-      <div class="profesionales-selector-vista" role="group" aria-label="Tipo de vista"><button type="button" data-vista-sucursales="lista" aria-pressed="${vistaEscritorio === 'lista'}" class="${vistaEscritorio === 'lista' ? 'is-selected' : ''}">${icon('menu')}<span>Lista</span></button><button type="button" data-vista-sucursales="tarjetas" aria-pressed="${vistaEscritorio === 'tarjetas'}" class="${vistaEscritorio === 'tarjetas' ? 'is-selected' : ''}">${icon('grid')}<span>Tarjetas</span></button></div>
+      <div class="profesionales-selector-vista" role="group" aria-label="Tipo de vista"><button type="button" data-vista-sucursales="lista" aria-pressed="${vistaEscritorio === 'lista'}" class="${vistaEscritorio === 'lista' ? 'is-selected' : ''}">${renderIcono('menu')}<span>Lista</span></button><button type="button" data-vista-sucursales="tarjetas" aria-pressed="${vistaEscritorio === 'tarjetas'}" class="${vistaEscritorio === 'tarjetas' ? 'is-selected' : ''}">${renderIcono('grid')}<span>Tarjetas</span></button></div>
     </section>
     <div class="profesionales-encabezado-resultados"><span id="conteo-resultados-sucursales" role="estado" aria-live="polite">${visibles.length} ${visibles.length === 1 ? 'resultado' : 'resultados'}</span></div>
-    ${sucursales.length ? `<div class="profesionales-resultados profesionales-vista--${vistaResultados}" data-vista-escritorio="${vistaEscritorio}" id="sucursal-resultados">${pagina.filas.map((sucursal) => renderSucursal(sucursal, profesionales, propia, administrar, true)).join('')}</div>${renderPaginacionCatalogo('sucursal', pagina)}<div class="profesionales-sin-resultados" id="sin-resultados-sucursales" ${visibles.length ? 'hidden' : ''}>${empty('Sin coincidencias', 'Prueba otra búsqueda o cambia el filtro de estado.', '<button type="button" class="btn btn-light" data-sucursal-limpiar>Limpiar filtros</button>')}</div>` : empty('Aún no hay sucursales', propia ? 'Tu negocio todavía no te asigna una sucursal.' : 'Crea una sucursal para empezar a organizar la atención.', propia ? '' : '<button type="button" class="btn btn-primary" data-action="nueva-sucursal">Nueva sucursal</button>')}
+    ${sucursales.length ? `<div class="profesionales-resultados profesionales-vista--${vistaResultados}" data-vista-escritorio="${vistaEscritorio}" id="sucursal-resultados">${pagina.filas.map((sucursal) => renderSucursal(sucursal, profesionales, propia, administrar, true)).join('')}</div>${renderPaginacionCatalogo('sucursal', pagina)}<div class="profesionales-sin-resultados" id="sin-resultados-sucursales" ${visibles.length ? 'hidden' : ''}>${renderEstadoVacio('Sin coincidencias', 'Prueba otra búsqueda o cambia el filtro de estado.', '<button type="button" class="btn btn-light" data-sucursal-limpiar>Limpiar filtros</button>')}</div>` : renderEstadoVacio('Aún no hay sucursales', propia ? 'Tu negocio todavía no te asigna una sucursal.' : 'Crea una sucursal para empezar a organizar la atención.', propia ? '' : '<button type="button" class="btn btn-primary" data-action="nueva-sucursal">Nueva sucursal</button>')}
   </div>`;
 }
 
@@ -105,10 +105,10 @@ export function aplicarFiltrosSucursales() {
   if (!raiz) return;
   interfaz.busqueda = raiz.querySelector('#busqueda-sucursales')?.value.trim() || '';
   interfaz.estado = raiz.querySelector('[data-filtro-sucursales]')?.value || 'todos';
-  const propia = !isDemo && user?.rol === 'profesional';
-  const profesional = propia ? list('professionals', state.tenantId)[0] : null;
+  const propia = !esDemo && usuarioActual?.rol === 'profesional';
+  const profesional = propia ? listarRegistros('professionals', estadoAplicacion.negocioId)[0] : null;
   raiz.querySelectorAll('[data-sucursal-limpiar]').forEach((boton) => { boton.disabled = !hayFiltrosCatalogo(interfaz); });
-  const visibles = new Set(list('branches', state.tenantId).filter((sucursal) => (!propia || profesional?.branchIds.includes(sucursal.id)) && coincide(sucursal)).map((sucursal) => String(sucursal.id)));
+  const visibles = new Set(listarRegistros('branches', estadoAplicacion.negocioId).filter((sucursal) => (!propia || profesional?.branchIds.includes(sucursal.id)) && coincide(sucursal)).map((sucursal) => String(sucursal.id)));
   actualizarPaginaCatalogo('sucursal', true);
   const conteo = visibles.size;
   raiz.querySelector('#conteo-resultados-sucursales').textContent = `${conteo} ${conteo === 1 ? 'resultado' : 'resultados'}`;

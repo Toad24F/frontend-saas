@@ -1,7 +1,7 @@
 {
   "tenants": [
-    { "id": 1, "name": "Clínica Bienestar", "slug": "clinica-bienestar", "category": "Salud y bienestar", "initials": "CB", "email": "hola@bienestar.example", "phone": "6145550100", "mode": "free", "reminder": 24 },
-    { "id": 2, "name": "Espacio Mente", "slug": "espacio-mente", "category": "Psicología y terapia", "initials": "EM", "email": "hola@mente.example", "phone": "6145550200", "mode": "compact", "reminder": 12 }
+    { "id": 1, "name": "Clínica Bienestar", "slug": "clinica-bienestar", "category": "Salud y bienestar", "initials": "CB", "email": "hola@bienestar.example", "phone": "6145550100", "mode": "free", "horasRecordatorio": 24 },
+    { "id": 2, "name": "Espacio Mente", "slug": "espacio-mente", "category": "Psicología y terapia", "initials": "EM", "email": "hola@mente.example", "phone": "6145550200", "mode": "compact", "horasRecordatorio": 12 }
   ],
   "branches": [
     { "id": 1, "tenantId": 1, "name": "Sucursal Centro", "address": "Av. Universidad 1200, Centro, Chihuahua", "phone": "6145550101", "notes": "Primer piso. Acceso por la entrada principal.", "color": "orange" },

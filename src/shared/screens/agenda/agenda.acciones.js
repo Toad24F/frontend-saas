@@ -1,15 +1,15 @@
 import { confirmarCancelacion } from './agenda.menu-estado.js';
-import { state as estado, render, navigate } from '../../app.js';
-import { db, list, resource, tenantById, appointmentInfo, TODAY, formatDate, money, statuses } from '../../data.js';
-import { icon } from '../../icons.js';
-import { toast, escape as esc, avatar, badge } from '../../ui.js';
+import { estadoAplicacion as estado, render, navegar } from '../../aplicacion.nucleo.js';
+import { datosAplicacion, listarRegistros, obtenerRecurso, obtenerNegocio, ampliarDatosCita, HOY, formatearFecha, formatearMoneda, etiquetasEstadoCita } from '../../aplicacion.datos.js';
+import { renderIcono } from '../../iconos.catalogo.js';
+import { mostrarAviso, escaparHtml as esc, avatar, renderEtiquetaEstado } from '../../interfaz.componentes.js';
 import { panelAgenda as modal, borradorAgenda, guardarBorradorAgenda, borrarBorradorAgenda } from './agenda.paneles.js';
-import { field as campo, select as selectorCampo, formError as errorFormulario, errorSlot as espacioError } from '../../forms.js';
+import { renderCampo as campo, renderSelector as selectorCampo, mostrarErrorFormulario as errorFormulario, espacioErrorFormulario as espacioError } from '../../formularios.componentes.js';
 import { buscarHorariosDemo, crearCitaDemo, seEmpalman } from '../../../demo/disponibilidad.motor.js';
 import { moverCitaDemo } from '../../../demo/clientes.horario.js';
 export function abrirDetalleDemo(id) {
-  const a = resource('appointments', id, estado.tenantId),
-    e = appointmentInfo(a);
+  const a = obtenerRecurso('appointments', id, estado.negocioId),
+    e = ampliarDatosCita(a);
   const el = modal(
     'Detalle de la cita',
     `<div class="dialog-body"><div class="appointment-identity">${avatar(
@@ -20,8 +20,8 @@ export function abrirDetalleDemo(id) {
         .join(''),
       'mint',
       'avatar-large',
-    )}<div><h3>${esc(e.client.name)}</h3><p>${a.folio}</p></div>${badge(a.status)}</div><div class="detail-list"><div>${icon('briefcase')}<span><small>Servicio</small><strong>${esc(e.service.name)}</strong></span><b>${money(e.service.price)}</b></div><div>${icon('stethoscope')}<span><small>Profesional</small><strong>${esc(e.professional.name)}</strong></span></div><div>${icon('calendar')}<span><small>Fecha y hora</small><strong>${formatDate(a.date)} · ${a.start} – ${a.end}</strong></span></div><div>${icon('pin')}<span><small>Sucursal</small><strong>${esc(e.branch.name)}</strong></span></div><div>${icon('message')}<span><small>WhatsApp</small><strong>${esc(e.client.phone)}</strong></span></div></div>${a.reason ? `<div class="appointment-reason"><strong>Motivo de consulta</strong><p>${esc(a.reason)}</p></div>` : ''}<label class="form-label" for="appointment-status">Estado de la cita</label><select id="appointment-status" class="form-select">${Object.entries(
-      statuses,
+    )}<div><h3>${esc(e.client.name)}</h3><p>${a.folio}</p></div>${renderEtiquetaEstado(a.status)}</div><div class="detail-list"><div>${renderIcono('briefcase')}<span><small>Servicio</small><strong>${esc(e.service.name)}</strong></span><b>${formatearMoneda(e.service.price)}</b></div><div>${renderIcono('stethoscope')}<span><small>Profesional</small><strong>${esc(e.professional.name)}</strong></span></div><div>${renderIcono('calendar')}<span><small>Fecha y hora</small><strong>${formatearFecha(a.date)} · ${a.start} – ${a.end}</strong></span></div><div>${renderIcono('pin')}<span><small>Sucursal</small><strong>${esc(e.branch.name)}</strong></span></div><div>${renderIcono('message')}<span><small>WhatsApp</small><strong>${esc(e.client.phone)}</strong></span></div></div>${a.reason ? `<div class="appointment-reason"><strong>Motivo de consulta</strong><p>${esc(a.reason)}</p></div>` : ''}<label class="form-label" for="appointment-status">Estado de la cita</label><select id="appointment-status" class="form-select">${Object.entries(
+      etiquetasEstadoCita,
     )
       .map(
         ([s, l]) =>
@@ -33,14 +33,14 @@ export function abrirDetalleDemo(id) {
   );
   el.querySelector('#save-status').onclick = () => {
     try {
-      const vigente = resource('appointments', id, estado.tenantId),
+      const vigente = obtenerRecurso('appointments', id, estado.negocioId),
         siguiente = el.querySelector('#appointment-status').value;
-      if (!statuses[siguiente]) throw new Error('Estado inválido.');
+      if (!etiquetasEstadoCita[siguiente]) throw new Error('Estado inválido.');
       if (
         ['cancelada', 'no_asistio'].includes(vigente.status) &&
         !['cancelada', 'no_asistio'].includes(siguiente)
       ) {
-        const conflicto = list('appointments', estado.tenantId).some(
+        const conflicto = listarRegistros('appointments', estado.negocioId).some(
           (b) =>
             b.id !== vigente.id &&
             b.professionalId === vigente.professionalId &&
@@ -58,50 +58,50 @@ export function abrirDetalleDemo(id) {
       vigente.status = siguiente;
       el.close();
       render();
-      toast('Estado de la cita actualizado.');
+      mostrarAviso('Estado de la cita actualizado.');
     } catch (error) {
       errorFormulario(error);
     }
   };
   el.querySelector('#cancel-appointment').onclick = () => confirmarCancelar(id);
   // Propuesta de fecha/hora local de la demo; la versión conectada realiza todas las comprobaciones en el servidor.
-  el.querySelector('.dialog-body').insertAdjacentHTML('beforeend', `<form data-demo-horario class="agenda-editor-estado"><h3>Cambiar horario</h3><div class="form-row-two">${campo('Nueva fecha', 'fechaLocal', a.date, 'date', 'required')}${campo('Nueva hora', 'horaInicio', a.start, 'time', 'required')}</div><p class="field-hint">Simulación local de horario y ocupación; conserva folio y duración. No reproduce las transacciones UTC del servidor.</p><p class="form-error" role="alert" data-demo-error-horario hidden></p><button type="submit" class="btn btn-primary" ${a.status === 'cancelada' || a.date < TODAY ? 'disabled' : ''}>Guardar horario</button></form>`);
+  el.querySelector('.dialog-body').insertAdjacentHTML('beforeend', `<form data-demo-horario class="agenda-editor-estado"><h3>Cambiar horario</h3><div class="form-row-two">${campo('Nueva fecha', 'fechaLocal', a.date, 'date', 'required')}${campo('Nueva hora', 'horaInicio', a.start, 'time', 'required')}</div><p class="field-hint">Simulación local de horario y ocupación; conserva folio y duración. No reproduce las transacciones UTC del servidor.</p><p class="form-error" role="alert" data-demo-error-horario hidden></p><button type="submit" class="btn btn-primary" ${a.status === 'cancelada' || a.date < HOY ? 'disabled' : ''}>Guardar horario</button></form>`);
   el.querySelector('[data-demo-horario]').onsubmit = (evento) => {
     evento.preventDefault();
     try {
-      moverCitaDemo(id, estado.tenantId, Object.fromEntries(new FormData(evento.target)));
-      estado.date = a.date; render(); abrirDetalleDemo(id); toast('Horario actualizado en esta demostración.');
+      moverCitaDemo(id, estado.negocioId, Object.fromEntries(new FormData(evento.target)));
+      estado.fecha = a.date; render(); abrirDetalleDemo(id); mostrarAviso('Horario actualizado en esta demostración.');
     } catch (error) { const objetivo = el.querySelector('[data-demo-error-horario]'); objetivo.textContent = error.message; objetivo.hidden = false; }
   };
 }
 async function confirmarCancelar(id) {
-  const a = resource('appointments', id, estado.tenantId), e = appointmentInfo(a);
+  const a = obtenerRecurso('appointments', id, estado.negocioId), e = ampliarDatosCita(a);
   const confirmacion = await confirmarCancelacion({ nombreContacto: e.client.name, nombreServicio: e.service.name,
     nombreSucursal: e.branch.name, fechaLocal: a.date, horaInicio: a.start, zonaHoraria: 'America/Chihuahua' });
   if (!confirmacion) return;
   a.status = 'cancelada';
   document.querySelector('#app-dialog')?.close();
   render();
-  toast('Demostración: cita cancelada. El horario vuelve a estar disponible.');
+  mostrarAviso('Demostración: cita cancelada. El horario vuelve a estar disponible.');
 }
-export function nuevaCitaManual(dia = estado.date, inicio = '') {
+export function nuevaCitaManual(dia = estado.fecha, inicio = '') {
   if (
-    !list('services', estado.tenantId).length ||
-    !list('professionals', estado.tenantId).length ||
-    !list('branches', estado.tenantId).length
+    !listarRegistros('services', estado.negocioId).length ||
+    !listarRegistros('professionals', estado.negocioId).length ||
+    !listarRegistros('branches', estado.negocioId).length
   ) {
-    toast(
+    mostrarAviso(
       'Agrega servicios, sucursales y profesionales antes de crear una cita.',
     );
     return;
   }
   const el = modal(
     'Nueva cita',
-    `<form id="manual-form"><div class="dialog-body"><p class="form-intro">Agenda una atención para tu paciente.</p><div class="form-row-two">${selectorCampo('Servicio', 'serviceId', list('services', estado.tenantId))}${selectorCampo('Sucursal', 'branchId', list('branches', estado.tenantId), estado.branch !== 'all' ? estado.branch : '')}</div><div class="form-row-two">${selectorCampo('Profesional', 'professionalId', list('professionals', estado.tenantId))}${campo('Fecha', 'day', dia < TODAY ? TODAY : dia, 'date', `required min="${TODAY}"`)}</div><div class="form-field"><label for="f-start" class="form-label">Horario disponible</label><select id="f-start" name="start" class="form-select" required></select><p class="field-hint" id="manual-availability-hint"></p></div><div class="form-separator"><span>DATOS DEL PACIENTE</span></div><div class="form-field"><label class="form-label" for="demo-customer-mode">Tipo de cliente</label><select id="demo-customer-mode" name="customerMode" class="form-select"><option value="nuevo">Cliente nuevo</option><option value="existente">Cliente existente</option></select></div><div data-demo-existente hidden>${selectorCampo('Cliente existente', 'clientId', list('clients', estado.tenantId))}</div><div class="form-row-two" data-demo-nuevo>${campo('Nombre completo', 'name', '', 'text', 'required maxlength="150" placeholder="Nombre y apellidos" autocomplete="off"')}${campo('Teléfono de WhatsApp', 'phone', '', 'tel', 'required pattern="[0-9]{10}" maxlength="10" inputmode="numeric" placeholder="10 dígitos" autocomplete="off"')}</div><div class="form-field"><label class="form-label" for="f-reason">Motivo de consulta <span class="optional">(opcional)</span></label><textarea class="form-control" id="f-reason" name="reason" rows="2" maxlength="500" placeholder="Información útil para el profesional"></textarea></div>${espacioError}<div class="information-note compact-note">${icon('info')} Usa datos ficticios. Esta reserva solo se guarda durante la sesión. La recuperación tras recarga y la auditoría reales se comprueban en la versión conectada.</div></div><div class="dialog-footer"><button type="button" class="btn btn-light" id="manual-cancel">Cancelar</button><button type="submit" class="btn btn-primary" id="manual-save">${icon('check')}Confirmar cita</button></div></form>`,
+    `<form id="manual-form"><div class="dialog-body"><p class="form-intro">Agenda una atención para tu paciente.</p><div class="form-row-two">${selectorCampo('Servicio', 'serviceId', listarRegistros('services', estado.negocioId))}${selectorCampo('Sucursal', 'branchId', listarRegistros('branches', estado.negocioId), estado.sucursal !== 'all' ? estado.sucursal : '')}</div><div class="form-row-two">${selectorCampo('Profesional', 'professionalId', listarRegistros('professionals', estado.negocioId))}${campo('Fecha', 'day', dia < HOY ? HOY : dia, 'date', `required min="${HOY}"`)}</div><div class="form-field"><label for="f-start" class="form-label">Horario disponible</label><select id="f-start" name="start" class="form-select" required></select><p class="field-hint" id="manual-availability-hint"></p></div><div class="form-separator"><span>DATOS DEL PACIENTE</span></div><div class="form-field"><label class="form-label" for="demo-customer-mode">Tipo de cliente</label><select id="demo-customer-mode" name="customerMode" class="form-select"><option value="nuevo">Cliente nuevo</option><option value="existente">Cliente existente</option></select></div><div data-demo-existente hidden>${selectorCampo('Cliente existente', 'clientId', listarRegistros('clients', estado.negocioId))}</div><div class="form-row-two" data-demo-nuevo>${campo('Nombre completo', 'name', '', 'text', 'required maxlength="150" placeholder="Nombre y apellidos" autocomplete="off"')}${campo('Teléfono de WhatsApp', 'phone', '', 'tel', 'required pattern="[0-9]{10}" maxlength="10" inputmode="numeric" placeholder="10 dígitos" autocomplete="off"')}</div><div class="form-field"><label class="form-label" for="f-reason">Motivo de consulta <span class="optional">(opcional)</span></label><textarea class="form-control" id="f-reason" name="reason" rows="2" maxlength="500" placeholder="Información útil para el profesional"></textarea></div>${espacioError}<div class="information-note compact-note">${renderIcono('info')} Usa datos ficticios. Esta reserva solo se guarda durante la sesión. La recuperación tras recarga y la auditoría reales se comprueban en la versión conectada.</div></div><div class="dialog-footer"><button type="button" class="btn btn-light" id="manual-cancel">Cancelar</button><button type="submit" class="btn btn-primary" id="manual-save">${renderIcono('check')}Confirmar cita</button></div></form>`,
     true,
   );
   const formulario = el.querySelector('form');
-  const claveBorrador = `demo-manual:${estado.tenantId}`, borrador = borradorAgenda(claveBorrador);
+  const claveBorrador = `demo-manual:${estado.negocioId}`, borrador = borradorAgenda(claveBorrador);
   let guardado = false;
   if (borrador) {
     for (const [nombre, valor] of Object.entries(borrador)) if (formulario.elements[nombre]) formulario.elements[nombre].value = valor;
@@ -119,7 +119,7 @@ export function nuevaCitaManual(dia = estado.date, inicio = '') {
     formulario.querySelector('[data-demo-nuevo]').hidden = existente;
     formulario.elements.clientId.disabled = !existente;
     if (existente) {
-      const persona = resource('clients', Number(formulario.elements.clientId.value), estado.tenantId);
+      const persona = obtenerRecurso('clients', Number(formulario.elements.clientId.value), estado.negocioId);
       formulario.elements.name.value = persona.name; formulario.elements.phone.value = persona.phone;
     }
   };
@@ -130,7 +130,7 @@ export function nuevaCitaManual(dia = estado.date, inicio = '') {
     const serviceId = Number(formulario.elements.serviceId.value),
       idSucursal = Number(formulario.elements.branchId.value),
       anterior = formulario.elements.professionalId.value;
-    const personas = list('professionals', estado.tenantId).filter(
+    const personas = listarRegistros('professionals', estado.negocioId).filter(
       (p) => p.serviceIds.includes(serviceId) && p.branchIds.includes(idSucursal),
     );
     formulario.elements.professionalId.innerHTML = personas
@@ -142,7 +142,7 @@ export function nuevaCitaManual(dia = estado.date, inicio = '') {
     let opcionesDisponibles = [];
     if (personas.length)
       opcionesDisponibles = buscarHorariosDemo({
-        tenantId: estado.tenantId,
+        tenantId: estado.negocioId,
         serviceId,
         branchId: idSucursal,
         professionalId: Number(formulario.elements.professionalId.value),
@@ -170,7 +170,7 @@ export function nuevaCitaManual(dia = estado.date, inicio = '') {
       const f = new FormData(formulario);
       const a = crearCitaDemo(
         {
-          tenantId: estado.tenantId,
+          tenantId: estado.negocioId,
           serviceId: Number(f.get('serviceId')),
           branchId: Number(f.get('branchId')),
           professionalId: Number(f.get('professionalId')),
@@ -181,11 +181,11 @@ export function nuevaCitaManual(dia = estado.date, inicio = '') {
         },
         { name: f.get('name'), phone: f.get('phone'), reason: f.get('reason') },
       );
-      estado.date = a.date;
+      estado.fecha = a.date;
       guardado = true;
       el.close();
-      navigate('agenda');
-      toast(`Cita creada · Folio ${a.folio}`);
+      navegar('agenda');
+      mostrarAviso(`Cita creada · Folio ${a.folio}`);
     } catch (error) {
       errorFormulario(error);
     }

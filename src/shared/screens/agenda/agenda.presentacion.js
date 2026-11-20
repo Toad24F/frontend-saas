@@ -1,11 +1,11 @@
-import { icon } from '../../icons.js';
-import { escape as esc } from '../../ui.js';
-import { statuses } from '../../data.js';
-import { calendarColumns as columnasCalendario } from '../../calendar-layout.js';
+import { renderIcono } from '../../iconos.catalogo.js';
+import { escaparHtml as esc } from '../../interfaz.componentes.js';
+import { etiquetasEstadoCita } from '../../aplicacion.datos.js';
+import { columnasCalendario } from '../../calendario.distribucion.js';
 
 // Componentes de presentación compartidos: demo y conectado conservan los mismos estados y jerarquía.
 export function leyendaAgenda() {
-  return `<div class="legend agenda-leyenda" role="list" aria-label="Estados de las citas">${Object.entries(statuses).map(([estadoActual, etiqueta]) => `<span role="listitem"><i class="legend-dot ${estadoActual}" aria-hidden="true"></i>${etiqueta}</span>`).join('')}</div>`;
+  return `<div class="legend agenda-leyenda" role="list" aria-label="Estados de las citas">${Object.entries(etiquetasEstadoCita).map(([estadoActual, etiqueta]) => `<span role="listitem"><i class="legend-dot ${estadoActual}" aria-hidden="true"></i>${etiqueta}</span>`).join('')}</div>`;
 }
 export function metricasAgenda(citas, dia, { loading: cargando = citas == null } = {}) {
   const elementos = citas?.filter((elemento) => elemento.date === dia);
@@ -13,7 +13,7 @@ export function metricasAgenda(citas, dia, { loading: cargando = citas == null }
   return `<div class="stats-grid agenda-metricas" aria-label="Resumen del día ${esc(dia)}" aria-busy="${cargando}">${cargando ? '<span class="visually-hidden" role="status">Cargando resumen del día…</span>' : ''}${[
     [cantidad(), 'Citas del día', 'calendar', 'orange'], [cantidad('confirmada'), 'Confirmadas', 'circleCheck', 'blue'],
     [cantidad('pendiente'), 'Por confirmar', 'clock', 'amber'], [cantidad('completada'), 'Completadas', 'check', 'green'],
-  ].map(([numero, etiqueta, imagen, color]) => `<div class="stat-card"><div class="stat-top"><span>${etiqueta}</span><span class="stat-icon ${color}">${icon(imagen)}</span></div><div class="stat-number">${numero == null ? cargando ? '<span class="esqueleto-relleno esqueleto-numero" aria-hidden="true"></span>' : '<span class="metrica-no-disponible">Sin datos</span>' : String(numero).padStart(2, '0')}</div></div>`).join('')}</div>`;
+  ].map(([numero, etiqueta, imagen, color]) => `<div class="stat-card"><div class="stat-top"><span>${etiqueta}</span><span class="stat-icon ${color}">${renderIcono(imagen)}</span></div><div class="stat-number">${numero == null ? cargando ? '<span class="esqueleto-relleno esqueleto-numero" aria-hidden="true"></span>' : '<span class="metrica-no-disponible">Sin datos</span>' : String(numero).padStart(2, '0')}</div></div>`).join('')}</div>`;
 }
 export function esqueletoCalendario(vista) {
   const mes = vista === 'month', dias = vista === 'day' ? 1 : 7;
@@ -37,11 +37,11 @@ export function distribuirEventos(elementos, primerMinuto = 540, altoHora = 96) 
   const huellas = elementos.map((elemento) => ({ ...elemento, start: reloj(horaAMinutos(elemento.start)), end: reloj(horaAMinutos(elemento.end)) }));
   const columnas = columnasCalendario(huellas);
   return new Map(elementos.map((elemento) => {
-    const { lane: carril, width: ancho } = columnas.get(elemento.id);
+    const { carril, ancho } = columnas.get(elemento.id);
     const huella = huellas.find((x) => x.id === elemento.id);
     let extension = 1;
     for (let siguiente = carril + 1; siguiente < Math.round(100 / ancho); siguiente++) {
-      if (huellas.some((otro) => columnas.get(otro.id).lane === siguiente && otro.start < huella.end && otro.end > huella.start)) break;
+      if (huellas.some((otro) => columnas.get(otro.id).carril === siguiente && otro.start < huella.end && otro.end > huella.start)) break;
       extension++;
     }
     return [elemento.id, { top: (horaAMinutos(elemento.start) - primerMinuto) / 60 * altoHora + hueco / 2,

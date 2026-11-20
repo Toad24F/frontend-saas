@@ -11,7 +11,7 @@ import { crearReservaPortal } from './reserva.flujo.js';
 import { montarReserva } from './reserva.vista.js';
 import { vincularCicloReserva } from './reserva.ciclo-vida.js';
 import { relojCabeceraPortal } from './portal.fechas.js';
-import { icon } from '../../shared/icons.js';
+import { renderIcono } from '../../shared/iconos.catalogo.js';
 import { inicialesNegocio } from './negocio.identidad.js';
 
 // La recuperación con marcador precede a cualquier catálogo o nueva selección.
@@ -23,7 +23,7 @@ export async function iniciarPortalPublico(slug) {
   let tema = ['light', 'dark'].includes(temaGuardado) ? temaGuardado :
     (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
   raiz.innerHTML = `<div class="portal-publico">
-    <header class="portal-cabecera"><img width="176" height="42" alt="Citalendar" id="portal-logo"><span class="portal-reloj-cabecera">${icon('calendar')}<span class="visually-hidden">Fecha y hora local: </span><time id="portal-reloj"></time></span>
+    <header class="portal-cabecera"><img width="176" height="42" alt="Citalendar" id="portal-logo"><span class="portal-reloj-cabecera">${renderIcono('calendar')}<span class="visually-hidden">Fecha y hora local: </span><time id="portal-reloj"></time></span>
       <button type="button" class="theme-toggle icon-btn" id="portal-tema"></button></header>
     <main id="portal-principal" class="portal-contenido" aria-labelledby="portal-titulo">
       <div class="portal-encabezado-negocio"><span class="portal-iniciales-negocio" id="portal-iniciales-negocio" aria-hidden="true"></span><div><p class="portal-antetitulo">PORTAL DE RESERVAS</p><h1 id="portal-titulo">Portal de reservas</h1><p id="portal-categoria" hidden></p></div><span class="portal-etiqueta-en-linea">Reservas en línea</span></div>
@@ -52,7 +52,7 @@ export async function iniciarPortalPublico(slug) {
     document.documentElement.dataset.theme = tema;
     document.querySelector('meta[name="theme-color"]')?.setAttribute('content', tema === 'dark' ? '#1f2026' : '#f4f5f6');
     raiz.querySelector('#portal-logo').src = tema === 'dark' ? '/brand/citalendar-logo-light.svg' : '/brand/citalendar-logo.svg';
-    botonTema.innerHTML = icon(tema === 'dark' ? 'sun' : 'moon');
+    botonTema.innerHTML = renderIcono(tema === 'dark' ? 'sun' : 'moon');
     botonTema.setAttribute('aria-label', `Activar modo ${tema === 'dark' ? 'claro' : 'oscuro'}`);
     botonTema.setAttribute('title', `Modo ${tema === 'dark' ? 'claro' : 'oscuro'}`);
     botonTema.setAttribute('aria-pressed', String(tema === 'dark'));

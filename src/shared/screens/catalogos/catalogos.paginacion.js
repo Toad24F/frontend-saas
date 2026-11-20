@@ -1,5 +1,5 @@
 import { paginarLocalmente, renderPaginacionLocal } from '../paginacion.local.js';
-import { toast } from '../../ui.js';
+import { mostrarAviso } from '../../interfaz.componentes.js';
 
 const catalogos = new Map();
 
@@ -9,7 +9,7 @@ export function configurarPaginacionCatalogo(tipo, alcance, registros, filtrarFi
   const filtrados = filtrarFilas();
   const ids = new Set(registros.map((fila) => fila.id));
   if (mismoAlcance && registros.some((fila) => !anterior.ids.has(fila.id) && !filtrados.some((registro) => registro.id === fila.id))) {
-    queueMicrotask(() => toast('Hay nuevos registros que no coinciden con los filtros actuales. Limpia los filtros para encontrarlos.'));
+    queueMicrotask(() => mostrarAviso('Hay nuevos registros que no coinciden con los filtros actuales. Limpia los filtros para encontrarlos.'));
   }
   const resultado = paginarLocalmente(filtrados, mismoAlcance ? anterior.pagina : 1);
   catalogos.set(tipo, { alcance, ids, filtrarFilas, renderFila, etiqueta, pagina: resultado.pagina });

@@ -1,0 +1,137 @@
+.notificaciones-aviso-whatsapp {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  background: #eaf3ec;
+  border: 1px solid #dce9de;
+  border-radius: 10px;
+  padding: 25px;
+  margin-bottom: 24px;
+}
+.notificaciones-icono-whatsapp {
+  width: 47px;
+  height: 47px;
+  border-radius: 13px;
+  background: #d9eadc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6f9679;
+}
+.notificaciones-icono-whatsapp > .icon {
+  width: 25px;
+  height: 25px;
+}
+.notificaciones-aviso-whatsapp > div {
+  flex: 1;
+}
+.notificaciones-aviso-whatsapp h2 {
+  font-size: 18px;
+  color: #5b765e;
+}
+.notificaciones-aviso-whatsapp p {
+  font-size: 12px;
+  margin-top: 7px;
+  color: #93a491;
+}
+.notificaciones-aviso-whatsapp > .soft-tag {
+  background: #ffffff66;
+  color: #90a18d;
+  border-color: #dce7d9;
+}
+.notificaciones-cuadricula {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 23px;
+}
+.notificaciones-automatizacion {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 24px;
+  border-top: 1px solid var(--border);
+}
+.notificaciones-automatizacion > div {
+  flex: 1;
+}
+.notificaciones-automatizacion strong {
+  font-size: 13px;
+  font-weight: 500;
+}
+.notificaciones-automatizacion p {
+  font-size: 11px;
+  margin-top: 5px;
+}
+.notificaciones-automatizacion .form-switch {
+  padding-left: 30px;
+}
+.notificaciones-recordatorio {
+  padding: 10px 24px 25px;
+}
+.notificaciones-recordatorio select {
+  max-width: 225px;
+}
+.notificaciones-vista-previa {
+  background: #e9ede7;
+  border: 1px solid #dce3da;
+  border-radius: 10px;
+  overflow: hidden;
+}
+.notificaciones-encabezado-mensaje {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 22px;
+  background: #f5f8f3;
+  border-bottom: 1px solid #dfe5dc;
+}
+.notificaciones-encabezado-mensaje strong {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+}
+.notificaciones-encabezado-mensaje small {
+  display: block;
+  font-size: 10px;
+  color: #98a48f;
+  margin-top: 4px;
+}
+.notificaciones-mensaje {
+  background: white;
+  border-radius: 0 10px 10px 10px;
+  margin: 25px 35px 17px;
+  padding: 20px;
+  box-shadow: 0 2px 5px #25351c09;
+  max-width: 360px;
+}
+.notificaciones-mensaje p {
+  font-size: 12px;
+  color: #788373;
+  margin-bottom: 13px;
+  line-height: 1.8;
+}
+.notificaciones-mensaje strong {
+  font-weight: 600;
+}
+.notificaciones-mensaje > small {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  font-size: 9px;
+  color: #b0b8aa;
+}
+.notificaciones-mensaje > small .icon {
+  width: 11px;
+  height: 11px;
+  color: #99b8c5;
+  margin-left: -5px;
+}
+.notificaciones-mensaje > small .icon:first-child {
+  margin-left: 5px;
+}
+.notificaciones-nota-vista-previa {
+  font-size: 10px;
+  text-align: center;
+  color: #a1ad9a;
+  margin-bottom: 18px;
+}

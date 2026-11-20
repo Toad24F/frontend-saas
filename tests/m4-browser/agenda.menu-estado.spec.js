@@ -83,6 +83,23 @@ test('cambio rápido usa la versión observada, sin abrir el detalle ni duplicar
   expect(errors).toEqual([]);
 });
 
+test('demo: el cambio rápido conserva el negocio de la cita y se guarda en memoria', async ({ page: pagina }) => {
+  const solicitudes = [];
+  await pagina.route((url) => url.port === '3000', (ruta) => {
+    solicitudes.push(ruta.request().url());
+    return ruta.abort();
+  });
+  await pagina.goto('/admin/agenda?demo=1');
+  await pagina.getByLabel('Sucursal', { exact: true }).selectOption('2');
+  const cita = pagina.locator('[data-agenda-menu-estado="9"]');
+  await cita.click({ button: 'right' });
+  await menu(pagina).getByRole('menuitemradio', { name: 'Pendiente', exact: true }).click();
+  await expect(pagina.getByText('Demostración: estado Pendiente. Solo datos locales.')).toBeVisible();
+  await cita.click({ button: 'right' });
+  await expect(menu(pagina).getByRole('menuitemradio', { checked: true })).toContainText('Pendiente');
+  expect(solicitudes).toEqual([]);
+});
+
 test('cancelar exige confirmación; conservar y Escape no escriben; confirmar incluye motivo', async ({ page }) => {
   const { writes, errors } = await prepare(page);
   await trigger(page).click({ button: 'right' }); await cancel(page).click();

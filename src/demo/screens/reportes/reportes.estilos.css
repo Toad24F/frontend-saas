@@ -1,0 +1,33 @@
+.reportes-filtros {
+  display: flex;
+  align-items: flex-end;
+  gap: 18px;
+  padding: 20px 24px;
+  margin-bottom: 24px;
+}
+.reportes-filtros label {
+  font-size: 12px;
+  color: #858e98;
+  flex: 1;
+}
+.reportes-filtros input,
+.reportes-filtros select {
+  margin-top: 8px;
+  font-size: 13px;
+}
+.reportes-tablas {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 22px;
+}
+.reportes-tablas .app-table {
+  min-width: 340px;
+}
+.reportes-tablas .app-table td,
+.reportes-tablas .app-table th {
+  padding-left: 20px;
+  padding-right: 20px;
+}
+.reportes-encabezado-impresion {
+  display: none;
+}
