@@ -778,7 +778,7 @@ html[data-theme='dark'] .sidebar .brand .brand-logo-on-light { display: none; }
 .app-dialog :is(.eyebrow, .form-label, .field-hint, .optional, .form-separator > span, .detail-list small, .detail-list strong) {
   color: var(--muted);
 }
-.app-dialog :is(input, select, textarea, button, .status-badge, .tenant-option) {
+.app-dialog :is(input, select, textarea, button, .status-badge, .opcion-negocio) {
   text-shadow: none;
 }
 .app-dialog .app-table thead th { color: var(--muted); }
@@ -1526,12 +1526,12 @@ html[data-theme='dark'] .sidebar .brand .brand-logo-on-light { display: none; }
 .appointment-reason p {
   margin-top: 7px;
 }
-.tenant-options {
+.opciones-negocio {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
-.tenant-option {
+.opcion-negocio {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -1541,29 +1541,29 @@ html[data-theme='dark'] .sidebar .brand .brand-logo-on-light { display: none; }
   border-radius: 8px;
   text-align: left;
 }
-.tenant-option > span:nth-child(2) {
+.opcion-negocio > span:nth-child(2) {
   display: flex;
   flex-direction: column;
   flex: 1;
   gap: 5px;
 }
-.tenant-option strong {
+.opcion-negocio strong {
   font-size: 14px;
   font-weight: 600;
 }
-.tenant-option small {
+.opcion-negocio small {
   font-size: 12px;
   color: #929b92;
 }
-.tenant-option > .icon {
+.opcion-negocio > .icon {
   width: 17px;
   color: #94a093;
 }
-.tenant-option.selected {
+.opcion-negocio.seleccionada {
   border-color: #df9277;
   background: #fffaf7;
 }
-.tenant-option:disabled {
+.opcion-negocio:disabled {
   opacity: 0.45;
 }
 .nav-item {

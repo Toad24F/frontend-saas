@@ -1,6 +1,6 @@
 import { abrirEditorCatalogo } from './screens/catalogos/catalogos.acciones.js';
 import { nuevoBloqueo, editarBloqueo } from './screens/disponibilidad/disponibilidad.acciones.js';
-import { switchTenant, newTenant } from './screens/plataforma/actions.js';
+import { cambiarEspacioTrabajo, registrarNegocio } from './screens/plataforma/plataforma.acciones.js';
 import { isDemo, pending, api, user, loadBackendData, crearPayloadHorario } from '../connected/backend.js';
 import { state, render, navigate } from './app.js';
 import {
@@ -30,8 +30,8 @@ export async function handleClick(e) {
       (await import('../connected/screens/agenda/agenda.vista.js')).handleClicAgenda(e)) return;
     // Solo los controles de la sección de inhabilitados cargan ese módulo;
     // navegación y acciones ordinarias conservan su flujo habitual.
-    if (!isDemo && e.target.closest('[data-retired-open], [data-retired-list], [data-retired-detail], [data-retired-restore], [data-retired-effects]') &&
-      await (await import('../connected/screens/recursos/retired-view.js')).handleRetiredClick(e)) return;
+    if (!isDemo && e.target.closest('[data-inhabilitados-abrir], [data-inhabilitados-lista], [data-inhabilitados-detalle], [data-inhabilitados-restaurar], [data-inhabilitados-afectaciones]') &&
+      await (await import('../connected/screens/recursos/inhabilitados.vista.js')).handleClicInhabilitados(e)) return;
     if (isDemo && state.page === 'disponibilidad') {
       const slot = e.target.closest('[data-disponibilidad-horario]');
       const operationalAction = e.target.closest('[data-disponibilidad-accion]');
@@ -168,8 +168,8 @@ export async function handleClick(e) {
       'nueva-sucursal': () => abrirEditorCatalogo('branches'),
       'nuevo-profesional': () => abrirEditorCatalogo('professionals'),
       'nuevo-bloqueo': nuevoBloqueo,
-      'switch-tenant': switchTenant,
-      'new-tenant': newTenant,
+      'cambiar-espacio-trabajo': cambiarEspacioTrabajo,
+      'registrar-negocio': registrarNegocio,
       'copy-link': async () => {
         const url = `${location.origin}/reservas/${tenantById(state.tenantId).slug}`;
         try {
@@ -286,41 +286,41 @@ export async function handleClick(e) {
       editarBloqueo(block);
       return;
     }
-    const toggle = e.target.closest('[data-toggle-tenant]');
-    if (toggle) {
-      const t = tenantById(toggle.dataset.toggleTenant);
-      const el = modal(
-        t.suspended ? 'Reactivar negocio' : 'Suspender negocio',
-        `<div class="dialog-body"><p>${esc(t.name)} ${isDemo ? (t.suspended ? 'volverá a mostrar' : 'dejará de mostrar') + ' su portal público en esta simulación.' : (t.suspended ? 'reactivará su licencia.' : 'solicitará la suspensión de su licencia según el plazo del servidor.')}</p></div><div class="dialog-footer"><button class="btn btn-light" id="dismiss-tenant">Volver</button><button class="btn btn-primary" id="confirm-tenant">${t.suspended ? 'Reactivar' : 'Suspender'}</button></div>`,
+    const cambioEstado = e.target.closest('[data-cambiar-estado-negocio]');
+    if (cambioEstado) {
+      const negocio = tenantById(cambioEstado.dataset.cambiarEstadoNegocio);
+      const dialogo = modal(
+        negocio.suspended ? 'Reactivar negocio' : 'Suspender negocio',
+        `<div class="dialog-body"><p>${esc(negocio.name)} ${isDemo ? (negocio.suspended ? 'volverá a mostrar' : 'dejará de mostrar') + ' su portal público en esta simulación.' : (negocio.suspended ? 'reactivará su licencia.' : 'solicitará la suspensión de su licencia según el plazo del servidor.')}</p></div><div class="dialog-footer"><button class="btn btn-light" id="volver-estado-negocio">Volver</button><button class="btn btn-primary" id="confirmar-estado-negocio">${negocio.suspended ? 'Reactivar' : 'Suspender'}</button></div>`,
       );
-      el.querySelector('#dismiss-tenant').onclick = () => el.close();
-      el.querySelector('#confirm-tenant').onclick = async () => {
+      dialogo.querySelector('#volver-estado-negocio').onclick = () => dialogo.close();
+      dialogo.querySelector('#confirmar-estado-negocio').onclick = async () => {
         if (!isDemo) {
-          const submit = el.querySelector('#confirm-tenant'); submit.disabled = true;
-          try { if (!t.licenseId) throw new Error('Este negocio aún no tiene una licencia disponible.'); const result = await api(`/licencias/${t.licenseId}/${t.suspended ? 'reactivar' : 'suspender'}`, 'POST', {}); el.close(); await loadBackendData(); render(); toast('Licencia: ' + result.estado); } catch (error) { toast(error.message); } finally { submit.disabled = false; }
+          const confirmacion = dialogo.querySelector('#confirmar-estado-negocio'); confirmacion.disabled = true;
+          try { if (!negocio.licenseId) throw new Error('Este negocio aún no tiene una licencia disponible.'); const resultado = await api(`/licencias/${negocio.licenseId}/${negocio.suspended ? 'reactivar' : 'suspender'}`, 'POST', {}); dialogo.close(); await loadBackendData(); render(); toast('Licencia: ' + resultado.estado); } catch (error) { toast(error.message); } finally { confirmacion.disabled = false; }
           return;
         }
-        t.suspended = !t.suspended;
-        el.close();
+        negocio.suspended = !negocio.suspended;
+        dialogo.close();
         render();
         toast('Estado del negocio actualizado.');
       };
       return;
     }
-    const license = e.target.closest('[data-license-tenant]');
-    if (license) {
+    const renovacion = e.target.closest('[data-renovar-licencia]');
+    if (renovacion) {
       if (!isDemo) {
-        const t = tenantById(license.dataset.licenseTenant);
-        if (!t.licenseId) throw new Error('Este negocio aún no tiene una licencia disponible.');
-        const el = modal('Renovar licencia', `<div class="dialog-body"><p>Se agregará un año calendario a la licencia de ${esc(t.name)}.</p></div><div class="dialog-footer"><button class="btn btn-light" data-dismiss>Cancelar</button><button class="btn btn-primary" id="confirm-renew">Renovar licencia</button></div>`);
-        el.querySelector('[data-dismiss]').onclick = () => el.close();
-        el.querySelector('#confirm-renew').onclick = async () => {
-          const submit = el.querySelector('#confirm-renew'); submit.disabled = true;
-          try { await api(`/licencias/${t.licenseId}/renovar`, 'POST', {}); el.close(); await loadBackendData(); render(); toast('Licencia renovada.'); } catch (error) { toast(error.message); } finally { submit.disabled = false; }
+        const negocio = tenantById(renovacion.dataset.renovarLicencia);
+        if (!negocio.licenseId) throw new Error('Este negocio aún no tiene una licencia disponible.');
+        const dialogo = modal('Renovar licencia', `<div class="dialog-body"><p>Se agregará un año calendario a la licencia de ${esc(negocio.name)}.</p></div><div class="dialog-footer"><button class="btn btn-light" data-dismiss>Cancelar</button><button class="btn btn-primary" id="confirmar-renovacion-negocio">Renovar licencia</button></div>`);
+        dialogo.querySelector('[data-dismiss]').onclick = () => dialogo.close();
+        dialogo.querySelector('#confirmar-renovacion-negocio').onclick = async () => {
+          const confirmacion = dialogo.querySelector('#confirmar-renovacion-negocio'); confirmacion.disabled = true;
+          try { await api(`/licencias/${negocio.licenseId}/renovar`, 'POST', {}); dialogo.close(); await loadBackendData(); render(); toast('Licencia renovada.'); } catch (error) { toast(error.message); } finally { confirmacion.disabled = false; }
         };
         return;
       }
-      tenantById(license.dataset.licenseTenant).license = '90 días';
+      tenantById(renovacion.dataset.renovarLicencia).license = '90 días';
       render();
       toast('Licencia de demostración renovada por 90 días.');
     }

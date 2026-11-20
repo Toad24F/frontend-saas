@@ -83,7 +83,7 @@ html[data-theme='dark'] :is(
   .service-card, .branch-card, .settings-card, .opcion-modo-agenda, .bloqueo-entrada,
   .notification-card, .message-preview, .report-card, .report-filters,
   .reserva-demo-superficie, .reserva-demo-opcion, .reserva-demo-fecha, .reserva-demo-horario,
-  .tenant-option, .section-card
+  .opcion-negocio, .section-card
 ) {
   background: var(--surface);
   border-color: var(--border);

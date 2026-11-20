@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { api, iniciarSesion, restaurarSesion, loadBackendData, crearPayloadCatalogo, crearPayloadHorario, modeUrl, availablePage, defaultPage } from '../src/connected/backend.js';
+import { api, iniciarSesion, restaurarSesion, loadBackendData, crearPayloadCatalogo, crearPayloadHorario, modeUrl, paginaPermitida, paginaInicial } from '../src/connected/backend.js';
 import { db } from '../src/shared/data.js';
 import { validarContrasenaNueva } from '../src/connected/modules/autenticacion/contrasena.politica.js';
 import { obtenerCupoSucursales } from '../src/connected/modules/sucursales/sucursales.cupo.js';
@@ -54,10 +54,10 @@ test('Recepción accede a disponibilidad privada y conserva cuenta', async () =>
     global.fetch = async () => Response.json({ accessToken: 'reception-token', usuario: { id: 8, nombre: 'Recepción', rol: 'recepcionista', negocioId: 7 } });
     await iniciarSesion('recepcion@example.com', 'test-password');
     // M4-T088 incorpora Agenda como inicio sin retirar las capacidades anteriores.
-    assert.equal(defaultPage(), 'agenda');
-    assert.equal(availablePage('disponibilidad'), true);
-    assert.equal(availablePage('cuenta'), true);
-    assert.equal(availablePage('profesionales'), false);
+    assert.equal(paginaInicial(), 'agenda');
+    assert.equal(paginaPermitida('disponibilidad'), true);
+    assert.equal(paginaPermitida('cuenta'), true);
+    assert.equal(paginaPermitida('profesionales'), false);
   } finally { global.fetch = original; global.sessionStorage = storage; }
 });
 
@@ -88,9 +88,9 @@ test('carga datos reales aislados del negocio, sin inventar citas, y envía auto
     };
     await iniciarSesion('test@example.com', 'test-password');
     await restaurarSesion();
-    assert.equal(defaultPage(), 'agenda');
-    assert.equal(availablePage('servicios'), true);
-    assert.equal(availablePage('agenda'), true);
+    assert.equal(paginaInicial(), 'agenda');
+    assert.equal(paginaPermitida('servicios'), true);
+    assert.equal(paginaPermitida('agenda'), true);
     assert.equal(await loadBackendData(), 7);
     assert.equal(db.tenants[0].name, 'Clínica Central');
     assert.equal(db.tenants[0].slug, 'clinica-central');
@@ -126,9 +126,9 @@ test('el profesional ve sus sucursales asignadas y la autoría real de servicios
   try {
     global.fetch = async (url) => Response.json(responses[new URL(url).pathname]);
     await iniciarSesion('ana@example.com', 'test-password');
-    assert.equal(defaultPage(), 'agenda');
-    assert.equal(availablePage('profesionales'), false);
-    assert.equal(availablePage('cuenta'), true);
+    assert.equal(paginaInicial(), 'agenda');
+    assert.equal(paginaPermitida('profesionales'), false);
+    assert.equal(paginaPermitida('cuenta'), true);
     await loadBackendData();
     assert.deepEqual(db.professionals[0].branchIds, [20]);
     assert.equal(db.branches[0].name, 'Centro');
@@ -163,9 +163,9 @@ test('el panel SA resume licencias y envíos reales sin datos de citas', async (
   try {
     global.fetch = async (url) => Response.json(responses[new URL(url).pathname]);
     await iniciarSesion('sa@example.com', 'test-password');
-    assert.equal(defaultPage(), 'plataforma');
-    assert.equal(availablePage('negocio'), true);
-    assert.equal(availablePage('recepcionistas'), false);
+    assert.equal(paginaInicial(), 'plataforma');
+    assert.equal(paginaPermitida('negocio'), true);
+    assert.equal(paginaPermitida('recepcionistas'), false);
     await loadBackendData();
     assert.equal(db.tenants[0].license, 'suspension_pendiente');
     assert.equal(db.tenants[0].failedDeliveries, 1);

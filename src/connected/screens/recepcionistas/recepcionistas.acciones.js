@@ -8,7 +8,7 @@ import { modal, toast } from '../../../shared/ui.js';
 import { mostrarErroresProfesional, limpiarErroresProfesional, limpiarCampoProfesional } from '../../../shared/screens/profesionales/profesionales.errores.js';
 import { validarRecepcionista, interpretarErrorRecepcionista } from './recepcionistas.errores.js';
 import { leerCupoRolPropio, renderAvisoCupoPropio } from '../negocio/usuarios.cupo.js';
-import { disableReceptionist } from '../../modules/recursos/retired.js';
+import { inhabilitarRecepcionista } from '../../modules/recursos/recursos.inhabilitados.js';
 
 const campoMarcado = (...argumentos) => field(...argumentos).replace('class="form-field"', `class="form-field" data-campo-profesional="${argumentos[1]}"`);
 const camposContrasena = () => campoMarcado('Contraseña', 'password', '', 'password', 'required minlength="12" autocomplete="new-password"');
@@ -77,7 +77,7 @@ export async function accionRecepcionista(accion, id) {
     const boton = evento.currentTarget;
     boton.disabled = true;
     try {
-      if (inhabilitando) await disableReceptionist(id);
+      if (inhabilitando) await inhabilitarRecepcionista(id);
       else await api(`/recepcionistas/${id}/${reactivando ? 'reactivar' : 'desactivar'}`, 'POST', {});
       try { await loadBackendData(); }
       catch (error) { toast('Cambio guardado. No se pudo actualizar la lista: ' + error.message); }

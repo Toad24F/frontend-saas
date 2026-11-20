@@ -7,7 +7,7 @@ import { renderDisponibilidadDemo } from './disponibilidad/disponibilidad.vista.
 import { reports } from './reportes/view.js';
 import { notifications } from './notificaciones/view.js';
 import { settings } from './configuracion/view.js';
-import { platform } from '../../shared/screens/plataforma/view.js';
+import { plataforma } from '../../shared/screens/plataforma/plataforma.vista.js';
 import { empty, button } from '../../shared/ui.js';
 
 const views = {
@@ -20,7 +20,7 @@ const views = {
   reportes: reports,
   notificaciones: notifications,
   configuracion: settings,
-  plataforma: platform,
+  plataforma,
 };
 
 export function renderView(page) {

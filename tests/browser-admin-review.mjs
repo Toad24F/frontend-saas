@@ -109,8 +109,8 @@ try {
         assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), `${width}/${theme}/${screen}`);
         await page.screenshot({ animations: 'disabled', fullPage: true, path: `test-results/admin-review/${width}-${theme}-${screen}.png` });
       }
-      await page.locator('[data-retired-open]').click();
-      await page.locator('[data-retired-detail]').waitFor();
+      await page.locator('[data-inhabilitados-abrir]').click();
+      await page.locator('[data-inhabilitados-detalle]').waitFor();
       await page.screenshot({ animations: 'disabled', path: `test-results/admin-review/${width}-${theme}-inhabilitados.png` });
       await page.getByRole('dialog').getByRole('button', { name: 'Cerrar', exact: true }).click();
     }
@@ -147,13 +147,13 @@ try {
   await page.getByRole('dialog').waitFor();
   await page.getByRole('dialog').getByRole('button', { name: 'Cancelar', exact: true }).click();
   await goto('servicios');
-  await page.locator('[data-retired-open]').click();
-  await page.locator('[data-retired-search]').fill('no coincide');
+  await page.locator('[data-inhabilitados-abrir]').click();
+  await page.locator('[data-inhabilitados-busqueda]').fill('no coincide');
   await page.getByText('No hay coincidencias en los inhabilitados.', { exact: true }).waitFor();
-  await page.locator('[data-retired-search]').fill('Retirado');
-  await page.locator('[data-retired-detail]').click();
+  await page.locator('[data-inhabilitados-busqueda]').fill('Retirado');
+  await page.locator('[data-inhabilitados-detalle]').click();
   await page.getByRole('dialog').getByRole('button', { name: 'Volver a inhabilitados' }).click();
-  await page.locator('[data-retired-restore]').click();
+  await page.locator('[data-inhabilitados-restaurar]').click();
   await page.getByRole('dialog').getByRole('button', { name: 'Restaurar', exact: true }).click();
   await page.getByText('Recurso restaurado como inactivo. Actívalo por separado cuando corresponda.', { exact: true }).waitFor();
   await goto('disponibilidad/equipo');
@@ -216,7 +216,7 @@ try {
   await page.getByRole('group', { name: 'Tipo de vista' }).getByRole('button', { name: 'Lista', exact: true }).click();
   await page.route('**/servicios/inhabilitados', (route) => route.fulfill({ status: 503, json: { message: 'Lista no disponible' } }));
   await goto('servicios');
-  await page.locator('[data-retired-open]').click();
+  await page.locator('[data-inhabilitados-abrir]').click();
   await page.getByRole('dialog').getByRole('alert').waitFor();
   await page.unroute('**/servicios/inhabilitados');
   await page.getByRole('dialog').getByRole('button', { name: 'Reintentar', exact: true }).click();
@@ -224,18 +224,18 @@ try {
   await page.getByRole('dialog').getByRole('button', { name: 'Cerrar', exact: true }).click();
   role = 'profesional';
   await goto('servicios');
-  assert.equal(await page.locator('[data-users-menu], [data-retired-open]').count(), 0);
+  assert.equal(await page.locator('[data-users-menu], [data-inhabilitados-abrir]').count(), 0);
   role = 'admin_negocio';
   await page.goto(`${origin}/admin/servicios?demo=1`);
   await page.locator('#busqueda-servicios').waitFor();
-  assert.equal(await page.locator('[data-retired-open]').count(), 0);
+  assert.equal(await page.locator('[data-inhabilitados-abrir]').count(), 0);
   for (const ancho of [1366, 390]) for (const tema of ['light', 'dark']) {
     await page.setViewportSize({ width: ancho, height: 900 });
     for (const [pantalla, selector] of [['profesionales', '[data-profesional-id]'], ['servicios', '[data-servicio-entrada]'], ['sucursales', '[data-sucursal-entrada]']]) {
       await page.goto(`${origin}/admin/${pantalla}?demo=1`);
       await page.evaluate((valor) => { localStorage.setItem('cita-theme', valor); document.documentElement.dataset.theme = valor; }, tema);
       await page.locator(selector).first().waitFor();
-      assert.equal(await page.locator('[data-retired-open]').count(), 0);
+      assert.equal(await page.locator('[data-inhabilitados-abrir]').count(), 0);
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), `demo/${pantalla}/${ancho}/${tema}`);
       await page.screenshot({ animations: 'disabled', fullPage: true, path: `test-results/admin-review/${ancho}-${tema}-demo-${pantalla}.png` });
     }

@@ -1,7 +1,7 @@
 # Reglas y plan de traducción de la nomenclatura del frontend
 
 Fecha de definición: 2026-11-16  
-Estado: implementación por conjuntos; glosario, Sucursales, Servicios, Profesionales, Recepcionistas, Clientes, Catálogos compartidos, Disponibilidad, Agenda, Portal público y reservas, Autenticación y sesión, y Cuenta, negocio, licencias y publicación terminados
+Estado: implementación por conjuntos. Completados los conjuntos 0 a 12.
 
 ## Objetivo
 
@@ -297,11 +297,13 @@ Resultado: conjunto cerrado el 2026-11-18 en [Cuenta, negocio, licencias y publi
 
 ### 12. Plataforma, permisos y recursos retirados
 
-- [ ] Traducir juntos los archivos de `shared/screens/plataforma/`: vista, acciones, directorio, modelo y estilos.
-- [ ] Traducir juntos `connected/modules/permisos/pages.js` y `roles.js`, conservando los valores contractuales de rol.
-- [ ] Traducir juntos `connected/modules/recursos/affected.js`, `retired.js` y la pantalla `connected/screens/recursos/retired-view.*`.
-- [ ] Actualizar pruebas de plataforma, permisos, recursos retirados e inhabilitados.
-- [ ] Verificar visibilidad por rol y estados activo/inactivo/retirado.
+- [x] Traducir juntos los archivos de `shared/screens/plataforma/`: vista, acciones, directorio, modelo y estilos.
+- [x] Traducir juntos `connected/modules/permisos/pages.js` y `roles.js`, conservando los valores contractuales de rol.
+- [x] Traducir juntos `connected/modules/recursos/affected.js`, `retired.js` y la pantalla `connected/screens/recursos/retired-view.*`.
+- [x] Actualizar pruebas de plataforma, permisos, recursos retirados e inhabilitados.
+- [x] Verificar visibilidad por rol y estados activo/inactivo/retirado.
+
+Resultado del 2026-11-20 en [Plataforma, permisos y recursos inhabilitados](resultado-plataforma-permisos-recursos-2026-11-20.md).
 
 ### 13. Demo restante
 

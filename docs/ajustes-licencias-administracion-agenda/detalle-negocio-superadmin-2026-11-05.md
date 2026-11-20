@@ -64,9 +64,9 @@ Se actualizaron el contexto del encabezado y el texto del directorio; se elimina
 
 La implementación reutiliza los datos ya cargados de negocios, vigencias e historial. La paginación es local: sigue descargándose la lista completa y consultándose la vigencia y correos de cada negocio; no se añaden contratos de servidor ni se reduce el coste de carga inicial. Un volumen grande requerirá paginación y agregados del backend.
 
-Archivos del panel: `src/shared/screens/plataforma/view.js`, `directory.js`, `directory-model.js` y `style.css`; pruebas en `tests/platform-directory.test.js` y `tests/browser-platform.mjs`.
+Los nombres actuales de los archivos y las pruebas del panel se registran en la [nota de traducción de Plataforma](../traduccion-nomenclaturas/resultado-plataforma-permisos-recursos-2026-11-20.md).
 
-Verificación adicional: cuatro pruebas unitarias (seguimiento real/umbral, búsqueda/filtros/página, representación temporal y controles/escape). Con Vite activo, `node tests/browser-platform.mjs` verifica navegación ida/vuelta conservando búsqueda/página, filtros combinados y reinicio a página uno, indicadores estáticos y activación/desactivación de Limpiar filtros, diez filas, controles dinámicos, actualización, error 503 con datos previos explícitos, vacío global y acción de suspensión demo con confirmación. Usa API simulada y solo acepta GET, sin escrituras al backend. Se generaron ocho capturas en `test-results/platform/`: 1366, 1159, 390 y 320px, claro/oscuro. Se revisaron capturas de escritorio y móvil y se comprobó automáticamente que no desborda el documento.
+Las cuatro pruebas unitarias cubren seguimiento, búsqueda, paginación, tiempo restante y escape de contenido. Con Vite activo, `node tests/plataforma.directorio-navegador.mjs` comprueba la conservación de filtros y página al volver del detalle, el alta conectada, el límite de diez filas, la actualización, el error 503 y los estados vacíos. Usa una API simulada y genera las capturas de escritorio y móvil en `test-results/plataforma/`.
 
 ## Verificación y reproducción
 
@@ -76,7 +76,7 @@ Con Vite ya iniciado en localhost:5173:
 npm test
 npm run build
 node tests/negocio.detalle-navegador.mjs
-node tests/browser-platform.mjs
+node tests/plataforma.directorio-navegador.mjs
 git diff --check
 ```
 

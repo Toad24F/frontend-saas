@@ -10,7 +10,7 @@ import { resourceStatus } from '../../../shared/resource-status.js';
 import { avatar, escape as escapar, pageHead, button, empty } from '../../../shared/ui.js';
 import '../../../shared/screens/profesionales/profesionales.estilos.css';
 import './recepcionistas.estilos.css';
-import { retiredSection } from '../recursos/retired-view.js';
+import { renderAccesoInhabilitados } from '../recursos/inhabilitados.vista.js';
 
 const interfaz = { busqueda: '', estado: 'todos' };
 let negocioId = null;
@@ -46,7 +46,7 @@ export function recepcionistas() {
   const activas = personas.filter((persona) => persona.active).length;
   const vistaEscritorio = consultarVistaCatalogos();
   const vistaResultados = matchMedia('(max-width: 767px)').matches ? 'tarjetas' : vistaEscritorio;
-  return `<div class="profesionales-espacio recepcionistas-espacio">${renderEncabezadoCatalogo('Recepcionistas', 'Gestiona las cuentas de recepción de tu negocio.', retiredSection('recepcionistas') + button('Nueva recepcionista', 'nueva-recepcionista'), renderCupoCatalogo('Recepcionistas activos', consultarCupoRol('recepcionistas')))}
+  return `<div class="profesionales-espacio recepcionistas-espacio">${renderEncabezadoCatalogo('Recepcionistas', 'Gestiona las cuentas de recepción de tu negocio.', renderAccesoInhabilitados('recepcionistas') + button('Nueva recepcionista', 'nueva-recepcionista'), renderCupoCatalogo('Recepcionistas activos', consultarCupoRol('recepcionistas')))}
     <div class="profesionales-resumen"><strong>${personas.length}</strong> ${personas.length === 1 ? 'recepcionista' : 'recepcionistas'}<span aria-hidden="true">·</span><strong>${activas}</strong> ${activas === 1 ? 'activa' : 'activas'}<span aria-hidden="true">·</span><strong>${personas.length - activas}</strong> ${personas.length - activas === 1 ? 'inactiva' : 'inactivas'}</div>
     <section class="profesionales-herramientas recepcionistas-herramientas" aria-label="Buscar y filtrar recepcionistas">
       <label class="profesionales-busqueda">${icon('search')}<span class="visually-hidden">Buscar recepcionistas</span><input id="busqueda-recepcionistas" type="search" placeholder="Buscar por nombre o correo" value="${escapar(interfaz.busqueda)}" autocomplete="off"></label>

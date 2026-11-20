@@ -43,7 +43,7 @@ test('FALA-T035–T040: cuatro retiros recuperables y consultas separadas', asyn
     await dialog.getByRole('button', { name: /Inhabilitar/ }).click();
     await expect(dialog).toHaveCount(0);
     await expect(card).toHaveCount(0);
-    await page.locator('[data-retired-open]').click();
+    await page.locator('[data-inhabilitados-abrir]').click();
     const section = page.getByRole('dialog');
     await expect(section).toContainText(item.name);
     await expect(section).toContainText('Inhabilitado');
@@ -71,7 +71,7 @@ test('FALA-T035–T040: cuatro retiros recuperables y consultas separadas', asyn
 test('FALA-T035: la demo conserva sus catálogos sin fingir retiros conectados', async ({ page }) => {
   await page.goto(`${origin()}/admin/profesionales?demo=1`);
   await expect(page.getByRole('heading', { name: 'Profesionales' })).toBeVisible();
-  await expect(page.locator('[data-retired-open]')).toHaveCount(0);
+  await expect(page.locator('[data-inhabilitados-abrir]')).toHaveCount(0);
   await expect(page.locator('[data-profesional-id]').first()).toBeVisible();
 });
 
@@ -98,7 +98,7 @@ test('FALA-T041–T043: restaurar los cuatro deja inactivo y activar respeta cup
   ];
   for (const [type, name, selector] of items) {
     await page.goto(`${origin()}/admin/${type}`);
-    await page.locator('[data-retired-open]').click();
+    await page.locator('[data-inhabilitados-abrir]').click();
     const section = page.getByRole('dialog');
     await section.getByRole('button', { name: `Restaurar ${name}` }).click();
     const dialog = page.getByRole('dialog');
@@ -107,7 +107,7 @@ test('FALA-T041–T043: restaurar los cuatro deja inactivo y activar respeta cup
     await expect(dialog).toHaveCount(0);
     const card = page.locator(selector, { hasText: name }).first();
     await expect(card).toContainText(/Inactivo|Inactiva/);
-    await page.locator('[data-retired-open]').click();
+    await page.locator('[data-inhabilitados-abrir]').click();
     await expect(section).not.toContainText(name);
   }
   await rows('UPDATE negocios SET limite_profesionales_activos=1 WHERE id=2');
@@ -131,7 +131,7 @@ test('FALA-T040: inhabilitados visibles en escritorio y móvil, claro y oscuro',
   await page.getByRole('button', { name: 'Inhabilitar a Recepción Retiro QA' }).click();
   await page.getByRole('dialog').getByRole('button', { name: 'Inhabilitar' }).click();
   await expect(page.getByRole('dialog')).toHaveCount(0);
-  await page.locator('[data-retired-open]').click();
+  await page.locator('[data-inhabilitados-abrir]').click();
   const section = page.getByRole('dialog');
   await expect(section).toContainText('Recepción Retiro QA');
   await expect(page.locator('#toast-region .app-toast')).toHaveCount(0);
@@ -151,10 +151,10 @@ test('FALA-T040: inhabilitados visibles en escritorio y móvil, claro y oscuro',
   await page.evaluate(() => scrollTo(0, 0));
   await page.screenshot({ path: testInfo.outputPath('retired-mobile-dark.png'), fullPage: true, animations: 'disabled' });
   await restore.click();
-  await page.screenshot({ path: testInfo.outputPath('retired-restore-mobile-dark.png'), animations: 'disabled' });
+  await page.screenshot({ path: testInfo.outputPath('inhabilitados-restaurar-mobile-dark.png'), animations: 'disabled' });
   await page.getByRole('dialog').getByRole('button', { name: 'Volver a inhabilitados' }).click();
   await section.getByRole('button', { name: 'Ver detalle de Recepción Retiro QA' }).click();
-  await page.screenshot({ path: testInfo.outputPath('retired-detail-mobile-dark.png'), animations: 'disabled' });
+  await page.screenshot({ path: testInfo.outputPath('inhabilitados-detalle-mobile-dark.png'), animations: 'disabled' });
   await page.getByRole('dialog').getByRole('button', { name: 'Volver a inhabilitados' }).click();
   await page.evaluate(() => { document.documentElement.dataset.theme = 'light'; });
   await page.screenshot({ path: testInfo.outputPath('retired-mobile-light.png'), fullPage: true, animations: 'disabled' });

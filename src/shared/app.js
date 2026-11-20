@@ -1,4 +1,4 @@
-import { isDemo, pending, modeUrl, user, etiquetaRol, availablePage, defaultPage, restaurarSesion, loadBackendData } from '../connected/backend.js';
+import { isDemo, pending, modeUrl, user, etiquetaRol, paginaPermitida, paginaInicial, restaurarSesion, loadBackendData } from '../connected/backend.js';
 import { renderAutenticacion } from '../connected/screens/autenticacion/autenticacion.vista.js';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './styles.css';
@@ -162,8 +162,8 @@ function connectedAccountMenu() {
     icon('logout') + '<span>Cerrar sesión</span></button></nav></div>';
 }
 export function navigate(page, id = null) {
-  if (!isDemo && !availablePage(page)) page = defaultPage();
-  if (page === 'negocio' && (!Number.isSafeInteger(Number(id)) || Number(id) < 1)) page = defaultPage();
+  if (!isDemo && !paginaPermitida(page)) page = paginaInicial();
+  if (page === 'negocio' && (!Number.isSafeInteger(Number(id)) || Number(id) < 1)) page = paginaInicial();
   if (page === 'disponibilidad') {
     state.grupoDisponibilidad = grupoDisponibilidadSeleccionado();
     menuDisponibilidadAbierto = true;
@@ -199,13 +199,13 @@ export function renderShell(content) {
   if (!tenantById(state.tenantId)) state.tenantId = db.tenants[0].id;
   const tenant = tenantById(state.tenantId);
   const sidebarScrollTop = document.querySelector('.sidebar')?.scrollTop ?? 0;
-  const home = isDemo ? 'agenda' : defaultPage();
+  const home = isDemo ? 'agenda' : paginaInicial();
   const visibleNav = isDemo ? nav : [
     ['connected', user.rol === 'superadmin' ? 'PLATAFORMA' : user.rol === 'recepcionista' ? 'MI CUENTA' : 'MI NEGOCIO'],
     ...(user.rol === 'superadmin' ? [['plataforma', 'grid', 'Negocios']] : [
       // La administración usa un menú propio; incluir aquí las nuevas lecturas M4.
       ...(user.rol === 'admin_negocio' ? [['agenda', 'calendar', 'Agenda'], ['clientes', 'users', 'Clientes']] : []),
-      ...(user.rol === 'admin_negocio' ? [['servicios', 'briefcase', 'Servicios'], ['sucursales', 'pin', 'Sucursales'], ['usuarios', 'users', 'Usuarios'], ['disponibilidad', 'clock', 'Disponibilidad']] : [...nav.filter((item) => item.length === 3 && item[0] !== 'usuarios' && availablePage(item[0])), ...(availablePage('profesionales') ? [['profesionales', 'stethoscope', 'Profesionales']] : [])]),
+      ...(user.rol === 'admin_negocio' ? [['servicios', 'briefcase', 'Servicios'], ['sucursales', 'pin', 'Sucursales'], ['usuarios', 'users', 'Usuarios'], ['disponibilidad', 'clock', 'Disponibilidad']] : [...nav.filter((item) => item.length === 3 && item[0] !== 'usuarios' && paginaPermitida(item[0])), ...(paginaPermitida('profesionales') ? [['profesionales', 'stethoscope', 'Profesionales']] : [])]),
     ]),
   ];
   const workspaceName = !isDemo && user.rol === 'superadmin' ? 'Plataforma' : tenant.name;
@@ -265,12 +265,12 @@ let extraViews = null,
   actions = null;
 export function render() {
   if (!db) return;
-  if (!isDemo && location.pathname.startsWith('/admin/') && !availablePage(state.page)) {
-    state.page = defaultPage();
+  if (!isDemo && location.pathname.startsWith('/admin/') && !paginaPermitida(state.page)) {
+    state.page = paginaInicial();
     history.replaceState({}, '', modeUrl(`/admin/${state.page}`));
   }
   if (!isDemo && state.page === 'negocio' && (!Number.isSafeInteger(state.businessId) || state.businessId < 1)) {
-    state.page = defaultPage();
+    state.page = paginaInicial();
     history.replaceState({}, '', modeUrl(`/admin/${state.page}`));
   }
   if (!isDemo && location.pathname.startsWith('/reservas/')) { renderShell(empty('Portal de reservas', pending)); return; }
@@ -283,7 +283,7 @@ export function render() {
     return;
   }
   renderShell(
-    !isDemo && !availablePage(state.page)
+    !isDemo && !paginaPermitida(state.page)
       ? pageHead(labels[state.page] || 'Agenda', '') + empty(pending, 'Puedes comparar esta pantalla con la demo.', `<a class="btn btn-light" href="${modeUrl(location.pathname, true)}">Ver demo</a>`)
       : isDemo && state.page === 'agenda'
       ? vistaAgenda()
@@ -355,9 +355,9 @@ document.addEventListener('click', async (e) => {
   const vistaSucursales = e.target.closest('[data-vista-sucursales]');
   if (vistaSucursales) { cambiarVistaSucursales(vistaSucursales.dataset.vistaSucursales); return; }
   if (e.target.closest('[data-sucursal-limpiar]')) { restablecerFiltrosSucursales(); return; }
-  const business = e.target.closest('[data-business-detail]');
-  if (business && !isDemo) {
-    navigate('negocio', Number(business.dataset.businessDetail));
+  const detalleNegocio = e.target.closest('[data-detalle-negocio]');
+  if (detalleNegocio && !isDemo) {
+    navigate('negocio', Number(detalleNegocio.dataset.detalleNegocio));
     return;
   }
   const navEl = e.target.closest('[data-nav]');
@@ -455,7 +455,7 @@ document.addEventListener('input', (e) => {
   }
 });
 window.addEventListener('popstate', () => {
-  state.page = location.pathname.split('/')[2] || (isDemo ? 'agenda' : defaultPage());
+  state.page = location.pathname.split('/')[2] || (isDemo ? 'agenda' : paginaInicial());
   restaurarGrupoDisponibilidad();
   state.businessId = state.page === 'negocio' ? Number(location.pathname.split('/')[3]) : null;
   animateNextRoute = true;
@@ -506,7 +506,7 @@ export async function start() {
     }
     state.page = location.pathname.startsWith('/admin/')
       ? location.pathname.split('/')[2]
-      : isDemo ? 'agenda' : defaultPage();
+      : isDemo ? 'agenda' : paginaInicial();
     restaurarGrupoDisponibilidad();
     state.businessId = state.page === 'negocio' ? Number(location.pathname.split('/')[3]) : null;
     [extraViews, booking, actions] = await Promise.all([

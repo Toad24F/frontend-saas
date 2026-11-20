@@ -1,20 +1,29 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { pagesForRole } from '../src/connected/modules/permisos/roles.js';
+import { paginasPorRol } from '../src/connected/modules/permisos/permisos.roles.js';
 import { periodoCalendario, moverFechaCalendario, hoyCivil } from '../src/connected/modules/agenda/agenda.calendario.js';
 import { crearAgendaClient } from '../src/connected/modules/agenda/agenda.client.js';
 import { crearAgendaStore } from '../src/connected/modules/agenda/agenda.store.js';
 
 // Tests escritos antes de producción: contratos reales, periodos completos y carreras de lectura.
 test('T088: agenda por rol y directorio exclusivo de Administración/Recepción', () => {
-  for (const role of ['admin_negocio', 'recepcionista']) {
-    assert.ok(pagesForRole(role).includes('agenda'));
-    assert.ok(pagesForRole(role).includes('clientes'));
+  for (const rol of ['admin_negocio', 'recepcionista']) {
+    assert.ok(paginasPorRol(rol).includes('agenda'));
+    assert.ok(paginasPorRol(rol).includes('clientes'));
   }
-  assert.ok(pagesForRole('profesional').includes('agenda'));
-  assert.ok(!pagesForRole('profesional').includes('clientes'));
-  assert.ok(!pagesForRole('superadmin').includes('agenda'));
-  assert.deepEqual(pagesForRole('desconocido'), []);
+  assert.ok(paginasPorRol('profesional').includes('agenda'));
+  assert.ok(!paginasPorRol('profesional').includes('clientes'));
+  assert.ok(!paginasPorRol('superadmin').includes('agenda'));
+  assert.deepEqual(paginasPorRol('desconocido'), []);
+});
+test('Plataforma y el detalle de Negocio solo están disponibles para superadministración', () => {
+  assert.deepEqual(paginasPorRol('superadmin'), ['plataforma', 'negocio', 'cuenta']);
+  for (const rol of ['admin_negocio', 'profesional', 'recepcionista']) {
+    const paginas = paginasPorRol(rol);
+    assert.equal(paginas[0], 'agenda');
+    assert.equal(paginas.includes('plataforma'), false);
+    assert.equal(paginas.includes('negocio'), false);
+  }
 });
 test('T090: día, semana y mes de seis semanas; aritmética civil sin DST', () => {
   assert.deepEqual(periodoCalendario('day', '2026-11-11'), { desde: '2026-11-11', hasta: '2026-11-11' });

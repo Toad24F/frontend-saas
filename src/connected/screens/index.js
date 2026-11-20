@@ -2,7 +2,7 @@ import { profesionales } from './profesionales/profesionales.vista.js';
 import { servicios } from './servicios/servicios.vista.js';
 import { sucursales } from './sucursales/sucursales.vista.js';
 import { renderDisponibilidadConectada } from './disponibilidad/disponibilidad.vista.js';
-import { platform } from '../../shared/screens/plataforma/view.js';
+import { plataforma } from '../../shared/screens/plataforma/plataforma.vista.js';
 import { cuenta } from './cuenta/cuenta.vista.js';
 import { renderDetalleNegocio } from './negocio/negocio.vista.js';
 import { recepcionistas } from './recepcionistas/recepcionistas.vista.js';
@@ -19,7 +19,7 @@ const views = {
   servicios,
   sucursales,
   disponibilidad: renderDisponibilidadConectada,
-  plataforma: platform,
+  plataforma,
   cuenta,
   negocio: renderDetalleNegocio,
   recepcionistas,

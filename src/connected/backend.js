@@ -4,4 +4,4 @@ export { api, usuarioActual as user, etiquetaRol, iniciarSesion, cerrarSesion, r
 export { crearPayloadCatalogo } from './modules/catalogos/catalogos.payload.js';
 export { crearPayloadHorario } from './modules/disponibilidad/disponibilidad.payload.js';
 export { loadBackendData } from './modules/datos/load.js';
-export { availablePage, defaultPage } from './modules/permisos/pages.js';
+export { paginaPermitida, paginaInicial } from './modules/permisos/permisos.paginas.js';

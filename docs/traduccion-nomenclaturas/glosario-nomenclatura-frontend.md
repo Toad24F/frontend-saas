@@ -258,3 +258,19 @@ Este glosario se aplica al código nuevo desde su fecha de cierre. La migración
 
 El [resultado de Agenda](resultado-agenda-2026-11-18.md) registra la correspondencia de archivos y los contratos compartidos.
 
+## Equivalencias de Plataforma, permisos y recursos inhabilitados
+
+| Nombre anterior | Nombre adoptado |
+| --- | --- |
+| `platform`, `switchTenant`, `newTenant` | `plataforma`, `cambiarEspacioTrabajo`, `registrarNegocio` |
+| `directoryState`, `directoryHtml`, `directoryResults`, `bindDirectory` | `estadoDirectorio`, `renderDirectorio`, `renderResultadosDirectorio`, `vincularDirectorio` |
+| `directoryPage`, `matchesFollowUp`, `remainingLabel` | `paginarDirectorio`, `coincideSeguimiento`, `textoTiempoRestante` |
+| `query`, `license`, `followUp`, `page` del directorio | `busqueda`, `estadoLicencia`, `seguimiento`, `pagina` |
+| `pending`, `expiring`, `blocked`, `failed` de seguimiento | `por-activar`, `por-vencer`, `acceso-bloqueado`, `correos-fallidos` |
+| `pagesForRole`, `defaultPage`, `availablePage` | `paginasPorRol`, `paginaInicial`, `paginaPermitida` |
+| `canConsultRetired`, `readRetiredList`, `readRetiredDetail`, `restoreRetired`, `disableReceptionist` | `puedeConsultarInhabilitados`, `listarInhabilitados`, `consultarDetalleInhabilitado`, `restaurarInhabilitado`, `inhabilitarRecepcionista` |
+| `retiredSection`, `handleRetiredClick`, `readResourceEffects`, `effectReasons` | `renderAccesoInhabilitados`, `handleClicInhabilitados`, `consultarCitasAfectadas`, `motivosAfectacion` |
+| Prefijos CSS y `data-*` de estas vistas | `platform-` → `plataforma-`, `retired-` → `inhabilitados-` |
+
+El [resultado de Plataforma, permisos y recursos inhabilitados](resultado-plataforma-permisos-recursos-2026-11-20.md) registra las rutas de archivo y las interfaces conservadas.
+
