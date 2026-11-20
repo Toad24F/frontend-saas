@@ -2,17 +2,17 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { crearOperacionesLicencia, validarPlazoSuspension } from '../src/connected/screens/negocio/licencia.operaciones.js';
 import { renderEstadoLicencia, renderEnviosLicencia } from '../src/connected/screens/negocio/licencia.presentacion.js';
-import { memoryStorage } from './fixtures/memory-storage.js';
+import { crearAlmacenamientoEnMemoria } from './datos-prueba/memoria.almacenamiento.js';
 
 const valido = (estado = 'vigente') => ({ estado, venceEn: '2027-11-04T00:00:00.000Z',
   bloqueoProgramadoEn: null, condicionAcceso: estado === 'vigente' });
 const clave = 'license_attempt_000001';
 
 test('FALA-T024: cliente privado añade cabecera solo cuando la llamada la pide', async () => {
-  const oldFetch = globalThis.fetch, oldStorage = globalThis.sessionStorage;
+  const fetchAnterior = globalThis.fetch, almacenamientoAnterior = globalThis.sessionStorage;
   const llamadas = [];
   try {
-    globalThis.sessionStorage = memoryStorage();
+    globalThis.sessionStorage = crearAlmacenamientoEnMemoria();
     globalThis.fetch = async (_url, opciones) => {
       llamadas.push(opciones.headers);
       return new Response(JSON.stringify({ ok: true }), { status: 200 });
@@ -22,17 +22,17 @@ test('FALA-T024: cliente privado añade cabecera solo cuando la llamada la pide'
     await api('/negocios');
     assert.equal(llamadas[0]['Idempotency-Key'], clave);
     assert.equal(llamadas[1]['Idempotency-Key'], undefined);
-  } finally { globalThis.fetch = oldFetch; globalThis.sessionStorage = oldStorage; }
+  } finally { globalThis.fetch = fetchAnterior; globalThis.sessionStorage = almacenamientoAnterior; }
 });
 
 // La clave y el cuerpo deben existir en sessionStorage antes de tocar HTTP.
 test('FALA-T024–T025: suspender guarda cuerpo y clave, los repite y acota cabecera privada', async () => {
-  const almacenamiento = memoryStorage(); const llamadas = [];
+  const almacenamiento = crearAlmacenamientoEnMemoria(); const llamadas = [];
   let fallo = true;
-  const api = async (path, method = 'GET', cuerpo, opciones) => {
-    llamadas.push({ path, method, body: cuerpo, options: opciones,
+  const api = async (ruta, metodo = 'GET', cuerpo, opciones) => {
+    llamadas.push({ path: ruta, method: metodo, body: cuerpo, options: opciones,
       saved: almacenamiento.getItem('citalendar:license:pending:7') });
-    if (method === 'POST' && fallo) { fallo = false; throw Error('respuesta perdida'); }
+    if (metodo === 'POST' && fallo) { fallo = false; throw Error('respuesta perdida'); }
     return valido('suspension_pendiente');
   };
   const operaciones = crearOperacionesLicencia({ api, almacenamiento, actorId: 7, generarClave: () => clave });
@@ -41,12 +41,12 @@ test('FALA-T024–T025: suspender guarda cuerpo y clave, los repite y acota cabe
     body: { plazoDias: 0 }, key: clave });
   await assert.rejects(operaciones.ejecutar('renovar', 2, 5, {}), /pendiente|comprobar/i);
   await operaciones.reintentar();
-  const escrituras = llamadas.filter(({ method }) => method === 'POST');
+  const escrituras = llamadas.filter(({ method: metodo }) => metodo === 'POST');
   assert.equal(escrituras.length, 2);
   assert.ok(escrituras.every(({ saved: guardado }) => guardado && JSON.parse(guardado).key === clave));
   assert.deepEqual(escrituras.map(({ body: cuerpo }) => cuerpo), [{ plazoDias: 0 }, { plazoDias: 0 }]);
   assert.deepEqual(escrituras.map(({ options: opciones }) => opciones.headers['Idempotency-Key']), [clave, clave]);
-  assert.equal(llamadas.find(({ method }) => method === 'GET').options, undefined);
+  assert.equal(llamadas.find(({ method: metodo }) => metodo === 'GET').options, undefined);
   assert.equal(operaciones.pendiente(), null);
 });
 
@@ -56,11 +56,11 @@ test('FALA-T027: plazo de suspensión acepta solo enteros de cero a treinta', ()
 });
 
 test('FALA-T028: renovación incierta no admite segunda anualidad y refresca vigencia', async () => {
-  const almacenamiento = memoryStorage(), llamadas = [];
+  const almacenamiento = crearAlmacenamientoEnMemoria(), llamadas = [];
   let fallo = true;
-  const api = async (path, method = 'GET', cuerpo, opciones) => {
-    llamadas.push({ path, method, body: cuerpo, options: opciones });
-    if (method === 'POST' && fallo) { fallo = false; throw Error('red'); }
+  const api = async (ruta, metodo = 'GET', cuerpo, opciones) => {
+    llamadas.push({ path: ruta, method: metodo, body: cuerpo, options: opciones });
+    if (metodo === 'POST' && fallo) { fallo = false; throw Error('red'); }
     return valido('suspendida');
   };
   const primera = crearOperacionesLicencia({ api, almacenamiento, actorId: 7, generarClave: () => clave });
@@ -69,8 +69,8 @@ test('FALA-T028: renovación incierta no admite segunda anualidad y refresca vig
   await assert.rejects(reanudadas.ejecutar('renovar', 2, 5, {}), /pendiente|comprobar/i);
   const resultado = await reanudadas.reintentar();
   assert.equal(resultado.estado, 'suspendida');
-  assert.deepEqual(llamadas.filter(({ method }) => method === 'POST').map(({ options: opciones }) => opciones.headers['Idempotency-Key']), [clave, clave]);
-  assert.ok(llamadas.some(({ path, method }) => path === '/licencias/5/vigencia' && method === 'GET'));
+  assert.deepEqual(llamadas.filter(({ method: metodo }) => metodo === 'POST').map(({ options: opciones }) => opciones.headers['Idempotency-Key']), [clave, clave]);
+  assert.ok(llamadas.some(({ path: ruta, method: metodo }) => ruta === '/licencias/5/vigencia' && metodo === 'GET'));
 });
 
 test('FALA-T026–T027: vista usa estado y bloqueo reales sin plazo fijo ni nueva suspensión', () => {
@@ -96,7 +96,7 @@ test('FALA-T029: correo pendiente, fallido y enviado no equivale a transición d
 });
 
 test('reanuda un marcador de licencia con el formato guardado antes de la traducción', async () => {
-  const almacenamiento = memoryStorage();
+  const almacenamiento = crearAlmacenamientoEnMemoria();
   const claveAlmacenamiento = 'citalendar:license:pending:7';
   almacenamiento.setItem(claveAlmacenamiento, '{"action":"suspender","businessId":2,"licenseId":5,"body":{"plazoDias":2},"key":"license_attempt_000001"}');
   const llamadas = [];

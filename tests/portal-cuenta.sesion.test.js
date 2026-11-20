@@ -6,47 +6,47 @@ import { urlPortalCuenta } from '../src/shared/cuenta.portal.js';
 
 // Solo HTTP doble: sesión privada y catálogos vacíos del negocio propio. Una
 // consulta a /negocios sería un error: sigue siendo exclusiva de superadmin.
-async function withSession(run) {
-  const originalFetch = global.fetch, originalStorage = global.sessionStorage;
-  const calls = [];
-  let identifier = 'clinica-login';
+async function conSesion(ejecutar) {
+  const fetchOriginal = global.fetch, almacenamientoOriginal = global.sessionStorage;
+  const llamadas = [];
+  let identificador = 'clinica-login';
   global.sessionStorage = { setItem() {}, removeItem() {} };
   global.fetch = async (url) => {
-    const path = new URL(url).pathname;
-    calls.push(path);
-    const account = { id: 2, sub: 2, nombre: 'Admin ficticio', negocioId: 7, rol: 'admin_negocio', identificadorPublico: identifier };
-    if (path === '/auth/login') return Response.json({ accessToken: 'token-ficticio', usuario: account });
-    if (path === '/auth/profile') return Response.json({ user: account });
-    if (path === '/sucursales/cupo') return Response.json({ negocioId: 7, disponibles: 1 });
-    assert.ok(['/servicios', '/sucursales', '/profesionales', '/recepcionistas', '/bloqueos'].includes(path), `Petición inesperada: ${path}`);
+    const ruta = new URL(url).pathname;
+    llamadas.push(ruta);
+    const cuenta = { id: 2, sub: 2, nombre: 'Admin ficticio', negocioId: 7, rol: 'admin_negocio', identificadorPublico: identificador };
+    if (ruta === '/auth/login') return Response.json({ accessToken: 'token-ficticio', usuario: cuenta });
+    if (ruta === '/auth/profile') return Response.json({ user: cuenta });
+    if (ruta === '/sucursales/cupo') return Response.json({ negocioId: 7, disponibles: 1 });
+    assert.ok(['/servicios', '/sucursales', '/profesionales', '/recepcionistas', '/bloqueos'].includes(ruta), `Petición inesperada: ${ruta}`);
     return Response.json([]);
   };
-  try { await run({ calls, setIdentifier(value) { identifier = value; } }); }
-  finally { olvidarSesion(); global.fetch = originalFetch; global.sessionStorage = originalStorage; }
+  try { await ejecutar({ calls: llamadas, setIdentifier(valor) { identificador = valor; } }); }
+  finally { olvidarSesion(); global.fetch = fetchOriginal; global.sessionStorage = almacenamientoOriginal; }
 }
 
-test('perfil conectado: login carga el slug real y habilita enlace público sin consulta global', async () => {
-  await withSession(async ({ calls }) => {
+test('perfil conectado: inicio de sesión carga el slug real y habilita enlace público sin consulta global', async () => {
+  await conSesion(async ({ calls: llamadas }) => {
     await iniciarSesion('admin@example.test', 'credencial-ficticia'); await cargarDatosBackend();
     assert.equal(datosAplicacion.tenants[0].slug, 'clinica-login');
     assert.equal(urlPortalCuenta({ usuario: usuarioActual, negocio: datosAplicacion.tenants[0], origen: 'https://citalendar.example' }), 'https://citalendar.example/reservas/clinica-login');
-    assert.ok(!calls.some((path) => path.startsWith('/negocios')));
+    assert.ok(!llamadas.some((ruta) => ruta.startsWith('/negocios')));
   });
 });
 
 test('perfil conectado: restauración reemplaza el identificador anterior por el vigente', async () => {
-  await withSession(async ({ setIdentifier }) => {
+  await conSesion(async ({ setIdentifier: guardarIdentificador }) => {
     await iniciarSesion('admin@example.test', 'credencial-ficticia'); await cargarDatosBackend();
-    setIdentifier('clinica-actualizada'); await restaurarSesion(); await cargarDatosBackend();
+    guardarIdentificador('clinica-actualizada'); await restaurarSesion(); await cargarDatosBackend();
     assert.equal(datosAplicacion.tenants[0].slug, 'clinica-actualizada');
   });
 });
 
 test('perfil conectado: contrato antiguo o slug inválido bloquea sin reutilizar el enlace anterior', async () => {
-  for (const identifier of [undefined, null, '', '../ajeno', 'clinica?demo=1', '<script>']) {
-    await withSession(async ({ setIdentifier }) => {
+  for (const identificador of [undefined, null, '', '../ajeno', 'clinica?demo=1', '<script>']) {
+    await conSesion(async ({ setIdentifier: guardarIdentificador }) => {
       await iniciarSesion('admin@example.test', 'credencial-ficticia'); await cargarDatosBackend();
-      setIdentifier(identifier); await restaurarSesion(); await cargarDatosBackend();
+      guardarIdentificador(identificador); await restaurarSesion(); await cargarDatosBackend();
       assert.equal(datosAplicacion.tenants[0].slug, '');
       assert.equal(urlPortalCuenta({ usuario: usuarioActual, negocio: datosAplicacion.tenants[0], origen: 'https://citalendar.example' }), null);
     });

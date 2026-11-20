@@ -15,7 +15,7 @@ export function limpiarErroresDisponibilidad(raiz) {
       control.removeAttribute('aria-describedby');
     });
   });
-  raiz.querySelectorAll('.disponibilidad-error-general, #form-error, #horario-error, #proyeccion-error').forEach((destino) => {
+  raiz.querySelectorAll('.disponibilidad-error-general, #error-formulario, #horario-error, #proyeccion-error').forEach((destino) => {
     destino.hidden = true; destino.textContent = '';
   });
 }

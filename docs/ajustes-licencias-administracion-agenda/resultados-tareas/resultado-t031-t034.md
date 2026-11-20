@@ -13,16 +13,16 @@ Se implementaron los cupos de profesionales y recepción en el frontend conectad
 
 | Archivo | Función |
 | --- | --- |
-| `src/connected/screens/negocio/user-quota.js` | Nuevo contrato de lectura y edición, validación de enteros y presentación de cupos propios y globales. |
-| `src/connected/screens/negocio/view.js` | Carga los dos cupos con el detalle y muestra la sección exclusiva del superadmin. |
-| `src/connected/screens/negocio/actions.js` | Abre el formulario de ambos límites y conserva el borrador ante rechazo. |
-| `src/shared/screens/catalogos/actions.js` | Informa el cupo profesional al crear en modo conectado. La demo no consulta la API. |
-| `src/connected/screens/profesionales/actions.js` | Informa cupo antes de reactivar profesional y mantiene el rechazo en el diálogo. |
-| `src/connected/screens/recepcionistas/actions.js` | Informa cupo al crear y reactivar recepción; conserva el rechazo. |
-| `src/shared/actions.js` | Espera las lecturas asíncronas antes de abrir las confirmaciones. |
-| `tests/ala-cupos-usuarios.test.js` | Nuevos casos de contrato, cuerpo PATCH, validación y propagación de 409. |
-| `tests/browser/global-setup.js` | Añade cuentas ficticias activas e inactivas únicamente a la base efímera de Playwright. |
-| `tests/browser/user-quotas.spec.js` | Nuevos recorridos reales de los dos roles, persistencia, rechazos, permisos y capturas visuales. |
+| `src/connected/screens/negocio/usuarios.cupo.js` | Nuevo contrato de lectura y edición, validación de enteros y presentación de cupos propios y globales. |
+| `src/connected/screens/negocio/negocio.vista.js` | Carga los dos cupos con el detalle y muestra la sección exclusiva del superadmin. |
+| `src/connected/screens/negocio/negocio.acciones.js` | Abre el formulario de ambos límites y conserva el borrador ante rechazo. |
+| `src/shared/screens/catalogos/catalogos.acciones.js` | Informa el cupo profesional al crear en modo conectado. La demo no consulta la API. |
+| `src/connected/screens/profesionales/profesionales.acciones.js` | Informa cupo antes de reactivar profesional y mantiene el rechazo en el diálogo. |
+| `src/connected/screens/recepcionistas/recepcionistas.acciones.js` | Informa cupo al crear y reactivar recepción; conserva el rechazo. |
+| `src/shared/aplicacion.acciones.js` | Espera las lecturas asíncronas antes de abrir las confirmaciones. |
+| `tests/ala-usuarios.cupo.test.js` | Nuevos casos de contrato, cuerpo PATCH, validación y propagación de 409. |
+| `tests/navegador/integracion.preparacion.js` | Añade cuentas ficticias activas e inactivas únicamente a la base efímera de Playwright. |
+| `tests/navegador/usuarios.cupo.spec.js` | Nuevos recorridos reales de los dos roles, persistencia, rechazos, permisos y capturas visuales. |
 | `tareas.md` | Marca T031–T034 como concluidas. |
 
 ## Pruebas y alcance

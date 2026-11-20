@@ -2,25 +2,25 @@
 [data-agenda-menu-estado] { -webkit-touch-callout: none; user-select: none; }
 .agenda-menu-estado {
   position: fixed; inset: auto; margin: 0; padding: 6px; width: 292px; max-width: calc(100vw - 16px);
-  max-height: calc(100dvh - 16px); overflow-y: auto; border: 1px solid var(--border);
-  border-radius: 12px; background: var(--surface); color: var(--ink); box-shadow: var(--glass-shadow, 0 12px 40px #0003);
+  max-height: calc(100dvh - 16px); overflow-y: auto; border: 1px solid var(--borde);
+  border-radius: 12px; background: var(--superficie); color: var(--texto); box-shadow: var(--cristal-sombra, 0 12px 40px #0003);
 }
 .agenda-menu-estado p { padding: 8px 10px; margin: 0; font-size: 14px; }
-.agenda-titulo-menu { font-weight: 650; border-bottom: 1px solid var(--border); overflow-wrap: anywhere; }
-.agenda-menu-estado small { display: block; font-size: 12px; font-weight: 400; color: var(--muted); }
+.agenda-titulo-menu { font-weight: 650; border-bottom: 1px solid var(--borde); overflow-wrap: anywhere; }
+.agenda-menu-estado small { display: block; font-size: 12px; font-weight: 400; color: var(--texto-secundario); }
 .agenda-menu-estado button {
   width: 100%; min-height: 44px; border: 0; border-radius: 6px; padding: 8px 10px;
-  display: flex; align-items: center; gap: 10px; text-align: left; color: var(--ink); background: transparent; font-size: 14px;
+  display: flex; align-items: center; gap: 10px; text-align: left; color: var(--texto); background: transparent; font-size: 14px;
 }
-.agenda-menu-estado button:hover:not(:disabled), .agenda-menu-estado button:focus-visible { background: var(--surface-soft); }
-.agenda-menu-estado button:disabled { cursor: default; color: var(--muted); }
-.agenda-menu-estado button > .icon { width: 18px; height: 18px; margin-left: auto; }
-.agenda-menu-estado [data-menu-detalle] { border-top: 1px solid var(--border); margin-top: 4px; }
+.agenda-menu-estado button:hover:not(:disabled), .agenda-menu-estado button:focus-visible { background: var(--superficie-suave); }
+.agenda-menu-estado button:disabled { cursor: default; color: var(--texto-secundario); }
+.agenda-menu-estado button > .icono { width: 18px; height: 18px; margin-left: auto; }
+.agenda-menu-estado [data-menu-detalle] { border-top: 1px solid var(--borde); margin-top: 4px; }
 .agenda-indicador-estado { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-.agenda-error-menu { color: var(--ink); }
-.agenda-dialogo-cancelacion { background: var(--surface); color: var(--ink); width: min(480px, calc(100vw - 24px)); max-height: calc(100dvh - 24px); overflow-y: auto; border: 1px solid var(--border); border-radius: 16px; padding: 0; }
+.agenda-error-menu { color: var(--texto); }
+.agenda-dialogo-cancelacion { background: var(--superficie); color: var(--texto); width: min(480px, calc(100vw - 24px)); max-height: calc(100dvh - 24px); overflow-y: auto; border: 1px solid var(--borde); border-radius: 16px; padding: 0; }
 .agenda-dialogo-cancelacion::backdrop { background: #0007; }
 .agenda-dialogo-cancelacion h2 { font-size: 20px; }
-.agenda-dialogo-cancelacion .dialog-footer { flex-wrap: wrap; }
+.agenda-dialogo-cancelacion .dialogo-pie { flex-wrap: wrap; }
 .agenda-dialogo-cancelacion button { min-height: 44px; }
-.app-dialog.agenda-dialogo-cancelacion[open], .app-dialog.agenda-dialogo-cancelacion[open]::backdrop { animation: none; }
+.dialogo-app.agenda-dialogo-cancelacion[open], .dialogo-app.agenda-dialogo-cancelacion[open]::backdrop { animation: none; }

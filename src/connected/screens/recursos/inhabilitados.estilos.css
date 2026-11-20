@@ -1,20 +1,20 @@
 /* La lista retirada permanece fuera de las tarjetas operativas y usa el
    borde semántico del tema para conservar contraste en claro y oscuro. */
 .inhabilitados-lista { list-style: none; padding: 0; margin: 1.25rem 0 0; }
-.inhabilitados-lista li { display: grid; grid-template-columns: minmax(220px, 1fr) minmax(0, 2fr); align-items: center; gap: 1rem; padding: .8rem 0; border-top: 1px solid var(--border); }
+.inhabilitados-lista li { display: grid; grid-template-columns: minmax(220px, 1fr) minmax(0, 2fr); align-items: center; gap: 1rem; padding: .8rem 0; border-top: 1px solid var(--borde); }
 .inhabilitados-lista li strong { display: inline; }
 .inhabilitados-acciones { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .5rem; }
 .inhabilitados-resultado-afectaciones { grid-column: 1 / -1; }
-.inhabilitados-resultado-afectaciones:not(:empty) { border-top: 1px solid var(--border); padding-top: .75rem; }
+.inhabilitados-resultado-afectaciones:not(:empty) { border-top: 1px solid var(--borde); padding-top: .75rem; }
 .inhabilitados-resultado-afectaciones ul { margin: .5rem 0 0; padding-left: 1.25rem; }
 @media (max-width: 767px) {
   .inhabilitados-lista li { grid-template-columns: 1fr; align-items: stretch; }
   .inhabilitados-resultado-afectaciones { grid-column: auto; }
   .inhabilitados-acciones { flex-direction: column; }
 }
-.app-dialog.inhabilitados-panel { position: fixed; inset: 0 0 0 auto; margin: 0; width: min(760px, 100%); max-width: 100%; height: 100dvh; max-height: 100dvh; border-radius: 16px 0 0 16px; }
+.dialogo-app.inhabilitados-panel { position: fixed; inset: 0 0 0 auto; margin: 0; width: min(760px, 100%); max-width: 100%; height: 100dvh; max-height: 100dvh; border-radius: 16px 0 0 16px; }
 .inhabilitados-panel .inhabilitados-lista li { grid-template-columns: minmax(0, 1fr); }
 .inhabilitados-panel .inhabilitados-acciones { justify-content: flex-start; }
 .inhabilitados-busqueda { display: grid; gap: 7px; font-size: 13px; margin: 20px 0; }
-.inhabilitados-panel :focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
-@media (max-width: 767px) { .app-dialog.inhabilitados-panel { width: 100%; border-radius: 0; } .inhabilitados-panel .dialog-body { padding-bottom: calc(24px + env(safe-area-inset-bottom)); } }
+.inhabilitados-panel :focus-visible { outline: 3px solid var(--acento); outline-offset: 3px; }
+@media (max-width: 767px) { .dialogo-app.inhabilitados-panel { width: 100%; border-radius: 0; } .inhabilitados-panel .dialogo-cuerpo { padding-bottom: calc(24px + env(safe-area-inset-bottom)); } }

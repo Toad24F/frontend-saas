@@ -13,13 +13,13 @@ const renderCasillasServicios = (elementos, seleccionados) => `<div class="ofert
 const opcionesFormularioServicios = {
   alFallar(error, formulario) {
     if (/servicio|serviceIds/i.test(error.message || '')) mostrarErroresDisponibilidad(formulario, { serviceIds: error.message });
-    else mostrarErrorGeneralDisponibilidad(formulario, error, '#form-error');
+    else mostrarErrorGeneralDisponibilidad(formulario, error, '#error-formulario');
   },
 };
 
 async function editarServiciosGenerales() {
   const servicios = await api(`${rutaProfesional()}/servicios`);
-  const dialogo = abrirFormulario('Servicios generales', `<p class="field-hint">Selecciona los servicios que ofrece este profesional. Los ajustes por sucursal se conservan al desmarcar.</p>${renderCasillasServicios(servicios.map((elemento) => ({ id: elemento.id, name: elemento.nombre, disabled: !elemento.activo && !elemento.seleccionado })), servicios.filter((elemento) => elemento.seleccionado).map((elemento) => elemento.id))}`, async (formulario) => {
+  const dialogo = abrirFormulario('Servicios generales', `<p class="ayuda-campo">Selecciona los servicios que ofrece este profesional. Los ajustes por sucursal se conservan al desmarcar.</p>${renderCasillasServicios(servicios.map((elemento) => ({ id: elemento.id, name: elemento.nombre, disabled: !elemento.activo && !elemento.seleccionado })), servicios.filter((elemento) => elemento.seleccionado).map((elemento) => elemento.id))}`, async (formulario) => {
     await api(`${rutaProfesional()}/servicios`, 'PUT', { servicioIds: formulario.getAll('serviceIds').map(Number) });
     await actualizarDatosDisponibilidad(true);
   }, true, opcionesFormularioServicios);
@@ -57,7 +57,7 @@ async function editarServiciosSucursal(sucursalId) {
   if (!sucursal) throw new Error('La sucursal no está asignada a este profesional.');
   const seleccion = await api(`${rutaProfesional()}/sucursales/${sucursalId}/servicios`);
   const permitidos = sucursal.servicios.filter((elemento) => elemento.servicioActivo && elemento.seleccionGeneralActiva);
-  const dialogo = abrirFormulario(`Servicios en ${esc(sucursal.nombre)}`, `<p class="field-hint">Solo aparecen los servicios activos y seleccionados en general.</p>${renderCasillasServicios(permitidos.map((elemento) => ({ id: elemento.id, name: elemento.nombre })), seleccion.servicioIds || [])}`, async (formulario) => {
+  const dialogo = abrirFormulario(`Servicios en ${esc(sucursal.nombre)}`, `<p class="ayuda-campo">Solo aparecen los servicios activos y seleccionados en general.</p>${renderCasillasServicios(permitidos.map((elemento) => ({ id: elemento.id, name: elemento.nombre })), seleccion.servicioIds || [])}`, async (formulario) => {
     await api(`${rutaProfesional()}/sucursales/${sucursalId}/servicios`, 'PUT', { servicioIds: formulario.getAll('serviceIds').map(Number) });
     await actualizarDatosDisponibilidad(true);
   }, true, opcionesFormularioServicios);

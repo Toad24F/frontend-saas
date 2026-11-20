@@ -77,7 +77,7 @@ test('demo: corregir ficha conserva contactos previos y mover conserva identidad
   );
   assert.equal(cita.start, '10:00');
 });
-test('T097: cambio cerrado de fecha/hora/versión, sin aceptar combinación ni snapshots', async () => {
+test('T097: cambio cerrado de fecha/hora/versión, sin aceptar combinación ni datos previos', async () => {
   const entrada = { fechaLocal: '2030-11-20', horaInicio: '09:17', version: 3 };
   assert.deepEqual(
     crearPayloadCambioHorario({ ...entrada, costo: 1, personalId: 99, zonaHoraria: 'otra' }),
@@ -199,7 +199,7 @@ test('T098: lectura inválida o de otra página no se convierte en directorio va
       (error) => error.status === estadoHttp,
     );
 });
-test('T098: historial conserva snapshots nulos y no acepta citas de otra ficha', async () => {
+test('T098: historial conserva valores históricos nulos y no acepta citas de otra ficha', async () => {
   const cita = {
     id: 7,
     clienteId: 1,

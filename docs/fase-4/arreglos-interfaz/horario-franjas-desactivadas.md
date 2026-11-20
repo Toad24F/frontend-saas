@@ -14,7 +14,7 @@ Los controles deshabilitados no forman parte de `FormData`. El guardado ahora le
 
 ## Archivos afectados
 
-`src/shared/screens/disponibilidad/{view.js,schedule-rows.js}`, `src/shared/actions.js` y `tests/horario-franja-inactiva.test.js`.
+`src/shared/screens/disponibilidad/disponibilidad.vista.js`, `src/shared/screens/disponibilidad/disponibilidad.horario-franjas.js`, `src/shared/aplicacion.acciones.js` y `tests/horario-franja-inactiva.test.js`.
 
 ## Comprobación y límites
 

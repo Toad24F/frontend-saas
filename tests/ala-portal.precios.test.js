@@ -5,14 +5,14 @@ import { renderSeleccion } from '../src/connected/portal-publico/seleccion.vista
 import { crearReservaPortal } from '../src/connected/portal-publico/reserva.flujo.js';
 import { renderReserva } from '../src/connected/portal-publico/reserva.vista.js';
 import { leerResultadoReserva } from '../src/connected/portal-publico/reserva.envio.js';
-import { memoryStorage } from './fixtures/memory-storage.js';
+import { crearAlmacenamientoEnMemoria } from './datos-prueba/memoria.almacenamiento.js';
 
 const slug = 'centro';
 const iniciar = '2026-10-20T17:00:00.000Z';
 const zona = 'America/Mazatlan';
 const servicio = (costo) => ({ id: 1, nombre: 'Consulta', duracionMinutos: 30,
   ...(costo === undefined ? {} : { costo }) });
-const catalog = (consulta, costo) => ({ negocio: { slug, nombre: 'Centro' },
+const catalogo = (consulta, costo) => ({ negocio: { slug, nombre: 'Centro' },
   servicios: [servicio(costo)],
   sucursales: consulta.servicioId ? [{ id: 2, nombre: 'Sucursal', direccion: 'Calle 1', zonaHoraria: zona }] : [],
   profesionales: consulta.sucursalId ? [{ id: 3, nombre: 'Ana' }] : [] });
@@ -24,65 +24,65 @@ const resultado = (costo) => ({ folio: 'P-123456789012345678', estado: 'pendient
 
 // Los dobles reproducen la proyección HTTP: el importe puede existir o faltar,
 // pero el navegador nunca recibe costoAceptado como campo público.
-const samePrice = Symbol('mismo precio');
-const hiddenPrice = Symbol('precio oculto');
-function reserva(catalogPrice, holdPrice, ownPrice = samePrice) {
-  const currentPrice = ownPrice === samePrice ? holdPrice : ownPrice === hiddenPrice ? undefined : ownPrice;
+const mismoPrecio = Symbol('mismo precio');
+const precioOculto = Symbol('precio oculto');
+function reserva(precioCatalogo, precioApartado, precioPropio = mismoPrecio) {
+  const precioVigente = precioPropio === mismoPrecio ? precioApartado : precioPropio === precioOculto ? undefined : precioPropio;
   const llamadas = [];
   const client = { async solicitar(ruta, opciones = {}) {
     llamadas.push(ruta);
-    if (ruta === 'catalogo') return catalog(opciones.consulta, catalogPrice);
+    if (ruta === 'catalogo') return catalogo(opciones.consulta, precioCatalogo);
     if (ruta === 'disponibilidad') return { ...opciones.consulta, modalidad: 'publica', zonaHoraria: zona,
       ranuras: [{ inicioUtc: iniciar, finUtc: '2026-10-20T17:30:00.000Z' }] };
     if (ruta === 'apartados') return { estado: 'concedida', apartadoId: 8, generacion: '1',
       expiraEn: '2026-10-20T16:05:00.000Z', servidorAhora: '2026-10-20T16:00:00.000Z', zonaHoraria: zona,
-      ...(holdPrice === undefined ? {} : { costo: holdPrice }) };
+      ...(precioApartado === undefined ? {} : { costo: precioApartado }) };
     return { apartadoId: 8, generacion: '1', estado: 'vigente',
       expiraEn: '2026-10-20T16:05:00.000Z', servidorAhora: '2026-10-20T16:00:00.000Z',
-      ...(currentPrice === undefined ? {} : { costo: currentPrice }) };
+      ...(precioVigente === undefined ? {} : { costo: precioVigente }) };
   } };
   const flujo = crearReservaPortal(client, { slug, ahora: () => new Date('2026-10-20T16:00:00Z'),
-    ahoraMonotono: () => 0, generarClaveOperacion: () => 'operation_test_000001', almacenamiento: memoryStorage() });
+    ahoraMonotono: () => 0, generarClaveOperacion: () => 'operation_test_000001', almacenamiento: crearAlmacenamientoEnMemoria() });
   return { flow: flujo, calls: llamadas };
 }
-async function toForm(flujo) {
+async function irAlFormulario(flujo) {
   await flujo.iniciar(); flujo.elegir('servicioId', 1); await flujo.continuar();
   if (flujo.obtenerEstado().paso === 1) flujo.elegir('sucursalId', 2); await flujo.continuar(); if (flujo.obtenerEstado().paso === 2) flujo.elegir('personalId', 3);
   await flujo.continuar(); flujo.elegirHorario(iniciar); await flujo.apartarHorarioElegido();
 }
 
 test('FALA-T008–T009: catálogo sin precio es válido y selección no muestra importe inventado', async () => {
-  const client = { solicitar: async (_path, { consulta }) => catalog(consulta, undefined) };
+  const client = { solicitar: async (_ruta, { consulta }) => catalogo(consulta, undefined) };
   const flujo = crearSeleccionPortal(client, { slug });
   await flujo.iniciar();
   assert.equal(flujo.obtenerEstado().consulta.estado, 'lista');
   const html = renderSeleccion(flujo.obtenerEstado());
   assert.match(html, /30 min/);
   assert.doesNotMatch(html, /NaN|MXN|\$0/);
-  const zero = crearSeleccionPortal({ solicitar: async (_path, { consulta }) => catalog(consulta, '0.00') }, { slug });
-  await zero.iniciar();
-  assert.match(renderSeleccion(zero.obtenerEstado()), /\$0\.00/);
+  const cero = crearSeleccionPortal({ solicitar: async (_ruta, { consulta }) => catalogo(consulta, '0.00') }, { slug });
+  await cero.iniciar();
+  assert.match(renderSeleccion(cero.obtenerEstado()), /\$0\.00/);
   // Un campo presente pero vacío no equivale a una omisión autorizada.
-  for (const invalid of ['', null]) {
-    const malformed = crearSeleccionPortal({ solicitar: async (_path, { consulta }) => catalog(consulta, invalid) }, { slug });
-    await malformed.iniciar();
-    assert.equal(malformed.obtenerEstado().consulta.estado, 'error');
+  for (const invalido of ['', null]) {
+    const malformado = crearSeleccionPortal({ solicitar: async (_ruta, { consulta }) => catalogo(consulta, invalido) }, { slug });
+    await malformado.iniciar();
+    assert.equal(malformado.obtenerEstado().consulta.estado, 'error');
   }
 });
 
 test('FALA-T010: apartado oculto no reutiliza precio del catálogo y lectura propia retira precio previo', async () => {
-  const hidden = reserva('900.00', undefined);
-  await toForm(hidden.flow);
-  assert.equal(hidden.flow.obtenerEstado().fase, 'formulario');
-  assert.doesNotMatch(renderReserva(hidden.flow.obtenerEstado()), /900\.00|MXN|Costo|Pago directamente/);
-  const switched = reserva('900.00', '450.00', hiddenPrice);
-  await toForm(switched.flow);
-  assert.doesNotMatch(renderReserva(switched.flow.obtenerEstado()), /450\.00|900\.00|MXN/);
+  const oculto = reserva('900.00', undefined);
+  await irAlFormulario(oculto.flow);
+  assert.equal(oculto.flow.obtenerEstado().fase, 'formulario');
+  assert.doesNotMatch(renderReserva(oculto.flow.obtenerEstado()), /900\.00|MXN|Costo|Pago directamente/);
+  const cambiado = reserva('900.00', '450.00', precioOculto);
+  await irAlFormulario(cambiado.flow);
+  assert.doesNotMatch(renderReserva(cambiado.flow.obtenerEstado()), /450\.00|900\.00|MXN/);
 });
 
 test('FALA-T010: costo visible del apartado prevalece sobre cambio del catálogo', async () => {
   const { flow: flujo, calls: llamadas } = reserva('900.00', '450.00');
-  await toForm(flujo);
+  await irAlFormulario(flujo);
   const html = renderReserva(flujo.obtenerEstado());
   assert.match(html, /450\.00/);
   assert.doesNotMatch(html, /900\.00/);
@@ -92,10 +92,10 @@ test('FALA-T010: costo visible del apartado prevalece sobre cambio del catálogo
 test('FALA-T011–T012: resultado histórico visible u oculto nunca usa el catálogo actual', () => {
   const visible = leerResultadoReserva(resultado('450.00'));
   assert.equal(visible.costo, '450.00');
-  const hidden = leerResultadoReserva(resultado());
-  assert.equal(Object.hasOwn(hidden, 'costo'), false);
+  const oculto = leerResultadoReserva(resultado());
+  assert.equal(Object.hasOwn(oculto, 'costo'), false);
   const estado = { fase: 'resultado', seleccion: { servicioId: 1 },
-    opciones: { servicios: [servicio('900.00')], sucursales: [], profesionales: [] }, resultado: hidden };
+    opciones: { servicios: [servicio('900.00')], sucursales: [], profesionales: [] }, resultado: oculto };
   const html = renderReserva(estado);
   assert.match(html, /Centro histórico|Consulta histórica/);
   assert.doesNotMatch(html, /900\.00|450\.00|MXN|Costo|Pago directamente/);

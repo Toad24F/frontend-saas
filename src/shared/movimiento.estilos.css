@@ -1,0 +1,199 @@
+:root {
+  --movimiento-pulsacion: 120ms;
+  --movimiento-rapido: 280ms;
+  --movimiento-entrada: 580ms;
+  --movimiento-rebote: cubic-bezier(0.18, 1.35, 0.32, 1);
+  --movimiento-deslizamiento: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* A screen or booking step arrives with an intentional, spring-like landing. */
+.animar-entrada {
+  animation: entrada-pantalla var(--movimiento-entrada) var(--movimiento-deslizamiento) backwards;
+}
+
+@keyframes entrada-pantalla {
+  0% { opacity: 0; transform: translateY(30px) scale(0.965); }
+  68% { opacity: 1; transform: translateY(-5px) scale(1.008); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+body[data-direccion-animacion='avance'] .reserva-demo-superficie.animar-entrada {
+  animation-name: avance-paso;
+}
+body[data-direccion-animacion='retroceso'] .reserva-demo-superficie.animar-entrada {
+  animation-name: retroceso-paso;
+}
+@keyframes avance-paso {
+  0% { opacity: 0; transform: translateX(68px) scale(0.9); }
+  68% { opacity: 1; transform: translateX(-12px) scale(1.025); }
+  100% { opacity: 1; transform: translateX(0) scale(1); }
+}
+@keyframes retroceso-paso {
+  0% { opacity: 0; transform: translateX(-68px) scale(0.9); }
+  68% { opacity: 1; transform: translateX(12px) scale(1.025); }
+  100% { opacity: 1; transform: translateX(0) scale(1); }
+}
+
+/* Small groups follow the screen instead of appearing as one solid block. */
+.animar-entrada .cuadricula-entidades > :nth-child(-n + 6),
+.animar-entrada .cuadricula-indicadores > :nth-child(-n + 6),
+.reserva-demo-superficie.animar-entrada .reserva-demo-opciones > :nth-child(-n + 6) {
+  animation: entrada-tarjeta 620ms var(--movimiento-deslizamiento) backwards;
+}
+.animar-entrada .cuadricula-entidades > :nth-child(2),
+.animar-entrada .cuadricula-indicadores > :nth-child(2),
+.reserva-demo-superficie.animar-entrada .reserva-demo-opciones > :nth-child(2) { animation-delay: 65ms; }
+.animar-entrada .cuadricula-entidades > :nth-child(3),
+.animar-entrada .cuadricula-indicadores > :nth-child(3),
+.reserva-demo-superficie.animar-entrada .reserva-demo-opciones > :nth-child(3) { animation-delay: 130ms; }
+.animar-entrada .cuadricula-entidades > :nth-child(4),
+.animar-entrada .cuadricula-indicadores > :nth-child(4),
+.reserva-demo-superficie.animar-entrada .reserva-demo-opciones > :nth-child(4) { animation-delay: 195ms; }
+.animar-entrada .cuadricula-entidades > :nth-child(5),
+.animar-entrada .cuadricula-indicadores > :nth-child(5),
+.reserva-demo-superficie.animar-entrada .reserva-demo-opciones > :nth-child(5) { animation-delay: 260ms; }
+.animar-entrada .cuadricula-entidades > :nth-child(6),
+.animar-entrada .cuadricula-indicadores > :nth-child(6),
+.reserva-demo-superficie.animar-entrada .reserva-demo-opciones > :nth-child(6) { animation-delay: 325ms; }
+
+@keyframes entrada-tarjeta {
+  0% { opacity: 0; transform: translateY(32px) scale(0.88) rotate(-1.5deg); }
+  70% { opacity: 1; transform: translateY(-6px) scale(1.025) rotate(0.3deg); }
+  100% { opacity: 1; transform: translateY(0) scale(1) rotate(0); }
+}
+
+/* Keep the form readable while its glass surface pops forward. */
+.dialogo-app[open] {
+  transform-origin: center 70%;
+  animation: entrada-dialogo 610ms var(--movimiento-deslizamiento) backwards;
+}
+.dialogo-app[open]::backdrop {
+  animation: entrada-fondo 360ms ease-out both;
+}
+.transicion-ingreso > .dialogo-cabecera,
+.transicion-ingreso > form {
+  animation: entrada-ingreso 260ms var(--movimiento-deslizamiento) both;
+}
+@keyframes entrada-ingreso {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes entrada-dialogo {
+  0% { opacity: 0; transform: translateY(54px) scale(0.82); }
+  64% { opacity: 1; transform: translateY(-10px) scale(1.035); }
+  82% { transform: translateY(3px) scale(0.99); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes entrada-fondo {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.aviso-app { animation: aparicion-aviso 520ms var(--movimiento-deslizamiento) backwards; }
+.aviso-app.esta-saliendo { animation: salida-aviso 180ms ease-in both; }
+@keyframes aparicion-aviso {
+  0% { opacity: 0; transform: translateY(42px) scale(0.76); }
+  65% { opacity: 1; transform: translateY(-7px) scale(1.045); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes salida-aviso {
+  to { opacity: 0; transform: translateY(12px) scale(0.94); }
+}
+
+/* Color changes retain the existing contrast and glass surfaces. */
+body,
+.barra-superior,
+.portal-demo-barra,
+.barra-lateral,
+.tarjeta-indicador,
+.calendario-panel,
+.superficie,
+.reserva-demo,
+.reserva-demo-superficie,
+.reserva-demo-resumen,
+.dialogo-app {
+  transition: background-color var(--movimiento-rapido) ease,
+    border-color var(--movimiento-rapido) ease,
+    color var(--movimiento-rapido) ease;
+}
+.selector-tema .icono { animation: giro-icono 490ms var(--movimiento-deslizamiento) backwards; }
+@keyframes giro-icono {
+  0% { opacity: 0.2; transform: rotate(-110deg) scale(0.35); }
+  65% { opacity: 1; transform: rotate(18deg) scale(1.22); }
+  100% { opacity: 1; transform: rotate(0) scale(1); }
+}
+
+.btn,
+.boton-icono,
+.selector-tema,
+.navegacion-enlace,
+.selector-segmentado button,
+.reserva-demo-opcion,
+.reserva-demo-fecha,
+.reserva-demo-horario,
+.opcion-modo-agenda,
+.calendario-evento,
+.cuadricula-entidades > .superficie {
+  transition: color var(--movimiento-rapido) ease,
+    background-color var(--movimiento-rapido) ease,
+    border-color var(--movimiento-rapido) ease,
+    box-shadow var(--movimiento-rapido) ease,
+    filter var(--movimiento-rapido) ease,
+    transform 390ms var(--movimiento-rebote);
+}
+
+@media (hover: hover) {
+  :is(.btn, .boton-icono, .selector-tema, .reserva-demo-opcion, .reserva-demo-fecha,
+    .reserva-demo-horario, .opcion-modo-agenda):not(:disabled):hover {
+    transform: translateY(-4px) scale(1.035);
+  }
+  .cuadricula-entidades > .superficie:hover {
+    transform: translateY(-7px) scale(1.012);
+    box-shadow: 0 20px 36px rgba(17, 36, 23, 0.14);
+  }
+  .navegacion-enlace:not(.active):hover { transform: translateX(6px); }
+  .calendario-evento:hover { transform: translateY(-3px) scale(1.035); }
+  :is(.reserva-demo-opcion, .reserva-demo-fecha, .reserva-demo-horario, .opcion-modo-agenda):not(:disabled):hover {
+    box-shadow: 0 13px 25px rgba(27, 52, 36, 0.14);
+  }
+}
+
+:is(.btn, .boton-icono, .selector-tema, .reserva-demo-opcion, .reserva-demo-fecha,
+  .reserva-demo-horario, .opcion-modo-agenda):not(:disabled):active {
+  transform: translateY(2px) scale(0.91);
+  transition-duration: var(--movimiento-pulsacion);
+}
+.navegacion-enlace:active,
+.calendario-evento:active { transform: scale(0.96); }
+
+:is(.reserva-demo-opcion, .reserva-demo-fecha, .reserva-demo-horario, .opcion-modo-agenda).seleccionado {
+  animation: resalte-seleccion 430ms var(--movimiento-deslizamiento) backwards;
+}
+@keyframes resalte-seleccion {
+  0% { transform: scale(0.94); }
+  55% { transform: scale(1.045); }
+  100% { transform: scale(1); }
+}
+
+@media (max-width: 767px) {
+  .barra-lateral { transition: transform 540ms var(--movimiento-rebote); }
+  .menu-abierto .fondo-barra-lateral { animation: entrada-fondo 320ms ease-out both; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animar-entrada,
+  .animar-entrada .cuadricula-entidades > *,
+  .animar-entrada .cuadricula-indicadores > *,
+  .reserva-demo-superficie.animar-entrada .reserva-demo-opciones > *,
+  .dialogo-app[open],
+  .dialogo-app[open]::backdrop,
+  .transicion-ingreso > .dialogo-cabecera,
+  .transicion-ingreso > form,
+  .aviso-app,
+  .aviso-app.esta-saliendo,
+  .selector-tema .icono,
+  .menu-abierto .fondo-barra-lateral,
+  :is(.reserva-demo-opcion, .reserva-demo-fecha, .reserva-demo-horario, .opcion-modo-agenda).seleccionado {
+    animation: none !important;
+  }
+}

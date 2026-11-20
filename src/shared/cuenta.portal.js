@@ -14,14 +14,14 @@ export function urlPortalCuenta({ usuario, negocio, origen, demo = false }) {
 export function renderPortalCuenta(contexto) {
   if (contexto.usuario?.rol !== 'admin_negocio') return '';
   const enlace = urlPortalCuenta(contexto);
-  return `<section class="surface account-portal" aria-labelledby="account-portal-title">
-    <h2 id="account-portal-title">Tu portal de reservas</h2>
+  return `<section class="superficie cuenta-portal" aria-labelledby="cuenta-portal-titulo">
+    <h2 id="cuenta-portal-titulo">Tu portal de reservas</h2>
     <p>${contexto.demo ? 'Demostración con datos ficticios; no crea reservas reales.' : 'Comparte este enlace para que tus clientes consulten horarios y soliciten una reserva.'}</p>
-    ${enlace ? `<label for="account-portal-url">Enlace del portal</label><input class="form-control" id="account-portal-url" value="${escaparHtml(enlace)}" readonly>
-      <div class="account-portal-actions"><a class="btn btn-primary" href="${escaparHtml(enlace)}" target="_blank" rel="noopener noreferrer">${renderIcono('external')}Abrir portal<span class="visually-hidden"> (nueva pestaña)</span></a>
-      <button class="btn btn-light" type="button" data-account-portal-copy>${renderIcono('link')}Copiar enlace</button></div>` :
-    '<p class="account-portal-unavailable">El enlace del negocio todavía no está disponible en tu perfil.</p><div class="account-portal-actions"><button class="btn btn-primary" type="button" disabled>Abrir portal</button><button class="btn btn-light" type="button" disabled>Copiar enlace</button></div>'}
-    <p class="account-portal-status" data-account-portal-status role="status" aria-live="polite"></p></section>`;
+    ${enlace ? `<label for="cuenta-portal-enlace">Enlace del portal</label><input class="form-control" id="cuenta-portal-enlace" value="${escaparHtml(enlace)}" readonly>
+      <div class="cuenta-portal-acciones"><a class="btn btn-primary" href="${escaparHtml(enlace)}" target="_blank" rel="noopener noreferrer">${renderIcono('external')}Abrir portal<span class="visually-hidden"> (nueva pestaña)</span></a>
+      <button class="btn btn-light" type="button" data-cuenta-portal-copiar>${renderIcono('link')}Copiar enlace</button></div>` :
+    '<p class="cuenta-portal-no-disponible">El enlace del negocio todavía no está disponible en tu perfil.</p><div class="cuenta-portal-acciones"><button class="btn btn-primary" type="button" disabled>Abrir portal</button><button class="btn btn-light" type="button" disabled>Copiar enlace</button></div>'}
+    <p class="cuenta-portal-estado" data-cuenta-portal-estado role="status" aria-live="polite"></p></section>`;
 }
 
 // La apertura usa un enlace nativo sin data-portal: inicia la entrada pública
@@ -41,11 +41,11 @@ export function vincularPortalCuenta(documento) {
   if (documentosVinculados.has(documento)) return;
   documentosVinculados.add(documento);
   documento.addEventListener('click', async (evento) => {
-    const boton = evento.target.closest('[data-account-portal-copy]');
+    const boton = evento.target.closest('[data-cuenta-portal-copiar]');
     if (!boton || boton.disabled) return;
-    const seccion = boton.closest('.account-portal');
-    const campo = seccion.querySelector('#account-portal-url');
-    const aviso = seccion.querySelector('[data-account-portal-status]');
+    const seccion = boton.closest('.cuenta-portal');
+    const campo = seccion.querySelector('#cuenta-portal-enlace');
+    const aviso = seccion.querySelector('[data-cuenta-portal-estado]');
     boton.disabled = true;
     await copiarEnlacePortalCuenta(campo, aviso, globalThis.navigator?.clipboard);
     boton.disabled = false;

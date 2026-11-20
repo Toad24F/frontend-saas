@@ -6,8 +6,8 @@
 
 | Tipo | Archivo | Resultado |
 | --- | --- | --- |
-| Agregado | `src/connected/modules/catalogos/detail.js` | Consulta y adapta fichas individuales de servicios, sucursales y profesionales. Para profesionales también carga asignaciones y opciones actuales. |
-| Modificados | `src/shared/screens/catalogos/actions.js`, `src/shared/actions.js` | Esperan la consulta antes de abrir el formulario conectado y muestran el error si el registro ya no existe o no es accesible. La demo sigue usando sus datos locales. |
+| Agregado | `src/connected/modules/catalogos/catalogos.detalle.js` | Consulta y adapta fichas individuales de servicios, sucursales y profesionales. Para profesionales también carga asignaciones y opciones actuales. |
+| Modificados | `src/shared/screens/catalogos/catalogos.acciones.js`, `src/shared/aplicacion.acciones.js` | Esperan la consulta antes de abrir el formulario conectado y muestran el error si el registro ya no existe o no es accesible. La demo sigue usando sus datos locales. |
 | Agregado | `tests/detalle-edicion-conectado.test.js` | Comprueba rutas, valores recientes, asignaciones y propagación de errores. |
 | Modificado | `docs/pendientes-y-reglas-modulo-1.md` | Actualiza el estado de las cuatro consultas individuales auditadas. |
 

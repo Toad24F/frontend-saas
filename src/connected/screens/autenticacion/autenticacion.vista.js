@@ -35,7 +35,7 @@ export function renderAutenticacion(mensaje = '', alIngresar) {
       '<img class="autenticacion-logo-oscuro" src="/brand/citalendar-logo-light.svg" alt="">' +
       '</div><div class="autenticacion-acciones-cabecera"><a class="autenticacion-enlace-demo" href="' +
       urlSegunModo('/admin/agenda', true) + '">Ver demo <span aria-hidden="true">↗</span></a>' +
-      '<button type="button" class="autenticacion-selector-tema theme-toggle" data-action="theme" ' +
+      '<button type="button" class="autenticacion-selector-tema selector-tema" data-action="theme" ' +
       'aria-label="Activar modo ' + (oscuro ? 'claro' : 'oscuro') + '" aria-pressed="' + oscuro +
       '" title="Modo ' + (oscuro ? 'claro' : 'oscuro') + '">' + renderIcono(oscuro ? 'sun' : 'moon') +
       '</button></div></header>' +

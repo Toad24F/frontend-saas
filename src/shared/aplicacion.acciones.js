@@ -178,7 +178,7 @@ export async function handleClicAplicacion(evento) {
         } catch {
           abrirDialogo(
             'Enlace de reservas',
-            `<div class="dialog-body"><label for="copy-url" class="form-label">Copia este enlace</label><input id="copy-url" class="form-control" readonly value="${esc(url)}"/></div>`,
+            `<div class="dialogo-cuerpo"><label for="copy-url" class="form-label">Copia este enlace</label><input id="copy-url" class="form-control" readonly value="${esc(url)}"/></div>`,
           );
           document.querySelector('#copy-url').select();
         }
@@ -239,7 +239,7 @@ export async function handleClicAplicacion(evento) {
       );
       abrirDialogo(
         esc(cliente.name),
-        `<div class="dialog-body"><p class="mb-4">${renderIcono('message')} ${esc(cliente.phone)} · Historial de citas</p>${tablaCitas(listarRegistros('appointments', estadoAplicacion.negocioId).filter((cita) => cita.clientId === cliente.id))}</div>`,
+        `<div class="dialogo-cuerpo"><p class="mb-4">${renderIcono('message')} ${esc(cliente.phone)} · Historial de citas</p>${tablaCitas(listarRegistros('appointments', estadoAplicacion.negocioId).filter((cita) => cita.clientId === cliente.id))}</div>`,
         true,
       );
       return;
@@ -261,7 +261,7 @@ export async function handleClicAplicacion(evento) {
       );
       const dialogo = abrirDialogo(
         'Eliminar bloqueo',
-        `<div class="dialog-body"><p>Se volverá a ofrecer disponibilidad durante “${esc(negocio.reason)}”.</p></div><div class="dialog-footer"><button id="keep-block" class="btn btn-light">Conservar</button><button id="confirm-remove-block" class="btn btn-danger-soft">Eliminar bloqueo</button></div>`,
+        `<div class="dialogo-cuerpo"><p>Se volverá a ofrecer disponibilidad durante “${esc(negocio.reason)}”.</p></div><div class="dialogo-pie"><button id="keep-block" class="btn btn-light">Conservar</button><button id="confirm-remove-block" class="btn btn-peligro-suave">Eliminar bloqueo</button></div>`,
       );
       dialogo.querySelector('#keep-block').onclick = () => dialogo.close();
       dialogo.querySelector('#confirm-remove-block').onclick = async () => {
@@ -291,7 +291,7 @@ export async function handleClicAplicacion(evento) {
       const negocio = obtenerNegocio(cambioEstado.dataset.cambiarEstadoNegocio);
       const dialogo = abrirDialogo(
         negocio.suspended ? 'Reactivar negocio' : 'Suspender negocio',
-        `<div class="dialog-body"><p>${esc(negocio.name)} ${esDemo ? (negocio.suspended ? 'volverá a mostrar' : 'dejará de mostrar') + ' su portal público en esta simulación.' : (negocio.suspended ? 'reactivará su licencia.' : 'solicitará la suspensión de su licencia según el plazo del servidor.')}</p></div><div class="dialog-footer"><button class="btn btn-light" id="volver-estado-negocio">Volver</button><button class="btn btn-primary" id="confirmar-estado-negocio">${negocio.suspended ? 'Reactivar' : 'Suspender'}</button></div>`,
+        `<div class="dialogo-cuerpo"><p>${esc(negocio.name)} ${esDemo ? (negocio.suspended ? 'volverá a mostrar' : 'dejará de mostrar') + ' su portal público en esta simulación.' : (negocio.suspended ? 'reactivará su licencia.' : 'solicitará la suspensión de su licencia según el plazo del servidor.')}</p></div><div class="dialogo-pie"><button class="btn btn-light" id="volver-estado-negocio">Volver</button><button class="btn btn-primary" id="confirmar-estado-negocio">${negocio.suspended ? 'Reactivar' : 'Suspender'}</button></div>`,
       );
       dialogo.querySelector('#volver-estado-negocio').onclick = () => dialogo.close();
       dialogo.querySelector('#confirmar-estado-negocio').onclick = async () => {
@@ -312,7 +312,7 @@ export async function handleClicAplicacion(evento) {
       if (!esDemo) {
         const negocio = obtenerNegocio(renovacion.dataset.renovarLicencia);
         if (!negocio.licenseId) throw new Error('Este negocio aún no tiene una licencia disponible.');
-        const dialogo = abrirDialogo('Renovar licencia', `<div class="dialog-body"><p>Se agregará un año calendario a la licencia de ${esc(negocio.name)}.</p></div><div class="dialog-footer"><button class="btn btn-light" data-dismiss>Cancelar</button><button class="btn btn-primary" id="confirmar-renovacion-negocio">Renovar licencia</button></div>`);
+        const dialogo = abrirDialogo('Renovar licencia', `<div class="dialogo-cuerpo"><p>Se agregará un año calendario a la licencia de ${esc(negocio.name)}.</p></div><div class="dialogo-pie"><button class="btn btn-light" data-dismiss>Cancelar</button><button class="btn btn-primary" id="confirmar-renovacion-negocio">Renovar licencia</button></div>`);
         dialogo.querySelector('[data-dismiss]').onclick = () => dialogo.close();
         dialogo.querySelector('#confirmar-renovacion-negocio').onclick = async () => {
           const confirmacion = dialogo.querySelector('#confirmar-renovacion-negocio'); confirmacion.disabled = true;

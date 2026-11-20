@@ -13,7 +13,7 @@
   gap: 15px;
   padding-bottom: 26px;
   margin-bottom: 22px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--borde);
 }
 .configuracion-identidad strong {
   font-size: 15px;
@@ -54,6 +54,6 @@
   font-size: 12px;
   margin: 12px 0 20px;
 }
-.configuracion-demo .text-button {
+.configuracion-demo .boton-texto {
   display: flex;
 }

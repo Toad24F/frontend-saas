@@ -1,7 +1,7 @@
 # Reglas y plan de traducción de la nomenclatura del frontend
 
 Fecha de definición: 2026-11-16  
-Estado: implementación por conjuntos. Implementados los conjuntos 0 a 14. La integración de navegador con MariaDB queda pendiente.
+Estado: plan cerrado el 2026-11-20. Implementados y verificados los conjuntos 0 a 17.
 
 ## Objetivo
 
@@ -254,7 +254,7 @@ La Agenda es el conjunto más grande y actualmente tiene archivos estrechamente 
 - [x] Traducir juntos la pantalla conectada `view.js`, `live.js`, `manual-view.js`, `presentation.js`, `quick-state.js`, `schedule-editor.js`, `state-editor.js` y `style.css`.
 - [x] Traducir juntos `demo/agenda-attention.js` y `demo/agenda-quick-state.js`.
 - [x] Actualizar en el mismo proceso todas las pruebas unitarias `agenda-*`, `m4-agenda*`, `m4-manual*`, `m4-live*` y `ala-agenda*`.
-- [x] Actualizar en el mismo proceso las pruebas `tests/m4-browser/agenda-*`, `state-menu`, `live-errors` y fixtures asociados.
+- [x] Actualizar en el mismo proceso las pruebas `tests/m4-navegador/agenda-*`, `state-menu`, `live-errors` y fixtures asociados.
 - [x] Verificar vistas diaria, semanal y mensual; roles; actualización en vivo; estados; filtros; diálogos; escritorio/móvil; temas; conectado/demo.
 
 Resultado: conjunto cerrado el 2026-11-18 en [Agenda](resultado-agenda-2026-11-18.md).
@@ -323,7 +323,7 @@ Estos archivos son consumidos por gran parte de la aplicación. El conjunto no d
 - [x] Traducir `shared/calendar-layout.js`, `resource-status.js` y `account-portal.js` con sus pruebas.
 - [x] Revisar `connected/backend.js`, `mode.js` y `connected/modules/datos/load.js` sin cambiar contratos ni variables de entorno.
 - [x] Ejecutar todas las pruebas unitarias y las pruebas de navegador con API simulada.
-- [ ] Ejecutar la suite de navegador con MariaDB en un entorno autorizado para preparar una base efímera.
+- [x] Ejecutar la suite de navegador con MariaDB en un entorno autorizado para preparar una base efímera.
 
 Resultado del 2026-11-20 en [Núcleo compartido](resultado-nucleo-compartido-2026-11-20.md).
 
@@ -331,34 +331,40 @@ Resultado del 2026-11-20 en [Núcleo compartido](resultado-nucleo-compartido-202
 
 Los selectores globales y las propiedades personalizadas pueden afectar todas las pantallas. Bootstrap, HTML y ARIA quedan fuera de la traducción.
 
-- [ ] Traducir de manera coordinada las clases propias de `shared/styles.css` y sus usos en JavaScript/HTML.
-- [ ] Traducir las propiedades propias de `shared/theme.css` sin cambiar el sistema visual ni los valores de tema.
-- [ ] Traducir selectores propios de `shared/mobile.css` sin afectar la navegación inferior.
-- [ ] Traducir animaciones y selectores propios de `shared/motion.css` respetando preferencias de movimiento reducido.
-- [ ] Traducir `shared/account-portal.css` y actualizar sus selectores en `shared/cuenta.portal.js`.
-- [ ] Buscar cada selector anterior en `src/` y `tests/` antes de marcarlo como terminado.
-- [ ] Verificar todas las pantallas en escritorio y móvil, modo claro y oscuro.
+- [x] Traducir de manera coordinada las clases propias de `shared/styles.css` y sus usos en JavaScript/HTML.
+- [x] Traducir las propiedades propias de `shared/theme.css` sin cambiar el sistema visual ni los valores de tema.
+- [x] Traducir selectores propios de `shared/mobile.css` sin afectar la navegación inferior.
+- [x] Traducir animaciones y selectores propios de `shared/motion.css` respetando preferencias de movimiento reducido.
+- [x] Traducir `shared/account-portal.css` y actualizar sus selectores en `shared/cuenta.portal.js`.
+- [x] Buscar cada selector anterior en `src/` y `tests/` antes de marcarlo como terminado.
+- [x] Verificar las pantallas en escritorio y móvil, en modo claro y oscuro.
+
+Resultado del 2026-11-20 en [CSS global](resultado-css-global-2026-11-20.md).
 
 ### 16. Pruebas y fixtures finales
 
-- [ ] Traducir nombres internos y descripciones en inglés de pruebas unitarias, sin alterar datos que representen contratos.
-- [ ] Traducir nombres internos y descripciones de pruebas Playwright.
-- [ ] Traducir helpers y fixtures propios después de actualizar todos sus consumidores.
-- [ ] Conservar selectores contractuales o de accesibilidad cuando cambiarlos reduzca la estabilidad de la prueba.
-- [ ] Buscar imports rotos, rutas antiguas, funciones antiguas y selectores antiguos.
-- [ ] Ejecutar `npm test`.
-- [ ] Ejecutar `npm run build`.
-- [ ] Ejecutar `npm run test:browser` o los proyectos Playwright aplicables.
-- [ ] Ejecutar `git diff --check`.
+- [x] Traducir nombres internos y descripciones en inglés de pruebas unitarias, sin alterar datos que representen contratos.
+- [x] Traducir nombres internos y descripciones de pruebas Playwright.
+- [x] Traducir helpers y fixtures propios después de actualizar todos sus consumidores.
+- [x] Conservar selectores contractuales o de accesibilidad cuando cambiarlos reduzca la estabilidad de la prueba.
+- [x] Buscar imports rotos, rutas antiguas, funciones antiguas y selectores antiguos.
+- [x] Ejecutar `npm test`.
+- [x] Ejecutar `npm run build`.
+- [x] Ejecutar `npm run test:browser` o los proyectos Playwright aplicables.
+- [x] Ejecutar `git diff --check`.
+
+Resultado del 2026-11-20 en [Pruebas y datos de prueba](resultado-pruebas-fixtures-2026-11-20.md).
 
 ### 17. Documentación y cierre
 
-- [ ] Actualizar README, documentos técnicos y ejemplos que usen nombres anteriores.
-- [ ] Registrar el mapa definitivo de nombres anteriores y nuevos.
-- [ ] Documentar excepciones que permanecieron en inglés y su motivo.
-- [ ] Confirmar que conectado y demo usan la misma nomenclatura donde comparten interfaz.
-- [ ] Confirmar que no se cambió ningún contrato del backend.
-- [ ] Confirmar que no se introdujeron cambios funcionales o visuales durante la traducción.
+- [x] Actualizar README, documentos técnicos y ejemplos que usen nombres anteriores.
+- [x] Registrar el mapa definitivo de nombres anteriores y nuevos.
+- [x] Documentar excepciones que permanecieron en inglés y su motivo.
+- [x] Confirmar que conectado y demo usan la misma nomenclatura donde comparten interfaz.
+- [x] Confirmar que no se cambió ningún contrato del backend.
+- [x] Confirmar que no se introdujeron cambios funcionales o visuales durante la traducción.
+
+Resultado del 2026-11-20 en [Cierre de la traducción](resultado-cierre-2026-11-20.md). La correspondencia de archivos está en el [mapa definitivo](mapa-renombres-frontend.md).
 
 ## Criterio para marcar “REALIZAR CON CUIDADO”
 

@@ -25,8 +25,8 @@ test('T048: PUT exacto y separación cero, cinco o sesenta', async () => {
 // T049: los fallos no confirman reemplazo y dejan todos los valores capturados.
 test('T049: 400 señala campo y 503 conserva borrador y error general', async () => {
   const valores = { ...base, modo: 'agenda_compacta', tiempoEntreCitasMinutos: 5 };
-  for (const [status, mensaje] of [[400, 'tiempoEntreCitasMinutos inválido'], [503, 'Servicio no disponible']]) {
-    const solicitar = async () => { throw Object.assign(new Error(mensaje), { status }); };
+  for (const [estadoHttp, mensaje] of [[400, 'tiempoEntreCitasMinutos inválido'], [503, 'Servicio no disponible']]) {
+    const solicitar = async () => { throw Object.assign(new Error(mensaje), { status: estadoHttp }); };
     const resultado = await guardarReglasAgenda(estadoInicial, valores, solicitar);
     assert.equal(resultado.guardado, false);
     assert.deepEqual(resultado.estado.borrador, valores);

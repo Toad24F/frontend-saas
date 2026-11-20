@@ -18,7 +18,7 @@
   justify-content: center;
   color: #6f9679;
 }
-.notificaciones-icono-whatsapp > .icon {
+.notificaciones-icono-whatsapp > .icono {
   width: 25px;
   height: 25px;
 }
@@ -34,7 +34,7 @@
   margin-top: 7px;
   color: #93a491;
 }
-.notificaciones-aviso-whatsapp > .soft-tag {
+.notificaciones-aviso-whatsapp > .etiqueta-suave {
   background: #ffffff66;
   color: #90a18d;
   border-color: #dce7d9;
@@ -49,7 +49,7 @@
   align-items: center;
   gap: 12px;
   padding: 20px 24px;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--borde);
 }
 .notificaciones-automatizacion > div {
   flex: 1;
@@ -120,13 +120,13 @@
   font-size: 9px;
   color: #b0b8aa;
 }
-.notificaciones-mensaje > small .icon {
+.notificaciones-mensaje > small .icono {
   width: 11px;
   height: 11px;
   color: #99b8c5;
   margin-left: -5px;
 }
-.notificaciones-mensaje > small .icon:first-child {
+.notificaciones-mensaje > small .icono:first-child {
   margin-left: 5px;
 }
 .notificaciones-nota-vista-previa {

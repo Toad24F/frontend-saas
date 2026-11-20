@@ -15,12 +15,12 @@ test('las asignaciones comparan conjuntos y conservan borradores al cambiar de p
 
 test('una sucursal inactiva nueva no se puede marcar; una ya asignada sí se puede quitar', () => {
   limpiarBorradorAsignaciones();
-  const branches = [
+  const sucursales = [
     { id: 1, name: 'Centro', active: false },
     { id: 2, name: 'Norte', active: false },
     { id: 3, name: 'Sur', active: true },
   ];
-  const html = renderFormularioAsignaciones({ id: 10, branchIds: [1] }, branches);
+  const html = renderFormularioAsignaciones({ id: 10, branchIds: [1] }, sucursales);
   assert.match(html, /value="1" checked\s+aria-label="Asignar Centro"/);
   assert.match(html, /value="2"\s+disabled\s+aria-label="Asignar Norte"/);
   assert.match(html, /value="3"\s+aria-label="Asignar Sur"/);
@@ -29,9 +29,9 @@ test('una sucursal inactiva nueva no se puede marcar; una ya asignada sí se pue
 });
 
 test('el guardado detecta cambios ajenos y sucursales inactivas o eliminadas', () => {
-  const branches = [{ id: 1, activo: true }, { id: 2, activo: false }, { id: 3, activo: true }];
-  assert.doesNotThrow(() => validarAsignacionesVigentes([1, 2], [1, 2, 3], [2, 1], branches));
-  assert.throws(() => validarAsignacionesVigentes([1], [1, 3], [1, 2], branches), /cambiaron/);
-  assert.throws(() => validarAsignacionesVigentes([1], [1, 2], [1], branches), /no está disponible/);
-  assert.throws(() => validarAsignacionesVigentes([1], [1, 4], [1], branches), /no está disponible/);
+  const sucursales = [{ id: 1, activo: true }, { id: 2, activo: false }, { id: 3, activo: true }];
+  assert.doesNotThrow(() => validarAsignacionesVigentes([1, 2], [1, 2, 3], [2, 1], sucursales));
+  assert.throws(() => validarAsignacionesVigentes([1], [1, 3], [1, 2], sucursales), /cambiaron/);
+  assert.throws(() => validarAsignacionesVigentes([1], [1, 2], [1], sucursales), /no está disponible/);
+  assert.throws(() => validarAsignacionesVigentes([1], [1, 4], [1], sucursales), /no está disponible/);
 });

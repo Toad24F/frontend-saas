@@ -9,22 +9,22 @@ const sucursal = { id: 2, nombre: 'Centro', direccion: 'Calle 1', zonaHoraria: '
 const profesional = { id: 3, nombre: 'Ana', especialidad: 'Medicina' };
 function prepararPrueba({ sucursales = 1, profesionales = 1, horarios = [], handler } = {}) {
   const llamadas = [];
-  const catalog = (consulta) => ({ negocio: { slug: 'qa', nombre: 'QA' }, servicios: [servicio], sucursales: consulta.servicioId ? Array.from({ length: sucursales }, (_, i) => ({ ...sucursal, id: i + 2 })) : [], profesionales: consulta.sucursalId ? Array.from({ length: profesionales }, (_, i) => ({ ...profesional, id: i + 3 })) : [] });
+  const catalogo = (consulta) => ({ negocio: { slug: 'qa', nombre: 'QA' }, servicios: [servicio], sucursales: consulta.servicioId ? Array.from({ length: sucursales }, (_, indice) => ({ ...sucursal, id: indice + 2 })) : [], profesionales: consulta.sucursalId ? Array.from({ length: profesionales }, (_, indice) => ({ ...profesional, id: indice + 3 })) : [] });
   const flujo = crearSeleccionPortal({ async solicitar(ruta, { consulta }) {
     llamadas.push({ path: ruta, consulta });
-    if (handler) return handler(ruta, consulta, catalog);
-    return ruta === 'catalogo' ? catalog(consulta) : { ...consulta, modalidad: 'publica', zonaHoraria: sucursal.zonaHoraria, ranuras: horarios };
+    if (handler) return handler(ruta, consulta, catalogo);
+    return ruta === 'catalogo' ? catalogo(consulta) : { ...consulta, modalidad: 'publica', zonaHoraria: sucursal.zonaHoraria, ranuras: horarios };
   } }, { slug: 'qa', ahora: () => new Date('2026-11-07T16:00:00Z') });
   return { flow: flujo, calls: llamadas };
 }
 
 test('portal: salta únicas opciones independientemente y vuelve a la última elección real', async () => {
-  for (const [sucursales, profesionales, expected] of [[1, 1, 3], [1, 2, 2], [2, 1, 1], [0, 1, 1]]) {
+  for (const [sucursales, profesionales, esperado] of [[1, 1, 3], [1, 2, 2], [2, 1, 1], [0, 1, 1]]) {
     const { flow: flujo, calls: llamadas } = prepararPrueba({ sucursales, profesionales });
     await flujo.iniciar(); assert.equal(flujo.obtenerEstado().paso, 0); // Servicio explícito incluso único.
     flujo.elegir('servicioId', 1); await flujo.continuar();
-    assert.equal(flujo.obtenerEstado().paso, expected);
-    if (expected === 3) {
+    assert.equal(flujo.obtenerEstado().paso, esperado);
+    if (esperado === 3) {
       assert.deepEqual(flujo.obtenerEstado().pasosAutomaticos, [1, 2]);
       assert.equal(flujo.obtenerEstado().consulta.estado, 'vacia');
       await flujo.volver(); assert.equal(flujo.obtenerEstado().paso, 0);
@@ -44,7 +44,7 @@ test('portal: múltiples sucursales y un profesional saltan solo el profesional'
 
 test('portal: una respuesta automática tardía no avanza después de volver', async () => {
   let fin;
-  const { flow: flujo } = prepararPrueba({ handler: (ruta, consulta, catalog) => consulta.servicioId ? new Promise((resolver) => { fin = () => resolver(catalog(consulta)); }) : catalog(consulta) });
+  const { flow: flujo } = prepararPrueba({ handler: (ruta, consulta, catalogo) => consulta.servicioId ? new Promise((resolver) => { fin = () => resolver(catalogo(consulta)); }) : catalogo(consulta) });
   await flujo.iniciar(); flujo.elegir('servicioId', 1); const continuar = flujo.continuar();
   assert.match(renderSeleccion(flujo.obtenerEstado()), /portal-esqueleto/);
   await flujo.volver(); fin(); await continuar;
@@ -52,8 +52,8 @@ test('portal: una respuesta automática tardía no avanza después de volver', a
 });
 
 test('portal: paginación de seis, búsqueda normalizada y filtros sin alterar colección', () => {
-  const filas = Array.from({ length: 13 }, (_, i) => ({ ...servicio, id: i + 1, nombre: `Revisión ${i}`, duracionMinutos: i < 6 ? 20 : 90 }));
-  const before = structuredClone(filas);
+  const filas = Array.from({ length: 13 }, (_, indice) => ({ ...servicio, id: indice + 1, nombre: `Revisión ${indice}`, duracionMinutos: indice < 6 ? 20 : 90 }));
+  const anterior = structuredClone(filas);
   for (const total of [0, 1, 6, 7, 13]) {
     const resultado = paginarOpciones(filas.slice(0, total), 0);
     assert.equal(resultado.filas.length, Math.min(total, 6));
@@ -64,7 +64,7 @@ test('portal: paginación de seis, búsqueda normalizada y filtros sin alterar c
   assert.equal(paginarOpciones(filas, 0, { ...crearFiltrosIniciales(), pagina: 3 }).filas.length, 1);
   assert.equal(paginarOpciones(filas.slice(0, 12), 0, { ...crearFiltrosIniciales(), pagina: 3 }).pagina, 2);
   assert.equal(paginarOpciones([profesional], 2, { busqueda: 'MEDICINA', filtro: 'Medicina', pagina: 1 }).total, 1);
-  assert.deepEqual(filas, before);
+  assert.deepEqual(filas, anterior);
   assert.doesNotMatch(renderFiltrosOpciones(filas, 0), /data-portal-limpiar >/);
 });
 
@@ -98,22 +98,22 @@ test('portal: partes del día separan al mediodía y skeleton no crea opciones i
 });
 
 test('portal: una etapa deja de omitirse si la oferta vigente ahora tiene varias opciones', async () => {
-  let expanded = false;
-  const { flow: flujo } = prepararPrueba({ handler: (ruta, consulta, catalog) => {
+  let expandido = false;
+  const { flow: flujo } = prepararPrueba({ handler: (ruta, consulta, catalogo) => {
     if (ruta === 'disponibilidad') return { ...consulta, modalidad: 'publica', zonaHoraria: sucursal.zonaHoraria, ranuras: [] };
-    const datos = catalog(consulta);
-    if (expanded && consulta.servicioId) datos.sucursales.push({ ...sucursal, id: 9 });
+    const datos = catalogo(consulta);
+    if (expandido && consulta.servicioId) datos.sucursales.push({ ...sucursal, id: 9 });
     return datos;
   } });
   await flujo.iniciar(); flujo.elegir('servicioId', 1); await flujo.continuar();
-  assert.equal(flujo.obtenerEstado().paso, 3); expanded = true;
+  assert.equal(flujo.obtenerEstado().paso, 3); expandido = true;
   await flujo.volver(); await flujo.continuar();
   assert.equal(flujo.obtenerEstado().paso, 1); assert.deepEqual(flujo.obtenerEstado().pasosAutomaticos, []);
 });
 
 test('portal: una sola opción tras búsqueda sigue siendo una elección explícita', async () => {
-  const { flow: flujo } = prepararPrueba({ sucursales: 7, handler: (_path, consulta, catalog) => {
-    const datos = catalog(consulta); datos.sucursales.forEach((elemento) => { elemento.nombre = `Sucursal ${elemento.id}`; }); return datos;
+  const { flow: flujo } = prepararPrueba({ sucursales: 7, handler: (_ruta, consulta, catalogo) => {
+    const datos = catalogo(consulta); datos.sucursales.forEach((elemento) => { elemento.nombre = `Sucursal ${elemento.id}`; }); return datos;
   } }); await flujo.iniciar(); flujo.elegir('servicioId', 1); await flujo.continuar();
   flujo.actualizarFiltros('busqueda', 'Sucursal 8');
   assert.equal((renderSeleccion(flujo.obtenerEstado()).match(/data-seleccion="sucursalId"/g) || []).length, 1);

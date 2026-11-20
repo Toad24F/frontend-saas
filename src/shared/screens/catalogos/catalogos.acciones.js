@@ -11,8 +11,8 @@ import { validarSucursal, interpretarErrorSucursal } from '../sucursales/sucursa
 import { ZONAS_HORARIAS_MEXICO } from '../sucursales/sucursales.zonas-horarias.js';
 import { leerCupoRolPropio, renderAvisoCupoPropio } from '../../../connected/screens/negocio/usuarios.cupo.js';
 
-const campoMarcado = (...argumentos) => renderCampo(...argumentos).replace('class="form-field"', `class="form-field" data-campo-profesional="${argumentos[1]}"`);
-const selectorMarcado = (...argumentos) => renderSelector(...argumentos).replace('class="form-field"', `class="form-field" data-campo-profesional="${argumentos[1]}"`);
+const campoMarcado = (...argumentos) => renderCampo(...argumentos).replace('class="campo-formulario"', `class="campo-formulario" data-campo-profesional="${argumentos[1]}"`);
+const selectorMarcado = (...argumentos) => renderSelector(...argumentos).replace('class="campo-formulario"', `class="campo-formulario" data-campo-profesional="${argumentos[1]}"`);
 const errorAsignacion = (campo, mensaje) => Object.assign(new Error(mensaje), { field: campo });
 export async function abrirEditorCatalogo(tipo, id) {
   const cacheado = id ? obtenerRecurso(tipo, id, estadoAplicacion.negocioId) : null;
@@ -24,7 +24,7 @@ export async function abrirEditorCatalogo(tipo, id) {
     }
     const dialogo = abrirFormulario(
       existente ? 'Editar servicio' : 'Nuevo servicio',
-      `${campoMarcado('Nombre del servicio', 'name', existente?.name, 'text', 'required maxlength="150"')}${campoMarcado('Descripción', 'description', existente?.description, 'text', esDemo ? 'required maxlength="200"' : 'maxlength="500"')}<div class="form-row-two">${campoMarcado('Duración en minutos', 'duration', existente?.duration || 45, 'number', esDemo ? 'required min="15" max="240" step="15"' : 'required min="1" step="1"')}${campoMarcado('Precio informativo (MXN)', 'price', existente?.price ?? 600, 'number', 'required min="0" max="99999" step="0.01"')}</div>`,
+      `${campoMarcado('Nombre del servicio', 'name', existente?.name, 'text', 'required maxlength="150"')}${campoMarcado('Descripción', 'description', existente?.description, 'text', esDemo ? 'required maxlength="200"' : 'maxlength="500"')}<div class="formulario-dos-columnas">${campoMarcado('Duración en minutos', 'duration', existente?.duration || 45, 'number', esDemo ? 'required min="15" max="240" step="15"' : 'required min="1" step="1"')}${campoMarcado('Precio informativo (MXN)', 'price', existente?.price ?? 600, 'number', 'required min="0" max="99999" step="0.01"')}</div>`,
       (datos) =>
         guardarRegistroCatalogo('services', existente, {
           name: datos.get('name').trim(),
@@ -32,7 +32,7 @@ export async function abrirEditorCatalogo(tipo, id) {
           duration: Number(datos.get('duration')),
           price: Number(datos.get('price')),
           icon: existente?.icon || 'briefcase',
-          color: existente?.color || 'blue',
+          color: existente?.color || 'azul',
         }),
       false,
       {
@@ -47,7 +47,7 @@ export async function abrirEditorCatalogo(tipo, id) {
           const errores = interpretarErrorServicio(error);
           if (errores) mostrarErroresProfesional(formulario, errores);
           else {
-            const destino = formulario.querySelector('#form-error');
+            const destino = formulario.querySelector('#error-formulario');
             destino.textContent = error.message || 'No se pudo guardar el servicio. Inténtalo de nuevo.';
             destino.hidden = false;
             destino.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -70,7 +70,7 @@ export async function abrirEditorCatalogo(tipo, id) {
           address: datos.get('address'),
           phone: datos.get('phone'),
           notes: datos.get('notes'), timezone: datos.get('timezone'), maps: datos.get('maps'),
-          color: existente?.color || 'orange',
+          color: existente?.color || 'naranja',
         }),
       false,
       {
@@ -85,7 +85,7 @@ export async function abrirEditorCatalogo(tipo, id) {
           const errores = interpretarErrorSucursal(error);
           if (errores) mostrarErroresProfesional(formulario, errores);
           else {
-            const destino = formulario.querySelector('#form-error');
+            const destino = formulario.querySelector('#error-formulario');
             destino.textContent = error.message || 'No se pudo guardar la sucursal. Inténtalo de nuevo.';
             destino.hidden = false;
             destino.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -112,12 +112,12 @@ export async function abrirEditorCatalogo(tipo, id) {
       // El alta muestra el cupo de la ruta propia; una lectura fallida no se
       // convierte en un límite local supuesto.
       try { introduccionCupo = renderAvisoCupoPropio('profesionales', await leerCupoRolPropio('profesionales', api)); }
-      catch { introduccionCupo = '<p class="form-intro">No se pudo consultar el cupo vigente. El servidor lo comprobará al guardar.</p>'; }
+      catch { introduccionCupo = '<p class="introduccion-formulario">No se pudo consultar el cupo vigente. El servidor lo comprobará al guardar.</p>'; }
     }
     let idVigente = existente?.id;
     const dialogo = abrirFormulario(
       existente ? 'Editar profesional' : 'Nuevo profesional',
-      `${introduccionCupo}${campoMarcado('Nombre completo', 'name', existente?.name, 'text', propio ? 'readonly' : 'required maxlength="150"')}${propio ? '' : campoMarcado('Especialidad', 'specialty', existente?.specialty, 'text', 'required maxlength="150"')}${campoMarcado('Correo', 'email', existente?.email, 'email', propio ? 'readonly' : 'required maxlength="150"')}${esDemo || propio ? '' : campoMarcado(existente ? 'Nueva contraseña (opcional)' : 'Contraseña', 'password', '', 'password', existente ? 'autocomplete="new-password" minlength="12"' : 'required autocomplete="new-password" minlength="12"')}${esDemo ? `<div class="form-field profesionales-grupo-eleccion" data-campo-profesional="services" role="group" aria-labelledby="servicios-profesional-etiqueta" tabindex="-1"><span class="form-label" id="servicios-profesional-etiqueta">Servicios que ofrece</span><div class="checkbox-list">${(existente?.catalogServices || listarRegistros(
+      `${introduccionCupo}${campoMarcado('Nombre completo', 'name', existente?.name, 'text', propio ? 'readonly' : 'required maxlength="150"')}${propio ? '' : campoMarcado('Especialidad', 'specialty', existente?.specialty, 'text', 'required maxlength="150"')}${campoMarcado('Correo', 'email', existente?.email, 'email', propio ? 'readonly' : 'required maxlength="150"')}${esDemo || propio ? '' : campoMarcado(existente ? 'Nueva contraseña (opcional)' : 'Contraseña', 'password', '', 'password', existente ? 'autocomplete="new-password" minlength="12"' : 'required autocomplete="new-password" minlength="12"')}${esDemo ? `<div class="campo-formulario profesionales-grupo-eleccion" data-campo-profesional="services" role="group" aria-labelledby="servicios-profesional-etiqueta" tabindex="-1"><span class="form-label" id="servicios-profesional-etiqueta">Servicios que ofrece</span><div class="lista-casillas">${(existente?.catalogServices || listarRegistros(
         'services',
         estadoAplicacion.negocioId,
       ))
@@ -127,7 +127,7 @@ export async function abrirEditorCatalogo(tipo, id) {
         )
         .join(
           '',
-      )}</div></div><div class="form-field profesionales-grupo-eleccion" data-campo-profesional="branches" role="group" aria-labelledby="sucursales-profesional-etiqueta" tabindex="-1"><span class="form-label" id="sucursales-profesional-etiqueta">Sucursales</span><div class="checkbox-list">${(existente?.catalogBranches || listarRegistros(
+      )}</div></div><div class="campo-formulario profesionales-grupo-eleccion" data-campo-profesional="branches" role="group" aria-labelledby="sucursales-profesional-etiqueta" tabindex="-1"><span class="form-label" id="sucursales-profesional-etiqueta">Sucursales</span><div class="lista-casillas">${(existente?.catalogBranches || listarRegistros(
         'branches',
         estadoAplicacion.negocioId,
       ))
@@ -135,7 +135,7 @@ export async function abrirEditorCatalogo(tipo, id) {
           (b) =>
             `<label><input type="checkbox" class="form-check-input" name="branches" value="${b.id}" ${propio ? 'disabled' : ''} ${existente?.branchIds.includes(b.id) ? 'checked' : ''}/> ${esc(b.name)}</label>`,
         )
-        .join('')}</div></div>` : '<p class="field-hint">Después de guardar, abre Ver disponibilidad para asignar sucursales y configurar servicios.</p>'}`,
+        .join('')}</div></div>` : '<p class="ayuda-campo">Después de guardar, abre Ver disponibilidad para asignar sucursales y configurar servicios.</p>'}`,
       async (datos) => {
         if (!esDemo) {
           const identidad = { nombre: datos.get('name').trim(), correo: datos.get('email').trim(), especialidad: datos.get('specialty').trim(), ...(datos.get('password') ? { password: datos.get('password') } : {}) };
@@ -168,7 +168,7 @@ export async function abrirEditorCatalogo(tipo, id) {
             .slice(-2)
             .map((palabra) => palabra[0])
             .join(''),
-          color: existente?.color || 'peach',
+          color: existente?.color || 'durazno',
           serviceIds: servicioIds,
           branchIds: sucursalIds,
         });
@@ -208,7 +208,7 @@ export async function abrirEditorCatalogo(tipo, id) {
           const errores = interpretarErrorProfesional(error);
           if (errores) mostrarErroresProfesional(formulario, errores);
           else {
-            const destino = formulario.querySelector('#form-error');
+            const destino = formulario.querySelector('#error-formulario');
             destino.textContent = error.message || 'No se pudieron guardar los cambios. Inténtalo de nuevo.';
             destino.hidden = false;
             destino.scrollIntoView({ behavior: 'smooth', block: 'center' });

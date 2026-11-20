@@ -12,15 +12,15 @@ Alcance: administración conectada de profesionales, recepción, servicios y suc
 
 | Archivo | Qué hace |
 | --- | --- |
-| `src/connected/modules/recursos/retired.js` | Añade `restoreRetired`: valida tipo, ID, ruta POST y respuesta inactiva antes de anunciar éxito. |
-| `src/connected/modules/recursos/affected.js` | Nuevo lector de causas del backend; arma filtros admitidos y conserva únicamente referencias del recurso consultado. |
-| `src/connected/screens/recursos/retired-view.js` | Agrega confirmación de restauración, consulta de afectaciones, estados de carga/error/vacío y actualización del catálogo tras éxito. |
-| `src/connected/screens/recursos/retired-view.css` | Acomoda nombre, acciones y causas en escritorio/móvil sin tapar botones con la navegación móvil. |
-| `src/shared/actions.js` | Despacha los botones nuevos de restauración y afectaciones únicamente en modo conectado. |
-| `src/shared/screens/disponibilidad/operational-contract.js` | Da nombres legibles a las causas de inhabilitación devueltas por el backend. |
-| `tests/ala-inhabilitados.test.js` | Añade pruebas de los cuatro contratos de restauración, respuesta inactiva y consulta de causas de solo lectura. |
-| `tests/browser/global-setup.js` | Siembra un profesional adicional y una cita futura ficticia en el negocio 2 de la base temporal. |
-| `tests/browser/retired-resources.spec.js` | Comprueba retiro, restauración, cupo, aislamiento entre negocios y que consultar causas no cambia la cita; captura los temas/tamaños. |
+| `src/connected/modules/recursos/recursos.inhabilitados.js` | Añade `restoreRetired`: valida tipo, ID, ruta POST y respuesta inactiva antes de anunciar éxito. |
+| `src/connected/modules/recursos/recursos.afectaciones.js` | Nuevo lector de causas del backend; arma filtros admitidos y conserva únicamente referencias del recurso consultado. |
+| `src/connected/screens/recursos/inhabilitados.vista.js` | Agrega confirmación de restauración, consulta de afectaciones, estados de carga/error/vacío y actualización del catálogo tras éxito. |
+| `src/connected/screens/recursos/inhabilitados.estilos.css` | Acomoda nombre, acciones y causas en escritorio/móvil sin tapar botones con la navegación móvil. |
+| `src/shared/aplicacion.acciones.js` | Despacha los botones nuevos de restauración y afectaciones únicamente en modo conectado. |
+| `src/shared/screens/disponibilidad/disponibilidad.contrato-operativo.js` | Da nombres legibles a las causas de inhabilitación devueltas por el backend. |
+| `tests/recursos.inhabilitados.test.js` | Añade pruebas de los cuatro contratos de restauración, respuesta inactiva y consulta de causas de solo lectura. |
+| `tests/navegador/integracion.preparacion.js` | Siembra un profesional adicional y una cita futura ficticia en el negocio 2 de la base temporal. |
+| `tests/navegador/recursos.inhabilitados.spec.js` | Comprueba retiro, restauración, cupo, aislamiento entre negocios y que consultar causas no cambia la cita; captura los temas/tamaños. |
 | `tareas.md` | Marca T041–T043 como terminadas. |
 
 ## Pruebas y resultado

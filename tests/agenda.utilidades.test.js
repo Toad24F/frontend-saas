@@ -5,89 +5,89 @@ import { huecosAtencion, posicionHoraActual, gruposDensos } from '../src/shared/
 import { consultarAtencionAgenda } from '../src/connected/modules/agenda/agenda.atencion.js';
 import { distribuirEventos } from '../src/shared/screens/agenda/agenda.presentacion.js';
 
-const period = { desde: '2026-11-09', hasta: '2026-11-15' };
-const appointment = { id: 1, fechaLocal: '2026-11-12', sucursalId: 2, personalId: 3, estado: 'confirmada', nombreContacto: 'Ángela %_', causas: [{ codigo: 'bloqueo' }] };
-test('cache reutiliza periodo completo, subconjunto, filtros y búsqueda literal sin llamadas', async () => {
-  const calls = [];
-  const cache = crearCacheAgenda(async (query) => { calls.push(query); return { ...period, citas: [appointment] }; });
-  await cache.read(period);
-  const result = await cache.read({ desde: '2026-11-12', hasta: '2026-11-12', sucursalId: '2', personalId: '3', busqueda: 'angela %_', afectadas: true });
-  assert.equal(calls.length, 1);
-  assert.equal(result.citas.length, 1);
-  assert.deepEqual((await cache.read({ ...period, estado: 'pendiente' })).citas, []);
-  assert.equal(calls.length, 1);
-  cache.clear(); await cache.read(period); assert.equal(calls.length, 2);
-  await cache.read(period, { force: true }); assert.equal(calls.length, 3);
+const periodo = { desde: '2026-11-09', hasta: '2026-11-15' };
+const cita = { id: 1, fechaLocal: '2026-11-12', sucursalId: 2, personalId: 3, estado: 'confirmada', nombreContacto: 'Ángela %_', causas: [{ codigo: 'bloqueo' }] };
+test('caché reutiliza periodo completo, subconjunto, filtros y búsqueda literal sin llamadas', async () => {
+  const llamadas = [];
+  const memoriaCache = crearCacheAgenda(async (consulta) => { llamadas.push(consulta); return { ...periodo, citas: [cita] }; });
+  await memoriaCache.read(periodo);
+  const resultado = await memoriaCache.read({ desde: '2026-11-12', hasta: '2026-11-12', sucursalId: '2', personalId: '3', busqueda: 'angela %_', afectadas: true });
+  assert.equal(llamadas.length, 1);
+  assert.equal(resultado.citas.length, 1);
+  assert.deepEqual((await memoriaCache.read({ ...periodo, estado: 'pendiente' })).citas, []);
+  assert.equal(llamadas.length, 1);
+  memoriaCache.clear(); await memoriaCache.read(periodo); assert.equal(llamadas.length, 2);
+  await memoriaCache.read(periodo, { force: true }); assert.equal(llamadas.length, 3);
 });
-test('cache no presenta una consulta filtrada como periodo completo cuando excede el límite', async () => {
-  const calls = [];
-  const cache = crearCacheAgenda(async (query) => {
-    calls.push(query);
-    if (!query.personalId) throw Object.assign(new Error('La consulta supera 1.000 citas. Acota el periodo o los filtros.'), { status: 400 });
-    return { ...period, citas: [appointment] };
+test('caché no presenta una consulta filtrada como periodo completo cuando excede el límite', async () => {
+  const llamadas = [];
+  const memoriaCache = crearCacheAgenda(async (consulta) => {
+    llamadas.push(consulta);
+    if (!consulta.personalId) throw Object.assign(new Error('La consulta supera 1.000 citas. Acota el periodo o los filtros.'), { status: 400 });
+    return { ...periodo, citas: [cita] };
   });
-  await cache.read({ ...period, personalId: '3' });
-  await assert.rejects(cache.read(period));
-  assert.equal(calls.length, 3);
+  await memoriaCache.read({ ...periodo, personalId: '3' });
+  await assert.rejects(memoriaCache.read(periodo));
+  assert.equal(llamadas.length, 3);
 });
-test('cache descarta lecturas pendientes al limpiar sesión y no conserva una denegación', async () => {
-  let resolve;
-  const cache = crearCacheAgenda(() => new Promise((r) => { resolve = r; }));
-  const pending = cache.read(period); cache.clear(); resolve({ ...period, citas: [appointment] }); await pending;
-  assert.equal(cache.size, 0);
-  let denied = false;
-  const other = crearCacheAgenda(async () => { if (denied) throw Object.assign(new Error('Denegado'), { status: 403 }); return { ...period, citas: [appointment] }; });
-  await other.read(period); denied = true;
-  await assert.rejects(other.read(period, { force: true })); assert.equal(other.size, 0);
+test('caché descarta lecturas pendientes al limpiar sesión y no conserva una denegación', async () => {
+  let resolverPromesa;
+  const memoriaCache = crearCacheAgenda(() => new Promise((respuesta) => { resolverPromesa = respuesta; }));
+  const pendiente = memoriaCache.read(periodo); memoriaCache.clear(); resolverPromesa({ ...periodo, citas: [cita] }); await pendiente;
+  assert.equal(memoriaCache.size, 0);
+  let denegado = false;
+  const otro = crearCacheAgenda(async () => { if (denegado) throw Object.assign(new Error('Denegado'), { status: 403 }); return { ...periodo, citas: [cita] }; });
+  await otro.read(periodo); denegado = true;
+  await assert.rejects(otro.read(periodo, { force: true })); assert.equal(otro.size, 0);
 });
-test('cache elimina snapshots si la consulta acotada de respaldo es denegada', async () => {
-  let denied = false;
-  const cache = crearCacheAgenda(async (query) => {
-    if (!denied) return { ...period, citas: [appointment] };
-    throw Object.assign(new Error(query.personalId ? 'Denegado' : 'La consulta supera 1.000 citas.'), { status: query.personalId ? 403 : 400 });
+test('caché elimina datos previos si la consulta acotada de respaldo es denegada', async () => {
+  let denegado = false;
+  const memoriaCache = crearCacheAgenda(async (consulta) => {
+    if (!denegado) return { ...periodo, citas: [cita] };
+    throw Object.assign(new Error(consulta.personalId ? 'Denegado' : 'La consulta supera 1.000 citas.'), { status: consulta.personalId ? 403 : 400 });
   });
-  await cache.read(period);
-  denied = true;
-  await assert.rejects(cache.read({ ...period, personalId: '3' }, { force: true }));
-  assert.equal(cache.size, 0);
+  await memoriaCache.read(periodo);
+  denegado = true;
+  await assert.rejects(memoriaCache.read({ ...periodo, personalId: '3' }, { force: true }));
+  assert.equal(memoriaCache.size, 0);
 });
-test('cache comparte la lectura pendiente y caduca sin consultar indefinidamente datos antiguos', async () => {
-  let calls = 0, now = 0, resolve;
-  const cache = crearCacheAgenda(() => { calls++; return new Promise((r) => { resolve = r; }); }, { now: () => now, ttl: 30000 });
-  const one = cache.read(period), two = cache.read({ ...period, estado: 'pendiente' });
-  assert.equal(calls, 1);
-  resolve({ ...period, citas: [appointment] });
-  assert.equal((await one).citas.length, 1); assert.equal((await two).citas.length, 0);
-  now = 30001; assert.equal(cache.peek(period), null);
+test('caché comparte la lectura pendiente y caduca sin consultar indefinidamente datos antiguos', async () => {
+  let llamadas = 0, ahora = 0, resolverPromesa;
+  const memoriaCache = crearCacheAgenda(() => { llamadas++; return new Promise((respuesta) => { resolverPromesa = respuesta; }); }, { now: () => ahora, ttl: 30000 });
+  const primero = memoriaCache.read(periodo), segundo = memoriaCache.read({ ...periodo, estado: 'pendiente' });
+  assert.equal(llamadas, 1);
+  resolverPromesa({ ...periodo, citas: [cita] });
+  assert.equal((await primero).citas.length, 1); assert.equal((await segundo).citas.length, 0);
+  ahora = 30001; assert.equal(memoriaCache.peek(periodo), null);
 });
 test('sin atención es complemento de intervalos efectivos; omisiones no se convierten en cierre', () => {
-  const data = { intervalos: [{ fecha: '2026-11-12', sucursalId: 2, inicioMinutos: 540, finMinutos: 780 }, { fecha: '2026-11-12', sucursalId: 2, inicioMinutos: 840, finMinutos: 1080 }], omisiones: [] };
-  assert.deepEqual(huecosAtencion(data, '2026-11-12', 2, 540, 1080), [{ start: 780, end: 840 }]);
-  assert.deepEqual(huecosAtencion({ ...data, omisiones: [{ fecha: '2026-11-12', sucursalId: 2 }] }, '2026-11-12', 2, 540, 1080), []);
+  const datos = { intervalos: [{ fecha: '2026-11-12', sucursalId: 2, inicioMinutos: 540, finMinutos: 780 }, { fecha: '2026-11-12', sucursalId: 2, inicioMinutos: 840, finMinutos: 1080 }], omisiones: [] };
+  assert.deepEqual(huecosAtencion(datos, '2026-11-12', 2, 540, 1080), [{ start: 780, end: 840 }]);
+  assert.deepEqual(huecosAtencion({ ...datos, omisiones: [{ fecha: '2026-11-12', sucursalId: 2 }] }, '2026-11-12', 2, 540, 1080), []);
   assert.deepEqual(huecosAtencion(null, '2026-11-12', 2, 540, 1080), []);
 });
 test('agrupación conserva IDs exactos y deja intacta una cita aislada', () => {
-  const items = [{ id: 99, start: '08:00', end: '08:30' }, ...Array.from({ length: 8 }, (_, i) => ({ id: i + 1, start: '09:00', end: '09:30' }))];
-  const groups = gruposDensos(items, 180);
-  assert.equal(groups.length, 1); assert.deepEqual(groups[0].ids, [1, 2, 3, 4, 5, 6, 7, 8]);
-  assert.equal(groups[0].start, 540); assert.equal(groups[0].end, 570);
-  assert.equal(gruposDensos(items, 1000).length, 0);
+  const elementos = [{ id: 99, start: '08:00', end: '08:30' }, ...Array.from({ length: 8 }, (_, indice) => ({ id: indice + 1, start: '09:00', end: '09:30' }))];
+  const grupos = gruposDensos(elementos, 180);
+  assert.equal(grupos.length, 1); assert.deepEqual(grupos[0].ids, [1, 2, 3, 4, 5, 6, 7, 8]);
+  assert.equal(grupos[0].start, 540); assert.equal(grupos[0].end, 570);
+  assert.equal(gruposDensos(elementos, 1000).length, 0);
 });
 test('hora actual usa una zona inequívoca y solo la fecha de hoy', () => {
-  const now = new Date('2026-11-12T18:20:00Z');
-  assert.equal(posicionHoraActual('2026-11-12', ['America/Chihuahua'], now), 740);
-  assert.equal(posicionHoraActual('2026-11-11', ['America/Chihuahua'], now), null);
-  assert.equal(posicionHoraActual('2026-11-12', ['America/Chihuahua', 'America/Tijuana'], now), null);
+  const ahora = new Date('2026-11-12T18:20:00Z');
+  assert.equal(posicionHoraActual('2026-11-12', ['America/Chihuahua'], ahora), 740);
+  assert.equal(posicionHoraActual('2026-11-11', ['America/Chihuahua'], ahora), null);
+  assert.equal(posicionHoraActual('2026-11-12', ['America/Chihuahua', 'America/Tijuana'], ahora), null);
 });
 test('atención valida perfil, periodo, intervalos y omisiones antes de sombrear', async () => {
-  const response = { ...period, personalId: 3, intervalos: [], omisiones: [] };
-  const calls = [];
-  assert.deepEqual(await consultarAtencionAgenda(async (path) => { calls.push(path); return response; }, 3, period), response);
-  assert.equal(calls[0], '/profesionales/3/atencion?desde=2026-11-09&hasta=2026-11-15');
-  for (const data of [{ ...response, personalId: 4 }, { ...response, desde: '2026-11-10' }, { ...response, intervalos: [{}] }, { ...response, omisiones: [{}] }]) await assert.rejects(consultarAtencionAgenda(async () => data, 3, period));
+  const respuesta = { ...periodo, personalId: 3, intervalos: [], omisiones: [] };
+  const llamadas = [];
+  assert.deepEqual(await consultarAtencionAgenda(async (ruta) => { llamadas.push(ruta); return respuesta; }, 3, periodo), respuesta);
+  assert.equal(llamadas[0], '/profesionales/3/atencion?desde=2026-11-09&hasta=2026-11-15');
+  for (const datos of [{ ...respuesta, personalId: 4 }, { ...respuesta, desde: '2026-11-10' }, { ...respuesta, intervalos: [{}] }, { ...respuesta, omisiones: [{}] }]) await assert.rejects(consultarAtencionAgenda(async () => datos, 3, periodo));
 });
 test('una cita aprovecha columnas libres después del pico sin superponer otras', () => {
-  const layout = distribuirEventos([{ id: 1, start: '09:00', end: '11:00' }, { id: 2, start: '09:00', end: '09:30' }, { id: 3, start: '09:00', end: '09:30' }, { id: 4, start: '09:30', end: '10:00' }]);
-  assert.ok(layout.get(4).width > 60);
-  assert.ok(layout.get(4).left >= layout.get(1).width - 0.01);
+  const distribucion = distribuirEventos([{ id: 1, start: '09:00', end: '11:00' }, { id: 2, start: '09:00', end: '09:30' }, { id: 3, start: '09:00', end: '09:30' }, { id: 4, start: '09:30', end: '10:00' }]);
+  assert.ok(distribucion.get(4).width > 60);
+  assert.ok(distribucion.get(4).left >= distribucion.get(1).width - 0.01);
 });

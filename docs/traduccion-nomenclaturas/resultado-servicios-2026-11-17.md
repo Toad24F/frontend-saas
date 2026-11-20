@@ -60,8 +60,8 @@ El contenedor mantiene el identificador híbrido `servicio-results`: `servicio` 
 - Validación sintáctica con `node --check`: correcta en todos los JavaScript modificados.
 - Pruebas dirigidas: 16 aprobadas, 0 fallidas.
 - `npm test`: 295 aprobadas, 0 fallidas.
-- Prueba de navegador `tests/browser-local-pagination.mjs`: aprobada con API simulada.
-- Prueba de navegador `tests/browser-admin-review.mjs`: aprobada con API simulada; conectada/demo, escritorio/móvil y ambos temas.
+- Prueba de navegador `tests/paginacion.local-navegador.mjs`: aprobada con API simulada.
+- Prueba de navegador `tests/administracion.revision-navegador.mjs`: aprobada con API simulada; conectada/demo, escritorio/móvil y ambos temas.
 - `npm run build`: correcto; Vite transformó 190 módulos.
 - Búsqueda con `rg`: sin imports, funciones ni selectores antiguos del conjunto.
 - `git diff --check`: correcto.

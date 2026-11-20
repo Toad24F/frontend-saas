@@ -10,7 +10,7 @@ export function confirmarInhabilitacionSucursal(id) {
   const sucursal = obtenerRecurso('branches', id, estadoAplicacion.negocioId);
   // No se promete que el retiro libere un cupo: la lectura posterior del
   // servidor decide cuántas sucursales activas quedan disponibles.
-  const dialogo = abrirDialogo('Inhabilitar sucursal', `<div class="dialog-body"><p><strong>${escaparHtml(sucursal.name)}</strong> saldrá de los listados operativos. Podrás consultarla en Inhabilitados y restaurarla como inactiva más adelante.</p>${espacioErrorFormulario}</div><div class="dialog-footer"><button type="button" class="btn btn-light" data-dismiss>Cancelar</button><button type="button" class="btn action-danger" data-confirm>Inhabilitar sucursal</button></div>`);
+  const dialogo = abrirDialogo('Inhabilitar sucursal', `<div class="dialogo-cuerpo"><p><strong>${escaparHtml(sucursal.name)}</strong> saldrá de los listados operativos. Podrás consultarla en Inhabilitados y restaurarla como inactiva más adelante.</p>${espacioErrorFormulario}</div><div class="dialogo-pie"><button type="button" class="btn btn-light" data-dismiss>Cancelar</button><button type="button" class="btn accion-peligro" data-confirm>Inhabilitar sucursal</button></div>`);
   dialogo.querySelector('[data-dismiss]').onclick = () => dialogo.close();
   dialogo.querySelector('[data-confirm]').onclick = async (evento) => {
     const boton = evento.currentTarget;
@@ -23,7 +23,7 @@ export function confirmarInhabilitacionSucursal(id) {
       try { await cargarDatosBackend(); render(); mostrarAviso('Sucursal inhabilitada.'); }
       catch (error) { mostrarAviso(`Sucursal inhabilitada. No se pudo actualizar la lista y el cupo: ${error.message}`); }
     } catch (error) {
-      const destino = dialogo.querySelector('#form-error');
+      const destino = dialogo.querySelector('#error-formulario');
       destino.textContent = error.message;
       destino.hidden = false;
       destino.focus();

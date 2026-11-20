@@ -65,7 +65,7 @@ export function limpiarErroresProfesional(formulario) {
       entrada.removeAttribute('aria-describedby');
     });
   });
-  const general = formulario.querySelector('#form-error');
+  const general = formulario.querySelector('#error-formulario');
   if (general) { general.hidden = true; general.textContent = ''; }
 }
 

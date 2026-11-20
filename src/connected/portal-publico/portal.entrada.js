@@ -1,6 +1,6 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
-import '../../shared/styles.css';
-import '../../shared/theme.css';
+import '../../shared/global.estilos.css';
+import '../../shared/tema.estilos.css';
 import './portal.estilos.css';
 import '../../shared/portal-publico/portal.opciones.css';
 import { renderEsqueletoPortal } from '../../shared/portal-publico/portal.opciones.js';
@@ -24,7 +24,7 @@ export async function iniciarPortalPublico(slug) {
     (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
   raiz.innerHTML = `<div class="portal-publico">
     <header class="portal-cabecera"><img width="176" height="42" alt="Citalendar" id="portal-logo"><span class="portal-reloj-cabecera">${renderIcono('calendar')}<span class="visually-hidden">Fecha y hora local: </span><time id="portal-reloj"></time></span>
-      <button type="button" class="theme-toggle icon-btn" id="portal-tema"></button></header>
+      <button type="button" class="selector-tema boton-icono" id="portal-tema"></button></header>
     <main id="portal-principal" class="portal-contenido" aria-labelledby="portal-titulo">
       <div class="portal-encabezado-negocio"><span class="portal-iniciales-negocio" id="portal-iniciales-negocio" aria-hidden="true"></span><div><p class="portal-antetitulo">PORTAL DE RESERVAS</p><h1 id="portal-titulo">Portal de reservas</h1><p id="portal-categoria" hidden></p></div><span class="portal-etiqueta-en-linea">Reservas en línea</span></div>
       <div id="portal-estado" role="status" aria-live="polite" aria-atomic="true"></div>

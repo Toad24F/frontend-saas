@@ -10,7 +10,7 @@ export function confirmarInhabilitacionServicio(id) {
   const servicio = obtenerRecurso('services', id, estadoAplicacion.negocioId);
   // El usuario confirma un retiro recuperable. Desactivar sigue disponible
   // como estado operativo distinto en el menú de la tarjeta.
-  const dialogo = abrirDialogo('Inhabilitar servicio', `<div class="dialog-body"><p><strong>${escaparHtml(servicio.name)}</strong> saldrá de los listados operativos. Podrás consultarlo en Inhabilitados y restaurarlo como inactivo más adelante.</p>${espacioErrorFormulario}</div><div class="dialog-footer"><button type="button" class="btn btn-light" data-dismiss>Cancelar</button><button type="button" class="btn action-danger" data-confirm>Inhabilitar servicio</button></div>`);
+  const dialogo = abrirDialogo('Inhabilitar servicio', `<div class="dialogo-cuerpo"><p><strong>${escaparHtml(servicio.name)}</strong> saldrá de los listados operativos. Podrás consultarlo en Inhabilitados y restaurarlo como inactivo más adelante.</p>${espacioErrorFormulario}</div><div class="dialogo-pie"><button type="button" class="btn btn-light" data-dismiss>Cancelar</button><button type="button" class="btn accion-peligro" data-confirm>Inhabilitar servicio</button></div>`);
   dialogo.querySelector('[data-dismiss]').onclick = () => dialogo.close();
   dialogo.querySelector('[data-confirm]').onclick = async (evento) => {
     const boton = evento.currentTarget;
@@ -23,7 +23,7 @@ export function confirmarInhabilitacionServicio(id) {
       try { await cargarDatosBackend(); render(); mostrarAviso('Servicio inhabilitado.'); }
       catch (error) { mostrarAviso(`Servicio inhabilitado. No se pudo actualizar el catálogo: ${error.message}`); }
     } catch (error) {
-      const destino = dialogo.querySelector('#form-error');
+      const destino = dialogo.querySelector('#error-formulario');
       destino.textContent = error.message;
       destino.hidden = false;
       destino.focus();

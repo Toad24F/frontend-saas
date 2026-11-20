@@ -6,9 +6,9 @@
 
 | Tipo | Archivo | Resultado |
 | --- | --- | --- |
-| Agregados | `src/connected/screens/servicios/view.js`, `actions.js`, `style.css` | Botón Eliminar en las tarjetas conectadas de AN, confirmación y mensaje de error junto a la acción. |
-| Agregado | `src/connected/modules/servicios/operations.js` | Envía `DELETE /servicios/:id` sin cuerpo y valida el ID local. |
-| Modificados | `src/connected/screens/index.js`, `src/shared/screens/servicios/view.js`, `src/shared/actions.js` | Conectan la pantalla y permiten extender solo las tarjetas de AN. Demo y P conservan sus controles. |
+| Agregados | `src/connected/screens/servicios/servicios.vista.js`, `actions.js`, `style.css` | Botón Eliminar en las tarjetas conectadas de AN, confirmación y mensaje de error junto a la acción. |
+| Agregado | `src/connected/modules/servicios/servicios.operaciones.js` | Envía `DELETE /servicios/:id` sin cuerpo y valida el ID local. |
+| Modificados | `src/connected/screens/pantallas.conectadas.js`, `src/shared/screens/servicios/servicios.vista.js`, `src/shared/aplicacion.acciones.js` | Conectan la pantalla y permiten extender solo las tarjetas de AN. Demo y P conservan sus controles. |
 | Agregado | `tests/servicios-conectados.test.js` | Comprueba ruta, método, ausencia de cuerpo, ID inválido y propagación del conflicto. |
 | Modificado | `docs/pendientes-y-reglas-modulo-1.md` | Retira la baja de servicios de las operaciones pendientes. |
 

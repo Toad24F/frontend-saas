@@ -30,4 +30,4 @@ Se ajustaron los consumidores en el enrutador de entrada, el índice de pantalla
 - La suite generó 16 capturas a 1366 y 390 px en claro y oscuro y comprobó el ancho del documento. Se revisaron muestras de escritorio y móvil de las cuatro pantallas. A 390 px se observa la distribución preexistente en dos columnas en varias secciones, con contenido estrecho y desplazamiento horizontal interno en tablas.
 - Pasó el recorrido `node tests/portal.navegacion-navegador.mjs` con Vite y la API interceptada. Cubrió la entrada pública y el portal demo. Las comprobaciones se realizaron sin escribir en el backend ni en su base de datos.
 
-Para repetir las pruebas de Edge con la API interceptada, ejecutar `npm run test:browser -- --config tests/m4-playwright.config.js demo.pantallas disponibilidad.operativa sesion.persistencia`. El runner guarda las capturas de las cuatro pantallas en `test-results/m4/`.
+Para repetir las pruebas de Edge con la API interceptada, ejecutar `npm run test:browser -- --config tests/m4-navegador.config.js demo.pantallas disponibilidad.operativa sesion.persistencia`. El runner guarda las capturas de las cuatro pantallas en `test-results/m4/`.

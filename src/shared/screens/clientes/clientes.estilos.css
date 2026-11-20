@@ -1,5 +1,5 @@
 /* El directorio conserva la tabla del panel; en móvil cada ficha tiene una tarjeta y una acción completa. */
-.directorio-clientes .section-heading {
+.directorio-clientes .encabezado-seccion {
   flex-wrap: wrap;
   gap: 1rem;
 }
@@ -8,7 +8,7 @@
   gap: 0.5rem;
   min-width: 0;
 }
-#filtros-directorio-conectado .search-field {
+#filtros-directorio-conectado .campo-busqueda {
   min-width: 0;
 }
 .directorio-identificador {
@@ -40,9 +40,9 @@
   margin-bottom: 1rem;
 }
 .directorio-clientes .table-footer {
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--borde);
   padding: 1rem 1.5rem;
-  color: var(--muted);
+  color: var(--texto-secundario);
   font-size: 0.8rem;
 }
 .historial-cliente {
@@ -54,7 +54,7 @@
 }
 .historial-cliente li {
   padding: 1rem 0;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--borde);
   overflow-wrap: anywhere;
 }
 .historial-cliente li p {
@@ -73,7 +73,7 @@
   }
   .directorio-tarjetas article {
     padding: 1rem 0;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--borde);
     overflow-wrap: anywhere;
   }
   .directorio-tarjetas h3 {
@@ -82,7 +82,7 @@
   #filtros-directorio-conectado {
     width: 100%;
   }
-  #filtros-directorio-conectado .search-field {
+  #filtros-directorio-conectado .campo-busqueda {
     flex: 1;
   }
   #filtros-directorio-conectado input {

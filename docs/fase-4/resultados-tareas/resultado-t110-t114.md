@@ -24,19 +24,19 @@ El flujo conserva el stack, la marca, los temas y los componentes existentes. Se
 
 | Archivo | Qué hace el cambio |
 | --- | --- |
-| `src/connected/public/attempt-store.js` | Nuevo. Lee/valida/escribe/verifica el marcador de tres campos por negocio en sessionStorage. Detecta corrupción/bloqueo y solo borra el marcador que coincide con el intento esperado. No tiene fallback persistente ni almacena contacto. |
-| `src/connected/public/submission.js` | Nuevo. Coordina preparación, envío, repetición y resolución. Congela contenido normalizado en memoria, conserva incertidumbre, verifica el resumen recibido y elimina el marcador únicamente al conocer el resultado aplicable. |
-| `src/connected/public/booking.js` | Modificado. Integra envío/recuperación con apartado y formulario. Invalida lecturas previas al comenzar el envío, bloquea acciones incompatibles y conserva la protección de salida. Recupera antes de iniciar selección. |
-| `src/connected/public/browser-session.js` | Modificado. Añade un Web Lock de mutaciones por negocio, compartido por concesiones y envíos. Un envío vivo incierto conserva el lock hasta resolver o salir, impidiendo concesiones desde otra pestaña mientras lo mantiene. |
-| `src/connected/public/selection.js` | Modificado. Añade reinicio explícito de selecciones y catálogos para el caso de ausencia terminal comprobada. |
-| `src/connected/public/booking-view.js` | Modificado. Habilita Reservar con vigencia válida, presenta envío/incertidumbre/reintentos y renderiza el resumen histórico pendiente sin depender de un apartado o catálogo local. Escapa todo texto recibido. |
-| `src/connected/public/entry.js` | Modificado. Conecta el lock nativo, actualiza identidad/título con el negocio histórico del resultado y conserva el marcador con mensaje de recuperación pendiente si falla la inicialización. |
-| `src/connected/public/style.css` | Modificado. Añade presentación del folio, lista de resumen y estado pendiente legible en claro/oscuro, manteniendo superficies y colores semánticos. |
-| `src/demo/screens/reservas/booking.js` | Modificado. Cambia título/descripción final de confirmada a pendiente; no altera su motor, datos o controles de demostración. |
-| `tests/portal-publico-envio.test.js` | Nuevo. Veinte pruebas Node de marcador, protocolo, repetición, incertidumbre, recarga, locks, salida, respuestas atrasadas y resumen seguro. Usa exclusivamente dobles. |
-| `tests/fixtures/memory-storage.js` | Nuevo. Implementa almacenamiento efímero para las pruebas; nunca se importa desde el producto. |
-| `tests/portal-publico-apartado.test.js` | Modificado. Inyecta almacenamiento de prueba y actualiza la comprobación del botón Reservar: ahora depende de vigencia en lugar de estar siempre deshabilitado. Conserva las 24 regresiones del lote anterior. |
-| `tests/fixtures/portal-selection-server.mjs` | Modificado. Simula preparación, escritor idempotente, resolutor y resultados guardados en memoria. Permite perder respuestas antes de preparación o después del registro, y simular error de resolución. Todo /publico se intercepta antes del proxy, sin backend real. |
+| `src/connected/portal-publico/intento.store.js` | Nuevo. Lee/valida/escribe/verifica el marcador de tres campos por negocio en sessionStorage. Detecta corrupción/bloqueo y solo borra el marcador que coincide con el intento esperado. No tiene fallback persistente ni almacena contacto. |
+| `src/connected/portal-publico/reserva.envio.js` | Nuevo. Coordina preparación, envío, repetición y resolución. Congela contenido normalizado en memoria, conserva incertidumbre, verifica el resumen recibido y elimina el marcador únicamente al conocer el resultado aplicable. |
+| `src/connected/portal-publico/reserva.flujo.js` | Modificado. Integra envío/recuperación con apartado y formulario. Invalida lecturas previas al comenzar el envío, bloquea acciones incompatibles y conserva la protección de salida. Recupera antes de iniciar selección. |
+| `src/connected/portal-publico/portal.sesion-navegador.js` | Modificado. Añade un Web Lock de mutaciones por negocio, compartido por concesiones y envíos. Un envío vivo incierto conserva el lock hasta resolver o salir, impidiendo concesiones desde otra pestaña mientras lo mantiene. |
+| `src/connected/portal-publico/seleccion.flujo.js` | Modificado. Añade reinicio explícito de selecciones y catálogos para el caso de ausencia terminal comprobada. |
+| `src/connected/portal-publico/reserva.vista.js` | Modificado. Habilita Reservar con vigencia válida, presenta envío/incertidumbre/reintentos y renderiza el resumen histórico pendiente sin depender de un apartado o catálogo local. Escapa todo texto recibido. |
+| `src/connected/portal-publico/portal.entrada.js` | Modificado. Conecta el lock nativo, actualiza identidad/título con el negocio histórico del resultado y conserva el marcador con mensaje de recuperación pendiente si falla la inicialización. |
+| `src/connected/portal-publico/portal.estilos.css` | Modificado. Añade presentación del folio, lista de resumen y estado pendiente legible en claro/oscuro, manteniendo superficies y colores semánticos. |
+| `src/demo/screens/reservas/reserva.vista.js` | Modificado. Cambia título/descripción final de confirmada a pendiente; no altera su motor, datos o controles de demostración. |
+| `tests/portal-publico.envio.test.js` | Nuevo. Veinte pruebas Node de marcador, protocolo, repetición, incertidumbre, recarga, locks, salida, respuestas atrasadas y resumen seguro. Usa exclusivamente dobles. |
+| `tests/datos-prueba/memoria.almacenamiento.js` | Nuevo. Implementa almacenamiento efímero para las pruebas; nunca se importa desde el producto. |
+| `tests/portal-publico.apartado.test.js` | Modificado. Inyecta almacenamiento de prueba y actualiza la comprobación del botón Reservar: ahora depende de vigencia en lugar de estar siempre deshabilitado. Conserva las 24 regresiones del lote anterior. |
+| `tests/datos-prueba/portal.servidor-simulado.mjs` | Modificado. Simula preparación, escritor idempotente, resolutor y resultados guardados en memoria. Permite perder respuestas antes de preparación o después del registro, y simular error de resolución. Todo /publico se intercepta antes del proxy, sin backend real. |
 | `README.md` | Modificado. Actualiza el alcance T098–T114, marcador, envío/recarga y límite de CSRF; distingue expresamente las reglas de la demo del producto conectado. |
 | `docs/fase-4/resultados-tareas/resultado-t104-t109.md` | Modificado. Enlaza este resultado como estado posterior sin reescribir la evidencia histórica del lote anterior. |
 | Este documento | Nuevo. Registra tareas, flujo, archivos, pruebas y límites de integración. |
@@ -88,7 +88,7 @@ Un caso de endurecimiento produjo un fallo funcional real: después de detectar 
 Ejecución final nueva/directamente relacionada:
 
 ```text
-node --test tests/portal-publico-envio.test.js tests/portal-publico-apartado.test.js tests/portal-publico-base.test.js tests/portal-publico-seleccion.test.js tests/backend.test.js tests/availability.test.js
+node --test tests/portal-publico.envio.test.js tests/portal-publico.apartado.test.js tests/portal-publico.base.test.js tests/portal-publico.seleccion.test.js tests/conexion.backend.test.js tests/disponibilidad.motor-demo.test.js
 tests 91
 pass 91
 fail 0
@@ -103,7 +103,7 @@ Desglose: **20 nuevas**, 24 de apartado/contacto, 8 de base pública, 15 de sele
 
 ## Revisión de navegador con API ficticia
 
-Ejecutar `node tests/fixtures/portal-selection-server.mjs` y abrir `http://127.0.0.1:5193/reservas/qa-portal`. La identidad visible indica **API simulada**. La fixture conserva apartados/intentos/resultados solo en memoria; valida contacto ficticio y conserva su hash para comparar reintentos, sin guardar cuerpos, teléfonos o notas en logs.
+Ejecutar `node tests/datos-prueba/portal.servidor-simulado.mjs` y abrir `http://127.0.0.1:5193/reservas/qa-portal`. La identidad visible indica **API simulada**. La fixture conserva apartados/intentos/resultados solo en memoria; valida contacto ficticio y conserva su hash para comparar reintentos, sin guardar cuerpos, teléfonos o notas en logs.
 
 Controles exclusivos de revisión, inexistentes en el producto:
 

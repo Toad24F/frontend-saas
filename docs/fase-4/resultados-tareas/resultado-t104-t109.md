@@ -25,18 +25,18 @@ Se mantuvieron Vanilla JS, Bootstrap y los estilos/recursos Citalendar. No se in
 
 | Archivo | Qué se agregó o modificó |
 | --- | --- |
-| `src/connected/public/booking.js` | Nuevo. Compone el selector con concesión, reintento idempotente de la operación de apartado, verificación propia, contacto en memoria, notificaciones, liberación y guardas de identidad/revisión. No crea intentos ni citas. |
-| `src/connected/public/contact.js` | Nuevo. Valida y normaliza nombre/teléfono/notas; cuenta puntos de código Unicode, recorta extremos y rechaza excesos sin truncar. Devuelve errores por campo y el contacto normalizado solo en memoria. |
-| `src/connected/public/hold-clock.js` | Nuevo. Calcula el presupuesto temporal desde expiraEn/servidorAhora y un reloj monótono. Descuenta conservadoramente latencia y nunca aumenta el plazo al sincronizar o repetir la misma concesión. |
-| `src/connected/public/booking-view.js` | Nuevo. Presenta concesión, formulario, errores, contador y acciones. Escapa valores personales y actualiza segundos sin recrear los inputs ni interrumpir cursor/IME. |
-| `src/connected/public/booking-lifecycle.js` | Nuevo. Conecta foco, visibilidad, pagehide y pageshow/BFCache, además del tick del contador; ofrece limpieza de listeners/temporizador. Limpia valores y defaults cacheados de los campos al salir. |
-| `src/connected/public/http.js` | Modificado. Admite keepalive exclusivamente para POST de liberación, manteniendo cookie, CSRF, mismo origen y rechazo de redirecciones. |
-| `src/connected/public/selection-view.js` | Modificado. Ofrece **Apartar este horario** al integrarse con el controlador nuevo; admite renderer compuesto y conserva foco/cursor en cambios de fase y formulario. El selector aislado sigue limitado a selección. |
-| `src/connected/public/entry.js` | Modificado. Monta el controlador, su vista, canal por negocio y eventos de ciclo de página después de verificar la sesión; errores nativos de arranque muestran un mensaje seguro. |
-| `src/connected/public/style.css` | Modificado. Añade contador, avisos, campos y errores adaptados a ambos temas con los tokens existentes. |
-| `src/demo/screens/reservas/booking.js` | Modificado. Aclara el alcance local del apartado de demostración sin cambiar su funcionamiento. |
-| `tests/portal-publico-apartado.test.js` | Nuevo. Veinticuatro pruebas Node de T104–T109 con HTTP/canal/relojes/eventos controlados, sin base real. |
-| `tests/fixtures/portal-selection-server.mjs` | Modificado. Añade sesiones, operaciones, generaciones e historial de apartados solo en memoria de la fixture. Simula consulta/liberación y permite avanzar el reloj ficticio. Intercepta todas las rutas públicas antes del proxy y rechaza envíos de reserva. |
+| `src/connected/portal-publico/reserva.flujo.js` | Nuevo. Compone el selector con concesión, reintento idempotente de la operación de apartado, verificación propia, contacto en memoria, notificaciones, liberación y guardas de identidad/revisión. No crea intentos ni citas. |
+| `src/connected/portal-publico/reserva.contacto.js` | Nuevo. Valida y normaliza nombre/teléfono/notas; cuenta puntos de código Unicode, recorta extremos y rechaza excesos sin truncar. Devuelve errores por campo y el contacto normalizado solo en memoria. |
+| `src/connected/portal-publico/apartado.reloj.js` | Nuevo. Calcula el presupuesto temporal desde expiraEn/servidorAhora y un reloj monótono. Descuenta conservadoramente latencia y nunca aumenta el plazo al sincronizar o repetir la misma concesión. |
+| `src/connected/portal-publico/reserva.vista.js` | Nuevo. Presenta concesión, formulario, errores, contador y acciones. Escapa valores personales y actualiza segundos sin recrear los inputs ni interrumpir cursor/IME. |
+| `src/connected/portal-publico/reserva.ciclo-vida.js` | Nuevo. Conecta foco, visibilidad, pagehide y pageshow/BFCache, además del tick del contador; ofrece limpieza de listeners/temporizador. Limpia valores y defaults cacheados de los campos al salir. |
+| `src/connected/portal-publico/portal.http.js` | Modificado. Admite keepalive exclusivamente para POST de liberación, manteniendo cookie, CSRF, mismo origen y rechazo de redirecciones. |
+| `src/connected/portal-publico/seleccion.vista.js` | Modificado. Ofrece **Apartar este horario** al integrarse con el controlador nuevo; admite renderer compuesto y conserva foco/cursor en cambios de fase y formulario. El selector aislado sigue limitado a selección. |
+| `src/connected/portal-publico/portal.entrada.js` | Modificado. Monta el controlador, su vista, canal por negocio y eventos de ciclo de página después de verificar la sesión; errores nativos de arranque muestran un mensaje seguro. |
+| `src/connected/portal-publico/portal.estilos.css` | Modificado. Añade contador, avisos, campos y errores adaptados a ambos temas con los tokens existentes. |
+| `src/demo/screens/reservas/reserva.vista.js` | Modificado. Aclara el alcance local del apartado de demostración sin cambiar su funcionamiento. |
+| `tests/portal-publico.apartado.test.js` | Nuevo. Veinticuatro pruebas Node de T104–T109 con HTTP/canal/relojes/eventos controlados, sin base real. |
+| `tests/datos-prueba/portal.servidor-simulado.mjs` | Modificado. Añade sesiones, operaciones, generaciones e historial de apartados solo en memoria de la fixture. Simula consulta/liberación y permite avanzar el reloj ficticio. Intercepta todas las rutas públicas antes del proxy y rechaza envíos de reserva. |
 | `README.md` | Modificado. Describe el alcance conectado hasta T109, límites de envío y reglas de memoria, contador y salida. |
 | `docs/fase-4/resultados-tareas/resultado-t101-t103.md` | Modificado. Añade una referencia al estado posterior del portal/fixture sin reescribir la evidencia histórica de aquel lote. |
 | Este documento | Nuevo. Registra marcas de finalización, responsabilidades, flujo, pruebas y límites. |
@@ -83,7 +83,7 @@ En navegador apareció `Illegal invocation` al arrancar: los temporizadores nati
 Ejecución final directamente relacionada:
 
 ```text
-node --test tests/portal-publico-apartado.test.js tests/portal-publico-base.test.js tests/portal-publico-seleccion.test.js tests/backend.test.js tests/availability.test.js
+node --test tests/portal-publico.apartado.test.js tests/portal-publico.base.test.js tests/portal-publico.seleccion.test.js tests/conexion.backend.test.js tests/disponibilidad.motor-demo.test.js
 tests 71
 pass 71
 fail 0
@@ -101,7 +101,7 @@ Desglose: **24 nuevas**, 8 de base pública T098–T100, 15 de selección T101�
 Ejecutar desde frontend-saas:
 
 ```sh
-node tests/fixtures/portal-selection-server.mjs
+node tests/datos-prueba/portal.servidor-simulado.mjs
 ```
 
 Abrir `http://127.0.0.1:5193/reservas/qa-portal`. La identidad visible indica **API simulada**. La fixture no contacta al backend, no acepta contacto ni envíos de reserva, y mantiene sus datos únicamente en el proceso de revisión.

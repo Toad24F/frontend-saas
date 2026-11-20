@@ -25,13 +25,13 @@ function renderServicio(servicio, profesionales, propio, profesional, administra
   const personas = profesionales.filter((persona) => persona.serviceIds.includes(servicio.id));
   const puedeEditar = !propio || servicio.creatorId === usuarioActual.id;
   const etiquetaAlternar = propio ? asignado ? 'Quitar selección' : 'Seleccionar' : activo ? 'Desactivar' : 'Activar';
-  const alternar = `<button type="button" class="${!propio && activo ? 'action-caution' : ''}" data-alternar-servicio="${servicio.id}" aria-label="${etiquetaAlternar} ${escapar(servicio.name)}">${etiquetaAlternar}</button>`;
+  const alternar = `<button type="button" class="${!propio && activo ? 'accion-precaucion' : ''}" data-alternar-servicio="${servicio.id}" aria-label="${etiquetaAlternar} ${escapar(servicio.name)}">${etiquetaAlternar}</button>`;
   const editar = puedeEditar ? `<button type="button" class="${propio ? 'profesional-editar' : 'profesional-disponibilidad'}" data-editar-servicio="${servicio.id}">Editar${propio ? '' : ` ${renderIcono('arrow')}`}</button>` : '';
   const adicional = administrar(servicio);
   const acciones = propio
     ? `<button type="button" class="profesional-disponibilidad" data-alternar-servicio="${servicio.id}" aria-label="${etiquetaAlternar} ${escapar(servicio.name)}" ${!activo && !asignado ? 'disabled title="Servicio inactivo en el negocio"' : ''}>${etiquetaAlternar} ${renderIcono('arrow')}</button>${editar}`
     : `${editar}<details class="profesional-mas"><summary aria-label="Más acciones para ${escapar(servicio.name)}">${renderIcono('more')}</summary><div class="profesional-menu-mas">${alternar}${adicional}</div></details>`;
-  return `<article class="surface profesional-entrada servicio-entrada" data-servicio-entrada="${servicio.id}" ${visible ? '' : 'hidden'}>
+  return `<article class="superficie profesional-entrada servicio-entrada" data-servicio-entrada="${servicio.id}" ${visible ? '' : 'hidden'}>
     <div class="profesional-persona"><span class="servicio-icono ${servicio.color}">${renderIcono(servicio.icon)}</span><div class="profesional-identidad"><h2>${escapar(servicio.name)}</h2><p>${escapar(servicio.description || 'Sin descripción')}</p></div></div>
     <div class="profesional-asignacion servicio-detalles"><span>${renderIcono('clock')}<strong>${servicio.duration}</strong> min</span><span>${renderIcono('briefcase')}<strong>${formatearMoneda(servicio.price)}</strong> MXN</span><span>${renderIcono('users')}<strong>${personas.length}</strong> ${personas.length === 1 ? 'profesional' : 'profesionales'}</span></div>
     <span class="profesional-estado ${propio && activo && !asignado ? 'sin-seleccionar' : estadoRecurso(servicio).clase}"><i></i>${propio && activo ? asignado ? 'Seleccionado' : 'Sin seleccionar' : estadoRecurso(servicio).etiqueta}</span>
@@ -59,7 +59,7 @@ export function servicios(administrar = () => '', { accionesEncabezado = '' } = 
     </section>
     <div class="profesionales-encabezado-resultados"><span id="conteo-resultados-servicios" role="estado" aria-live="polite">${visibles.length} ${visibles.length === 1 ? 'resultado' : 'resultados'}</span></div>
     ${servicios.length ? `<div class="profesionales-resultados profesionales-vista--${vistaResultados}" data-vista-escritorio="${vistaEscritorio}" id="servicio-resultados">${pagina.filas.map((servicio) => renderServicio(servicio, profesionales, propio, profesional, administrar, true)).join('')}</div>${renderPaginacionCatalogo('servicio', pagina)}<div class="profesionales-sin-resultados" id="sin-resultados-servicios" ${visibles.length ? 'hidden' : ''}>${renderEstadoVacio('Sin coincidencias', 'Prueba otra búsqueda o cambia el filtro de estado.', '<button type="button" class="btn btn-light" data-servicio-limpiar>Limpiar filtros</button>')}</div>` : renderEstadoVacio('Aún no hay servicios', 'Crea el primer servicio para organizar tu oferta.', '<button type="button" class="btn btn-primary" data-action="nuevo-servicio">Nuevo servicio</button>')}
-    <div class="information-note">${renderIcono('info')} La duración de cada servicio determina los horarios disponibles en tu portal. El precio es informativo; no se realizan cobros en línea.</div>
+    <div class="nota-informativa">${renderIcono('info')} La duración de cada servicio determina los horarios disponibles en tu portal. El precio es informativo; no se realizan cobros en línea.</div>
   </div>`;
 }
 

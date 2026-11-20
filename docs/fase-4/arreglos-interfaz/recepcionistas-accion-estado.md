@@ -12,10 +12,10 @@ La fila y la tarjeta ya muestran los datos que aparecían en «Ver detalle». La
 
 ## Archivos
 
-- `src/connected/screens/recepcionistas/view.js`: acción visible según el estado.
-- `src/connected/screens/recepcionistas/style.css`: estilo de desactivación y tema oscuro.
-- `src/connected/screens/recepcionistas/actions.js`: se retira el detalle repetido.
-- `src/shared/actions.js`: se retira el manejador del detalle.
+- `src/connected/screens/recepcionistas/recepcionistas.vista.js`: acción visible según el estado.
+- `src/connected/screens/recepcionistas/recepcionistas.estilos.css`: estilo de desactivación y tema oscuro.
+- `src/connected/screens/recepcionistas/recepcionistas.acciones.js`: se retira el detalle repetido.
+- `src/shared/aplicacion.acciones.js`: se retira el manejador del detalle.
 
 ## Comprobación y límites
 

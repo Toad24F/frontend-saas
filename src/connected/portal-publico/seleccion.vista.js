@@ -15,7 +15,7 @@ function cintaFechas(seleccionado, fechasDisponibles = []) {
     const dia = new Date(`${valor}T12:00:00Z`);
     const diaAbreviado = new Intl.DateTimeFormat('es-MX', { timeZone: 'UTC', weekday: 'short' }).format(dia);
     const mesAbreviado = new Intl.DateTimeFormat('es-MX', { timeZone: 'UTC', month: 'short' }).format(dia);
-    return `<button class="portal-boton-fecha ${valor === seleccionado ? 'selected' : ''}" type="button" data-seleccion-fecha="${valor}" aria-pressed="${valor === seleccionado}" aria-label="Consultar ${escaparTextoPortal(etiquetaFecha(valor))}"><span>${escaparTextoPortal(diaAbreviado)}</span><strong>${dia.getUTCDate()}</strong><small>${escaparTextoPortal(mesAbreviado)}</small></button>`;
+    return `<button class="portal-boton-fecha ${valor === seleccionado ? 'seleccionado' : ''}" type="button" data-seleccion-fecha="${valor}" aria-pressed="${valor === seleccionado}" aria-label="Consultar ${escaparTextoPortal(etiquetaFecha(valor))}"><span>${escaparTextoPortal(diaAbreviado)}</span><strong>${dia.getUTCDate()}</strong><small>${escaparTextoPortal(mesAbreviado)}</small></button>`;
   }).join('')}</div>`;
 }
 
@@ -30,7 +30,7 @@ function renderCalendarioDisponibilidad(estado) {
     const valor = new Date(iniciar + indice * 86400000).toISOString().slice(0, 10);
     const habilitado = disponibles.has(valor) && estado.consulta.estado !== 'cargando';
     const seleccionado = valor === estado.seleccion.fecha;
-    return `<button class="portal-calendario-dia ${seleccionado ? 'selected' : ''}" type="button" ${habilitado ? `data-seleccion-fecha="${valor}"` : 'disabled'} aria-label="${escaparTextoPortal(etiquetaFecha(valor))}${habilitado ? ', disponible' : ', no disponible'}" ${habilitado && seleccionado ? 'aria-current="date"' : ''}>${Number(valor.slice(-2))}</button>`;
+    return `<button class="portal-calendario-dia ${seleccionado ? 'seleccionado' : ''}" type="button" ${habilitado ? `data-seleccion-fecha="${valor}"` : 'disabled'} aria-label="${escaparTextoPortal(etiquetaFecha(valor))}${habilitado ? ', disponible' : ', no disponible'}" ${habilitado && seleccionado ? 'aria-current="date"' : ''}>${Number(valor.slice(-2))}</button>`;
   }).join('');
   const etiqueta = `${etiquetaFecha(rango.desde)} al ${etiquetaFecha(rango.hasta)}`;
   return `<div class="portal-calendario" aria-label="Calendario de disponibilidad"><div class="portal-calendario-cabecera"><strong>Fechas del ${escaparTextoPortal(etiqueta)}</strong><div><button class="btn btn-light" type="button" data-rango-fechas="-1" aria-label="Consultar fechas anteriores" ${rango.desde <= rango.hoy || estado.consulta.estado === 'cargando' ? 'disabled' : ''}>‹</button><button class="btn btn-light" type="button" data-rango-fechas="1" aria-label="Consultar fechas siguientes" ${estado.consulta.estado === 'cargando' ? 'disabled' : ''}>›</button></div></div><p class="portal-calendario-ayuda">Solo se pueden elegir los días con horarios disponibles.</p><div class="portal-calendario-cuadricula" role="group" aria-label="Días consultados">${['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sá'].map((dia) => `<span class="portal-calendario-dia-semana">${dia}</span>`).join('')}${Array.from({ length: desplazamiento }, () => '<span aria-hidden="true"></span>').join('')}${dias}</div></div>`;
@@ -138,13 +138,13 @@ export function montarSeleccion(contenedor, controlador, renderVista = renderSel
     const rango = dentro && typeof activo.selectionStart === 'number' ? [activo.selectionStart, activo.selectionEnd] : null;
     const cintaFechasAnterior = contenido.querySelector('.portal-cinta-fechas');
     const desplazamientoFechas = cintaFechasAnterior?.scrollLeft || 0;
-    const fechaSeleccionadaPrevia = cintaFechasAnterior?.querySelector('.portal-boton-fecha.selected')?.dataset.seleccionFecha;
+    const fechaSeleccionadaPrevia = cintaFechasAnterior?.querySelector('.portal-boton-fecha.seleccionado')?.dataset.seleccionFecha;
     contenido.innerHTML = renderVista(estado);
     const resumen = contenido.querySelector('.portal-resumen-desplegable');
     if (resumen && resumenEstabaAbierto !== undefined) resumen.open = resumenEstabaAbierto;
     const cintaFechas = contenido.querySelector('.portal-cinta-fechas');
     if (cintaFechas) {
-      const fechaElegida = cintaFechas.querySelector('.portal-boton-fecha.selected');
+      const fechaElegida = cintaFechas.querySelector('.portal-boton-fecha.seleccionado');
       const primeraFecha = cintaFechas.querySelector('.portal-boton-fecha');
       if (fechaElegida && primeraFecha && (ultimaFechaSeleccionada !== estado.seleccion?.fecha || fechaSeleccionadaPrevia !== estado.seleccion.fecha)) {
         const fechaAnterior = fechaElegida.previousElementSibling;

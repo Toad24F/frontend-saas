@@ -18,9 +18,9 @@ Se retiró «Tu tiempo importa. Tu bienestar, también.» del pie del portal con
 
 ## Alcance y archivos
 
-- Portal conectado: `src/connected/public/selection.js`, `selection-view.js`, `accessibility.js`, `entry.js` y `style.css`.
-- Pie de la demo: `src/demo/screens/reservas/booking.js` y `style.css`.
-- Pruebas: `tests/portal-publico-seleccion.test.js`.
+- Portal conectado: `src/connected/portal-publico/seleccion.flujo.js`, `selection-view.js`, `accessibility.js`, `entry.js` y `style.css`.
+- Pie de la demo: `src/demo/screens/reservas/reserva.vista.js` y `style.css`.
+- Pruebas: `tests/portal-publico.seleccion.test.js`.
 - La demo ya filtra días sin horarios mediante `nextDates`; no usa la API pública y conserva su comportamiento ficticio.
 - Los estilos emplean las variables actuales de ambos temas y la tira permite desplazamiento horizontal en móvil.
 

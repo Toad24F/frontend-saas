@@ -18,20 +18,20 @@ Se aplicó `redesign-existing-projects` para una auditoría y evolución acotada
 
 | Archivo | Qué hace |
 | --- | --- |
-| `src/shared/screens/agenda/presentation.js` (nuevo) | Centraliza métricas compactas, leyenda, skeleton, referencia de cita y geometría visual. Separa datos no disponibles de carga y calcula columnas con la huella visual mínima sin modificar horarios del dominio. |
-| `src/shared/screens/agenda/panels.js` (nuevo) | Reutiliza `modal` con las clases laterales existentes y añade un almacén de borradores solo en memoria, limpiado al expirar sesión. No sustituye el protocolo durable de citas manuales. |
-| `src/shared/screens/agenda/polish.css` (nuevo) | Estilos de carga, toolbar adaptable, referencias, separación de citas y paneles. Usa los tokens actuales, animación de opacidad y entrada lateral con alternativa sin movimiento. |
-| `src/shared/screens/agenda/view.js` | Aplica a la demo las métricas, leyenda y geometría compartidas, además de la referencia visible en día/semana/mes. Conserva los datos ficticios y sus controles propios. |
-| `src/shared/screens/agenda/actions.js` | Convierte los diálogos propios de agenda demo en paneles y conserva el borrador manual en memoria al cerrar sin guardar. Un alta correcta elimina ese borrador. |
-| `src/connected/screens/agenda/presentation.js` | Adapta resúmenes autorizados al render compartido; añade referencias y separación. Conserva fechas, zona histórica, continuaciones y causas vigentes en sus títulos/detalle. |
-| `src/connected/screens/agenda/view.js` | Sustituye el párrafo de carga por skeleton, mueve la leyenda, distingue métricas fallidas y abre detalle en panel. Pasa el alcance de sesión al borrador de estado. |
-| `src/connected/screens/agenda/manual-view.js` | Abre el alta en panel y conserva datos sin enviar al cerrar. Restaura contacto, notas y ficha elegida, pero exige volver a consultar disponibilidad. Un marcador durable pendiente tiene prioridad sobre el borrador en memoria. |
-| `src/connected/screens/agenda/state-editor.js` | Conserva estado/motivo sin guardar al cerrar; un borrador con versión distinta o conflicto pendiente exige actualizar detalle. El guardado y la actualización explícita limpian el borrador correspondiente. |
-| `tests/agenda-polish.test.js` (nuevo) | Cuatro tests Node para métricas/carga/error, leyenda y estructura de skeleton, escape de referencias y ausencia de superposición geométrica. |
-| `tests/m4-browser/agenda-fixture.js` (nuevo) | Extrae la fixture HTTP anterior para reutilizarla en la suite visual nueva, sin cambiar el backend simulado ni registrar nuevos tests por importación. |
-| `tests/m4-browser/agenda.spec.js` | Usa la fixture extraída y comprueba que los errores terminan el estado de carga de métricas. Conserva sus recorridos y comparación demo/conectado. |
-| `tests/m4-browser/polish.spec.js` (nuevo) | Seis casos de navegador: cuatro tamaños/temas con consulta retenida, citas densas y panel; borradores al cerrar; demo y preferencia de movimiento reducido. |
-| `tests/m4-agenda-presentation.test.js` | Actualiza la posición visual y skeleton esperados; cuenta botones mensuales sin confundirlos con el nuevo texto interior. Conserva las pruebas de periodo completo y citas nocturnas. |
+| `src/shared/screens/agenda/agenda.presentacion.js` (nuevo) | Centraliza métricas compactas, leyenda, skeleton, referencia de cita y geometría visual. Separa datos no disponibles de carga y calcula columnas con la huella visual mínima sin modificar horarios del dominio. |
+| `src/shared/screens/agenda/agenda.paneles.js` (nuevo) | Reutiliza `modal` con las clases laterales existentes y añade un almacén de borradores solo en memoria, limpiado al expirar sesión. No sustituye el protocolo durable de citas manuales. |
+| `src/shared/screens/agenda/agenda.refinamientos.css` (nuevo) | Estilos de carga, toolbar adaptable, referencias, separación de citas y paneles. Usa los tokens actuales, animación de opacidad y entrada lateral con alternativa sin movimiento. |
+| `src/shared/screens/agenda/agenda.vista.js` | Aplica a la demo las métricas, leyenda y geometría compartidas, además de la referencia visible en día/semana/mes. Conserva los datos ficticios y sus controles propios. |
+| `src/shared/screens/agenda/agenda.acciones.js` | Convierte los diálogos propios de agenda demo en paneles y conserva el borrador manual en memoria al cerrar sin guardar. Un alta correcta elimina ese borrador. |
+| `src/connected/screens/agenda/agenda.presentacion.js` | Adapta resúmenes autorizados al render compartido; añade referencias y separación. Conserva fechas, zona histórica, continuaciones y causas vigentes en sus títulos/detalle. |
+| `src/connected/screens/agenda/agenda.vista.js` | Sustituye el párrafo de carga por skeleton, mueve la leyenda, distingue métricas fallidas y abre detalle en panel. Pasa el alcance de sesión al borrador de estado. |
+| `src/connected/screens/agenda/agenda.vista-manual.js` | Abre el alta en panel y conserva datos sin enviar al cerrar. Restaura contacto, notas y ficha elegida, pero exige volver a consultar disponibilidad. Un marcador durable pendiente tiene prioridad sobre el borrador en memoria. |
+| `src/connected/screens/agenda/agenda.editor-estado.js` | Conserva estado/motivo sin guardar al cerrar; un borrador con versión distinta o conflicto pendiente exige actualizar detalle. El guardado y la actualización explícita limpian el borrador correspondiente. |
+| `tests/agenda.refinamientos.test.js` (nuevo) | Cuatro tests Node para métricas/carga/error, leyenda y estructura de skeleton, escape de referencias y ausencia de superposición geométrica. |
+| `tests/m4-navegador/agenda.respuestas-simuladas.js` (nuevo) | Extrae la fixture HTTP anterior para reutilizarla en la suite visual nueva, sin cambiar el backend simulado ni registrar nuevos tests por importación. |
+| `tests/m4-navegador/agenda.consulta-conectada.spec.js` | Usa la fixture extraída y comprueba que los errores terminan el estado de carga de métricas. Conserva sus recorridos y comparación demo/conectado. |
+| `tests/m4-navegador/agenda.refinamientos.spec.js` (nuevo) | Seis casos de navegador: cuatro tamaños/temas con consulta retenida, citas densas y panel; borradores al cerrar; demo y preferencia de movimiento reducido. |
+| `tests/agenda.presentacion-conectada.test.js` | Actualiza la posición visual y skeleton esperados; cuenta botones mensuales sin confundirlos con el nuevo texto interior. Conserva las pruebas de periodo completo y citas nocturnas. |
 | `README.md`, `docs/Fase-5-modulo-4/tareas.md` e informes enlazados | Enlazan el estado visual vigente sin alterar el cierre funcional de T088–T096. |
 
 ## Flujo de carga y calendario
@@ -54,7 +54,7 @@ Límite: los borradores sin enviar sobreviven al cierre/reapertura del panel den
 
 ## Pruebas y correcciones observadas
 
-- Antes de añadir el módulo compartido se escribieron cuatro tests Node. El primer rojo fue `ERR_MODULE_NOT_FOUND` de `src/shared/screens/agenda/presentation.js`: un archivo fallido al cargar, sin atribuir ejecución a sus casos internos. Tras implementar, los cuatro casos aprobaron.
+- Antes de añadir el módulo compartido se escribieron cuatro tests Node. El primer rojo fue `ERR_MODULE_NOT_FOUND` de `src/shared/screens/agenda/agenda.presentacion.js`: un archivo fallido al cargar, sin atribuir ejecución a sus casos internos. Tras implementar, los cuatro casos aprobaron.
 - La primera regresión Node completa obtuvo **241/242**: el contador anterior de mes coincidía también con la clase nueva `month-event-label`. Se acotó a la clase del botón, manteniendo la comprobación de tres citas y 42 fechas.
 - La primera suite visual nueva obtuvo **4/6**. En móvil ya estaba seleccionada la vista Día y pulsarla no volvía a consultar; el test esperaba la fixture densa sin haber cambiado el periodo. Se corrigió el recorrido del test pasando por Semana y luego Día, conservando la caché existente.
 - La revisión añadió primero una comprobación de error sin skeleton: **3/4** tests Node, con fallo por métricas que continuaban indicando carga. Se separó la disponibilidad de cifras del flag de carga y se pasó `model.busy` explícitamente. La suite vuelve a comprobar carga/error/vacío por separado.
@@ -67,10 +67,10 @@ Se prueban 1366 y 390 px, claro/oscuro, demo/conectado, Escape/retorno de foco, 
 | Comando | Resultado |
 | --- | --- |
 | `npm test` | **242/242 aprobados**, sin fallos ni omitidos; 1,096 s. |
-| `npx playwright test --config tests/m4-playwright.config.js` | **26/26 aprobados**, sin fallos; 1,5 min. Incluye toda la regresión anterior y seis casos nuevos de presentación/paneles. |
+| `npx playwright test --config tests/m4-navegador.config.js` | **26/26 aprobados**, sin fallos; 1,5 min. Incluye toda la regresión anterior y seis casos nuevos de presentación/paneles. |
 | `npm run build` | Aprobado; 163 módulos, 1,01 s. |
 | `git -c core.safecrlf=false diff --check` | Sin errores de espacios; archivos nuevos y enlaces locales comprobados adicionalmente. |
 
 Capturas regenerables en `test-results/m4/skeleton-*.png`, `dense-*.png`, `panel-*.png`, además de la regresión anterior. Son salida local ignorada por Git. No se modifica el backend, Nginx, rutas HTTP, permisos, contratos o datos reales; no se crea commit.
 
-Comprobación final adicional tras reforzar el fondo opaco de los paneles de demo: `npx playwright test --config tests/m4-playwright.config.js --grep 'demo conserva las mismas'` → **1/1 aprobado**, 4,1 s, incluido movimiento reducido. Revisión de ocho archivos nuevos/documentales y enlaces locales: **0 problemas**.
+Comprobación final adicional tras reforzar el fondo opaco de los paneles de demo: `npx playwright test --config tests/m4-navegador.config.js --grep 'demo conserva las mismas'` → **1/1 aprobado**, 4,1 s, incluido movimiento reducido. Revisión de ocho archivos nuevos/documentales y enlaces locales: **0 problemas**.

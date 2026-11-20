@@ -11,17 +11,17 @@ const slug = 'centro';
 // Estos dobles ignoran AbortSignal a propósito: la revisión debe descartar
 // respuestas tardías incluso si el transporte no coopera con la cancelación.
 test('T116: éxito y fallo antiguos no pisan la disponibilidad más reciente', async () => {
-  for (const fails of [false, true]) {
+  for (const fallos of [false, true]) {
     let fin;
-    let availabilityCalls = 0;
+    let consultasHorarios = 0;
     const { controller: controlador } = prepararPrueba((ruta, { consulta }) => {
-      if (ruta === 'catalogo') return catalog(consulta);
-      if (++availabilityCalls === 2) return new Promise((resolver, rechazar) => {
-        fin = () => fails ? rechazar(Error('respuesta vieja')) : resolver(disponibilidad(consulta));
+      if (ruta === 'catalogo') return catalogo(consulta);
+      if (++consultasHorarios === 2) return new Promise((resolver, rechazar) => {
+        fin = () => fallos ? rechazar(Error('respuesta vieja')) : resolver(disponibilidad(consulta));
       });
       return disponibilidad(consulta, [{ inicioUtc: '2026-10-22T17:00:00.000Z', finUtc: '2026-10-22T17:30:00.000Z' }]);
     });
-    await toDate(controlador);
+    await convertirFecha(controlador);
     const pendiente = controlador.seleccionarFecha('2026-10-21');
     await controlador.seleccionarFecha('2026-10-22');
     controlador.elegirHorario('2026-10-22T17:00:00.000Z');
@@ -31,14 +31,14 @@ test('T116: éxito y fallo antiguos no pisan la disponibilidad más reciente', a
   }
 });
 
-test('T116: cambiar cada dependencia limpia fecha y ranuras; snapshot no permite mutar el estado', async () => {
-  for (const [clave, id, backs] of [['servicioId', 4, 3], ['sucursalId', 5, 2], ['personalId', 6, 1]]) {
-    const { controller: controlador } = prepararPrueba((ruta, { consulta }) => ruta === 'disponibilidad' ? disponibilidad(consulta) : ({ ...catalog(consulta),
+test('T116: cambiar cada dependencia limpia fecha y ranuras; la copia impide modificar el estado', async () => {
+  for (const [clave, id, regresos] of [['servicioId', 4, 3], ['sucursalId', 5, 2], ['personalId', 6, 1]]) {
+    const { controller: controlador } = prepararPrueba((ruta, { consulta }) => ruta === 'disponibilidad' ? disponibilidad(consulta) : ({ ...catalogo(consulta),
       sucursales: consulta.servicioId ? [sucursal, { ...sucursal, id: 5 }] : [],
       profesionales: consulta.sucursalId ? [profesional, { ...profesional, id: 6 }] : [],
     }));
-    await toDate(controlador); await controlador.seleccionarFecha('2026-10-20'); controlador.elegirHorario('2026-10-20T17:00:00.000Z');
-    for (let indice = 0; indice < backs; indice++) await controlador.volver();
+    await convertirFecha(controlador); await controlador.seleccionarFecha('2026-10-20'); controlador.elegirHorario('2026-10-20T17:00:00.000Z');
+    for (let indice = 0; indice < regresos; indice++) await controlador.volver();
     controlador.elegir(clave, id);
     const estado = controlador.obtenerEstado();
     assert.equal(estado.seleccion[clave], id); assert.equal(estado.seleccion.fecha, '');
@@ -52,7 +52,7 @@ test('T116: cambiar cada dependencia limpia fecha y ranuras; snapshot no permite
 const servicio = { id: 1, nombre: 'Consulta', costo: '450.00', duracionMinutos: 30 };
 const sucursal = { id: 2, nombre: 'Centro', direccion: 'Calle 1', zonaHoraria: 'America/Mazatlan' };
 const profesional = { id: 3, nombre: 'Ana' };
-const catalog = (consulta = {}) => ({ negocio: { slug, nombre: 'Centro' },
+const catalogo = (consulta = {}) => ({ negocio: { slug, nombre: 'Centro' },
   servicios: [servicio, { ...servicio, id: 4, nombre: 'Seguimiento' }],
   sucursales: consulta.servicioId ? [sucursal, { ...sucursal, id: 5 }] : [], profesionales: consulta.sucursalId ? [profesional, { ...profesional, id: 6 }] : [] });
 const disponibilidad = (consulta, ranuras = [{ inicioUtc: '2026-10-20T17:00:00.000Z', finUtc: '2026-10-20T17:30:00.000Z' }]) => ({
@@ -62,18 +62,18 @@ function prepararPrueba(handler) {
   const llamadas = [];
   const client = { async solicitar(ruta, opciones) {
     llamadas.push({ path: ruta, ...opciones });
-    return handler ? handler(ruta, opciones) : ruta === 'catalogo' ? catalog(opciones.consulta) : disponibilidad(opciones.consulta);
+    return handler ? handler(ruta, opciones) : ruta === 'catalogo' ? catalogo(opciones.consulta) : disponibilidad(opciones.consulta);
   } };
   const controlador = crearSeleccionPortal(client, { slug, ahora: () => new Date('2026-10-20T01:00:00Z') });
   return { controller: controlador, calls: llamadas };
 }
-async function toDate(controlador) {
+async function convertirFecha(controlador) {
   await controlador.iniciar(); controlador.elegir('servicioId', 1); await controlador.continuar();
   controlador.elegir('sucursalId', 2); await controlador.continuar(); controlador.elegir('personalId', 3); await controlador.continuar();
 }
 
 test('el portal presenta campos públicos opcionales sin convertirlos en reservas', async () => {
-  const { controller: controlador } = prepararPrueba((_path, { consulta }) => ({ ...catalog(consulta),
+  const { controller: controlador } = prepararPrueba((_ruta, { consulta }) => ({ ...catalogo(consulta),
     negocio: { slug, nombre: 'Centro', categoria: 'Salud' },
     servicios: [{ ...servicio, descripcion: '<consulta>' }],
     sucursales: consulta.servicioId ? [{ ...sucursal, telefono: '6140000000', indicaciones: 'Entrada norte' }, { ...sucursal, id: 5 }] : [],
@@ -105,7 +105,7 @@ test('T101: define fases separadas y bloquea avances sin selección válida', as
 
 test('T102: pasos consultan únicamente opciones públicas compatibles y permiten volver', async () => {
   const { controller: controlador, calls: llamadas } = prepararPrueba();
-  await toDate(controlador);
+  await convertirFecha(controlador);
   assert.deepEqual(llamadas.slice(0, 3).map((llamada) => llamada.consulta), [{}, { servicioId: 1 }, { servicioId: 1, sucursalId: 2 }]);
   assert.equal(llamadas[3].path, 'disponibilidad');
   assert.equal(llamadas[3].consulta.desde, '2026-10-19'); // Fecha de la sucursal, no la UTC.
@@ -116,7 +116,7 @@ test('T102: pasos consultan únicamente opciones públicas compatibles y permite
 
 test('T101: cambiar servicio invalida sucursal, profesional, fecha y horario', async () => {
   const { controller: controlador } = prepararPrueba();
-  await toDate(controlador);
+  await convertirFecha(controlador);
   await controlador.seleccionarFecha('2026-10-20');
   controlador.elegirHorario('2026-10-20T17:00:00.000Z');
   await controlador.volver(); await controlador.volver(); await controlador.volver();
@@ -131,7 +131,7 @@ test('T101: cambiar servicio invalida sucursal, profesional, fecha y horario', a
 test('T101: una respuesta antigua de catálogo no sobrescribe el paso vigente', async () => {
   let fin;
   const { controller: controlador } = prepararPrueba((ruta, { consulta }) => consulta.servicioId === 1
-    ? new Promise((resolver) => { fin = () => resolver(catalog(consulta)); }) : catalog(consulta));
+    ? new Promise((resolver) => { fin = () => resolver(catalogo(consulta)); }) : catalogo(consulta));
   await controlador.iniciar(); controlador.elegir('servicioId', 1);
   const pendiente = controlador.continuar();
   await controlador.volver(); controlador.elegir('servicioId', 4);
@@ -142,7 +142,7 @@ test('T101: una respuesta antigua de catálogo no sobrescribe el paso vigente', 
 });
 
 test('T103: fecha real y consulta de hasta 31 fechas inclusivas', async () => {
-  const { controller: controlador, calls: llamadas } = prepararPrueba(); await toDate(controlador);
+  const { controller: controlador, calls: llamadas } = prepararPrueba(); await convertirFecha(controlador);
   await controlador.seleccionarFecha('2026-10-20');
   assert.deepEqual(llamadas.at(-1).consulta, { servicioId: 1, sucursalId: 2, personalId: 3, desde: '2026-10-19', hasta: '2026-11-18' });
   const cantidad = llamadas.length;
@@ -158,10 +158,10 @@ test('T103: fecha real y consulta de hasta 31 fechas inclusivas', async () => {
 test('la tira muestra todos los días disponibles de la ventana sin flechas', async () => {
   const dias = ['2026-10-20', '2026-10-22', '2026-10-25', '2026-10-28', '2026-10-29',
     '2026-10-30', '2026-10-31', '2026-11-01', '2026-11-02', '2026-11-22'];
-  const { controller: controlador, calls: llamadas } = prepararPrueba((ruta, { consulta }) => ruta === 'catalogo' ? catalog(consulta) : disponibilidad(consulta,
+  const { controller: controlador, calls: llamadas } = prepararPrueba((ruta, { consulta }) => ruta === 'catalogo' ? catalogo(consulta) : disponibilidad(consulta,
     dias.filter((dia) => dia >= consulta.desde && dia <= consulta.hasta)
       .map((dia) => ({ inicioUtc: `${dia}T17:00:00.000Z`, finUtc: `${dia}T17:30:00.000Z` }))));
-  await toDate(controlador);
+  await convertirFecha(controlador);
   let html = renderSeleccion(controlador.obtenerEstado());
   assert.match(html, /data-seleccion-fecha="2026-10-20"/);
   assert.match(html, /data-seleccion-fecha="2026-11-02"/);
@@ -181,10 +181,10 @@ test('la tira muestra todos los días disponibles de la ventana sin flechas', as
 });
 
 test('el calendario desactiva días sin ranuras públicas y consulta otro intervalo al avanzar', async () => {
-  const { controller: controlador, calls: llamadas } = prepararPrueba((ruta, { consulta }) => ruta === 'catalogo' ? catalog(consulta) : disponibilidad(consulta,
+  const { controller: controlador, calls: llamadas } = prepararPrueba((ruta, { consulta }) => ruta === 'catalogo' ? catalogo(consulta) : disponibilidad(consulta,
     [{ inicioUtc: '2026-10-22T17:00:00.000Z', finUtc: '2026-10-22T17:30:00.000Z' }]
       .filter((horario) => horario.inicioUtc.slice(0, 10) >= consulta.desde && horario.inicioUtc.slice(0, 10) <= consulta.hasta)));
-  await toDate(controlador);
+  await convertirFecha(controlador);
   const html = renderSeleccion(controlador.obtenerEstado());
   assert.match(html, /class="portal-calendario-dia [^"]*" type="button" disabled aria-label="miércoles, 21[^\"]*no disponible"/);
   assert.match(html, /class="portal-calendario-dia [^"]*" type="button" data-seleccion-fecha="2026-10-22"/);
@@ -194,11 +194,11 @@ test('el calendario desactiva días sin ranuras públicas y consulta otro interv
 });
 
 test('al consultar otra fecha la tira sigue visible y el horario se presenta sin radio visible ni aviso duplicado', async () => {
-  let resolveAvailability;
-  let availabilityCalls = 0;
+  let resolverHorarios;
+  let consultasHorarios = 0;
   const { controller: controlador } = prepararPrueba((ruta, { consulta }) => {
-    if (ruta === 'catalogo') return catalog(consulta);
-    if (++availabilityCalls === 2) return new Promise((resolver) => { resolveAvailability = () => resolver(disponibilidad(consulta, [
+    if (ruta === 'catalogo') return catalogo(consulta);
+    if (++consultasHorarios === 2) return new Promise((resolver) => { resolverHorarios = () => resolver(disponibilidad(consulta, [
       { inicioUtc: '2026-10-22T17:00:00.000Z', finUtc: '2026-10-22T17:30:00.000Z' },
     ])); });
     return disponibilidad(consulta, [
@@ -206,12 +206,12 @@ test('al consultar otra fecha la tira sigue visible y el horario se presenta sin
       { inicioUtc: '2026-10-22T17:00:00.000Z', finUtc: '2026-10-22T17:30:00.000Z' },
     ]);
   });
-  await toDate(controlador);
+  await convertirFecha(controlador);
   const pendiente = controlador.seleccionarFecha('2026-10-22');
   assert.equal(controlador.obtenerEstado().consulta.estado, 'cargando');
   assert.deepEqual(controlador.obtenerEstado().fechasDisponibles, ['2026-10-20', '2026-10-22']);
   assert.match(renderSeleccion(controlador.obtenerEstado()), /data-seleccion-fecha="2026-10-22"/);
-  resolveAvailability(); await pendiente;
+  resolverHorarios(); await pendiente;
   controlador.elegirHorario('2026-10-22T17:00:00.000Z');
   const html = renderSeleccion(controlador.obtenerEstado());
   assert.match(html, /Horarios disponibles para jueves, 22 de octubre de 2026/);
@@ -220,7 +220,7 @@ test('al consultar otra fecha la tira sigue visible y el horario se presenta sin
 });
 
 test('T103: solo horarios devueltos, en zona de sucursal, sin conceder apartado', async () => {
-  const { controller: controlador, calls: llamadas } = prepararPrueba(); await toDate(controlador); await controlador.seleccionarFecha('2026-10-20');
+  const { controller: controlador, calls: llamadas } = prepararPrueba(); await convertirFecha(controlador); await controlador.seleccionarFecha('2026-10-20');
   assert.equal(controlador.obtenerEstado().horarios[0].horaInicio, '10:00');
   controlador.elegirHorario('2026-10-20T17:00:00.000Z');
   assert.equal(controlador.obtenerEstado().seleccion.horario.horaInicio, '10:00');
@@ -234,12 +234,12 @@ test('T103: solo horarios devueltos, en zona de sucursal, sin conceder apartado'
 test('T103: vacío, selección inválida y fallo técnico tienen estados diferentes y reintento', async () => {
   let modo = 'vacia';
   const { controller: controlador } = prepararPrueba((ruta, { consulta }) => {
-    if (ruta === 'catalogo') return catalog(consulta);
+    if (ruta === 'catalogo') return catalogo(consulta);
     if (modo === 'error') throw Object.assign(new Error('Temporalmente no disponible'), { status: 503 });
     if (modo === 'invalida') throw Object.assign(new Error('Selección no disponible'), { status: 404 });
     return disponibilidad(consulta, []);
   });
-  await toDate(controlador); assert.equal(controlador.obtenerEstado().consulta.estado, 'vacia');
+  await convertirFecha(controlador); assert.equal(controlador.obtenerEstado().consulta.estado, 'vacia');
   modo = 'invalida'; await controlador.reintentar(); assert.equal(controlador.obtenerEstado().consulta.estado, 'invalida');
   modo = 'error'; await controlador.reintentar(); assert.equal(controlador.obtenerEstado().consulta.estado, 'error');
   modo = 'vacia'; await controlador.reintentar(); assert.equal(controlador.obtenerEstado().consulta.estado, 'vacia');
@@ -247,13 +247,13 @@ test('T103: vacío, selección inválida y fallo técnico tienen estados diferen
 
 test('T101–T103: respuestas de disponibilidad desordenadas y errores antiguos se descartan', async () => {
   let fin;
-  let availabilityCalls = 0;
+  let consultasHorarios = 0;
   const { controller: controlador } = prepararPrueba((ruta, { consulta }) => {
-    if (ruta === 'catalogo') return catalog(consulta);
-    if (++availabilityCalls === 2) return new Promise((_resolve, rechazar) => { fin = () => rechazar(Error('viejo')); });
+    if (ruta === 'catalogo') return catalogo(consulta);
+    if (++consultasHorarios === 2) return new Promise((_resolver, rechazar) => { fin = () => rechazar(Error('viejo')); });
     return disponibilidad(consulta, []);
   });
-  await toDate(controlador);
+  await convertirFecha(controlador);
   const pendiente = controlador.seleccionarFecha('2026-10-21');
   await controlador.seleccionarFecha('2026-10-22');
   fin(); await pendiente;
@@ -263,8 +263,8 @@ test('T101–T103: respuestas de disponibilidad desordenadas y errores antiguos 
 
 test('T103: respuesta malformada o de otra selección es error, nunca agenda vacía', async () => {
   let resultado;
-  const { controller: controlador } = prepararPrueba((ruta, { consulta }) => ruta === 'catalogo' ? catalog(consulta) : resultado ?? disponibilidad(consulta, []));
-  await toDate(controlador);
+  const { controller: controlador } = prepararPrueba((ruta, { consulta }) => ruta === 'catalogo' ? catalogo(consulta) : resultado ?? disponibilidad(consulta, []));
+  await convertirFecha(controlador);
   for (const datos of [{}, { ...disponibilidad({}), ranuras: null }, disponibilidad({ servicioId: 999 }),
     disponibilidad({ servicioId: 1, sucursalId: 2, personalId: 3, desde: '2026-10-20', hasta: '2026-10-20' }, [{ inicioUtc: 'incorrecto', finUtc: 'incorrecto' }])]) {
     resultado = datos; await controlador.seleccionarFecha('2026-10-20');
@@ -275,7 +275,7 @@ test('T103: respuesta malformada o de otra selección es error, nunca agenda vac
 
 test('T102: al refrescar oferta desaparecida se invalida la selección anterior', async () => {
   let faltante = false;
-  const { controller: controlador } = prepararPrueba((_path, { consulta }) => ({ ...catalog(consulta), servicios: faltante ? [] : catalog(consulta).servicios }));
+  const { controller: controlador } = prepararPrueba((_ruta, { consulta }) => ({ ...catalogo(consulta), servicios: faltante ? [] : catalogo(consulta).servicios }));
   await controlador.iniciar(); controlador.elegir('servicioId', 1);
   faltante = true; await controlador.reintentar();
   assert.equal(controlador.obtenerEstado().seleccion.servicioId, null);
@@ -289,7 +289,7 @@ test('T103: conversión local respeta fecha distinta de UTC y cambios de horario
 });
 
 test('T102–T103: HTML etiquetado, opciones escapadas y horario sin promesa de reserva', async () => {
-  const { controller: controlador } = prepararPrueba((_path, { consulta }) => ({ ...catalog(consulta), servicios: [{ ...servicio, nombre: '<script>alert(1)</script>' }] }));
+  const { controller: controlador } = prepararPrueba((_ruta, { consulta }) => ({ ...catalogo(consulta), servicios: [{ ...servicio, nombre: '<script>alert(1)</script>' }] }));
   await controlador.iniciar();
   const html = renderSeleccion(controlador.obtenerEstado());
   assert.match(html, /&lt;script&gt;/); assert.doesNotMatch(html, /<script>/);
@@ -298,7 +298,7 @@ test('T102–T103: HTML etiquetado, opciones escapadas y horario sin promesa de 
 });
 
 test('T101: cambiar sucursal y profesional invalida solo las selecciones posteriores', async () => {
-  const { controller: controlador } = prepararPrueba((_path, { consulta }) => ({ ...catalog(consulta),
+  const { controller: controlador } = prepararPrueba((_ruta, { consulta }) => ({ ...catalogo(consulta),
     sucursales: consulta.servicioId ? [sucursal, { ...sucursal, id: 5, nombre: 'Norte' }] : [],
     profesionales: consulta.sucursalId ? [profesional, { id: 6, nombre: 'Luis' }] : [],
   }));
@@ -315,10 +315,10 @@ test('T101: cambiar sucursal y profesional invalida solo las selecciones posteri
 
 test('T101: una disponibilidad tardía no reaparece después de volver', async () => {
   let fin;
-  let availabilityCalls = 0;
-  const { controller: controlador } = prepararPrueba((ruta, { consulta }) => ruta === 'catalogo' ? catalog(consulta)
-    : ++availabilityCalls === 2 ? new Promise((resolver) => { fin = () => resolver(disponibilidad(consulta, [])); }) : disponibilidad(consulta, []));
-  await toDate(controlador);
+  let consultasHorarios = 0;
+  const { controller: controlador } = prepararPrueba((ruta, { consulta }) => ruta === 'catalogo' ? catalogo(consulta)
+    : ++consultasHorarios === 2 ? new Promise((resolver) => { fin = () => resolver(disponibilidad(consulta, [])); }) : disponibilidad(consulta, []));
+  await convertirFecha(controlador);
   const pendiente = controlador.seleccionarFecha('2026-10-21');
   await controlador.volver(); fin(); await pendiente;
   assert.equal(controlador.obtenerEstado().paso, 2);
@@ -327,9 +327,9 @@ test('T101: una disponibilidad tardía no reaparece después de volver', async (
 });
 
 test('T102: un catálogo fallido no presenta las opciones anteriores como resultado', async () => {
-  let fail = false;
-  const { controller: controlador } = prepararPrueba((_path, { consulta }) => { if (fail) throw Error('Error interno'); return catalog(consulta); });
-  await controlador.iniciar(); fail = true; await controlador.reintentar();
+  let rechazarPromesa = false;
+  const { controller: controlador } = prepararPrueba((_ruta, { consulta }) => { if (rechazarPromesa) throw Error('Error interno'); return catalogo(consulta); });
+  await controlador.iniciar(); rechazarPromesa = true; await controlador.reintentar();
   const html = renderSeleccion(controlador.obtenerEstado());
   assert.doesNotMatch(html, /<input type="radio"/);
   assert.match(html, /Reintentar consulta/);

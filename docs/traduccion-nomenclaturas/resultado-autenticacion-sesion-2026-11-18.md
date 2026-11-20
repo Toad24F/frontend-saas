@@ -12,9 +12,9 @@ Se tradujeron los archivos, las funciones, el estado interno, los selectores y l
 | `src/connected/modules/auth/password-policy.js` | `src/connected/modules/autenticacion/contrasena.politica.js` |
 | `src/connected/screens/auth/dialogs.js` | `src/connected/screens/autenticacion/autenticacion.vista.js` |
 | `src/connected/screens/auth/style.css` | `src/connected/screens/autenticacion/autenticacion.estilos.css` |
-| `tests/session-persistence.test.js` | `tests/sesion.persistencia.test.js` |
-| `tests/account-portal-session.test.js` | `tests/portal-cuenta.sesion.test.js` |
-| `tests/m4-browser/session-persistence.spec.js` | `tests/m4-browser/sesion.persistencia.spec.js` |
+| `tests/sesion.persistencia.test.js` | `tests/sesion.persistencia.test.js` |
+| `tests/portal-cuenta.sesion.test.js` | `tests/portal-cuenta.sesion.test.js` |
+| `tests/m4-navegador/sesion.persistencia.spec.js` | `tests/m4-navegador/sesion.persistencia.spec.js` |
 
 El módulo usa `iniciarSesion`, `cerrarSesion`, `restaurarSesion`, `olvidarSesion`, `usuarioActual` y `etiquetaRol`. La fachada `backend.js` sigue exponiendo `user` como alias para los consumidores de otros conjuntos. Se conserva `api` como entrada compartida de transporte. Los estilos conservan sus reglas, imágenes de marca y tamaños.
 
@@ -34,5 +34,5 @@ El módulo usa `iniciarSesion`, `cerrarSesion`, `restaurarSesion`, `olvidarSesio
 Para repetir los casos de navegador sin MariaDB:
 
 ```sh
-npm run test:browser -- --config tests/m4-playwright.config.js sesion.persistencia autenticacion.flujos agenda.refresco-errores
+npm run test:browser -- --config tests/m4-navegador.config.js sesion.persistencia autenticacion.flujos agenda.refresco-errores
 ```

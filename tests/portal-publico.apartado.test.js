@@ -6,22 +6,22 @@ import { crearRelojApartado } from '../src/connected/portal-publico/apartado.rel
 import { vincularCicloReserva } from '../src/connected/portal-publico/reserva.ciclo-vida.js';
 import { renderReserva, actualizarTiempoApartado } from '../src/connected/portal-publico/reserva.vista.js';
 import { crearPortalClient } from '../src/connected/portal-publico/portal.http.js';
-import { memoryStorage } from './fixtures/memory-storage.js';
+import { crearAlmacenamientoEnMemoria } from './datos-prueba/memoria.almacenamiento.js';
 
 const iniciar = '2026-10-20T17:00:00.000Z';
 const ahora = '2026-10-20T16:00:00.000Z';
 const vencimientoServidor = '2026-10-20T16:05:00.000Z';
-const concesion = (id = 8, gen = '1') => ({ estado: 'concedida', apartadoId: id, generacion: gen,
+const concesion = (id = 8, generar = '1') => ({ estado: 'concedida', apartadoId: id, generacion: generar,
   expiraEn: vencimientoServidor, servidorAhora: ahora, zonaHoraria: 'America/Mazatlan', costo: '450.00' });
 // La lectura propia devuelve el costo solo mientras su publicación está activa;
 // esta fixture representa el caso visible y las pruebas ALA cubren la omisión.
-const propio = (id = 8, gen = '1', estado = 'vigente') => ({ apartadoId: id, generacion: gen, estado,
+const propio = (id = 8, generar = '1', estado = 'vigente') => ({ apartadoId: id, generacion: generar, estado,
   expiraEn: vencimientoServidor, servidorAhora: ahora, costo: '450.00' });
 const contacto = { nombre: '  María José  ', telefono: '+52 614-123-4567', notas: ' Consulta ' };
-const crearPromesaControlada = () => { let resolver, rechazar; const promise = new Promise((yes, no) => { resolver = yes; rechazar = no; }); return { promise, resolver, reject: rechazar }; };
+const crearPromesaControlada = () => { let resolver, rechazar; const promesa = new Promise((afirmativo, negativo) => { resolver = afirmativo; rechazar = negativo; }); return { promise: promesa, resolver, reject: rechazar }; };
 
 // Fixtures del contrato, sin API real. Permiten controlar reloj, respuestas perdidas y carreras.
-function prepararPrueba(handler, extra = {}) {
+function prepararPrueba(handler, adicional = {}) {
   let mono = 0;
   const llamadas = [], mensajes = [];
   const canal = { postMessage: (datos) => mensajes.push(datos), close() {} };
@@ -38,7 +38,7 @@ function prepararPrueba(handler, extra = {}) {
     return propio();
   } };
   const flujo = crearReservaPortal(client, { slug: 'centro', ahora: () => new Date(ahora), ahoraMonotono: () => mono,
-    generarClaveOperacion: () => 'operation_test_0000001', almacenamiento: memoryStorage(), channel: canal, ...extra });
+    generarClaveOperacion: () => 'operation_test_0000001', almacenamiento: crearAlmacenamientoEnMemoria(), channel: canal, ...adicional });
   return { flow: flujo, calls: llamadas, messages: mensajes, channel: canal, setMono: (valor) => { mono = valor; } };
 }
 async function select(flujo) {
@@ -157,10 +157,10 @@ test('T108: avisos sin datos privados, generación antigua ignorada y nueva veri
 });
 
 test('T108: fallo de consulta o identidad distinta bloquea uso, sin falso vencimiento', async () => {
-  let fail = false;
-  const { flow: flujo } = prepararPrueba((ruta) => ruta === 'apartados' ? concesion() : fail ? Promise.reject(Error('red')) : propio());
-  await formulario(flujo); fail = true; await flujo.verificarVigencia(); assert.equal(flujo.obtenerEstado().estadoApartado, 'sin-verificar');
-  fail = false; await flujo.verificarVigencia(); assert.equal(flujo.obtenerEstado().estadoApartado, 'vigente');
+  let rechazarPromesa = false;
+  const { flow: flujo } = prepararPrueba((ruta) => ruta === 'apartados' ? concesion() : rechazarPromesa ? Promise.reject(Error('red')) : propio());
+  await formulario(flujo); rechazarPromesa = true; await flujo.verificarVigencia(); assert.equal(flujo.obtenerEstado().estadoApartado, 'sin-verificar');
+  rechazarPromesa = false; await flujo.verificarVigencia(); assert.equal(flujo.obtenerEstado().estadoApartado, 'vigente');
 });
 
 test('T109: volver confirma liberación del ID/generación antes de abrir disponibilidad', async () => {
@@ -174,12 +174,12 @@ test('T109: volver confirma liberación del ID/generación antes de abrir dispon
 });
 
 test('T109: liberar con respuesta perdida permite repetir sin perder la referencia propia', async () => {
-  let fail = true;
+  let rechazarPromesa = true;
   const { flow: flujo, calls: llamadas } = prepararPrueba((ruta) => ruta === 'apartados' ? concesion() : ruta.endsWith('/liberar')
-    ? fail ? Promise.reject(Error('red')) : null : propio());
+    ? rechazarPromesa ? Promise.reject(Error('red')) : null : propio());
   await formulario(flujo); await flujo.volverADisponibilidad();
   assert.equal(flujo.obtenerEstado().estadoApartado, 'error-liberacion'); assert.equal(flujo.obtenerEstado().apartado.apartadoId, 8);
-  fail = false; await flujo.volverADisponibilidad();
+  rechazarPromesa = false; await flujo.volverADisponibilidad();
   assert.equal(llamadas.filter((llamada) => llamada.path.endsWith('/liberar')).length, 2);
   assert.equal(flujo.obtenerEstado().fase, 'seleccion');
 });
@@ -187,15 +187,15 @@ test('T109: liberar con respuesta perdida permite repetir sin perder la referenc
 test('T109: salida usa keepalive una vez, borra contacto y libera concesión recibida tarde', async () => {
   const { flow: flujo, calls: llamadas } = prepararPrueba(); await formulario(flujo); flujo.actualizarContacto('nombre', 'Privado');
   flujo.salir(); flujo.salir(); await Promise.resolve();
-  const releases = llamadas.filter((llamada) => llamada.path.endsWith('/liberar'));
-  assert.equal(releases.length, 1); assert.equal(releases[0].keepalive, true);
+  const liberaciones = llamadas.filter((llamada) => llamada.path.endsWith('/liberar'));
+  assert.equal(liberaciones.length, 1); assert.equal(liberaciones[0].keepalive, true);
   assert.equal(flujo.obtenerEstado().contacto.nombre, '');
   const pendiente = crearPromesaControlada();
-  const late = prepararPrueba((ruta) => ruta === 'apartados' ? pendiente.promise : null);
-  await select(late.flow); const solicitar = late.flow.apartarHorarioElegido(); late.flow.salir();
+  const tardio = prepararPrueba((ruta) => ruta === 'apartados' ? pendiente.promise : null);
+  await select(tardio.flow); const solicitar = tardio.flow.apartarHorarioElegido(); tardio.flow.salir();
   pendiente.resolver(concesion()); await solicitar;
-  assert.equal(late.calls.at(-1).path, 'apartados/8/liberar');
-  assert.equal(late.calls.at(-1).keepalive, true);
+  assert.equal(tardio.calls.at(-1).path, 'apartados/8/liberar');
+  assert.equal(tardio.calls.at(-1).keepalive, true);
 });
 
 test('T108–T109: una consulta atrasada no devuelve al formulario después de liberar', async () => {
@@ -223,8 +223,8 @@ test('T105–T107: formulario escapado, errores accesibles y envío sujeto a vig
   assert.match(html, /&lt;script&gt;/); assert.doesNotMatch(html, /<script>/);
   assert.match(html, /autocomplete="off"/); assert.match(html, /aria-invalid="true"/);
   assert.match(html, /data-enviar-reserva/);
-  const expired = { ...flujo.obtenerEstado(), milisegundosRestantes: 0 };
-  assert.match(renderReserva(expired), /disabled[^>]*>Reservar/);
+  const vencido = { ...flujo.obtenerEstado(), milisegundosRestantes: 0 };
+  assert.match(renderReserva(vencido), /disabled[^>]*>Reservar/);
 });
 
 test('el formulario muestra barra de tiempo y deja fecha, zona y costo en el resumen', async () => {
@@ -246,13 +246,13 @@ test('el formulario muestra barra de tiempo y deja fecha, zona y costo en el res
 });
 
 test('T108–T109: eventos de foco, visibilidad y salida se conectan y limpian', async () => {
-  const win = new EventTarget(); const doc = new EventTarget(); doc.visibilityState = 'visible';
-  let checks = 0, exits = 0, blocked = 0, ticks = 0;
-  const cleanup = vincularCicloReserva({ verificarVigencia: async () => { checks++; }, marcarSinVerificar() { blocked++; }, salir() { exits++; }, actualizarContador() { ticks++; } },
-    { window: win, document: doc, setInterval: (handler) => { handler(); return 1; }, clearInterval() {} });
-  win.dispatchEvent(new Event('focus')); doc.visibilityState = 'hidden'; doc.dispatchEvent(new Event('visibilitychange'));
-  win.dispatchEvent(new Event('pagehide')); assert.equal(checks, 1); assert.equal(blocked, 1); assert.equal(exits, 1); assert.equal(ticks, 1);
-  cleanup(); win.dispatchEvent(new Event('focus')); assert.equal(checks, 1);
+  const ventana = new EventTarget(); const documento = new EventTarget(); documento.visibilityState = 'visible';
+  let comprobaciones = 0, cierres = 0, bloqueado = 0, avances = 0;
+  const limpiar = vincularCicloReserva({ verificarVigencia: async () => { comprobaciones++; }, marcarSinVerificar() { bloqueado++; }, salir() { cierres++; }, actualizarContador() { avances++; } },
+    { window: ventana, document: documento, setInterval: (handler) => { handler(); return 1; }, clearInterval() {} });
+  ventana.dispatchEvent(new Event('focus')); documento.visibilityState = 'hidden'; documento.dispatchEvent(new Event('visibilitychange'));
+  ventana.dispatchEvent(new Event('pagehide')); assert.equal(comprobaciones, 1); assert.equal(bloqueado, 1); assert.equal(cierres, 1); assert.equal(avances, 1);
+  limpiar(); ventana.dispatchEvent(new Event('focus')); assert.equal(comprobaciones, 1);
 });
 
 test('T107: reintentar tras fallo de verificación no reinicia el presupuesto original', async () => {
@@ -273,20 +273,20 @@ test('T108: respuesta propia con ID, generación o vencimiento diferentes bloque
 });
 
 test('T106: vencimiento y sustitución conservan los datos al obtener otro apartado', async () => {
-  let gen = '1';
-  const { flow: flujo, setMono: ajustarRelojMonotono } = prepararPrueba((ruta) => ruta === 'apartados' ? concesion(8, gen) : ruta.endsWith('/liberar') ? null : propio(8, gen));
+  let generar = '1';
+  const { flow: flujo, setMono: ajustarRelojMonotono } = prepararPrueba((ruta) => ruta === 'apartados' ? concesion(8, generar) : ruta.endsWith('/liberar') ? null : propio(8, generar));
   await formulario(flujo); flujo.actualizarContacto('nombre', 'Ana'); flujo.actualizarContacto('notas', 'Recordar');
   ajustarRelojMonotono(300000); flujo.actualizarContador(); await flujo.volverADisponibilidad();
-  ajustarRelojMonotono(300001); gen = '2'; flujo.elegirHorario(iniciar); await flujo.apartarHorarioElegido();
+  ajustarRelojMonotono(300001); generar = '2'; flujo.elegirHorario(iniciar); await flujo.apartarHorarioElegido();
   assert.equal(flujo.obtenerEstado().fase, 'formulario'); assert.equal(flujo.obtenerEstado().contacto.nombre, 'Ana');
   assert.equal(flujo.obtenerEstado().contacto.notas, 'Recordar');
 });
 
 test('T108: temporizadores del navegador conservan el receptor window', () => {
-  const win = new EventTarget(), doc = new EventTarget();
-  const cleanup = vincularCicloReserva({ actualizarContador() {} }, { window: win, document: doc,
-    setInterval() { assert.equal(this, win); return 1; }, clearInterval() { assert.equal(this, win); } });
-  cleanup();
+  const ventana = new EventTarget(), documento = new EventTarget();
+  const limpiar = vincularCicloReserva({ actualizarContador() {} }, { window: ventana, document: documento,
+    setInterval() { assert.equal(this, ventana); return 1; }, clearInterval() { assert.equal(this, ventana); } });
+  limpiar();
 });
 
 test('T108: un reemplazo fallido también avisa para consultar el apartado anterior', async () => {
@@ -296,14 +296,14 @@ test('T108: un reemplazo fallido también avisa para consultar el apartado anter
 });
 
 test('T109: BFCache recarga y limpia los valores cacheados de los campos', () => {
-  const win = new EventTarget(), doc = new EventTarget();
+  const ventana = new EventTarget(), documento = new EventTarget();
   const entrada = { value: 'Privado', defaultValue: 'Privado' };
-  doc.querySelectorAll = () => [entrada];
-  let reloads = 0; win.location = { reload() { reloads++; } };
-  const cleanup = vincularCicloReserva({ salir() {}, actualizarContador() {} }, { window: win, document: doc, setInterval: () => 1, clearInterval() {} });
-  win.dispatchEvent(new Event('pagehide'));
+  documento.querySelectorAll = () => [entrada];
+  let recargas = 0; ventana.location = { reload() { recargas++; } };
+  const limpiar = vincularCicloReserva({ salir() {}, actualizarContador() {} }, { window: ventana, document: documento, setInterval: () => 1, clearInterval() {} });
+  ventana.dispatchEvent(new Event('pagehide'));
   const mostrados = new Event('pageshow'); Object.defineProperty(mostrados, 'persisted', { value: true });
-  win.dispatchEvent(mostrados);
-  assert.equal(entrada.value, ''); assert.equal(entrada.defaultValue, ''); assert.equal(reloads, 1);
-  cleanup();
+  ventana.dispatchEvent(mostrados);
+  assert.equal(entrada.value, ''); assert.equal(entrada.defaultValue, ''); assert.equal(recargas, 1);
+  limpiar();
 });

@@ -31,6 +31,6 @@ Las claves de datos de la demo que utilizan `public/data/demo.json`, Agenda y ot
 - `git diff --check`: correcto.
 - Playwright con API interceptada: 42 pruebas aprobadas en `clientes-horario.spec.js`, `live-errors.spec.js` y `agenda.spec.js`. Cubrieron búsqueda, paginación, alta, corrección versionada, historial, reintentos, roles y foco. Se revisaron las capturas del directorio y del editor a 1366 y 390 px en tema claro y oscuro, con cobertura visual de la demo y del modo conectado.
 
-Se actualizaron `tests/m4-clientes-horario.test.js`, `tests/m4-browser/clientes-horario.spec.js` y los selectores y datos de ficha de `tests/m4-browser/live-errors.spec.js`. La suite M4 verifica los flujos conectados con API interceptada. El backend y su base de datos quedaron fuera de la ejecución.
+Se actualizaron `tests/m4-clientes-horario.test.js`, `tests/m4-navegador/clientes-horario.spec.js` y los selectores y datos de ficha de `tests/m4-navegador/agenda.refresco-errores.spec.js`. La suite M4 verifica los flujos conectados con API interceptada. El backend y su base de datos quedaron fuera de la ejecución.
 
 La ejecución completa de M4 se detuvo después de seis fallos en Agenda. Los seis se reprodujeron sobre una copia de `HEAD` anterior a estos cambios: cuatro casos de atención por columna y dos de distribución móvil de la agenda compacta.

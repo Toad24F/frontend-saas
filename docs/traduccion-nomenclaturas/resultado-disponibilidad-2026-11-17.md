@@ -32,8 +32,8 @@ El modelo de datos compartido de la demo y las interfaces que consumen Agenda y 
 - `npm test`: 295 aprobadas, incluidas las 58 que se ejecutaron también de forma dirigida.
 - `npm run build`: correcto, 190 módulos transformados.
 - `node --check` y `git diff --check`: correctos. La búsqueda en `src/` y `tests/` no encontró referencias a las rutas y selectores anteriores del conjunto.
-- `tests/browser-admin-review.mjs`: completada con API simulada. Cubre asignaciones, oferta, horario, formulario de bloqueo y reglas.
-- `tests/browser-local-pagination.mjs`: completada con API simulada. Cubre alcance por profesional, filtros, errores de fecha y paginación de Bloqueos sin consultas adicionales.
+- `tests/administracion.revision-navegador.mjs`: completada con API simulada. Cubre asignaciones, oferta, horario, formulario de bloqueo y reglas.
+- `tests/paginacion.local-navegador.mjs`: completada con API simulada. Cubre alcance por profesional, filtros, errores de fecha y paginación de Bloqueos sin consultas adicionales.
 - Suite M4 filtrada a `disponibilidad.operativa.spec.js`, `manual.spec.js` y `agenda.spec.js`: 26 aprobadas. Los seis casos de Disponibilidad comprueban permisos de Profesional y Recepción, consulta, recuperación de un 503, validación puntual, teclado y descansos en demo.
 - Revisión visual de capturas en escritorio y móvil, en claro y oscuro, para conectado y demo. Los recorridos conectados de administración también comprobaron el ancho de 320 px.
 

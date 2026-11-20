@@ -67,21 +67,21 @@ La caché no certifica ausencia de cambios externos. El backend no proporciona a
 | Caché, store y contrato de atención | `src/connected/modules/agenda/{cache,store,attention}.js` |
 | Integración conectada y compatibilidad de presentación | `src/connected/screens/agenda/{view,presentation}.js` |
 | Presentación y navegación compartidas | `src/shared/screens/agenda/{chrome,frame,month,navigation,timeline,utility,presentation,view}.js`, `utility.css` |
-| Conexión de eventos y símbolo de refresco | `src/shared/app.js`, `src/shared/icons.js` |
-| Atención y causas ficticias | `src/demo/agenda-attention.js` |
-| Pruebas | `tests/agenda-utility.test.js`, `tests/m4-agenda-presentation.test.js`, `tests/m4-browser/{agenda-utility.spec,agenda.spec,agenda-fixture,polish.spec}.js` |
+| Conexión de eventos y símbolo de refresco | `src/shared/aplicacion.nucleo.js`, `src/shared/iconos.catalogo.js` |
+| Atención y causas ficticias | `src/demo/agenda.atencion.js` |
+| Pruebas | `tests/agenda.utilidades.test.js`, `tests/agenda.presentacion-conectada.test.js`, `tests/m4-navegador/{agenda-utility.spec,agenda.spec,agenda-fixture,polish.spec}.js` |
 | Documentación | Este informe, README y notas visuales previas con enlace de actualización |
 
 ## Comprobación y límites
 
-Primero se ejecutó `tests/agenda-utility.test.js` sin los módulos nuevos y falló por módulo ausente. Después pasaron los seis casos iniciales. Se añadieron antes de sus correcciones pruebas que fallaron por expansión insuficiente de columnas, foco oculto bajo cabecera y conservación indebida de caché cuando el respaldo acotado era denegado. El desarrollo conserva esa secuencia de pruebas y corrección; no se atribuye un ciclo rojo/verde independiente a cada ajuste de CSS.
+Primero se ejecutó `tests/agenda.utilidades.test.js` sin los módulos nuevos y falló por módulo ausente. Después pasaron los seis casos iniciales. Se añadieron antes de sus correcciones pruebas que fallaron por expansión insuficiente de columnas, foco oculto bajo cabecera y conservación indebida de caché cuando el respaldo acotado era denegado. El desarrollo conserva esa secuencia de pruebas y corrección; no se atribuye un ciclo rojo/verde independiente a cada ajuste de CSS.
 
 La primera ejecución de navegador dentro del entorno restringido no avanzó y se interrumpió. Las ejecuciones posteriores usan Edge/Vite locales con API interceptada, sin iniciar ni modificar backend o base de datos. Se corrigió además un extremo UTC invertido en la fixture nueva de atención. Las pruebas anteriores que exigían petición HTTP por búsqueda, tarjetas en Agenda o folio siempre visible se actualizaron al comportamiento acordado.
 
 | Comprobación | Resultado real |
 | --- | --- |
 | `npm test` | 268/268 aprobadas; repetición final aprobada tras el último ajuste de texto. Incluye diez pruebas nuevas de utilidad. |
-| `node node_modules/@playwright/test/cli.js test --config tests/m4-playwright.config.js` | 67/67 aprobadas en ejecución completa (2,0 min). Incluye ocho casos nuevos de caché, atención, navegación y visuales. |
+| `node node_modules/@playwright/test/cli.js test --config tests/m4-navegador.config.js` | 67/67 aprobadas en ejecución completa (2,0 min). Incluye ocho casos nuevos de caché, atención, navegación y visuales. |
 | `… agenda-utility.spec.js polish.spec.js` | 14/14 aprobadas después de ajustar el encabezado diario para que siga visible en móvil con muchas columnas simultáneas. La prueba de esa posición falló antes del ajuste. |
 | `… agenda-utility.spec.js --grep "revisión visual"` | 4/4 aprobadas en la revisión final; capturas de atención añadidas en los dos modos, ambos temas y tamaños. Se espera el fin de la animación de entrada de la demo para capturar su apariencia estable. |
 | `npm run build` | Aprobado; repetido al final, 184 módulos transformados. |

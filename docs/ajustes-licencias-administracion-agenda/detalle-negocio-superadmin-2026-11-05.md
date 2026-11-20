@@ -37,7 +37,7 @@ La paginación y los filtros operan sobre todo el historial descargado. No reduc
 
 ## Archivos
 
-- `src/connected/screens/negocio/view.js`: composición de pestañas y bloques.
+- `src/connected/screens/negocio/negocio.vista.js`: composición de pestañas y bloques.
 - `workspace.js`: interacción y estado local de pestañas/filtros/página.
 - `mail-history.js`: consulta local, orden, filtros, paginación y seguimiento.
 - `quota-meter.js`, `user-quota.js`: indicadores de consumo y acciones existentes.
@@ -47,7 +47,7 @@ La paginación y los filtros operan sobre todo el historial descargado. No reduc
 - `tests/negocio.detalle.test.js`: siete pruebas nuevas de reglas y renderizado.
 - `tests/ala-usuarios.cupo.test.js`: ajuste del texto esperado de consumo.
 - `tests/negocio.detalle-navegador.mjs`: prueba de interfaz aislada con API simulada.
-- `tests/browser/licenses.spec.js`, `tests/browser/user-quotas.spec.js`: selectores y navegación actualizados para las pestañas.
+- `tests/navegador/licencia.operaciones.spec.js`, `tests/navegador/usuarios.cupo.spec.js`: selectores y navegación actualizados para las pestañas.
 
 ## Panel de negocios: indicadores y directorio
 

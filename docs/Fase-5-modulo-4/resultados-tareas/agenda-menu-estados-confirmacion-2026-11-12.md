@@ -16,13 +16,13 @@ Fecha: 2026-11-12. Revisión base frontend: `e889f98c265a1bf5eb8dbef2eb74d68a93e
 - [Menú, restricciones orientativas y diálogo compartidos](../../../src/shared/screens/agenda/agenda.menu-estado.js), [estilos](../../../src/shared/screens/agenda/agenda.menu-estado.css), [tarjetas por hora](../../../src/shared/screens/agenda/agenda.linea-tiempo.js) y [mes](../../../src/shared/screens/agenda/agenda.mes.js).
 - [Escritura conectada](../../../src/connected/screens/agenda/agenda.estado-rapido.js), [vista conectada](../../../src/connected/screens/agenda/agenda.vista.js) y [editor existente](../../../src/connected/screens/agenda/agenda.editor-estado.js).
 - [Acciones de demo](../../../src/demo/agenda.estado-rapido.js), [vista compartida](../../../src/shared/screens/agenda/agenda.vista.js) y [detalle de demo](../../../src/shared/screens/agenda/agenda.acciones.js).
-- [Once casos nuevos de navegador](../../../tests/m4-browser/agenda.menu-estado.spec.js) y [regresión manual adaptada a la confirmación](../../../tests/m4-browser/agenda.alta-manual.spec.js).
+- [Once casos nuevos de navegador](../../../tests/m4-navegador/agenda.menu-estado.spec.js) y [regresión manual adaptada a la confirmación](../../../tests/m4-navegador/agenda.alta-manual.spec.js).
 
 ## Ajuste puntual: sin tres puntos y pulsación larga
 
 Se conserva el menú, sus estados, confirmaciones, permisos y escrituras. La propia tarjeta es el ancla accesible del menú; el clic/toque breve conserva el detalle y Shift+F10/tecla de menú contextual conservan la apertura por teclado. Una pulsación táctil de 500 ms abre el menú y bloquea el clic posterior de ese gesto para evitar abrir también el detalle. Mover el dedo más de 10 px, soltar antes, cancelar el puntero o comenzar un desplazamiento cancela el temporizador; no se bloquea el desplazamiento normal de la página. Se elimina el espacio y el estilo que reservaba el botón de tres puntos, también en Mes.
 
-Archivos de este ajuste: `state-menu.js`, `state-menu.css`, `timeline.js`, `month.js` y `tests/m4-browser/state-menu.spec.js`. Se mantienen los demás cambios que ya existían en el árbol del usuario. Alcance: conectado/demo, Día/Semana/Mes, ambos temas y escritorio/móvil; sin cambios del backend.
+Archivos de este ajuste: `state-menu.js`, `state-menu.css`, `timeline.js`, `month.js` y `tests/m4-navegador/agenda.menu-estado.spec.js`. Se mantienen los demás cambios que ya existían en el árbol del usuario. Alcance: conectado/demo, Día/Semana/Mes, ambos temas y escritorio/móvil; sin cambios del backend.
 
 Verificación del ajuste: 268/268 unitarias, compilación y `diff --check` aprobados; 13/13 pruebas enfocadas del menú aprobadas con HTTP interceptado. Se añadieron dos casos para toque breve/pulsación larga y cancelación del gesto, y se adaptaron las activaciones anteriores por botón a clic derecho o puntero táctil simulado. Se revisaron capturas del menú en móvil oscuro conectado y escritorio claro demo; la suite genera las cuatro combinaciones de tamaño/tema en ambos modos. No se atribuye una ejecución completa nueva ni una prueba en dispositivo físico.
 
@@ -31,7 +31,7 @@ Verificación del ajuste: 268/268 unitarias, compilación y `diff --check` aprob
 - `npm test`: 268 aprobadas, sin omitidas.
 - `npm run build`: aprobado.
 - `git diff --check`: aprobado; Git informa únicamente normalización LF/CRLF prevista.
-- `npx playwright test --config tests/m4-playwright.config.js`: 78 aprobadas, sin omitidas, en la ejecución final (3,5 minutos; Edge/Chromium con HTTP interceptado).
+- `npx playwright test --config tests/m4-navegador.config.js`: 78 aprobadas, sin omitidas, en la ejecución final (3,5 minutos; Edge/Chromium con HTTP interceptado).
 - Revisión visual de capturas de menú y confirmación en 1366×900 y 390×900, claro/oscuro, conectado/demo. Las capturas se generan en `test-results/m4/state-menu-*` y `state-cancel-*`. Se revisaron también el aislamiento del modal, la legibilidad y los colores semánticos de la leyenda.
 
 En la primera prueba nueva se detectó que Guardar estado quedaba sin foco al conservar la cita; se corrigió y la suite enfocada pasó sus 11 casos. La primera regresión completa pasó 77/78: el caso anterior de cancelación esperaba un PATCH sin confirmar. Se adaptó para pulsar la confirmación tanto ante 409 como ante éxito y esperar la versión confirmada. Se comprobó además el bloqueo de dos activaciones seguidas de un cambio rápido y el retorno de foco tras la reconsulta.

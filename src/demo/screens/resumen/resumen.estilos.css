@@ -38,7 +38,7 @@
   min-height: 3px;
 }
 .resumen-barra.resumen-barra-hoy {
-  background: var(--accent);
+  background: var(--acento);
 }
 .resumen-destacado {
   padding: 28px;
@@ -69,7 +69,7 @@
   right: 25px;
   color: #a0b49c;
 }
-.resumen-destacado .eyebrow {
+.resumen-destacado .sobretitulo {
   color: #8da083;
   font-size: 9px;
 }

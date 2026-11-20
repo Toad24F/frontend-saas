@@ -12,15 +12,15 @@ export function abrirDetalleDemo(id) {
     e = ampliarDatosCita(a);
   const el = modal(
     'Detalle de la cita',
-    `<div class="dialog-body"><div class="appointment-identity">${avatar(
+    `<div class="dialogo-cuerpo"><div class="cita-identidad">${avatar(
       e.client.name
         .split(' ')
         .map((x) => x[0])
         .slice(0, 2)
         .join(''),
-      'mint',
-      'avatar-large',
-    )}<div><h3>${esc(e.client.name)}</h3><p>${a.folio}</p></div>${renderEtiquetaEstado(a.status)}</div><div class="detail-list"><div>${renderIcono('briefcase')}<span><small>Servicio</small><strong>${esc(e.service.name)}</strong></span><b>${formatearMoneda(e.service.price)}</b></div><div>${renderIcono('stethoscope')}<span><small>Profesional</small><strong>${esc(e.professional.name)}</strong></span></div><div>${renderIcono('calendar')}<span><small>Fecha y hora</small><strong>${formatearFecha(a.date)} · ${a.start} – ${a.end}</strong></span></div><div>${renderIcono('pin')}<span><small>Sucursal</small><strong>${esc(e.branch.name)}</strong></span></div><div>${renderIcono('message')}<span><small>WhatsApp</small><strong>${esc(e.client.phone)}</strong></span></div></div>${a.reason ? `<div class="appointment-reason"><strong>Motivo de consulta</strong><p>${esc(a.reason)}</p></div>` : ''}<label class="form-label" for="appointment-status">Estado de la cita</label><select id="appointment-status" class="form-select">${Object.entries(
+      'menta',
+      'avatar-grande',
+    )}<div><h3>${esc(e.client.name)}</h3><p>${a.folio}</p></div>${renderEtiquetaEstado(a.status)}</div><div class="lista-detalle"><div>${renderIcono('briefcase')}<span><small>Servicio</small><strong>${esc(e.service.name)}</strong></span><b>${formatearMoneda(e.service.price)}</b></div><div>${renderIcono('stethoscope')}<span><small>Profesional</small><strong>${esc(e.professional.name)}</strong></span></div><div>${renderIcono('calendar')}<span><small>Fecha y hora</small><strong>${formatearFecha(a.date)} · ${a.start} – ${a.end}</strong></span></div><div>${renderIcono('pin')}<span><small>Sucursal</small><strong>${esc(e.branch.name)}</strong></span></div><div>${renderIcono('message')}<span><small>WhatsApp</small><strong>${esc(e.client.phone)}</strong></span></div></div>${a.reason ? `<div class="cita-motivo"><strong>Motivo de consulta</strong><p>${esc(a.reason)}</p></div>` : ''}<label class="form-label" for="appointment-status">Estado de la cita</label><select id="appointment-status" class="form-select">${Object.entries(
       etiquetasEstadoCita,
     )
       .map(
@@ -29,7 +29,7 @@ export function abrirDetalleDemo(id) {
       )
       .join(
         '',
-      )}</select>${espacioError}<p class="field-hint mt-3">Origen: ${a.origin === 'manual' ? 'Agendamiento manual' : 'Portal de reservas'} · Solo datos ficticios</p></div><div class="dialog-footer"><button class="btn btn-danger-soft" id="cancel-appointment" ${a.status === 'cancelada' ? 'disabled' : ''}>Cancelar cita</button><button class="btn btn-primary" id="save-status">Guardar estado</button></div>`,
+      )}</select>${espacioError}<p class="ayuda-campo mt-3">Origen: ${a.origin === 'manual' ? 'Agendamiento manual' : 'Portal de reservas'} · Solo datos ficticios</p></div><div class="dialogo-pie"><button class="btn btn-peligro-suave" id="cancel-appointment" ${a.status === 'cancelada' ? 'disabled' : ''}>Cancelar cita</button><button class="btn btn-primary" id="save-status">Guardar estado</button></div>`,
   );
   el.querySelector('#save-status').onclick = () => {
     try {
@@ -65,7 +65,7 @@ export function abrirDetalleDemo(id) {
   };
   el.querySelector('#cancel-appointment').onclick = () => confirmarCancelar(id);
   // Propuesta de fecha/hora local de la demo; la versión conectada realiza todas las comprobaciones en el servidor.
-  el.querySelector('.dialog-body').insertAdjacentHTML('beforeend', `<form data-demo-horario class="agenda-editor-estado"><h3>Cambiar horario</h3><div class="form-row-two">${campo('Nueva fecha', 'fechaLocal', a.date, 'date', 'required')}${campo('Nueva hora', 'horaInicio', a.start, 'time', 'required')}</div><p class="field-hint">Simulación local de horario y ocupación; conserva folio y duración. No reproduce las transacciones UTC del servidor.</p><p class="form-error" role="alert" data-demo-error-horario hidden></p><button type="submit" class="btn btn-primary" ${a.status === 'cancelada' || a.date < HOY ? 'disabled' : ''}>Guardar horario</button></form>`);
+  el.querySelector('.dialogo-cuerpo').insertAdjacentHTML('beforeend', `<form data-demo-horario class="agenda-editor-estado"><h3>Cambiar horario</h3><div class="formulario-dos-columnas">${campo('Nueva fecha', 'fechaLocal', a.date, 'date', 'required')}${campo('Nueva hora', 'horaInicio', a.start, 'time', 'required')}</div><p class="ayuda-campo">Simulación local de horario y ocupación; conserva folio y duración. No reproduce las transacciones UTC del servidor.</p><p class="error-formulario" role="alert" data-demo-error-horario hidden></p><button type="submit" class="btn btn-primary" ${a.status === 'cancelada' || a.date < HOY ? 'disabled' : ''}>Guardar horario</button></form>`);
   el.querySelector('[data-demo-horario]').onsubmit = (evento) => {
     evento.preventDefault();
     try {
@@ -80,7 +80,7 @@ async function confirmarCancelar(id) {
     nombreSucursal: e.branch.name, fechaLocal: a.date, horaInicio: a.start, zonaHoraria: 'America/Chihuahua' });
   if (!confirmacion) return;
   a.status = 'cancelada';
-  document.querySelector('#app-dialog')?.close();
+  document.querySelector('#dialogo-app')?.close();
   render();
   mostrarAviso('Demostración: cita cancelada. El horario vuelve a estar disponible.');
 }
@@ -97,7 +97,7 @@ export function nuevaCitaManual(dia = estado.fecha, inicio = '') {
   }
   const el = modal(
     'Nueva cita',
-    `<form id="manual-form"><div class="dialog-body"><p class="form-intro">Agenda una atención para tu paciente.</p><div class="form-row-two">${selectorCampo('Servicio', 'serviceId', listarRegistros('services', estado.negocioId))}${selectorCampo('Sucursal', 'branchId', listarRegistros('branches', estado.negocioId), estado.sucursal !== 'all' ? estado.sucursal : '')}</div><div class="form-row-two">${selectorCampo('Profesional', 'professionalId', listarRegistros('professionals', estado.negocioId))}${campo('Fecha', 'day', dia < HOY ? HOY : dia, 'date', `required min="${HOY}"`)}</div><div class="form-field"><label for="f-start" class="form-label">Horario disponible</label><select id="f-start" name="start" class="form-select" required></select><p class="field-hint" id="manual-availability-hint"></p></div><div class="form-separator"><span>DATOS DEL PACIENTE</span></div><div class="form-field"><label class="form-label" for="demo-customer-mode">Tipo de cliente</label><select id="demo-customer-mode" name="customerMode" class="form-select"><option value="nuevo">Cliente nuevo</option><option value="existente">Cliente existente</option></select></div><div data-demo-existente hidden>${selectorCampo('Cliente existente', 'clientId', listarRegistros('clients', estado.negocioId))}</div><div class="form-row-two" data-demo-nuevo>${campo('Nombre completo', 'name', '', 'text', 'required maxlength="150" placeholder="Nombre y apellidos" autocomplete="off"')}${campo('Teléfono de WhatsApp', 'phone', '', 'tel', 'required pattern="[0-9]{10}" maxlength="10" inputmode="numeric" placeholder="10 dígitos" autocomplete="off"')}</div><div class="form-field"><label class="form-label" for="f-reason">Motivo de consulta <span class="optional">(opcional)</span></label><textarea class="form-control" id="f-reason" name="reason" rows="2" maxlength="500" placeholder="Información útil para el profesional"></textarea></div>${espacioError}<div class="information-note compact-note">${renderIcono('info')} Usa datos ficticios. Esta reserva solo se guarda durante la sesión. La recuperación tras recarga y la auditoría reales se comprueban en la versión conectada.</div></div><div class="dialog-footer"><button type="button" class="btn btn-light" id="manual-cancel">Cancelar</button><button type="submit" class="btn btn-primary" id="manual-save">${renderIcono('check')}Confirmar cita</button></div></form>`,
+    `<form id="manual-form"><div class="dialogo-cuerpo"><p class="introduccion-formulario">Agenda una atención para tu paciente.</p><div class="formulario-dos-columnas">${selectorCampo('Servicio', 'serviceId', listarRegistros('services', estado.negocioId))}${selectorCampo('Sucursal', 'branchId', listarRegistros('branches', estado.negocioId), estado.sucursal !== 'all' ? estado.sucursal : '')}</div><div class="formulario-dos-columnas">${selectorCampo('Profesional', 'professionalId', listarRegistros('professionals', estado.negocioId))}${campo('Fecha', 'day', dia < HOY ? HOY : dia, 'date', `required min="${HOY}"`)}</div><div class="campo-formulario"><label for="f-start" class="form-label">Horario disponible</label><select id="f-start" name="start" class="form-select" required></select><p class="ayuda-campo" id="manual-availability-hint"></p></div><div class="separador-formulario"><span>DATOS DEL PACIENTE</span></div><div class="campo-formulario"><label class="form-label" for="demo-customer-mode">Tipo de cliente</label><select id="demo-customer-mode" name="customerMode" class="form-select"><option value="nuevo">Cliente nuevo</option><option value="existente">Cliente existente</option></select></div><div data-demo-existente hidden>${selectorCampo('Cliente existente', 'clientId', listarRegistros('clients', estado.negocioId))}</div><div class="formulario-dos-columnas" data-demo-nuevo>${campo('Nombre completo', 'name', '', 'text', 'required maxlength="150" placeholder="Nombre y apellidos" autocomplete="off"')}${campo('Teléfono de WhatsApp', 'phone', '', 'tel', 'required pattern="[0-9]{10}" maxlength="10" inputmode="numeric" placeholder="10 dígitos" autocomplete="off"')}</div><div class="campo-formulario"><label class="form-label" for="f-reason">Motivo de consulta <span class="opcional">(opcional)</span></label><textarea class="form-control" id="f-reason" name="reason" rows="2" maxlength="500" placeholder="Información útil para el profesional"></textarea></div>${espacioError}<div class="nota-informativa nota-compacta">${renderIcono('info')} Usa datos ficticios. Esta reserva solo se guarda durante la sesión. La recuperación tras recarga y la auditoría reales se comprueban en la versión conectada.</div></div><div class="dialogo-pie"><button type="button" class="btn btn-light" id="manual-cancel">Cancelar</button><button type="submit" class="btn btn-primary" id="manual-save">${renderIcono('check')}Confirmar cita</button></div></form>`,
     true,
   );
   const formulario = el.querySelector('form');

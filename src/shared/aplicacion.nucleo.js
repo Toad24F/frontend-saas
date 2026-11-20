@@ -1,10 +1,10 @@
 import { esDemo, mensajePendiente, urlSegunModo, usuarioActual, etiquetaRol, paginaPermitida, paginaInicial, restaurarSesion, cargarDatosBackend } from '../connected/backend.js';
 import { renderAutenticacion } from '../connected/screens/autenticacion/autenticacion.vista.js';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import './styles.css';
-import './theme.css';
-import './motion.css';
-import './mobile.css';
+import './global.estilos.css';
+import './tema.estilos.css';
+import './movimiento.estilos.css';
+import './movil.estilos.css';
 import './screens/agenda/agenda.calendario.css';
 import { renderIcono } from './iconos.catalogo.js';
 import { handleNavegacionAgenda, renderAgendaConservandoPosicion } from './screens/agenda/agenda.navegacion.js';
@@ -47,20 +47,20 @@ function aplicarTema() {
 }
 aplicarTema();
 export function montarSelectorTema() {
-  const contenedor = document.querySelector('.topbar-right, .portal-demo-barra');
+  const contenedor = document.querySelector('.barra-superior-derecha, .portal-demo-barra');
   if (!contenedor) return;
-  if (contenedor.querySelector('.theme-toggle')) return;
+  if (contenedor.querySelector('.selector-tema')) return;
   const esOscuro = tema === 'dark';
   contenedor.insertAdjacentHTML(
     'beforeend',
-    `<button type="button" class="theme-toggle icon-btn" data-action="theme" aria-label="Activar modo ${esOscuro ? 'claro' : 'oscuro'}" title="Modo ${esOscuro ? 'claro' : 'oscuro'}" aria-pressed="${esOscuro}">${renderIcono(esOscuro ? 'sun' : 'moon')}</button>`,
+    `<button type="button" class="selector-tema boton-icono" data-action="theme" aria-label="Activar modo ${esOscuro ? 'claro' : 'oscuro'}" title="Modo ${esOscuro ? 'claro' : 'oscuro'}" aria-pressed="${esOscuro}">${renderIcono(esOscuro ? 'sun' : 'moon')}</button>`,
   );
 }
 function alternarTema() {
   tema = tema === 'dark' ? 'light' : 'dark';
   aplicarTema();
   try { localStorage.setItem(claveTema, tema); } catch { /* preferencia temporal */ }
-  document.querySelectorAll('.theme-toggle').forEach((boton) => {
+  document.querySelectorAll('.selector-tema').forEach((boton) => {
     const esOscuro = tema === 'dark';
     boton.innerHTML = renderIcono(esOscuro ? 'sun' : 'moon');
     boton.setAttribute('aria-label', `Activar modo ${esOscuro ? 'claro' : 'oscuro'}`);
@@ -116,32 +116,32 @@ let menuUsuariosAbierto = null;
 const rutaDisponibilidad = (grupo) => `/admin/disponibilidad/${grupo}`;
 const grupoDisponibilidadSeleccionado = () => resolverGrupoDisponibilidad(estadoAplicacion.grupoDisponibilidad, esDemo, usuarioActual?.rol);
 function renderElementoNavegacion(elemento) {
-  if (elemento.length === 2) return `<div class="nav-section">${elemento[1]}</div>`;
+  if (elemento.length === 2) return `<div class="navegacion-seccion">${elemento[1]}</div>`;
   if (elemento[0] === 'usuarios') {
     const seleccionado = ['profesionales', 'recepcionistas'].includes(estadoAplicacion.pagina);
     const abierto = menuUsuariosAbierto ?? seleccionado;
-    return `<div class="nav-disclosure"><button type="button" class="nav-item nav-disclosure-trigger ${seleccionado ? 'active' : ''}" data-users-menu aria-expanded="${abierto}" aria-controls="users-sidebar-submenu">${renderIcono('users')}<span>Usuarios</span>${renderIcono('chevron', 'nav-disclosure-arrow')}</button><div class="nav-submenu" id="users-sidebar-submenu" ${abierto ? '' : 'hidden'}>${[['profesionales', 'Profesionales'], ...(!esDemo && usuarioActual?.rol === 'admin_negocio' ? [['recepcionistas', 'Recepcionistas']] : [])].map(([pagina, etiqueta]) => `<a href="/admin/${pagina}" data-nav="${pagina}" class="nav-subitem ${estadoAplicacion.pagina === pagina ? 'is-current' : ''}" ${estadoAplicacion.pagina === pagina ? 'aria-current="page"' : ''}>${etiqueta}</a>`).join('')}</div></div>`;
+    return `<div class="nav-disclosure"><button type="button" class="navegacion-enlace navegacion-desplegador ${seleccionado ? 'active' : ''}" data-users-menu aria-expanded="${abierto}" aria-controls="users-sidebar-submenu">${renderIcono('users')}<span>Usuarios</span>${renderIcono('chevron', 'navegacion-flecha')}</button><div class="navegacion-submenu" id="users-sidebar-submenu" ${abierto ? '' : 'hidden'}>${[['profesionales', 'Profesionales'], ...(!esDemo && usuarioActual?.rol === 'admin_negocio' ? [['recepcionistas', 'Recepcionistas']] : [])].map(([pagina, etiqueta]) => `<a href="/admin/${pagina}" data-nav="${pagina}" class="navegacion-subenlace ${estadoAplicacion.pagina === pagina ? 'es-actual' : ''}" ${estadoAplicacion.pagina === pagina ? 'aria-current="page"' : ''}>${etiqueta}</a>`).join('')}</div></div>`;
   }
   if (elemento[0] === 'disponibilidad') {
     const abierto = menuDisponibilidadAbierto ?? estadoAplicacion.pagina === 'disponibilidad';
-    const enlaces = gruposDisponibilidadPermitidos(esDemo, usuarioActual?.rol).map((grupo) => `<a href="${rutaDisponibilidad(grupo.id)}" data-grupo-disponibilidad="${grupo.id}" class="nav-subitem ${estadoAplicacion.pagina === 'disponibilidad' && grupoDisponibilidadSeleccionado() === grupo.id ? 'is-current' : ''}" ${estadoAplicacion.pagina === 'disponibilidad' && grupoDisponibilidadSeleccionado() === grupo.id ? 'aria-current="page"' : ''}>${grupo.etiqueta}</a>`).join('');
-    return `<div class="nav-disclosure"><button type="button" class="nav-item nav-disclosure-trigger ${estadoAplicacion.pagina === 'disponibilidad' ? 'active' : ''}" data-menu-disponibilidad aria-expanded="${abierto}" aria-controls="submenu-disponibilidad">${renderIcono('clock')}<span>Disponibilidad</span>${renderIcono('chevron', 'nav-disclosure-arrow')}</button><div class="nav-submenu" id="submenu-disponibilidad" ${abierto ? '' : 'hidden'}>${enlaces}</div></div>`;
+    const enlaces = gruposDisponibilidadPermitidos(esDemo, usuarioActual?.rol).map((grupo) => `<a href="${rutaDisponibilidad(grupo.id)}" data-grupo-disponibilidad="${grupo.id}" class="navegacion-subenlace ${estadoAplicacion.pagina === 'disponibilidad' && grupoDisponibilidadSeleccionado() === grupo.id ? 'es-actual' : ''}" ${estadoAplicacion.pagina === 'disponibilidad' && grupoDisponibilidadSeleccionado() === grupo.id ? 'aria-current="page"' : ''}>${grupo.etiqueta}</a>`).join('');
+    return `<div class="nav-disclosure"><button type="button" class="navegacion-enlace navegacion-desplegador ${estadoAplicacion.pagina === 'disponibilidad' ? 'active' : ''}" data-menu-disponibilidad aria-expanded="${abierto}" aria-controls="submenu-disponibilidad">${renderIcono('clock')}<span>Disponibilidad</span>${renderIcono('chevron', 'navegacion-flecha')}</button><div class="navegacion-submenu" id="submenu-disponibilidad" ${abierto ? '' : 'hidden'}>${enlaces}</div></div>`;
   }
-  return `<a href="/admin/${elemento[0]}" data-nav="${elemento[0]}" class="nav-item ${estadoAplicacion.pagina === elemento[0] ? 'active' : ''}" ${estadoAplicacion.pagina === elemento[0] ? 'aria-current="page"' : ''}>${renderIcono(elemento[1])}<span>${elemento[2]}</span>${esDemo && elemento[0] === 'agenda' ? `<span class="nav-count">${listarRegistros('appointments', estadoAplicacion.negocioId).filter((cita) => cita.date === HOY).length}</span>` : ''}</a>`;
+  return `<a href="/admin/${elemento[0]}" data-nav="${elemento[0]}" class="navegacion-enlace ${estadoAplicacion.pagina === elemento[0] ? 'active' : ''}" ${estadoAplicacion.pagina === elemento[0] ? 'aria-current="page"' : ''}>${renderIcono(elemento[1])}<span>${elemento[2]}</span>${esDemo && elemento[0] === 'agenda' ? `<span class="navegacion-contador">${listarRegistros('appointments', estadoAplicacion.negocioId).filter((cita) => cita.date === HOY).length}</span>` : ''}</a>`;
 }
 function establecerMenuMovil(abierto) {
-  const estructura = document.querySelector('.admin-layout');
+  const estructura = document.querySelector('.estructura-admin');
   if (!estructura) return;
-  estructura.classList.toggle('menu-open', abierto);
+  estructura.classList.toggle('menu-abierto', abierto);
   estructura.querySelectorAll('button[data-action="menu"]').forEach((boton) => {
     boton.setAttribute('aria-expanded', String(abierto));
   });
-  if (abierto) estructura.querySelector('.sidebar nav .nav-item')?.focus();
-  else estructura.querySelector('.mobile-tabbar [data-action="menu"]')?.focus();
+  if (abierto) estructura.querySelector('.barra-lateral nav .navegacion-enlace')?.focus();
+  else estructura.querySelector('.navegacion-inferior [data-action="menu"]')?.focus();
 }
 function establecerMenuCuenta(abierto, devolverFoco = false) {
-  const disparador = document.querySelector('.account-menu-trigger');
-  const panel = document.querySelector('.account-menu-panel');
+  const disparador = document.querySelector('.menu-cuenta-disparador');
+  const panel = document.querySelector('.menu-cuenta-panel');
   if (!disparador || !panel) return;
   disparador.setAttribute('aria-expanded', String(abierto));
   panel.hidden = !abierto;
@@ -150,11 +150,11 @@ function establecerMenuCuenta(abierto, devolverFoco = false) {
 function renderMenuCuentaConectada() {
   const nombre = usuarioActual.nombre || 'Mi cuenta';
   const iniciales = nombre.trim().split(/\s+/).slice(0, 2).map((parte) => parte[0]).join('');
-  return '<div class="account-menu"><button type="button" class="profile-button account-menu-trigger" aria-label="Opciones de ' +
-    escaparHtml(nombre) + '" aria-expanded="false" aria-controls="account-menu-panel">' +
-    avatar(iniciales, 'peach') + '<span><strong>' + escaparHtml(nombre) + '</strong><small>' +
+  return '<div class="menu-cuenta"><button type="button" class="boton-perfil menu-cuenta-disparador" aria-label="Opciones de ' +
+    escaparHtml(nombre) + '" aria-expanded="false" aria-controls="menu-cuenta-panel">' +
+    avatar(iniciales, 'durazno') + '<span><strong>' + escaparHtml(nombre) + '</strong><small>' +
     escaparHtml(etiquetaRol(usuarioActual.rol)) + '</small></span>' + renderIcono('down') + '</button>' +
-    '<nav id="account-menu-panel" class="account-menu-panel" aria-label="Opciones de usuario" hidden>' +
+    '<nav id="menu-cuenta-panel" class="menu-cuenta-panel" aria-label="Opciones de usuario" hidden>' +
     '<a href="' + urlSegunModo('/admin/cuenta') + '" data-nav="cuenta" ' +
     (estadoAplicacion.pagina === 'cuenta' ? 'aria-current="page"' : '') + '>' +
     renderIcono('user') + '<span>Mi cuenta</span></a>' +
@@ -198,7 +198,7 @@ function restaurarGrupoDisponibilidad() {
 export function renderEstructuraAplicacion(contenido) {
   if (!obtenerNegocio(estadoAplicacion.negocioId)) estadoAplicacion.negocioId = datosAplicacion.tenants[0].id;
   const negocio = obtenerNegocio(estadoAplicacion.negocioId);
-  const desplazamientoLateral = document.querySelector('.sidebar')?.scrollTop ?? 0;
+  const desplazamientoLateral = document.querySelector('.barra-lateral')?.scrollTop ?? 0;
   const inicio = esDemo ? 'agenda' : paginaInicial();
   const navegacionVisible = esDemo ? navegacion : [
     ['connected', usuarioActual.rol === 'superadmin' ? 'PLATAFORMA' : usuarioActual.rol === 'recepcionista' ? 'MI CUENTA' : 'MI NEGOCIO'],
@@ -211,10 +211,10 @@ export function renderEstructuraAplicacion(contenido) {
   const nombreEspacio = !esDemo && usuarioActual.rol === 'superadmin' ? 'Plataforma' : negocio.name;
   const inicialesEspacio = !esDemo && usuarioActual.rol === 'superadmin' ? 'PL' : negocio.initials;
   const marcaCatalogoMovil = ['profesionales', 'recepcionistas', 'servicios', 'sucursales'].includes(estadoAplicacion.pagina)
-    ? `<a class="mobile-professional-brand" href="/admin/${estadoAplicacion.pagina}" data-nav="${estadoAplicacion.pagina}" aria-label="Citalendar, ${etiquetas[estadoAplicacion.pagina].toLowerCase()}"><img class="brand-logo-on-light" src="/brand/citalendar-logo.svg" alt=""><img class="brand-logo-on-dark" src="/brand/citalendar-logo-light.svg" alt=""></a>`
+    ? `<a class="marca-catalogo-movil" href="/admin/${estadoAplicacion.pagina}" data-nav="${estadoAplicacion.pagina}" aria-label="Citalendar, ${etiquetas[estadoAplicacion.pagina].toLowerCase()}"><img class="logo-marca-claro" src="/brand/citalendar-logo.svg" alt=""><img class="logo-marca-oscuro" src="/brand/citalendar-logo-light.svg" alt=""></a>`
     : '';
   document.querySelector('#app').innerHTML =
-    `<div class="admin-layout"><div class="sidebar-overlay" data-action="menu"></div><aside class="sidebar"><a class="brand" aria-label="Citalendar: inicio" href="/admin/agenda" data-nav="agenda"><img class="brand-logo-on-light" src="/brand/citalendar-logo.svg" alt=""/><img class="brand-logo-on-dark" src="/brand/citalendar-logo-light.svg" alt=""/></a><div class="workspace-identity glass-effect glass-effect--dark">${avatar(inicialesEspacio, 'workspace-avatar')}<span><strong>${escaparHtml(nombreEspacio)}</strong></span></div><nav aria-label="Navegación principal">${navegacionVisible.map(renderElementoNavegacion).join('')}</nav><div class="sidebar-bottom"><a href="/admin/configuracion" data-nav="configuracion" class="nav-item ${estadoAplicacion.pagina === 'configuracion' ? 'active' : ''}">${renderIcono('settings')}<span>Configuración</span></a><div class="portal-card"><div class="portal-icon">${renderIcono('link')}</div><strong>Tu agenda, a un enlace</strong><p>Comparte tu portal y recibe reservas en línea.</p><a href="/reservas/${negocio.slug}" data-portal>Ver portal de reservas ${renderIcono('external')}</a></div><div class="sidebar-foot"><span class="green-dot"></span> Entorno de demostración <span>v1.0</span></div></div></aside><div class="main-layout"><header class="topbar"><div class="breadcrumbs">${marcaCatalogoMovil}<button class="icon-btn mobile-menu" data-action="menu" aria-label="Abrir menú">${renderIcono('menu')}</button><span>${escaparHtml(nombreEspacio)}</span>${renderIcono('chevron')}<strong>${etiquetas[estadoAplicacion.pagina] || 'Agenda'}</strong></div><div class="topbar-right"><span class="demo-pill">Prototipo</span><span class="topbar-date">${renderIcono('calendar')} ${formatearFecha(HOY, { day: 'numeric', month: 'short', year: 'numeric' })}</span><button class="notification-button icon-btn" data-nav="notificaciones" aria-label="Ver notificaciones">${renderIcono('bell')}<i></i></button><span class="topbar-divider"></span><button class="profile-button" data-nav="configuracion">${avatar('AV', 'peach')}<span><strong>Adriana Vega</strong><small>Administradora</small></span>${renderIcono('down')}</button></div></header><main id="main-content" class="main-content${animarSiguienteRuta ? ' motion-enter' : ''}">${contenido}</main><footer class="app-footer"><span class="footer-logo">Citalendar</span></footer></div></div>`;
+    `<div class="estructura-admin"><div class="fondo-barra-lateral" data-action="menu"></div><aside class="barra-lateral"><a class="marca" aria-label="Citalendar: inicio" href="/admin/agenda" data-nav="agenda"><img class="logo-marca-claro" src="/brand/citalendar-logo.svg" alt=""/><img class="logo-marca-oscuro" src="/brand/citalendar-logo-light.svg" alt=""/></a><div class="identidad-espacio efecto-cristal efecto-cristal--oscuro">${avatar(inicialesEspacio, 'avatar-espacio')}<span><strong>${escaparHtml(nombreEspacio)}</strong></span></div><nav aria-label="Navegación principal">${navegacionVisible.map(renderElementoNavegacion).join('')}</nav><div class="seccion-inferior-lateral"><a href="/admin/configuracion" data-nav="configuracion" class="navegacion-enlace ${estadoAplicacion.pagina === 'configuracion' ? 'active' : ''}">${renderIcono('settings')}<span>Configuración</span></a><div class="tarjeta-portal"><div class="icono-portal">${renderIcono('link')}</div><strong>Tu agenda, a un enlace</strong><p>Comparte tu portal y recibe reservas en línea.</p><a href="/reservas/${negocio.slug}" data-portal>Ver portal de reservas ${renderIcono('external')}</a></div><div class="pie-lateral"><span class="punto-verde"></span> Entorno de demostración <span>v1.0</span></div></div></aside><div class="estructura-principal"><header class="barra-superior"><div class="migas-navegacion">${marcaCatalogoMovil}<button class="boton-icono menu-movil" data-action="menu" aria-label="Abrir menú">${renderIcono('menu')}</button><span>${escaparHtml(nombreEspacio)}</span>${renderIcono('chevron')}<strong>${etiquetas[estadoAplicacion.pagina] || 'Agenda'}</strong></div><div class="barra-superior-derecha"><span class="indicador-demo">Prototipo</span><span class="barra-superior-fecha">${renderIcono('calendar')} ${formatearFecha(HOY, { day: 'numeric', month: 'short', year: 'numeric' })}</span><button class="boton-notificaciones boton-icono" data-nav="notificaciones" aria-label="Ver notificaciones">${renderIcono('bell')}<i></i></button><span class="barra-superior-separador"></span><button class="boton-perfil" data-nav="configuracion">${avatar('AV', 'durazno')}<span><strong>Adriana Vega</strong><small>Administradora</small></span>${renderIcono('down')}</button></div></header><main id="contenido-principal" class="contenido-principal${animarSiguienteRuta ? ' animar-entrada' : ''}">${contenido}</main><footer class="pie-app"><span class="logo-pie">Citalendar</span></footer></div></div>`;
   const pestanasDemo = [
     ['resumen', 'grid', 'Inicio'],
     ['agenda', 'calendar', 'Agenda'],
@@ -229,33 +229,33 @@ export function renderEstructuraAplicacion(contenido) {
   const pestanasPrincipales = esDemo ? pestanasDemo : pestanasPorRol[usuarioActual.rol] || [['cuenta', 'user', 'Mi cuenta']];
   const masEstaActivo = !pestanasPrincipales.some(([pagina]) => pagina === estadoAplicacion.pagina);
   const pestanasMoviles = pestanasPrincipales.map(([pagina, simbolo, etiqueta]) =>
-    `<a class="mobile-tab ${estadoAplicacion.pagina === pagina ? 'is-current' : ''}" href="/admin/${pagina}" data-nav="${pagina}" ${estadoAplicacion.pagina === pagina ? 'aria-current="page"' : ''}><span class="mobile-tab-icon">${renderIcono(simbolo)}</span><span>${etiqueta}</span></a>`,
+    `<a class="pestana-movil ${estadoAplicacion.pagina === pagina ? 'es-actual' : ''}" href="/admin/${pagina}" data-nav="${pagina}" ${estadoAplicacion.pagina === pagina ? 'aria-current="page"' : ''}><span class="pestana-movil-icono">${renderIcono(simbolo)}</span><span>${etiqueta}</span></a>`,
   ).join('');
-  const barraLateral = document.querySelector('.sidebar');
+  const barraLateral = document.querySelector('.barra-lateral');
   barraLateral.id = 'mobile-navigation-drawer';
   barraLateral.scrollTop = desplazamientoLateral;
   barraLateral.insertAdjacentHTML('afterend',
-    `<nav class="mobile-tabbar glass-effect" aria-label="Navegación inferior"><div class="mobile-tabbar-inner" style="--tab-count:${pestanasPrincipales.length + (esDemo || usuarioActual.rol !== 'recepcionista' ? 1 : 0)}">${pestanasMoviles}${esDemo || usuarioActual.rol !== 'recepcionista' ? `<button type="button" class="mobile-tab ${masEstaActivo ? 'is-current' : ''}" data-action="menu" aria-label="Más secciones" aria-controls="mobile-navigation-drawer" aria-expanded="false"><span class="mobile-tab-icon">${renderIcono('menu')}</span><span>Más</span></button>` : ''}</div></nav>`,
+    `<nav class="navegacion-inferior efecto-cristal" aria-label="Navegación inferior"><div class="navegacion-inferior-contenido" style="--cantidad-pestanas:${pestanasPrincipales.length + (esDemo || usuarioActual.rol !== 'recepcionista' ? 1 : 0)}">${pestanasMoviles}${esDemo || usuarioActual.rol !== 'recepcionista' ? `<button type="button" class="pestana-movil ${masEstaActivo ? 'es-actual' : ''}" data-action="menu" aria-label="Más secciones" aria-controls="mobile-navigation-drawer" aria-expanded="false"><span class="pestana-movil-icono">${renderIcono('menu')}</span><span>Más</span></button>` : ''}</div></nav>`,
   );
   document.querySelectorAll('a[href^="/admin/"], a[href^="/reservas/"]').forEach((enlace) => enlace.href = urlSegunModo(enlace.getAttribute('href')));
-  const indicador = document.querySelector('.demo-pill');
-  indicador.outerHTML = `<a class="demo-pill" href="${urlSegunModo(!esDemo && estadoAplicacion.pagina === 'cuenta' ? '/admin/agenda' : !esDemo && estadoAplicacion.pagina === 'negocio' ? '/admin/plataforma' : location.pathname, !esDemo)}" title="${esDemo ? 'Ver versión conectada' : 'Comparar con la demo'}">${esDemo ? 'Prototipo' : 'Ver demo'}</a>`;
+  const indicador = document.querySelector('.indicador-demo');
+  indicador.outerHTML = `<a class="indicador-demo" href="${urlSegunModo(!esDemo && estadoAplicacion.pagina === 'cuenta' ? '/admin/agenda' : !esDemo && estadoAplicacion.pagina === 'negocio' ? '/admin/plataforma' : location.pathname, !esDemo)}" title="${esDemo ? 'Ver versión conectada' : 'Comparar con la demo'}">${esDemo ? 'Prototipo' : 'Ver demo'}</a>`;
   if (!esDemo) {
-    const marca = document.querySelector('.brand');
+    const marca = document.querySelector('.marca');
     marca.href = urlSegunModo(`/admin/${inicio}`);
     marca.dataset.nav = inicio;
-    const enlaceCuenta = document.querySelector('.sidebar-bottom [data-nav="configuracion"]');
+    const enlaceCuenta = document.querySelector('.seccion-inferior-lateral [data-nav="configuracion"]');
     enlaceCuenta.href = urlSegunModo('/admin/cuenta');
     enlaceCuenta.dataset.nav = 'cuenta';
     enlaceCuenta.querySelector('span').textContent = 'Mi cuenta';
-    enlaceCuenta.querySelector('.icon').outerHTML = renderIcono('user');
+    enlaceCuenta.querySelector('.icono').outerHTML = renderIcono('user');
     enlaceCuenta.classList.toggle('active', estadoAplicacion.pagina === 'cuenta');
-    document.querySelector('.portal-card').remove();
-    document.querySelector('.notification-button').remove();
-    document.querySelector('.topbar-divider').remove();
-    document.querySelector('.breadcrumbs strong').textContent = etiquetas[estadoAplicacion.pagina] || etiquetas[inicio];
-    document.querySelector('.sidebar-foot').remove();
-    document.querySelector('.profile-button').outerHTML = renderMenuCuentaConectada();
+    document.querySelector('.tarjeta-portal').remove();
+    document.querySelector('.boton-notificaciones').remove();
+    document.querySelector('.barra-superior-separador').remove();
+    document.querySelector('.migas-navegacion strong').textContent = etiquetas[estadoAplicacion.pagina] || etiquetas[inicio];
+    document.querySelector('.pie-lateral').remove();
+    document.querySelector('.boton-perfil').outerHTML = renderMenuCuentaConectada();
   }
   montarSelectorTema();
   animarSiguienteRuta = false;
@@ -305,7 +305,7 @@ document.addEventListener('toggle', (evento) => {
   cerrarMenusProfesionales(menu);
   const disparador = menu.querySelector('summary');
   const panel = menu.querySelector('.profesional-menu-mas');
-  const barraMovil = document.querySelector('.mobile-tabbar');
+  const barraMovil = document.querySelector('.navegacion-inferior');
   const limiteInferior = barraMovil && getComputedStyle(barraMovil).display !== 'none'
     ? barraMovil.getBoundingClientRect().top - 8
     : window.innerHeight - 8;
@@ -315,7 +315,7 @@ document.addEventListener('click', (evento) => {
   if (!evento.target.closest('.profesional-mas') || evento.target.closest('[data-accion-profesional], [data-accion-recepcionista], [data-alternar-servicio], [data-inhabilitar-servicio], [data-alternar-sucursal], [data-inhabilitar-sucursal]')) cerrarMenusProfesionales();
 }, true);
 document.addEventListener('click', async (evento) => {
-  const disparadorCuenta = evento.target.closest('.account-menu-trigger');
+  const disparadorCuenta = evento.target.closest('.menu-cuenta-disparador');
   if (disparadorCuenta) {
     establecerMenuCuenta(disparadorCuenta.getAttribute('aria-expanded') !== 'true');
     return;
@@ -398,7 +398,7 @@ document.addEventListener('click', async (evento) => {
       return;
     }
     if (accion === 'menu') {
-      establecerMenuMovil(!document.querySelector('.admin-layout')?.classList.contains('menu-open'));
+      establecerMenuMovil(!document.querySelector('.estructura-admin')?.classList.contains('menu-abierto'));
       return;
     }
     if (accion === 'agenda-hoy') {
@@ -462,7 +462,7 @@ window.addEventListener('popstate', () => {
   render();
 });
 document.addEventListener('keydown', (evento) => {
-  if (evento.key === 'Escape' && document.querySelector('.account-menu-trigger[aria-expanded="true"]')) {
+  if (evento.key === 'Escape' && document.querySelector('.menu-cuenta-disparador[aria-expanded="true"]')) {
     establecerMenuCuenta(false, true);
     evento.preventDefault();
     return;
@@ -485,17 +485,17 @@ document.addEventListener('keydown', (evento) => {
       return;
     }
   }
-  if (evento.key === 'Escape' && document.querySelector('.admin-layout.menu-open') && !document.querySelector('#app-dialog')?.open) {
+  if (evento.key === 'Escape' && document.querySelector('.estructura-admin.menu-abierto') && !document.querySelector('#dialogo-app')?.open) {
     establecerMenuMovil(false);
   }
 });
 document.addEventListener('focusin', (evento) => {
-  if (!evento.target.closest?.('.account-menu')) establecerMenuCuenta(false);
+  if (!evento.target.closest?.('.menu-cuenta')) establecerMenuCuenta(false);
 });
 function mostrarIngresoConectado(mensaje = '') {
   renderAutenticacion(mensaje, iniciarAplicacion);
 }
-window.addEventListener('cita-sesion-expirada', () => { document.querySelector('#app-dialog')?.close(); mostrarIngresoConectado('Tu sesión expiró. Inicia sesión nuevamente.'); });
+window.addEventListener('cita-sesion-expirada', () => { document.querySelector('#dialogo-app')?.close(); mostrarIngresoConectado('Tu sesión expiró. Inicia sesión nuevamente.'); });
 export async function iniciarAplicacion() {
   try {
     document.documentElement.dataset.appMode = esDemo ? 'demo' : 'connected';
@@ -519,7 +519,7 @@ export async function iniciarAplicacion() {
   } catch (error) {
     if (!esDemo && !usuarioActual) { mostrarIngresoConectado(error.message); return; }
     document.querySelector('#app').innerHTML =
-      `<div class="startup-error"><img src="/brand/citalendar-icon.svg" alt=""/><h1>No pudimos abrir tu agenda</h1><p>${escaparHtml(error.message)}</p><div class="startup-actions"><button class="btn btn-primary" onclick="location.reload()">Volver a intentar</button><a class="btn btn-light" href="${urlSegunModo(location.pathname, true)}">Ver demo</a></div></div>`;
+      `<div class="arranque-error"><img src="/brand/citalendar-icon.svg" alt=""/><h1>No pudimos abrir tu agenda</h1><p>${escaparHtml(error.message)}</p><div class="arranque-acciones"><button class="btn btn-primary" onclick="location.reload()">Volver a intentar</button><a class="btn btn-light" href="${urlSegunModo(location.pathname, true)}">Ver demo</a></div></div>`;
   }
 }
 // Mejora progresiva: los navegadores sin WebMCP siguen usando la misma interfaz.

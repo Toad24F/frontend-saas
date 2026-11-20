@@ -32,7 +32,7 @@ window.addEventListener('cita-sesion-expirada', () => {
 
 // Reemplazar detalle por editor usa el mismo panel nativo; el foco final vuelve a la ficha del directorio.
 function abrirPanelCliente(titulo, contenido) {
-  const anterior = document.querySelector('#app-dialog');
+  const anterior = document.querySelector('#dialogo-app');
   if (!anterior?.open) destinoFoco = document.activeElement;
   const dialogo = panelAgenda(titulo, contenido, true);
   dialogo.classList.add('agenda-dialogo-cita');
@@ -61,15 +61,15 @@ export async function abrirFichaCliente(id, alCambiar) {
     identidad = identidadSesion();
   const dialogo = abrirPanelCliente(
     'Ficha del cliente',
-    '<div class="dialog-body"><p role="status">Consultando ficha…</p></div>',
+    '<div class="dialogo-cuerpo"><p role="status">Consultando ficha…</p></div>',
   );
   const vigente = () =>
     dialogo.open && revisionPanel === generacion && identidad === identidadSesion();
   try {
     const ficha = await clientesClient.consultar(id);
     if (!vigente()) return;
-    dialogo.querySelector('.dialog-body').innerHTML =
-      `<dl class="agenda-campos-detalle"><div><dt>Nombre completo</dt><dd>${esc(ficha.nombreCompleto)}</dd></div><div><dt>Teléfono</dt><dd>${esc(ficha.telefono)}</dd></div><div><dt>Cliente</dt><dd>#${ficha.id}</dd></div><div><dt>Versión</dt><dd>${ficha.version}</dd></div></dl><button class="btn btn-primary" data-ficha-corregir>Corregir ficha</button><section class="historial-cliente" aria-label="Historial del cliente"><h3>Historial de citas</h3><p class="field-hint">Los contactos y costos de cada cita conservan su registro histórico, aunque se corrija esta ficha.</p><div data-ficha-historial></div></section>`;
+    dialogo.querySelector('.dialogo-cuerpo').innerHTML =
+      `<dl class="agenda-campos-detalle"><div><dt>Nombre completo</dt><dd>${esc(ficha.nombreCompleto)}</dd></div><div><dt>Teléfono</dt><dd>${esc(ficha.telefono)}</dd></div><div><dt>Cliente</dt><dd>#${ficha.id}</dd></div><div><dt>Versión</dt><dd>${ficha.version}</dd></div></dl><button class="btn btn-primary" data-ficha-corregir>Corregir ficha</button><section class="historial-cliente" aria-label="Historial del cliente"><h3>Historial de citas</h3><p class="ayuda-campo">Los contactos y costos de cada cita conservan su registro histórico, aunque se corrija esta ficha.</p><div data-ficha-historial></div></section>`;
     dialogo.querySelector('[data-ficha-corregir]').onclick = () =>
       abrirEditorCliente(ficha, alCambiar);
     let generacionHistorial = 0;
@@ -120,7 +120,7 @@ export async function abrirFichaCliente(id, alCambiar) {
     await cargarHistorial();
   } catch (error) {
     if (!vigente()) return;
-    dialogo.querySelector('.dialog-body').innerHTML = renderError(error);
+    dialogo.querySelector('.dialogo-cuerpo').innerHTML = renderError(error);
     dialogo.querySelector('[data-ficha-reintentar]')?.addEventListener('click', () => void abrirFichaCliente(id, alCambiar));
   }
 }
@@ -132,7 +132,7 @@ export function abrirEditorCliente(ficha, alCambiar) {
     borrador = borradorAgenda(clave);
   const dialogo = abrirPanelCliente(
     ficha ? 'Corregir ficha' : 'Nuevo cliente',
-    `<form><div class="dialog-body"><p class="form-intro">${ficha ? 'Corrige los datos actuales de esta persona. Las citas anteriores no se modifican.' : 'Crea una ficha independiente. Dos personas pueden compartir el mismo teléfono.'}</p>${renderCampo('Nombre completo', 'nombreCompleto', borrador?.nombreCompleto ?? ficha?.nombreCompleto ?? '', 'text', 'required autocomplete="off"')}${renderCampo('Teléfono', 'telefono', borrador?.telefono ?? ficha?.telefono ?? '', 'tel', 'required autocomplete="off" inputmode="tel"')}<p class="field-hint">Nombre: hasta 150 caracteres. Teléfono: diez dígitos; puedes incluir +52, espacios o guiones.</p><p class="form-error" data-ficha-error role="alert" tabindex="-1" hidden></p><p class="field-hint aviso-cliente" data-ficha-alta-incierta hidden>El alta puede haberse guardado aunque no se reciba confirmación. Revisa elemento directorio antes de descartar este borrador y crear otra ficha.</p><button type="button" class="btn btn-light" data-ficha-releer hidden>${ficha ? 'Releer ficha' : 'Revisar directorio'}</button>${!ficha ? '<button type="button" class="btn btn-light" data-ficha-descartar hidden>Descartar borrador</button>' : ''}</div><div class="dialog-footer"><button type="button" class="btn btn-light" data-ficha-cerrar>Cerrar</button><button type="submit" class="btn btn-primary">Guardar ficha</button></div></form>`,
+    `<form><div class="dialogo-cuerpo"><p class="introduccion-formulario">${ficha ? 'Corrige los datos actuales de esta persona. Las citas anteriores no se modifican.' : 'Crea una ficha independiente. Dos personas pueden compartir el mismo teléfono.'}</p>${renderCampo('Nombre completo', 'nombreCompleto', borrador?.nombreCompleto ?? ficha?.nombreCompleto ?? '', 'text', 'required autocomplete="off"')}${renderCampo('Teléfono', 'telefono', borrador?.telefono ?? ficha?.telefono ?? '', 'tel', 'required autocomplete="off" inputmode="tel"')}<p class="ayuda-campo">Nombre: hasta 150 caracteres. Teléfono: diez dígitos; puedes incluir +52, espacios o guiones.</p><p class="error-formulario" data-ficha-error role="alert" tabindex="-1" hidden></p><p class="ayuda-campo aviso-cliente" data-ficha-alta-incierta hidden>El alta puede haberse guardado aunque no se reciba confirmación. Revisa elemento directorio antes de descartar este borrador y crear otra ficha.</p><button type="button" class="btn btn-light" data-ficha-releer hidden>${ficha ? 'Releer ficha' : 'Revisar directorio'}</button>${!ficha ? '<button type="button" class="btn btn-light" data-ficha-descartar hidden>Descartar borrador</button>' : ''}</div><div class="dialogo-pie"><button type="button" class="btn btn-light" data-ficha-cerrar>Cerrar</button><button type="submit" class="btn btn-primary">Guardar ficha</button></div></form>`,
   );
   const formulario = dialogo.querySelector('form'),
     guardar = formulario.querySelector('[type="submit"]'),

@@ -9,7 +9,7 @@ npm install
 npm run dev
 ```
 
-Abre la dirección que imprima Vite. Para compilar: `npm run build`. Para revisar la compilación local: `npm run preview`. Las verificaciones del motor de demostración se ejecutan con `npm test`.
+Abre la dirección que imprima Vite. Para compilar: `npm run build`. Para revisar la compilación local: `npm run preview`. Las pruebas unitarias se ejecutan con `npm test`.
 
 ### Verlo desde un Android
 
@@ -37,7 +37,11 @@ El panel conectado requiere la API del backend y una cuenta activa. La entrada p
 
 En el panel, administración dispone de **Mi cuenta → Tu portal de reservas → Abrir portal / Copiar enlace**. Requiere el backend actualizado con `identificadorPublico` en login/perfil; al recargar se obtiene el dato con la sesión vigente. Si falta un identificador válido, se informa y se deshabilitan las acciones. [Contrato, pruebas y evidencia del acceso](docs/fase-4/resultados-tareas/resultado-acceso-portal-perfil.md).
 
-T115 añade avisos accesibles en una región estable, restauración de foco visible y ajustes móviles. T116 amplía las pruebas de invalidación, respuestas fuera de orden, contacto en memoria e incertidumbre. Detalle y evidencia: [T115–T116](docs/fase-4/resultados-tareas/resultado-t115-t116.md). T117–T124 agregan pruebas Playwright del portal y API reales contra una base MariaDB temporal; ejecuta `npm run test:browser` con el backend, MariaDB y Microsoft Edge disponibles. El usuario de base de datos configurado en `../backend/.env` necesita poder crear y eliminar bases temporales. [Flujo y resultados del runner](docs/fase-4/resultados-tareas/resultado-t117-t124.md).
+T115 añade avisos accesibles en una región estable, restauración de foco visible y ajustes móviles. T116 amplía las pruebas de invalidación, respuestas fuera de orden, contacto en memoria e incertidumbre. Detalle y evidencia en [T115–T116](docs/fase-4/resultados-tareas/resultado-t115-t116.md). Las pruebas Playwright T117–T124 usan el portal, la API real y una base efímera de MariaDB. El usuario configurado para pruebas en `../backend/.env.test.local` necesita permiso para crear y eliminar esa base. [Flujo y resultados de la integración](docs/fase-4/resultados-tareas/resultado-t117-t124.md)
+
+- `npm test` ejecuta las pruebas unitarias.
+- `npm run test:browser -- --config tests/m4-navegador.config.js` ejecuta Playwright en Microsoft Edge con API simulada.
+- `npm run test:browser` ejecuta la integración real con MariaDB y Microsoft Edge. En PowerShell, establece `$env:PORTAL_TEST_BACKEND_READ_ONLY='1'` para usar el backend ya compilado y limitar las escrituras a la base efímera de la corrida.
 
 El cliente público llama exclusivamente a `/publico/negocios/:slug/...` bajo el mismo origen del frontend, con cookie HttpOnly y protección CSRF. No usa el JWT del panel ni llama directamente a `VITE_API_URL`. En desarrollo, `vite.config.js` dirige `/publico` hacia `VITE_API_URL` (por defecto `http://localhost:3000`) sin cambiar el encabezado Origin ni la ruta de la cookie.
 
@@ -104,55 +108,43 @@ Las reglas siguientes describen exclusivamente `?demo=1`. La integración del pa
 
 ```text
 src/
-  main.js              # Delega al selector de entradas
-  entry-router.js      # Separa portal público, panel conectado y demo explícita
-  demo/                # Datos ficticios, reservas y horarios en memoria
-    entry.js
-    data.js
-    availability.js
-    schedule.js
-    screens/
-      index.js        # Registro de pantallas de la demo
-      resumen/         # view.js y style.css
-      clientes/        # view.js, actions.js y style.css
-      reportes/        # view.js, state.js y style.css
-      notificaciones/  # view.js y style.css
-      configuracion/   # view.js y style.css
-      reservas/        # booking.js y style.css
-  connected/           # Integración con el backend
-    entry.js
-    public/            # Entrada pública aislada, HTTP y coordinación del navegador
-    backend.js         # Fachada para las vistas comunes
-    mode.js
-    screens/index.js   # Registro de pantallas conectadas
-    modules/
-      auth/             # Sesión y cliente HTTP
-      catalogos/        # Datos de servicios y sucursales
-      datos/            # Carga real según el rol
-      disponibilidad/   # Horarios enviados a la API
-      permisos/         # Pantallas disponibles según el rol
-  shared/              # Router, estado, UI y estilos generales
-    app.js
-    actions.js         # Distribuye eventos a acciones por pantalla
-    forms.js           # Formularios comunes
-    styles.css         # Shell y componentes comunes
-    screens/
-      agenda/          # agenda.vista.js, agenda.tabla.js, agenda.acciones.js y CSS
-      profesionales/   # view.js y style.css
-      servicios/       # view.js y style.css
-      sucursales/      # view.js y style.css
-      disponibilidad/  # view.js, actions.js y style.css
-      plataforma/      # view.js y actions.js
-      catalogos/       # Acciones comunes de los tres catálogos
-public/data/demo.json # Catálogos ficticios de dos negocios
-db/schema.sql        # Propuesta SQL para una base NUEVA, no ejecutada por la app
-docs/                # Diccionario, alcance y contrato futuro de seguridad
-tests/               # Verificaciones del motor en memoria
+  aplicacion.entrada.js                  # Punto de entrada de index.html
+  entrada.enrutador.js                   # Selección de portal, panel o demo
+  connected/
+    conectado.entrada.js
+    backend.js                           # Fachada para las vistas comunes
+    conexion.modo.js
+    modules/autenticacion/sesion.estado.js
+    portal-publico/portal.entrada.js
+    screens/pantallas.conectadas.js
+  demo/
+    demo.entrada.js
+    demo.datos.js
+    demo.horario.js
+    disponibilidad.motor.js
+    screens/pantallas.demo.js
+  shared/
+    aplicacion.nucleo.js                 # Navegación, estado y render compartidos
+    aplicacion.acciones.js
+    formularios.componentes.js
+    global.estilos.css
+    tema.estilos.css
+    movil.estilos.css
+    movimiento.estilos.css
+    screens/                            # Agenda, catálogos y otras vistas comunes
+public/data/demo.json                   # Catálogos ficticios de dos negocios
+tests/                                 # Unitarias y recorridos independientes
+  datos-prueba/
+  m4-navegador/                         # Playwright con API simulada
+  navegador/                            # Playwright con API real y MariaDB efímera
+docs/
 ```
+
+El historial de la migración, las rutas vigentes y las excepciones de nomenclatura están en el [cierre del plan](docs/traduccion-nomenclaturas/resultado-cierre-2026-11-20.md) y el [mapa de renombres](docs/traduccion-nomenclaturas/mapa-renombres-frontend.md).
 
 ## Estilo de cristal
 
-La clase reutilizable `.glass-effect` está en `src/shared/styles.css` y usa blanco al 20 %, desenfoque de 7 px, borde blanco al 30 % y sombra de 30 px. Se aplica a los diálogos y avisos del prototipo. El exterior del diálogo permanece nítido y transparente; el modo oscuro adapta el vidrio y el texto. El selector de negocio y el resumen del portal usan variantes adecuadas a sus fondos.
+La clase reutilizable `.efecto-cristal` está en `src/shared/global.estilos.css` y usa blanco al 20 %, desenfoque de 7 px, borde blanco al 30 % y sombra de 30 px. Se aplica a los diálogos y avisos del prototipo. El exterior del diálogo permanece nítido y transparente; el modo oscuro adapta el vidrio y el texto. El selector de negocio y el resumen del portal usan variantes adecuadas a sus fondos.
 
 ## Configuración
 

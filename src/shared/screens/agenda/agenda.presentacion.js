@@ -5,15 +5,15 @@ import { columnasCalendario } from '../../calendario.distribucion.js';
 
 // Componentes de presentación compartidos: demo y conectado conservan los mismos estados y jerarquía.
 export function leyendaAgenda() {
-  return `<div class="legend agenda-leyenda" role="list" aria-label="Estados de las citas">${Object.entries(etiquetasEstadoCita).map(([estadoActual, etiqueta]) => `<span role="listitem"><i class="legend-dot ${estadoActual}" aria-hidden="true"></i>${etiqueta}</span>`).join('')}</div>`;
+  return `<div class="leyenda agenda-leyenda" role="list" aria-label="Estados de las citas">${Object.entries(etiquetasEstadoCita).map(([estadoActual, etiqueta]) => `<span role="listitem"><i class="legend-dot ${estadoActual}" aria-hidden="true"></i>${etiqueta}</span>`).join('')}</div>`;
 }
 export function metricasAgenda(citas, dia, { loading: cargando = citas == null } = {}) {
   const elementos = citas?.filter((elemento) => elemento.date === dia);
   const cantidad = (estadoActual) => elementos == null ? null : estadoActual ? elementos.filter((elemento) => elemento.status === estadoActual).length : elementos.length;
-  return `<div class="stats-grid agenda-metricas" aria-label="Resumen del día ${esc(dia)}" aria-busy="${cargando}">${cargando ? '<span class="visually-hidden" role="status">Cargando resumen del día…</span>' : ''}${[
-    [cantidad(), 'Citas del día', 'calendar', 'orange'], [cantidad('confirmada'), 'Confirmadas', 'circleCheck', 'blue'],
-    [cantidad('pendiente'), 'Por confirmar', 'clock', 'amber'], [cantidad('completada'), 'Completadas', 'check', 'green'],
-  ].map(([numero, etiqueta, imagen, color]) => `<div class="stat-card"><div class="stat-top"><span>${etiqueta}</span><span class="stat-icon ${color}">${renderIcono(imagen)}</span></div><div class="stat-number">${numero == null ? cargando ? '<span class="esqueleto-relleno esqueleto-numero" aria-hidden="true"></span>' : '<span class="metrica-no-disponible">Sin datos</span>' : String(numero).padStart(2, '0')}</div></div>`).join('')}</div>`;
+  return `<div class="cuadricula-indicadores agenda-metricas" aria-label="Resumen del día ${esc(dia)}" aria-busy="${cargando}">${cargando ? '<span class="visually-hidden" role="status">Cargando resumen del día…</span>' : ''}${[
+    [cantidad(), 'Citas del día', 'calendar', 'naranja'], [cantidad('confirmada'), 'Confirmadas', 'circleCheck', 'azul'],
+    [cantidad('pendiente'), 'Por confirmar', 'clock', 'ambar'], [cantidad('completada'), 'Completadas', 'check', 'verde'],
+  ].map(([numero, etiqueta, imagen, color]) => `<div class="tarjeta-indicador"><div class="indicador-cabecera"><span>${etiqueta}</span><span class="indicador-icono ${color}">${renderIcono(imagen)}</span></div><div class="indicador-valor">${numero == null ? cargando ? '<span class="esqueleto-relleno esqueleto-numero" aria-hidden="true"></span>' : '<span class="metrica-no-disponible">Sin datos</span>' : String(numero).padStart(2, '0')}</div></div>`).join('')}</div>`;
 }
 export function esqueletoCalendario(vista) {
   const mes = vista === 'month', dias = vista === 'day' ? 1 : 7;

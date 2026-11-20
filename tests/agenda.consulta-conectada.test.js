@@ -36,68 +36,68 @@ test('T090: día, semana y mes de seis semanas; aritmética civil sin DST', () =
   assert.throws(() => periodoCalendario('month', '2026-02-30'));
 });
 test('T089/T091: GET cerrado, filtros escapados y ninguna identidad ni paginación en calendario', async () => {
-  const calls = [];
-  const client = crearAgendaClient(async (path) => { calls.push(path); return { desde: '2026-11-01', hasta: '2026-11-01', citas: [] }; });
+  const llamadas = [];
+  const client = crearAgendaClient(async (ruta) => { llamadas.push(ruta); return { desde: '2026-11-01', hasta: '2026-11-01', citas: [] }; });
   await client.listar({ desde: '2026-11-01', hasta: '2026-11-01', sucursalId: '2', personalId: '3', estado: 'confirmada', busqueda: 'Ana & %_', negocioId: 999, pagina: 2 });
-  const url = new URL(calls[0], 'http://test');
+  const url = new URL(llamadas[0], 'http://test');
   assert.equal(url.pathname, '/citas');
   assert.deepEqual(Object.fromEntries(url.searchParams), { desde: '2026-11-01', hasta: '2026-11-01', sucursalId: '2', personalId: '3', estado: 'confirmada', busqueda: 'Ana & %_' });
 });
 test('T089/T092: detalle sin query, historial paginado y clientes solo por GET', async () => {
-  const calls = [];
-  const client = crearAgendaClient(async (...args) => { calls.push(args); return {}; });
+  const llamadas = [];
+  const client = crearAgendaClient(async (...argumentos) => { llamadas.push(argumentos); return {}; });
   await client.consultarDetalle(7); await client.consultarHistorial(7, 2);
   await client.listarClientes({ busqueda: 'Ana', pagina: 2, limite: 20, negocioId: 9 });
   await client.consultarCliente(5); await client.consultarHistorialCliente(5, 3);
-  assert.deepEqual(calls.map(([path]) => path), ['/citas/7', '/citas/7/historial?pagina=2&limite=50', '/clientes?busqueda=Ana&pagina=2&limite=20', '/clientes/5', '/clientes/5/citas?pagina=3&limite=50']);
-  assert.ok(calls.every((args) => args.length === 1));
+  assert.deepEqual(llamadas.map(([ruta]) => ruta), ['/citas/7', '/citas/7/historial?pagina=2&limite=50', '/clientes?busqueda=Ana&pagina=2&limite=20', '/clientes/5', '/clientes/5/citas?pagina=3&limite=50']);
+  assert.ok(llamadas.every((argumentos) => argumentos.length === 1));
   assert.throws(() => client.consultarDetalle('1/estado'));
 });
 test('T090: exceso, error técnico y respuesta incompleta nunca se convierten en vacío', async () => {
-  const query = { desde: '2026-11-01', hasta: '2026-11-01' };
-  for (const response of [null, {}, { ...query, citas: [{}] }, { ...query, citas: Array(1001).fill({}) }, { desde: 'otro', hasta: query.hasta, citas: [] }]) {
-    await assert.rejects(crearAgendaClient(async () => response).listar(query));
+  const consulta = { desde: '2026-11-01', hasta: '2026-11-01' };
+  for (const respuesta of [null, {}, { ...consulta, citas: [{}] }, { ...consulta, citas: Array(1001).fill({}) }, { desde: 'otro', hasta: consulta.hasta, citas: [] }]) {
+    await assert.rejects(crearAgendaClient(async () => respuesta).listar(consulta));
   }
-  for (const status of [400, 401, 403, 404, 409, 500, 503]) {
-    const error = Object.assign(new Error('Acota la consulta'), { status });
-    await assert.rejects(crearAgendaClient(async () => { throw error; }).listar(query), (e) => e === error);
+  for (const estadoHttp of [400, 401, 403, 404, 409, 500, 503]) {
+    const error = Object.assign(new Error('Acota la consulta'), { status: estadoHttp });
+    await assert.rejects(crearAgendaClient(async () => { throw error; }).listar(consulta), (errorPrueba) => errorPrueba === error);
   }
 });
-const deferred = () => { let resolve, reject; const promise = new Promise((a, b) => { resolve = a; reject = b; }); return { promise, resolve, reject }; };
+const diferido = () => { let resolverPromesa, rechazar; const promesa = new Promise((a, b) => { resolverPromesa = a; rechazar = b; }); return { promise: promesa, resolve: resolverPromesa, reject: rechazar }; };
 test('T091: respuesta antigua y error antiguo no reemplazan el último filtro', async () => {
-  for (const rejectOld of [false, true]) {
-    const first = deferred(), second = deferred(); let n = 0;
-    const store = crearAgendaStore(() => (++n === 1 ? first.promise : second.promise));
+  for (const rechazarAnterior of [false, true]) {
+    const primera = diferido(), segunda = diferido(); let n = 0;
+    const store = crearAgendaStore(() => (++n === 1 ? primera.promise : segunda.promise));
     const a = store.load({ busqueda: 'A' }); const b = store.load({ busqueda: 'B' });
-    second.resolve({ citas: [{ id: 2 }] }); await b;
-    if (rejectOld) first.reject(new Error('Antiguo')); else first.resolve({ citas: [{ id: 1 }] });
+    segunda.resolve({ citas: [{ id: 2 }] }); await b;
+    if (rechazarAnterior) primera.reject(new Error('Antiguo')); else primera.resolve({ citas: [{ id: 1 }] });
     await a;
     assert.equal(store.state.data.citas[0].id, 2);
     assert.equal(store.state.error, null);
   }
 });
 test('T090/T091: nueva consulta retira datos previos; fallo visible y reintento explícito', async () => {
-  let fail = false;
-  const store = crearAgendaStore(async () => { if (fail) throw Object.assign(new Error('Temporal'), { status: 503 }); return { citas: [] }; });
+  let rechazarPromesa = false;
+  const store = crearAgendaStore(async () => { if (rechazarPromesa) throw Object.assign(new Error('Temporal'), { status: 503 }); return { citas: [] }; });
   await store.load({ estado: 'confirmada' });
-  fail = true; const pending = store.load({ estado: 'pendiente' });
+  rechazarPromesa = true; const pendiente = store.load({ estado: 'pendiente' });
   assert.equal(store.state.data, null); assert.equal(store.state.busy, true);
-  await pending;
+  await pendiente;
   assert.equal(store.state.error.status, 503); assert.equal(store.state.data, null);
-  fail = false; await store.load({ estado: 'pendiente' });
+  rechazarPromesa = false; await store.load({ estado: 'pendiente' });
   assert.deepEqual(store.state.data, { citas: [] });
 });
 test('T088: limpiar sesión invalida lecturas pendientes y datos privados', async () => {
-  const wait = deferred(), store = crearAgendaStore(() => wait.promise);
-  const pending = store.load({}); store.reset(); wait.resolve({ citas: [{ id: 1 }] }); await pending;
+  const espera = diferido(), store = crearAgendaStore(() => espera.promise);
+  const pendiente = store.load({}); store.reset(); espera.resolve({ citas: [{ id: 1 }] }); await pendiente;
   assert.equal(store.state.data, null); assert.equal(store.state.busy, false);
 });
 test('T090: más de cien citas siguen completas; 1.000 es un límite técnico inclusivo', async () => {
-  const query = { desde: '2026-11-01', hasta: '2026-11-01' };
-  const cita = { id: 1, estado: 'confirmada', fechaLocal: query.desde, fechaFinLocal: query.desde, horaInicio: '23:15:00', horaFin: '23:45:00', zonaHoraria: 'America/Tijuana', causas: [] };
-  for (const count of [101, 1000]) {
-    const response = { ...query, citas: Array.from({ length: count }, (_, i) => ({ ...cita, id: i + 1 })) };
-    const result = await crearAgendaClient(async () => response).listar(query);
-    assert.equal(result.citas.length, count);
+  const consulta = { desde: '2026-11-01', hasta: '2026-11-01' };
+  const cita = { id: 1, estado: 'confirmada', fechaLocal: consulta.desde, fechaFinLocal: consulta.desde, horaInicio: '23:15:00', horaFin: '23:45:00', zonaHoraria: 'America/Tijuana', causas: [] };
+  for (const cantidad of [101, 1000]) {
+    const respuesta = { ...consulta, citas: Array.from({ length: cantidad }, (_, indice) => ({ ...cita, id: indice + 1 })) };
+    const resultado = await crearAgendaClient(async () => respuesta).listar(consulta);
+    assert.equal(resultado.citas.length, cantidad);
   }
 });

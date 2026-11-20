@@ -1,7 +1,7 @@
 import { escaparHtml } from '../../interfaz.componentes.js';
 
 export function renderEncabezadoCatalogo(titulo, descripcion, acciones, cupo = '') {
-  return `<div class="page-heading catalogo-encabezado"><div><h1>${escaparHtml(titulo)}</h1><p>${escaparHtml(descripcion)}</p></div>${cupo ? `<div class="catalogo-cupo">${cupo}</div>` : ''}<div class="heading-actions">${acciones}</div></div>`;
+  return `<div class="encabezado-pagina catalogo-encabezado"><div><h1>${escaparHtml(titulo)}</h1><p>${escaparHtml(descripcion)}</p></div>${cupo ? `<div class="catalogo-cupo">${cupo}</div>` : ''}<div class="acciones-encabezado">${acciones}</div></div>`;
 }
 
 export function renderCupoCatalogo(etiqueta, datos) {

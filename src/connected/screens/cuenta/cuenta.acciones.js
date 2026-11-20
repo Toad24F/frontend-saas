@@ -15,7 +15,7 @@ document.addEventListener('submit', (evento) => {
 });
 
 export function cambiarContrasena() {
-  const dialogo = abrirDialogo('Cambiar contraseña', `<form id="cuenta-formulario-contrasena"><div class="dialog-body"><p class="form-intro">Después de guardar tendrás que iniciar sesión de nuevo.</p>${campo('Contraseña actual', 'contrasenaActual', '', 'password', 'required autocomplete="current-password"')}${campo('Nueva contraseña', 'contrasenaNueva', '', 'password', 'required minlength="12" autocomplete="new-password"')}${campo('Confirmar nueva contraseña', 'confirmacion', '', 'password', 'required minlength="12" autocomplete="new-password"')}${espacioErrorFormulario}</div><div class="dialog-footer"><button type="button" class="btn btn-light" data-dismiss>Cancelar</button><button type="submit" class="btn btn-primary">Guardar contraseña</button></div></form>`);
+  const dialogo = abrirDialogo('Cambiar contraseña', `<form id="cuenta-formulario-contrasena"><div class="dialogo-cuerpo"><p class="introduccion-formulario">Después de guardar tendrás que iniciar sesión de nuevo.</p>${campo('Contraseña actual', 'contrasenaActual', '', 'password', 'required autocomplete="current-password"')}${campo('Nueva contraseña', 'contrasenaNueva', '', 'password', 'required minlength="12" autocomplete="new-password"')}${campo('Confirmar nueva contraseña', 'confirmacion', '', 'password', 'required minlength="12" autocomplete="new-password"')}${espacioErrorFormulario}</div><div class="dialogo-pie"><button type="button" class="btn btn-light" data-dismiss>Cancelar</button><button type="submit" class="btn btn-primary">Guardar contraseña</button></div></form>`);
   dialogo.querySelector('[data-dismiss]').onclick = () => dialogo.close();
   dialogo.querySelector('form').onsubmit = async (evento) => {
     evento.preventDefault();
@@ -30,7 +30,7 @@ export function cambiarContrasena() {
       dialogo.close();
       location.reload();
     } catch (error) {
-      const destino = dialogo.querySelector('#form-error');
+      const destino = dialogo.querySelector('#error-formulario');
       destino.textContent = error.message;
       destino.hidden = false;
       destino.focus();

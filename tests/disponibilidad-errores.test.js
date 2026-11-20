@@ -3,10 +3,10 @@ import assert from 'node:assert/strict';
 import { interpretarErroresBloqueo, interpretarErroresHorario, validarBloqueo, validarProyeccion, validarFranjasHorario } from '../src/shared/screens/disponibilidad/disponibilidad.errores.js';
 
 test('bloqueos señalan motivo, fechas y horas por separado', () => {
-  const data = new FormData();
-  data.set('reason', ' '); data.set('date', '2026-10-20'); data.set('endDate', '2026-10-19');
-  data.set('start', '12:00'); data.set('end', '');
-  assert.deepEqual(validarBloqueo(data), {
+  const datos = new FormData();
+  datos.set('reason', ' '); datos.set('date', '2026-10-20'); datos.set('endDate', '2026-10-19');
+  datos.set('start', '12:00'); datos.set('end', '');
+  assert.deepEqual(validarBloqueo(datos), {
     reason: 'Escribe el motivo del bloqueo.',
     endDate: 'La fecha final debe ser igual o posterior a la fecha inicial.',
     end: 'Indica también la hora final.',
@@ -18,14 +18,14 @@ test('bloqueos señalan motivo, fechas y horas por separado', () => {
 });
 
 test('horario semanal señala la celda y detecta empalmes', () => {
-  const rows = [
+  const consultarFilas = [
     { id: 10, day: 1, enabled: true, branchId: 2, start: '09:00', end: '12:00', breakStart: '', breakEnd: '' },
     { id: 11, day: 1, enabled: true, branchId: 2, start: '11:30', end: '13:00', breakStart: '', breakEnd: '' },
   ];
-  assert.deepEqual(validarFranjasHorario(rows, [2]), {
+  assert.deepEqual(validarFranjasHorario(consultarFilas, [2]), {
     'horario-11-entrada': 'Esta franja se empalma con 09:00–12:00.',
   });
-  assert.deepEqual(interpretarErroresHorario(new Error('fila 1, finMinutos: debe ser posterior'), rows), {
+  assert.deepEqual(interpretarErroresHorario(new Error('fila 1, finMinutos: debe ser posterior'), consultarFilas), {
     'horario-11-salida': 'fila 1, finMinutos: debe ser posterior',
   });
   assert.deepEqual(validarFranjasHorario([{ id: 12, day: 2, enabled: false, branchId: 0, start: '', end: '', breakStart: '', breakEnd: '' }], [2]), {});

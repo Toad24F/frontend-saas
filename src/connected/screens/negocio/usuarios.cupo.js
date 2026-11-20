@@ -58,5 +58,5 @@ export function renderAvisoCupoPropio(rol, datos) {
     throw new Error('La respuesta de cupo del negocio no es válida.');
   }
   const etiqueta = rol === 'profesionales' ? 'profesionales' : 'recepcionistas';
-  return `<p class="form-intro" role="status">Cupo vigente de ${etiqueta}: ${escapar(datos.activos)} de ${escapar(datos.limite)} cuentas activas; ${escapar(datos.disponibles)} disponibles. El servidor vuelve a comprobarlo al guardar.</p>`;
+  return `<p class="introduccion-formulario" role="status">Cupo vigente de ${etiqueta}: ${escapar(datos.activos)} de ${escapar(datos.limite)} cuentas activas; ${escapar(datos.disponibles)} disponibles. El servidor vuelve a comprobarlo al guardar.</p>`;
 }

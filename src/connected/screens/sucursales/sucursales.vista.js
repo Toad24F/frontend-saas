@@ -8,5 +8,5 @@ export function sucursales() {
   if (usuarioActual?.rol !== 'admin_negocio') return sucursalesCompartidas();
   const cupo = obtenerCupoSucursales();
   return `${sucursalesCompartidas({ cupo, accionesEncabezado: renderAccesoInhabilitados('sucursales'), administrar: (sucursal) =>
-    `<button type="button" class="action-danger" data-inhabilitar-sucursal="${sucursal.id}" aria-label="Inhabilitar ${escaparHtml(sucursal.name)}">Inhabilitar</button>` })}`;
+    `<button type="button" class="accion-peligro" data-inhabilitar-sucursal="${sucursal.id}" aria-label="Inhabilitar ${escaparHtml(sucursal.name)}">Inhabilitar</button>` })}`;
 }

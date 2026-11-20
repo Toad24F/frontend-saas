@@ -16,7 +16,7 @@ En el horario semanal conectado ahora se puede quitar incluso la única franja g
 
 ## Archivos afectados
 
-`src/connected/screens/disponibilidad/{view.js,actions.js,style.css}`, `src/demo/screens/disponibilidad/view.js`, `src/shared/screens/disponibilidad/{view.js,style.css}`, `src/shared/screens/catalogos/actions.js`, `src/shared/actions.js`, `src/connected/modules/catalogos/detail.js`, `tests/detalle-edicion-conectado.test.js` y las notas de integración actualizadas.
+`src/connected/screens/disponibilidad/disponibilidad.vista.js`, `src/connected/screens/disponibilidad/disponibilidad.acciones.js`, `src/connected/screens/disponibilidad/disponibilidad.estilos.css`, `src/demo/screens/disponibilidad/disponibilidad.vista.js`, `src/shared/screens/disponibilidad/disponibilidad.vista.js`, `src/shared/screens/disponibilidad/disponibilidad.estilos.css`, `src/shared/screens/catalogos/catalogos.acciones.js`, `src/shared/aplicacion.acciones.js`, `src/connected/modules/catalogos/catalogos.detalle.js`, `tests/detalle-edicion-conectado.test.js` y las notas de integración actualizadas.
 
 ## Comprobación y límites
 

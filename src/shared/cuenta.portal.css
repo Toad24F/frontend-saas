@@ -1,0 +1,16 @@
+/* Sección común de perfil/configuración: mismos tokens de marca en ambos temas. */
+.cuenta-portal { min-width: 0; padding: 26px 30px; }
+.cuenta-portal h2 { font-size: 17px; }
+.cuenta-portal p { color: var(--texto-secundario); line-height: 1.6; margin-top: 10px; }
+.cuenta-portal label { display: block; margin: 20px 0 8px; font-weight: 600; }
+.cuenta-portal .form-control { width: 100%; min-width: 0; font-size: 16px; }
+.cuenta-portal-acciones { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 20px; }
+.cuenta-portal-acciones .btn { min-height: 44px; white-space: normal; }
+/* Bootstrap conserva su azul por defecto al deshabilitar: mantener el acento. */
+.cuenta-portal .btn-primary { --bs-btn-disabled-bg: var(--acento); --bs-btn-disabled-border-color: var(--acento); }
+.cuenta-portal-estado:empty { margin: 0; }
+.cuenta-portal :focus-visible { outline: 3px solid var(--acento); outline-offset: 3px; }
+@media (max-width: 767px) {
+  .cuenta-portal { padding: 20px; }
+  .cuenta-portal-acciones .btn { flex: 1 1 160px; }
+}

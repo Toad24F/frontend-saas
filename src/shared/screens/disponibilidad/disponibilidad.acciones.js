@@ -5,8 +5,8 @@ import { renderCampo, renderSelector, abrirFormulario } from '../../formularios.
 import { consultarAlcanceBloqueos } from './disponibilidad.vista.js';
 import { interpretarErroresBloqueo, limpiarErroresDisponibilidad, limpiarCampoDisponibilidad, mostrarErroresDisponibilidad, mostrarErrorGeneralDisponibilidad, validarBloqueo } from './disponibilidad.errores.js';
 
-const campoMarcado = (...argumentos) => renderCampo(...argumentos).replace('class="form-field"', `class="form-field" data-disponibilidad-campo="${argumentos[1]}"`);
-const selectorMarcado = (...argumentos) => renderSelector(...argumentos).replace('class="form-field"', `class="form-field" data-disponibilidad-campo="${argumentos[1]}"`);
+const campoMarcado = (...argumentos) => renderCampo(...argumentos).replace('class="campo-formulario"', `class="campo-formulario" data-disponibilidad-campo="${argumentos[1]}"`);
+const selectorMarcado = (...argumentos) => renderSelector(...argumentos).replace('class="campo-formulario"', `class="campo-formulario" data-disponibilidad-campo="${argumentos[1]}"`);
 
 function abrirFormularioBloqueo(existente = null) {
   const editando = Boolean(existente);
@@ -17,16 +17,16 @@ function abrirFormularioBloqueo(existente = null) {
   const dialogo = abrirFormulario(
     editando ? 'Editar bloqueo' : 'Bloquear disponibilidad',
     `${campoMarcado('Motivo del bloqueo', 'reason', existente?.reason || '', 'text', 'required maxlength="500"')}
-    <div class="form-row-two">${selectorMarcado('Tipo', 'type', [
+    <div class="formulario-dos-columnas">${selectorMarcado('Tipo', 'type', [
       { id: 'vacaciones', name: 'Vacaciones' },
       { id: 'dia_festivo', name: 'Día festivo' },
       { id: 'emergencia', name: 'Emergencia' },
     ], existente?.type === 'feriado' ? 'dia_festivo' : existente?.type || 'vacaciones')}
     ${selectorMarcado('Profesional', 'professionalId', opcionesProfesionales, existente ? existente.professionalId ?? '' : (puedeElegirEquipo ? consultarAlcanceBloqueos() : usuarioActual.id))}</div>
     ${selectorMarcado('Sucursal', 'branchId', sucursales, existente?.branchId ?? '')}
-    <div class="form-row-two">${campoMarcado('Desde', 'date', existente?.date || HOY, 'date', 'required')}${campoMarcado('Hasta', 'endDate', existente?.endDate || HOY, 'date', 'required')}</div>
-    <div class="form-row-two">${campoMarcado('Hora inicial (opcional)', 'start', existente?.start || '', 'time')}${campoMarcado('Hora final (opcional)', 'end', existente?.end || '', 'time')}</div>
-    <p class="field-hint">Deja ambas horas vacías para bloquear días completos. Las citas existentes se conservan.</p>`,
+    <div class="formulario-dos-columnas">${campoMarcado('Desde', 'date', existente?.date || HOY, 'date', 'required')}${campoMarcado('Hasta', 'endDate', existente?.endDate || HOY, 'date', 'required')}</div>
+    <div class="formulario-dos-columnas">${campoMarcado('Hora inicial (opcional)', 'start', existente?.start || '', 'time')}${campoMarcado('Hora final (opcional)', 'end', existente?.end || '', 'time')}</div>
+    <p class="ayuda-campo">Deja ambas horas vacías para bloquear días completos. Las citas existentes se conservan.</p>`,
     async (formulario) => {
       const bloqueo = {
         professionalId: !esDemo && usuarioActual.rol === 'profesional' ? usuarioActual.id : Number(formulario.get('professionalId')) || null,
@@ -58,7 +58,7 @@ function abrirFormularioBloqueo(existente = null) {
       alFallar(error, formulario) {
         const errores = interpretarErroresBloqueo(error);
         if (errores) mostrarErroresDisponibilidad(formulario, errores);
-        else mostrarErrorGeneralDisponibilidad(formulario, error, '#form-error');
+        else mostrarErrorGeneralDisponibilidad(formulario, error, '#error-formulario');
       },
     },
   );

@@ -32,7 +32,7 @@ test('perfil demo: copia y apertura conservan explícitamente la simulación', (
 test('perfil: copiar confirma solo al resolver; fallo ofrece selección manual del mismo enlace', async () => {
   const llamadas = [], campo = { value: urlPortalCuenta(contexto), focus() { llamadas.push('focus'); }, select() { llamadas.push('select'); } };
   const aviso = { textContent: '' };
-  await copiarEnlacePortalCuenta(campo, aviso, { async writeText(value) { llamadas.push(value); } });
+  await copiarEnlacePortalCuenta(campo, aviso, { async writeText(valor) { llamadas.push(valor); } });
   assert.equal(llamadas[0], campo.value); assert.equal(aviso.textContent, 'Enlace copiado.');
   await copiarEnlacePortalCuenta(campo, aviso, { async writeText() { throw Error('denegado'); } });
   assert.deepEqual(llamadas.slice(-2), ['focus', 'select']); assert.match(aviso.textContent, /Copia manualmente/);
