@@ -8,8 +8,8 @@ La demo presenta un calendario equivalente para sus próximos 45 días, calculad
 
 ## Alcance
 
-- Portal conectado, temas claro y oscuro, escritorio y móvil: `src/connected/public/selection.js`, `selection-view.js` y `style.css`.
-- Portal demo, temas claro y oscuro, escritorio y móvil: `src/demo/screens/reservas/booking.js` y `style.css`.
+- Portal conectado, temas claro y oscuro, escritorio y móvil: `src/connected/portal-publico/seleccion.flujo.js`, `selection-view.js` y `style.css`.
+- Portal demo, temas claro y oscuro, escritorio y móvil: `src/demo/screens/reservas/reserva.vista.js` y `style.css`.
 - Pruebas de selección: `tests/portal-publico.seleccion.test.js`.
 
 El calendario conectado refleja la disponibilidad de la última consulta. La API conserva la autoridad sobre reglas de anticipación, horizonte, horarios, ocupaciones y licencia. Una ranura puede dejar de estar libre después de la consulta; la revalidación anterior al apartado sigue siendo necesaria. El calendario de la demo usa únicamente datos ficticios.

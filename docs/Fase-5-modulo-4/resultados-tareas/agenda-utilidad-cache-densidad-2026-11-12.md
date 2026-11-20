@@ -67,8 +67,8 @@ La caché no certifica ausencia de cambios externos. El backend no proporciona a
 | Caché, store y contrato de atención | `src/connected/modules/agenda/{cache,store,attention}.js` |
 | Integración conectada y compatibilidad de presentación | `src/connected/screens/agenda/{view,presentation}.js` |
 | Presentación y navegación compartidas | `src/shared/screens/agenda/{chrome,frame,month,navigation,timeline,utility,presentation,view}.js`, `utility.css` |
-| Conexión de eventos y símbolo de refresco | `src/shared/app.js`, `src/shared/icons.js` |
-| Atención y causas ficticias | `src/demo/agenda-attention.js` |
+| Conexión de eventos y símbolo de refresco | `src/shared/aplicacion.nucleo.js`, `src/shared/iconos.catalogo.js` |
+| Atención y causas ficticias | `src/demo/agenda.atencion.js` |
 | Pruebas | `tests/agenda.utilidades.test.js`, `tests/agenda.presentacion-conectada.test.js`, `tests/m4-navegador/{agenda-utility.spec,agenda.spec,agenda-fixture,polish.spec}.js` |
 | Documentación | Este informe, README y notas visuales previas con enlace de actualización |
 

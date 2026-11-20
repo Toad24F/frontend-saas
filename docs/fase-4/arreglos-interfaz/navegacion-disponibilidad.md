@@ -15,7 +15,7 @@ El submenú participa en el flujo normal de la barra lateral: al abrirlo desplaz
 
 ## Archivos afectados
 
-`src/shared/app.js`, `src/shared/screens/disponibilidad/{groups.js,view.js}`, `src/shared/{styles.css,theme.css}` y `tests/disponibilidad-grupos.test.js`.
+`src/shared/aplicacion.nucleo.js`, `src/shared/screens/disponibilidad/disponibilidad.grupos.js`, `src/shared/screens/disponibilidad/disponibilidad.vista.js`, `src/shared/global.estilos.css`, `src/shared/tema.estilos.css` y `tests/disponibilidad-grupos.test.js`.
 
 ## Comprobación y límites
 

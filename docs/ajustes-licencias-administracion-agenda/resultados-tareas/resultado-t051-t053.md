@@ -12,16 +12,16 @@ En **Horarios disponibles**, Administrador y Recepción pueden consultar dentro 
 
 | Archivo | Función del cambio |
 | --- | --- |
-| `src/shared/screens/disponibilidad/view.js` | Renderiza cinco columnas sin descanso en conectado, conserva el descanso ficticio en demo y presenta solo Bloqueos en la pestaña correspondiente. |
-| `src/shared/screens/disponibilidad/style.css` | Ajusta la cuadrícula móvil de cinco columnas para las franjas conectadas. |
-| `src/connected/screens/disponibilidad/view.js` | Deja de cargar estado y contenido de excepciones; mantiene oferta, horarios y bloqueos. |
-| `src/connected/screens/disponibilidad/actions.js` | Retira las acciones y solicitudes de excepciones por fecha; conserva guardado semanal y acciones de bloqueos. |
-| `src/connected/screens/disponibilidad/payload.js` | Elimina la construcción del payload de excepciones obsoleto. |
-| `src/connected/screens/disponibilidad/style.css` | Elimina estilos del formulario de excepciones retirado. |
-| `src/connected/modules/datos/load.js` | Ya no introduce campos de descanso al leer franjas del backend. |
-| `src/shared/screens/disponibilidad/errors.js` | Retira validadores de excepciones sin uso; mantiene las validaciones de horario y demo. |
-| `src/shared/screens/disponibilidad/branch-assignments.js` | Actualiza el aviso de asignación para referirse a horarios y bloqueos vigentes. |
-| `src/shared/screens/disponibilidad/operational.js` | Muestra las reglas y la modalidad de consulta según conectado o demo. |
+| `src/shared/screens/disponibilidad/disponibilidad.vista.js` | Renderiza cinco columnas sin descanso en conectado, conserva el descanso ficticio en demo y presenta solo Bloqueos en la pestaña correspondiente. |
+| `src/shared/screens/disponibilidad/disponibilidad.estilos.css` | Ajusta la cuadrícula móvil de cinco columnas para las franjas conectadas. |
+| `src/connected/screens/disponibilidad/disponibilidad.vista.js` | Deja de cargar estado y contenido de excepciones; mantiene oferta, horarios y bloqueos. |
+| `src/connected/screens/disponibilidad/disponibilidad.acciones.js` | Retira las acciones y solicitudes de excepciones por fecha; conserva guardado semanal y acciones de bloqueos. |
+| `src/connected/screens/disponibilidad/disponibilidad.payload.js` | Elimina la construcción del payload de excepciones obsoleto. |
+| `src/connected/screens/disponibilidad/disponibilidad.estilos.css` | Elimina estilos del formulario de excepciones retirado. |
+| `src/connected/modules/datos/datos.carga.js` | Ya no introduce campos de descanso al leer franjas del backend. |
+| `src/shared/screens/disponibilidad/disponibilidad.errores.js` | Retira validadores de excepciones sin uso; mantiene las validaciones de horario y demo. |
+| `src/shared/screens/disponibilidad/disponibilidad.asignaciones-sucursales.js` | Actualiza el aviso de asignación para referirse a horarios y bloqueos vigentes. |
+| `src/shared/screens/disponibilidad/disponibilidad.operativa.js` | Muestra las reglas y la modalidad de consulta según conectado o demo. |
 | `tests/navegador/integracion.preparacion.js` | Da contraseña válida al Profesional ficticio de la base temporal para probar su acceso real. |
 | `tests/navegador/agenda-semana-roles.spec.js` | Añade pruebas de interfaz, roles y contrato API; reutiliza la sesión ficticia del administrador para respetar el límite de cinco logins por IP. |
 | `tests/disponibilidad-conectada.test.js`, `tests/disponibilidad-errores.test.js` | Retiran expectativas de payload y validación de excepciones que dejaron de formar parte del frontend. |

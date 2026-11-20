@@ -1,7 +1,7 @@
 # Reglas y plan de traducción de la nomenclatura del frontend
 
 Fecha de definición: 2026-11-16  
-Estado: implementación por conjuntos. Implementados los conjuntos 0 a 16.
+Estado: plan cerrado el 2026-11-20. Implementados y verificados los conjuntos 0 a 17.
 
 ## Objetivo
 
@@ -357,12 +357,14 @@ Resultado del 2026-11-20 en [Pruebas y datos de prueba](resultado-pruebas-fixtur
 
 ### 17. Documentación y cierre
 
-- [ ] Actualizar README, documentos técnicos y ejemplos que usen nombres anteriores.
-- [ ] Registrar el mapa definitivo de nombres anteriores y nuevos.
-- [ ] Documentar excepciones que permanecieron en inglés y su motivo.
-- [ ] Confirmar que conectado y demo usan la misma nomenclatura donde comparten interfaz.
-- [ ] Confirmar que no se cambió ningún contrato del backend.
-- [ ] Confirmar que no se introdujeron cambios funcionales o visuales durante la traducción.
+- [x] Actualizar README, documentos técnicos y ejemplos que usen nombres anteriores.
+- [x] Registrar el mapa definitivo de nombres anteriores y nuevos.
+- [x] Documentar excepciones que permanecieron en inglés y su motivo.
+- [x] Confirmar que conectado y demo usan la misma nomenclatura donde comparten interfaz.
+- [x] Confirmar que no se cambió ningún contrato del backend.
+- [x] Confirmar que no se introdujeron cambios funcionales o visuales durante la traducción.
+
+Resultado del 2026-11-20 en [Cierre de la traducción](resultado-cierre-2026-11-20.md). La correspondencia de archivos está en el [mapa definitivo](mapa-renombres-frontend.md).
 
 ## Criterio para marcar “REALIZAR CON CUIDADO”
 

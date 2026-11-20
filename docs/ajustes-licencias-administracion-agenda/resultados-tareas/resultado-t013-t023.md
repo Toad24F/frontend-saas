@@ -20,10 +20,10 @@ Alcance: portal conectado. Se consultó el contrato del backend sin editar sus a
 
 ## Archivos modificados y función
 
-- `src/connected/public/http.js`: permite el código funcional específico de cupo telefónico solo con 409. Conserva el filtro de mensajes públicos para otros estados.
-- `src/connected/public/submission.js`: identifica la resolución `no_registrado` por cupo, mantiene la referencia propia y desactiva la repetición. Su comentario explica por qué no crea un intento sucesor sin el contrato pendiente.
-- `src/connected/public/booking-view.js`: muestra «No se registró la reserva» y la causa de cupo, sin controles para repetir un intento terminal ni texto de incertidumbre ya resuelta.
-- `src/connected/public/booking.js`: aclara la necesidad de consultar disponibilidad vigente tras un rechazo ordinario comprobado. Conserva el contacto en memoria.
+- `src/connected/portal-publico/portal.http.js`: permite el código funcional específico de cupo telefónico solo con 409. Conserva el filtro de mensajes públicos para otros estados.
+- `src/connected/portal-publico/reserva.envio.js`: identifica la resolución `no_registrado` por cupo, mantiene la referencia propia y desactiva la repetición. Su comentario explica por qué no crea un intento sucesor sin el contrato pendiente.
+- `src/connected/portal-publico/reserva.vista.js`: muestra «No se registró la reserva» y la causa de cupo, sin controles para repetir un intento terminal ni texto de incertidumbre ya resuelta.
+- `src/connected/portal-publico/reserva.flujo.js`: aclara la necesidad de consultar disponibilidad vigente tras un rechazo ordinario comprobado. Conserva el contacto en memoria.
 - `tests/ala-portal.intentos.test.js` (nuevo): prueba la frontera HTTP de cupo, el marcador y el bloqueo del reenvío, además de ausencia terminal sin folio. Los comentarios explican cada escenario.
 - `tests/navegador/portal.reservas.spec.js`: añade caso de licencia bloqueada al recargar y capturas de formulario en escritorio/móvil y claro/oscuro. Actualiza tres expectativas de encabezado del primer paso para usar el título actual de la portada; sus comentarios describen el propósito.
 - `docs/ajustes-licencias-administracion-agenda/tareas.md`: marca únicamente T013–T023 y enlaza esta evidencia.

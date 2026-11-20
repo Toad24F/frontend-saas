@@ -6,8 +6,8 @@ La pantalla de reglas separa «Modo de agenda» de «Condiciones para reservar»
 
 ## Alcance y archivos
 
-- `src/shared/screens/disponibilidad/operational.js`: estructura y textos del formulario compartido.
-- `src/shared/screens/disponibilidad/operational.css`: alineación y estados visuales.
+- `src/shared/screens/disponibilidad/disponibilidad.operativa.js`: estructura y textos del formulario compartido.
+- `src/shared/screens/disponibilidad/disponibilidad.operativa.css`: alineación y estados visuales.
 - Afecta a demo y versión conectada, en los temas claro y oscuro. Conserva los cuatro nombres de campo, radios, límites, validaciones y envío existentes. En ancho móvil, los modos y campos pasan a una columna mediante las reglas responsivas existentes.
 
 ## Comprobación y límites

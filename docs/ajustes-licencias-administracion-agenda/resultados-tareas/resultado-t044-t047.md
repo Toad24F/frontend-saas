@@ -10,14 +10,14 @@ En **Disponibilidad → Reglas de agenda**, la versión conectada lee `tiempoEnt
 
 | Archivo | Qué hace |
 | --- | --- |
-| `src/connected/modules/publicacion/precios.js` | Lee el estado autorizado y guarda un PATCH parcial; exige confirmación del booleano. |
-| `src/connected/screens/cuenta/price-publication.js` | Dibuja carga, error, estado vigente, alcance global y selector de publicación. |
-| `src/connected/screens/cuenta/view.js` | Carga el estado para la sesión del Administrador y conserva el borrador ante fallo. |
-| `src/connected/screens/cuenta/actions.js` y `src/connected/screens/index.js` | Conectan reintento y envío a los controles de cuenta. |
-| `src/connected/screens/cuenta/style.css` | Ajusta controles y tamaño táctil al diseño existente. |
-| `src/shared/screens/disponibilidad/operational.js` | Presenta el campo conectado nuevo, incluido cero, sin cambiar el formulario ficticio de demo. |
-| `src/shared/screens/disponibilidad/operational-contract.js` | Valida el campo y rechaza una lectura incompleta. |
-| `src/connected/screens/disponibilidad/view.js` y `actions.js` | Leen el contrato actual y envían el campo correcto desde el formulario conectado. |
+| `src/connected/modules/publicacion/publicacion.precios.js` | Lee el estado autorizado y guarda un PATCH parcial; exige confirmación del booleano. |
+| `src/connected/screens/cuenta/cuenta.publicacion-precios.js` | Dibuja carga, error, estado vigente, alcance global y selector de publicación. |
+| `src/connected/screens/cuenta/cuenta.vista.js` | Carga el estado para la sesión del Administrador y conserva el borrador ante fallo. |
+| `src/connected/screens/cuenta/cuenta.acciones.js` y `src/connected/screens/pantallas.conectadas.js` | Conectan reintento y envío a los controles de cuenta. |
+| `src/connected/screens/cuenta/cuenta.estilos.css` | Ajusta controles y tamaño táctil al diseño existente. |
+| `src/shared/screens/disponibilidad/disponibilidad.operativa.js` | Presenta el campo conectado nuevo, incluido cero, sin cambiar el formulario ficticio de demo. |
+| `src/shared/screens/disponibilidad/disponibilidad.contrato-operativo.js` | Valida el campo y rechaza una lectura incompleta. |
+| `src/connected/screens/disponibilidad/disponibilidad.vista.js` y `actions.js` | Leen el contrato actual y envían el campo correcto desde el formulario conectado. |
 | `tests/ala-publicacion.precios-agenda.test.js` | Prueba ruta, booleano, errores, PATCH parcial y tiempo entre citas cero. |
 | `tests/navegador/portal.reservas.spec.js` | Recorre la alternancia real, comprueba el campo `costo` en HTTP y en pantalla, y conserva el costo histórico. |
 | `tests/navegador/integracion.preparacion.js` | Toma credenciales de `.env.test.local`, verifica su separación de la base habitual y crea/elimina una base temporal para el navegador. |

@@ -1,7 +1,8 @@
 # Glosario definitivo de nomenclatura del frontend
 
-Fecha de cierre: 2026-11-17  
-Alcance: reglas de la etapa 0 y términos incorporados durante las migraciones.
+Última revisión 2026-11-20.
+
+Incluye las reglas de la etapa 0 y los términos incorporados durante las migraciones. Consulte el [mapa definitivo de renombres](mapa-renombres-frontend.md) para localizar archivos anteriores.
 
 ## Regla general
 
@@ -88,6 +89,16 @@ La traducción se decide por responsabilidad, no por sustitución literal. Por e
 Estas excepciones no autorizan conservar en inglés los conceptos que las acompañan: `renderAppointment` debe convertirse en `renderCita`, no quedarse completamente en inglés.
 
 También permanecen en inglés las palabras reservadas de JavaScript, nombres de las APIs web, métodos HTTP, atributos HTML/ARIA, clases de Bootstrap, nombres de paquetes y comandos de herramientas.
+
+| Nombre vigente | Motivo |
+| --- | --- |
+| `src/connected/`, `src/demo/`, `src/shared/`, `modules/`, `screens/` y `tests/` | Raíces existentes de la arquitectura y de las suites. La migración tradujo sus módulos de dominio y conservó la estructura de integración. |
+| `src/connected/backend.js` | Fachada de acceso conectado. `backend` identifica el sistema externo que consume el navegador. |
+| `agenda.cache.js` | `cache` representa el sustantivo español «caché» en un nombre ASCII. |
+| `tenants`, `tenantId`, `services`, `professionals`, `name` y claves relacionadas | Forma de registro compartida por el JSON de demo, los adaptadores y los componentes que reciben sus resultados. Algunas no son campos del backend y se conservan por compatibilidad entre consumidores. |
+| `test`, `expect`, `page`, `browser`, `globalSetup`, `.test.js` y `.spec.js` | Interfaces y convenciones de Node y Playwright. Los casos pueden usar alias locales como `{ page: pagina }`. |
+| `data-theme`, `light`, `dark`, `list`, `cards`, `day`, `week`, `month`, `demo`, `connected` | Nombres y valores de tema, vista y modo que leen la aplicación y las preferencias guardadas. |
+| `data-label` | Selector existente usado por tablas responsivas en Negocio, Disponibilidad y el tema común. La tabla de Plataforma emplea `data-etiqueta` en su plantilla y su CSS local. |
 
 ## Siglas técnicas
 

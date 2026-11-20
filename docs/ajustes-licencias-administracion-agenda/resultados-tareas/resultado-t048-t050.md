@@ -12,11 +12,11 @@ En **Equipo → Horario semanal**, el payload conectado de `PUT /profesionales/:
 
 | Archivo | Qué hace |
 | --- | --- |
-| `src/connected/modules/disponibilidad/configuration.js` | Nuevo constructor del PUT exacto y controlador de respuesta: valida cuatro campos, confirma el reemplazo o conserva dato vigente y borrador con errores. |
-| `src/connected/screens/disponibilidad/actions.js` | Convierte los campos del formulario conectado sin transformar una ausencia en cero y llama al guardado. |
-| `src/connected/screens/disponibilidad/view.js` | Presenta el estado ocupado y aplica el resultado confirmado o el borrador con errores; solo devuelve éxito real para el aviso. |
-| `src/connected/modules/disponibilidad/payload.js` | Excluye campos de descanso y ordena las franjas semanales enviadas a la API. |
-| `src/shared/screens/disponibilidad/errors.js` | Señala descansos incrustados en modo conectado; conserva la validación previa de demo. |
+| `src/connected/modules/disponibilidad/disponibilidad.configuracion.js` | Nuevo constructor del PUT exacto y controlador de respuesta: valida cuatro campos, confirma el reemplazo o conserva dato vigente y borrador con errores. |
+| `src/connected/screens/disponibilidad/disponibilidad.acciones.js` | Convierte los campos del formulario conectado sin transformar una ausencia en cero y llama al guardado. |
+| `src/connected/screens/disponibilidad/disponibilidad.vista.js` | Presenta el estado ocupado y aplica el resultado confirmado o el borrador con errores; solo devuelve éxito real para el aviso. |
+| `src/connected/modules/disponibilidad/disponibilidad.payload.js` | Excluye campos de descanso y ordena las franjas semanales enviadas a la API. |
+| `src/shared/screens/disponibilidad/disponibilidad.errores.js` | Señala descansos incrustados en modo conectado; conserva la validación previa de demo. |
 | `tests/agenda.configuracion-semana.test.js` | Prueba PUT exacto, valores 0/5/60 e inválidos, 400/503, respuesta incongruente y dos franjas sin descansos. |
 | `tests/conexion.backend.test.js` | Actualiza la expectativa del payload semanal al contrato sin descanso. |
 | `tests/navegador/agenda-configuracion.spec.js` | Prueba con API y base temporal el formulario, errores 400/503 y el horario de dos franjas; captura tamaños y temas para revisión. |

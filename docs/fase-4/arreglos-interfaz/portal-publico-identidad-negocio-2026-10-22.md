@@ -10,9 +10,9 @@ El distintivo calcula hasta dos iniciales del nombre público, porque el backend
 
 ## Alcance y archivos
 
-- `src/connected/public/entry.js`: título, distintivo y actualización de identidad.
-- `src/connected/public/business-identity.js`: cálculo de iniciales a partir del nombre.
-- `src/connected/public/style.css`: distintivo circular y etiqueta rectangular en claro y oscuro.
+- `src/connected/portal-publico/portal.entrada.js`: título, distintivo y actualización de identidad.
+- `src/connected/portal-publico/negocio.identidad.js`: cálculo de iniciales a partir del nombre.
+- `src/connected/portal-publico/portal.estilos.css`: distintivo circular y etiqueta rectangular en claro y oscuro.
 - `tests/portal-publico.identidad.test.js`: casos de nombres compuestos, acentos y un solo término.
 - Solo portal público conectado; no cambian la demo, las rutas ni el contrato del backend.
 

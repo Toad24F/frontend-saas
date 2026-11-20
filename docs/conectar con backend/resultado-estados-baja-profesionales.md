@@ -6,9 +6,9 @@
 
 | Tipo | Archivo | Resultado |
 | --- | --- | --- |
-| Agregados | `src/connected/screens/profesionales/view.js`, `actions.js`, `style.css` | Tarjetas conectadas con botones Desactivar, Reactivar y Eliminar; modales de confirmación y errores junto a la acción. |
-| Agregado | `src/connected/modules/profesionales/operations.js` | Envía `POST /profesionales/:id/desactivar`, `POST /profesionales/:id/reactivar` con cuerpo `{}` y `DELETE /profesionales/:id` sin cuerpo. |
-| Modificados | `src/connected/screens/index.js`, `src/shared/screens/profesionales/view.js`, `src/shared/actions.js` | La versión conectada utiliza la extensión de la tarjeta compartida y despacha acciones solo para AN. La demo conserva sus tarjetas sin estos controles. |
+| Agregados | `src/connected/screens/profesionales/profesionales.vista.js`, `actions.js`, `style.css` | Tarjetas conectadas con botones Desactivar, Reactivar y Eliminar; modales de confirmación y errores junto a la acción. |
+| Agregado | `src/connected/modules/profesionales/profesionales.operaciones.js` | Envía `POST /profesionales/:id/desactivar`, `POST /profesionales/:id/reactivar` con cuerpo `{}` y `DELETE /profesionales/:id` sin cuerpo. |
+| Modificados | `src/connected/screens/pantallas.conectadas.js`, `src/shared/screens/profesionales/profesionales.vista.js`, `src/shared/aplicacion.acciones.js` | La versión conectada utiliza la extensión de la tarjeta compartida y despacha acciones solo para AN. La demo conserva sus tarjetas sin estos controles. |
 | Agregado | `tests/profesionales-conectados.test.js` | Comprueba rutas, métodos, cuerpos, IDs inválidos y propagación del conflicto de baja. |
 | Modificado | `docs/pendientes-y-reglas-modulo-1.md` | Retira estas tres operaciones de la lista pendiente. |
 

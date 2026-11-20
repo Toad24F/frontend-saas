@@ -4,7 +4,7 @@
 
 ## 1. Alcance y base comprobada
 
-Aplicar la [constitución frontend](constitucion.md) sobre el stack y la marca actuales. `src/main.js` separa modo conectado y demo; `src/shared/` contiene vistas y reglas de presentación comunes. El backend hermano es solo de lectura. Este plan modifica únicamente el frontend y sus pruebas y documentos futuros; no diseña tablas, migraciones ni lógica de reserva del servidor.
+Aplicar la [constitución frontend](constitucion.md) sobre el stack y la marca actuales. `src/aplicacion.entrada.js` separa modo conectado y demo; `src/shared/` contiene vistas y reglas de presentación comunes. El backend hermano es solo de lectura. Este plan modifica únicamente el frontend y sus pruebas y documentos futuros; no diseña tablas, migraciones ni lógica de reserva del servidor.
 
 La inspección del código actual confirma contratos que requieren adaptación: `tiempoEntreCitasMinutos` reemplaza `intervaloMinutos`; el horario semanal ya no acepta descansos ni hay rutas de excepciones; los `DELETE` de recursos se retiraron; licencias exigen `Idempotency-Key`; el precio público puede omitirse; el rechazo por cupo requiere una sucesión de intentos. Las capacidades actuales del portal no se dan por revalidadas por esta propuesta.
 

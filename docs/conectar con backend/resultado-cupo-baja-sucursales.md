@@ -6,9 +6,9 @@
 
 | Tipo | Archivo | Resultado |
 | --- | --- | --- |
-| Agregados | `src/connected/screens/sucursales/view.js`, `actions.js`, `style.css` | Resumen del cupo en la vista conectada, botón Eliminar por sucursal y confirmación con error junto a la acción. |
-| Agregados | `src/connected/modules/sucursales/quota.js`, `operations.js` | Conserva la última vista de cupo cargada y envía `DELETE /sucursales/:id` sin cuerpo. |
-| Modificados | `src/connected/modules/datos/load.js`, `src/connected/screens/index.js`, `src/shared/screens/sucursales/view.js`, `src/shared/actions.js` | Carga `GET /sucursales/cupo`, conecta la pantalla AN y permite extender las tarjetas compartidas sin agregar controles a la demo ni al profesional. |
+| Agregados | `src/connected/screens/sucursales/sucursales.vista.js`, `actions.js`, `style.css` | Resumen del cupo en la vista conectada, botón Eliminar por sucursal y confirmación con error junto a la acción. |
+| Agregados | `src/connected/modules/sucursales/sucursales.cupo.js`, `operations.js` | Conserva la última vista de cupo cargada y envía `DELETE /sucursales/:id` sin cuerpo. |
+| Modificados | `src/connected/modules/datos/datos.carga.js`, `src/connected/screens/pantallas.conectadas.js`, `src/shared/screens/sucursales/sucursales.vista.js`, `src/shared/aplicacion.acciones.js` | Carga `GET /sucursales/cupo`, conecta la pantalla AN y permite extender las tarjetas compartidas sin agregar controles a la demo ni al profesional. |
 | Modificados | `tests/conexion.backend.test.js` y `tests/sucursales-conectadas.test.js` | Comprueban lectura del cupo, ruta y método de baja, IDs inválidos y propagación del conflicto. |
 | Modificado | `docs/pendientes-y-reglas-modulo-1.md` | Retira estas dos operaciones de la lista pendiente. |
 

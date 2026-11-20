@@ -79,16 +79,16 @@ Este es un documento nuevo para la entrega del administrador. La documentación 
 - El patrón compartido también se aplica a los catálogos y Bloqueos de la demo que existen; Recepcionistas sigue siendo una pantalla conectada.
 - Todo sucede sobre las colecciones ya cargadas. No se añaden parámetros, rutas ni contratos de paginación al backend. La descarga inicial completa y su costo permanecen; no se plantea migrar a paginación de servidor.
 
-Archivos añadidos: `src/shared/screens/local-pagination.js`, `catalog-pagination.js`, `src/shared/screens/disponibilidad/block-directory.js` y `block-filters.js`. Se adaptan las cuatro vistas de catálogo, Disponibilidad y sus estilos. Pruebas: `tests/paginacion.local.test.js` y `tests/paginacion.local-navegador.mjs`.
+Archivos añadidos: `src/shared/screens/paginacion.local.js`, `catalog-pagination.js`, `src/shared/screens/disponibilidad/disponibilidad.directorio-bloqueos.js` y `block-filters.js`. Se adaptan las cuatro vistas de catálogo, Disponibilidad y sus estilos. Pruebas: `tests/paginacion.local.test.js` y `tests/paginacion.local-navegador.mjs`.
 
 ## Archivos principales
 
-- `src/shared/app.js`, `src/shared/styles.css`, `src/shared/forms.js` y `src/shared/ui.js`: navegación Usuarios, uniformidad del menú de cuenta, colores semánticos y formularios laterales con confirmación de descarte.
-- `src/shared/screens/catalog-header.js`: encabezado, resumen de cupo y estado del botón de limpieza.
-- `src/connected/modules/catalogos/capacity.js`, `src/connected/modules/datos/load.js`: lectura y caché de los cupos del administrador.
-- `src/shared/screens/{profesionales,servicios,sucursales}/view.js` y sus adaptadores conectados; `src/connected/screens/recepcionistas/view.js`: filtros, encabezados y menú de recepción.
-- `src/connected/screens/recursos/retired-view.js`, `retired-view.css` y `src/shared/actions.js`: panel, búsqueda, navegación interna y acciones de inhabilitados.
-- `src/shared/screens/disponibilidad/branch-assignments.js`, `offering.js`, `view.js`, `operational.js` y `style.css`; vistas conectada y demo de Disponibilidad: asignaciones, oferta y explicaciones.
+- `src/shared/aplicacion.nucleo.js`, `src/shared/global.estilos.css`, `src/shared/formularios.componentes.js` y `src/shared/interfaz.componentes.js`: navegación Usuarios, uniformidad del menú de cuenta, colores semánticos y formularios laterales con confirmación de descarte.
+- `src/shared/screens/catalogos/catalogos.encabezado.js`: encabezado, resumen de cupo y estado del botón de limpieza.
+- `src/connected/modules/catalogos/catalogos.cupo.js`, `src/connected/modules/datos/datos.carga.js`: lectura y caché de los cupos del administrador.
+- `src/shared/screens/{profesionales,servicios,sucursales}/view.js` y sus adaptadores conectados; `src/connected/screens/recepcionistas/recepcionistas.vista.js`: filtros, encabezados y menú de recepción.
+- `src/connected/screens/recursos/inhabilitados.vista.js`, `retired-view.css` y `src/shared/aplicacion.acciones.js`: panel, búsqueda, navegación interna y acciones de inhabilitados.
+- `src/shared/screens/disponibilidad/disponibilidad.asignaciones-sucursales.js`, `offering.js`, `view.js`, `operational.js` y `style.css`; vistas conectada y demo de Disponibilidad: asignaciones, oferta y explicaciones.
 - `tests/administracion.revision.test.js`, `tests/administracion.revision-navegador.mjs`: pruebas nuevas. `tests/navegador/recursos.inhabilitados.spec.js`: selectores y pasos adaptados al nuevo diálogo; `tests/navegador/usuarios.cupo.spec.js`: descarte explícito del alta rechazada al cancelar.
 
 ## Contratos consultados

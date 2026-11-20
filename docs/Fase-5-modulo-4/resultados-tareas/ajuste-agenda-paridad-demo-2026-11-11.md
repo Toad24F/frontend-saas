@@ -24,9 +24,9 @@ Auditoría previa:
 
 | Archivo | Cambio y propósito |
 | --- | --- |
-| `src/connected/screens/agenda/presentation.js` | Nuevo módulo puro para métricas, títulos, cuadrícula por horas y mes. Reutiliza las clases CSS, iconos, colores y reparto de columnas de la demo. Divide citas nocturnas por fecha y amplía el eje horario para no perder citas tempranas o tardías. |
-| `src/connected/screens/agenda/view.js` | Sustituye las tarjetas por el calendario horario, recupera métricas y filtros compactos, importa los estilos de agenda compartidos y mantiene el cliente HTTP, control de respuestas obsoletas, detalle e historial. Añade búsqueda con debounce y filtros al cambiar; Enter aplica de inmediato. |
-| `src/connected/screens/agenda/style.css` | Retira el sistema visual alternativo. Conserva únicamente estilos necesarios para errores, vacío, foco y detalle/historial; la presentación principal procede de los estilos de demo. |
+| `src/connected/screens/agenda/agenda.presentacion.js` | Nuevo módulo puro para métricas, títulos, cuadrícula por horas y mes. Reutiliza las clases CSS, iconos, colores y reparto de columnas de la demo. Divide citas nocturnas por fecha y amplía el eje horario para no perder citas tempranas o tardías. |
+| `src/connected/screens/agenda/agenda.vista.js` | Sustituye las tarjetas por el calendario horario, recupera métricas y filtros compactos, importa los estilos de agenda compartidos y mantiene el cliente HTTP, control de respuestas obsoletas, detalle e historial. Añade búsqueda con debounce y filtros al cambiar; Enter aplica de inmediato. |
+| `src/connected/screens/agenda/agenda.estilos.css` | Retira el sistema visual alternativo. Conserva únicamente estilos necesarios para errores, vacío, foco y detalle/historial; la presentación principal procede de los estilos de demo. |
 | `tests/agenda.presentacion-conectada.test.js` | Cuatro tests Node nuevos escritos antes de producción: estructura/posición/escape, continuación nocturna y eje, mes con «más» y métricas reales o pendientes de consulta. |
 | `tests/m4-navegador/agenda.consulta-conectada.spec.js` | Adapta las acciones de filtros a Enter/cambio de selector, comprueba la cuadrícula horaria y añade una comparación directa de estilos/geometría con la demo usando su mismo conjunto de datos y fecha. |
 | `docs/Fase-5-modulo-4/tareas.md` | Enlaza la corrección manteniendo el punto de parada en T092. |

@@ -8,8 +8,8 @@ La tarjeta seleccionada muestra una palomita dentro de un círculo, como la demo
 
 ## Alcance y archivos
 
-- `src/connected/public/selection-view.js`: iconos de servicio y sucursal e indicador visual de selección.
-- `src/connected/public/style.css`: tamaño de SVG, hover, selección y contraste en temas claro y oscuro.
+- `src/connected/portal-publico/seleccion.vista.js`: iconos de servicio y sucursal e indicador visual de selección.
+- `src/connected/portal-publico/portal.estilos.css`: tamaño de SVG, hover, selección y contraste en temas claro y oscuro.
 - Solo portal conectado, tarjetas de servicio y sucursal en escritorio y móvil. La demo mantiene su diseño y datos ficticios.
 
 ## Comprobación

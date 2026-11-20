@@ -6,10 +6,10 @@
 
 | Tipo | Archivos | Resultado |
 | --- | --- | --- |
-| Agregados | `src/connected/screens/disponibilidad/view.js`, `actions.js`, `style.css`, `payload.js` | Secciones y formularios conectados de oferta, excepciones y proyección; conversión de horarios y validación de rango. |
-| Modificado | `src/connected/screens/index.js` | La ruta conectada de Disponibilidad usa la vista extendida; la demo sigue usando la vista compartida. |
-| Modificados | `src/shared/screens/disponibilidad/view.js`, `actions.js` | Botón de edición de bloqueos y formulario compartido para alta/edición con `PATCH` real. |
-| Modificado | `src/shared/actions.js` | Acciones de la nueva vista, control de permiso para editar un bloqueo propio y limpieza de proyección tras cambios de horario o bloqueos. |
+| Agregados | `src/connected/screens/disponibilidad/disponibilidad.vista.js`, `actions.js`, `style.css`, `payload.js` | Secciones y formularios conectados de oferta, excepciones y proyección; conversión de horarios y validación de rango. |
+| Modificado | `src/connected/screens/pantallas.conectadas.js` | La ruta conectada de Disponibilidad usa la vista extendida; la demo sigue usando la vista compartida. |
+| Modificados | `src/shared/screens/disponibilidad/disponibilidad.vista.js`, `actions.js` | Botón de edición de bloqueos y formulario compartido para alta/edición con `PATCH` real. |
+| Modificado | `src/shared/aplicacion.acciones.js` | Acciones de la nueva vista, control de permiso para editar un bloqueo propio y limpieza de proyección tras cambios de horario o bloqueos. |
 | Agregado | `tests/disponibilidad-conectada.test.js` | Pruebas de cierre explícito, conservación de IDs, minuto 1440 y rango máximo de proyección. |
 
 No se movieron pantallas existentes ni se cambió el backend. Los archivos nuevos de interfaz quedaron dentro del módulo conectado `disponibilidad`.

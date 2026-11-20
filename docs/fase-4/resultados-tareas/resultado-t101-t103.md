@@ -24,12 +24,12 @@ La demo ya tenía el mismo orden de selección. Se conserva su recorrido complet
 
 | Archivo | Operación y responsabilidad |
 | --- | --- |
-| `src/connected/public/selection.js` | Nuevo. Controlador de selección en memoria: estados, opciones compatibles, navegación, consultas, validación de respuestas y descarte por revisión/AbortController. Reserva campos separados para las fases futuras, sin implementarlas. |
-| `src/connected/public/dates.js` | Nuevo. Valida fechas civiles y presenta fechas/horas mediante Intl en una zona IANA explícita. No genera disponibilidad ni convierte una hora local en una reserva. |
-| `src/connected/public/selection-view.js` | Nuevo. Renderiza los cuatro pasos con HTML escapado, radios nativos, etiquetas, anuncios de estado y controles de navegación; conecta los eventos y restaura el foco. No importa módulos del panel o datos de demo. |
-| `src/connected/public/entry.js` | Modificado. Monta el controlador y su vista después de comprobar la sesión anónima de T098–T100. Sustituye el aviso anterior de selección no disponible por el flujo implementado. |
-| `src/connected/public/style.css` | Modificado. Añade estilos acotados de pasos, opciones, fecha, horarios y acciones, con ajustes móviles y foco visible, reutilizando los tokens existentes. |
-| `src/demo/screens/reservas/booking.js` | Modificado. Aclara que los horarios de demostración son simulados; conserva su cálculo y comportamiento. |
+| `src/connected/portal-publico/seleccion.flujo.js` | Nuevo. Controlador de selección en memoria: estados, opciones compatibles, navegación, consultas, validación de respuestas y descarte por revisión/AbortController. Reserva campos separados para las fases futuras, sin implementarlas. |
+| `src/connected/portal-publico/portal.fechas.js` | Nuevo. Valida fechas civiles y presenta fechas/horas mediante Intl en una zona IANA explícita. No genera disponibilidad ni convierte una hora local en una reserva. |
+| `src/connected/portal-publico/seleccion.vista.js` | Nuevo. Renderiza los cuatro pasos con HTML escapado, radios nativos, etiquetas, anuncios de estado y controles de navegación; conecta los eventos y restaura el foco. No importa módulos del panel o datos de demo. |
+| `src/connected/portal-publico/portal.entrada.js` | Modificado. Monta el controlador y su vista después de comprobar la sesión anónima de T098–T100. Sustituye el aviso anterior de selección no disponible por el flujo implementado. |
+| `src/connected/portal-publico/portal.estilos.css` | Modificado. Añade estilos acotados de pasos, opciones, fecha, horarios y acciones, con ajustes móviles y foco visible, reutilizando los tokens existentes. |
+| `src/demo/screens/reservas/reserva.vista.js` | Modificado. Aclara que los horarios de demostración son simulados; conserva su cálculo y comportamiento. |
 | `tests/portal-publico.seleccion.test.js` | Nuevo. Quince pruebas Node del estado, contratos de consulta, invalidación, respuestas desordenadas, fechas, errores y salida HTML. Usa dobles y no contacta una base de datos. |
 | `tests/datos-prueba/portal.servidor-simulado.mjs` | Nuevo. Servidor Vite exclusivamente de revisión con API ficticia aislada. Intercepta **todas** las rutas `/publico` antes del proxy, sin contactar al backend. Permite reproducir horarios, vacío, 503 y 404. No se importa desde `src/` ni se incluye como fallback del producto. |
 | `README.md` | Modificado. Actualiza el alcance T098–T103, explica las consultas y corrige el enlace al resultado anterior, ahora ubicado en `docs/fase-4/resultados-tareas`. |

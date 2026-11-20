@@ -8,8 +8,8 @@
 
 ## Alcance y archivos
 
-- Portal conectado: `src/connected/public/booking-view.js` y `src/connected/public/style.css`.
-- Demo: `src/demo/screens/reservas/booking.js` y `src/demo/screens/reservas/style.css`.
+- Portal conectado: `src/connected/portal-publico/reserva.vista.js` y `src/connected/portal-publico/portal.estilos.css`.
+- Demo: `src/demo/screens/reservas/reserva.vista.js` y `src/demo/screens/reservas/reserva.estilos.css`.
 - Pruebas: `tests/portal-publico.apartado.test.js` y expectativas de título en `tests/navegador/portal.reservas.spec.js`.
 - Los estilos usan los tokens existentes para los temas claro y oscuro. La barra ocupa el ancho disponible del contador, también en móvil. El resumen lateral sigue su posición actual en cada tamaño de pantalla.
 

@@ -37,7 +37,7 @@ La paginación y los filtros operan sobre todo el historial descargado. No reduc
 
 ## Archivos
 
-- `src/connected/screens/negocio/view.js`: composición de pestañas y bloques.
+- `src/connected/screens/negocio/negocio.vista.js`: composición de pestañas y bloques.
 - `workspace.js`: interacción y estado local de pestañas/filtros/página.
 - `mail-history.js`: consulta local, orden, filtros, paginación y seguimiento.
 - `quota-meter.js`, `user-quota.js`: indicadores de consumo y acciones existentes.

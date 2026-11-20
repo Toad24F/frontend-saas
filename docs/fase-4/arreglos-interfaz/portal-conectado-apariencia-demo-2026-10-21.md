@@ -12,11 +12,11 @@ Se consumen los campos opcionales añadidos a la proyección pública del backen
 
 El cambio visual afecta solo a `/reservas/:slug` conectado. La demo y las pantallas administrativas no se modificaron. Usa la paleta y los logos existentes en tema claro y oscuro. En escritorio hay superficie principal y resumen lateral; en móvil los pasos se desplazan horizontalmente y el resumen pasa debajo del formulario.
 
-- `src/connected/public/entry.js`: cabecera, identidad del negocio y pie.
-- `src/connected/public/selection.js`: conserva la identidad pública recibida del catálogo.
-- `src/connected/public/selection-view.js`: tarjetas, campos opcionales y tira de fechas; conserva radios nativos, etiquetas, foco y estados de consulta.
-- `src/connected/public/booking-view.js`: seis pasos y resumen común para selección, apartado, formulario, envío incierto y resultado.
-- `src/connected/public/style.css`: composición adaptable y estilos de ambos temas.
+- `src/connected/portal-publico/portal.entrada.js`: cabecera, identidad del negocio y pie.
+- `src/connected/portal-publico/seleccion.flujo.js`: conserva la identidad pública recibida del catálogo.
+- `src/connected/portal-publico/seleccion.vista.js`: tarjetas, campos opcionales y tira de fechas; conserva radios nativos, etiquetas, foco y estados de consulta.
+- `src/connected/portal-publico/reserva.vista.js`: seis pasos y resumen común para selección, apartado, formulario, envío incierto y resultado.
+- `src/connected/portal-publico/portal.estilos.css`: composición adaptable y estilos de ambos temas.
 - `tests/portal-publico.seleccion.test.js`: comprueba la presentación y el escape de datos públicos opcionales.
 
 El backend hermano se consultó en modo de lectura; sus cambios existentes no se editaron. La proyección de `catalogo` todavía depende de que la migración y la configuración de publicación del backend se apliquen en el entorno donde se despliegue.

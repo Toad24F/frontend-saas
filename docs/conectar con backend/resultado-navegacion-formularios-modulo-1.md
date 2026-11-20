@@ -8,13 +8,13 @@ No se movieron archivos en esta etapa. Se conservó la separación previa entre 
 
 | Tipo | Archivo(s) | Resultado |
 | --- | --- | --- |
-| Agregado | `src/connected/screens/cuenta/view.js` | Vista mínima “Mi cuenta” para todos los roles. Da a recepcionista un destino conectado válido mientras se implementan sus operaciones futuras. |
-| Modificados | `src/connected/modules/permisos/pages.js`, `src/connected/backend.js`, `src/connected/screens/index.js`, `src/shared/app.js` | Mapa de páginas y destino inicial por rol; navegación lateral y móvil acorde con ese mapa; rutas conectadas no disponibles redirigen al inicio permitido. Se retiran del menú conectado las entradas de demo (agenda, clientes, reportes, notificaciones, portal). El perfil lleva a “Mi cuenta”. |
-| Modificados | `src/shared/mobile.css` | La barra móvil conserva sus clases, colores y efectos; el número de columnas se ajusta a las pestañas visibles de cada rol. |
-| Modificados | `src/connected/modules/datos/load.js`, `src/connected/modules/catalogos/payload.js` | Se cargan la descripción y autoría reales de servicios y la especialidad real del profesional para el administrador. Para el profesional, las sucursales y su estado individual proceden de `/profesionales/:id/oferta`, incluso si no tienen horario semanal. El payload de servicios incluye descripción. |
-| Modificados | `src/shared/screens/catalogos/actions.js`, `src/shared/screens/servicios/view.js` | El administrador puede capturar/editar especialidad y descripción con datos reales. El profesional puede crear servicios y editar solo los de su autoría; su botón de selección ya no se presenta como cambio de estado global. |
-| Modificados | `src/shared/actions.js`, `src/shared/screens/sucursales/view.js` | El profesional activa o pausa su atención con `PUT /profesionales/:id/sucursales/:sucursalId/atencion`, sin reescribir el horario. La tarjeta distingue atención individual de sucursal global inactiva. |
-| Modificado | `src/shared/screens/plataforma/actions.js` | El enlace a la demo desde “Mi cuenta” abre una pantalla existente de la demo. |
+| Agregado | `src/connected/screens/cuenta/cuenta.vista.js` | Vista mínima “Mi cuenta” para todos los roles. Da a recepcionista un destino conectado válido mientras se implementan sus operaciones futuras. |
+| Modificados | `src/connected/modules/permisos/permisos.paginas.js`, `src/connected/backend.js`, `src/connected/screens/pantallas.conectadas.js`, `src/shared/aplicacion.nucleo.js` | Mapa de páginas y destino inicial por rol; navegación lateral y móvil acorde con ese mapa; rutas conectadas no disponibles redirigen al inicio permitido. Se retiran del menú conectado las entradas de demo (agenda, clientes, reportes, notificaciones, portal). El perfil lleva a “Mi cuenta”. |
+| Modificados | `src/shared/movil.estilos.css` | La barra móvil conserva sus clases, colores y efectos; el número de columnas se ajusta a las pestañas visibles de cada rol. |
+| Modificados | `src/connected/modules/datos/datos.carga.js`, `src/connected/modules/catalogos/catalogos.payload.js` | Se cargan la descripción y autoría reales de servicios y la especialidad real del profesional para el administrador. Para el profesional, las sucursales y su estado individual proceden de `/profesionales/:id/oferta`, incluso si no tienen horario semanal. El payload de servicios incluye descripción. |
+| Modificados | `src/shared/screens/catalogos/catalogos.acciones.js`, `src/shared/screens/servicios/servicios.vista.js` | El administrador puede capturar/editar especialidad y descripción con datos reales. El profesional puede crear servicios y editar solo los de su autoría; su botón de selección ya no se presenta como cambio de estado global. |
+| Modificados | `src/shared/aplicacion.acciones.js`, `src/shared/screens/sucursales/sucursales.vista.js` | El profesional activa o pausa su atención con `PUT /profesionales/:id/sucursales/:sucursalId/atencion`, sin reescribir el horario. La tarjeta distingue atención individual de sucursal global inactiva. |
+| Modificado | `src/shared/screens/plataforma/plataforma.acciones.js` | El enlace a la demo desde “Mi cuenta” abre una pantalla existente de la demo. |
 | Modificado | `tests/conexion.backend.test.js` | Se actualizó el contrato esperado del payload de servicios y se verificaron páginas por rol, sucursales del profesional, descripción y autoría. |
 
 ## Navegación conectada resultante
@@ -39,5 +39,5 @@ La demo conserva su navegación y su presentación. En la versión conectada se 
 ## Verificación
 
 - `npm test`: 26 pruebas aprobadas.
-- `npm run build`: compilación Vite correcta al ejecutarla fuera del sandbox; dentro del sandbox `realpath` sobre `src/shared/app.js` devolvía `EPERM`.
+- `npm run build`: compilación Vite correcta al ejecutarla fuera del sandbox; dentro del sandbox `realpath` sobre `src/shared/aplicacion.nucleo.js` devolvía `EPERM`.
 - `node --check` de los archivos JS principales y `git diff --check`: sin errores.

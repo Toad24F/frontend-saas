@@ -14,7 +14,7 @@ La pantalla resume cuántas sucursales se asignarán y cuántas se quitarán. Al
 
 ## Archivos afectados
 
-`src/shared/screens/disponibilidad/{branch-assignments.js,style.css}`, `src/shared/{app.js,actions.js}`, `src/connected/screens/disponibilidad/{view.js,actions.js}`, `src/demo/screens/disponibilidad/view.js`, `tests/disponibilidad.asignaciones.test.js`.
+`src/shared/screens/disponibilidad/disponibilidad.asignaciones-sucursales.js`, `src/shared/screens/disponibilidad/disponibilidad.estilos.css`, `src/shared/aplicacion.nucleo.js`, `src/shared/aplicacion.acciones.js`, `src/connected/screens/disponibilidad/disponibilidad.vista.js`, `src/connected/screens/disponibilidad/disponibilidad.acciones.js`, `src/demo/screens/disponibilidad/disponibilidad.vista.js`, `tests/disponibilidad.asignaciones.test.js`.
 
 ## Comprobación y límites
 

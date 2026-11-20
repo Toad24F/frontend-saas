@@ -10,9 +10,9 @@ La cabecera usa tres columnas para centrar la fecha y hora en escritorio. En mó
 
 ## Alcance y archivos
 
-- `src/connected/public/entry.js`: contenido y actualización de la cabecera; iconos y atributos del botón.
-- `src/connected/public/dates.js`: formato de fecha y hora en la zona local del navegador.
-- `src/connected/public/style.css`: composición adaptable y animación del botón.
+- `src/connected/portal-publico/portal.entrada.js`: contenido y actualización de la cabecera; iconos y atributos del botón.
+- `src/connected/portal-publico/portal.fechas.js`: formato de fecha y hora en la zona local del navegador.
+- `src/connected/portal-publico/portal.estilos.css`: composición adaptable y animación del botón.
 - `tests/portal-publico.cabecera.test.js`: cambio de día según la zona y uso de la zona local por defecto.
 - Solo portal público conectado, temas claro y oscuro, escritorio y móvil. La demo conserva sus datos ficticios y su cabecera.
 

@@ -21,11 +21,11 @@ Los cambios visuales son acotados: textos largos pueden encogerse dentro de las 
 
 | Archivo | Responsabilidad del cambio |
 | --- | --- |
-| `src/connected/public/accessibility.js` | Nuevo. Compone anuncios de estado sin valores de contacto, evita repetir texto idéntico y restaura foco/cursor con desplazamiento visible. Incluye comentarios del propósito y límites. |
-| `src/connected/public/selection-view.js` | Modificado. Separa contenido reemplazable y región viva persistente; mantiene eventos delegados, restaura todas las acciones públicas y marca la fecha inválida con `aria-invalid`. Las ayudas siguen asociadas por ID. |
-| `src/connected/public/booking-view.js` | Modificado. Quita regiones vivas transitorias duplicadas, identifica el botón Revisar datos y utiliza el helper de foco para errores de revisión/envío. El reloj sigue actualizándose sin recrear campos ni anunciar cada tick. |
-| `src/connected/public/style.css` | Modificado. Permite texto flexible, mantiene foco visible, añade margen de desplazamiento, escritura de 16 px, acciones adaptables, resumen móvil de una columna y espacio de zona segura. |
-| `src/demo/screens/reservas/style.css` | Modificado. Refleja el foco visible y escritura móvil de 16 px sin conectar la demo al backend ni modificar su motor. |
+| `src/connected/portal-publico/portal.accesibilidad.js` | Nuevo. Compone anuncios de estado sin valores de contacto, evita repetir texto idéntico y restaura foco/cursor con desplazamiento visible. Incluye comentarios del propósito y límites. |
+| `src/connected/portal-publico/seleccion.vista.js` | Modificado. Separa contenido reemplazable y región viva persistente; mantiene eventos delegados, restaura todas las acciones públicas y marca la fecha inválida con `aria-invalid`. Las ayudas siguen asociadas por ID. |
+| `src/connected/portal-publico/reserva.vista.js` | Modificado. Quita regiones vivas transitorias duplicadas, identifica el botón Revisar datos y utiliza el helper de foco para errores de revisión/envío. El reloj sigue actualizándose sin recrear campos ni anunciar cada tick. |
+| `src/connected/portal-publico/portal.estilos.css` | Modificado. Permite texto flexible, mantiene foco visible, añade margen de desplazamiento, escritura de 16 px, acciones adaptables, resumen móvil de una columna y espacio de zona segura. |
+| `src/demo/screens/reservas/reserva.estilos.css` | Modificado. Refleja el foco visible y escritura móvil de 16 px sin conectar la demo al backend ni modificar su motor. |
 | `tests/portal-publico.accesibilidad.test.js` | Nuevo. Cuatro pruebas de anuncios, deduplicación/texto seguro, etiquetas/ayudas/errores y orden de restauración del foco/cursor/desplazamiento. |
 | `tests/portal-publico.seleccion.test.js` | Modificado. Dos regresiones parametrizadas: éxito/error tardíos tras cambiar fecha y limpieza de dependencias al cambiar servicio/sucursal/profesional. También comprueba que modificar un snapshot no altera el controlador. |
 | `tests/portal-publico.envio.test.js` | Modificado. Dos regresiones: incertidumbre bloquea todas las acciones de nueva reserva hasta ausencia terminal, y el contacto sobrevive al vencimiento/navegación interna sin persistirse, limpiándose al salir. |

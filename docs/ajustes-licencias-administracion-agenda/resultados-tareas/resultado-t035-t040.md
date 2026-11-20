@@ -12,14 +12,14 @@ Alcance: frontend conectado del Administrador de negocio. Los cuatro recursos se
 
 | Archivo | Qué hace |
 | --- | --- |
-| `src/shared/resource-status.js` y vistas compartidas de profesionales, servicios y sucursales | Definen y aplican las etiquetas de los tres estados; mantienen los textos de selección/atención propios del profesional. |
-| `src/shared/screens/profesionales/style.css` | Da un color semántico distinto al estado inhabilitado en ambos temas. |
-| `src/connected/modules/recursos/retired.js` | Valida tipos e IDs y centraliza lectura de listas/detalles y el POST de Recepción. |
+| `src/shared/recursos.estado.js` y vistas compartidas de profesionales, servicios y sucursales | Definen y aplican las etiquetas de los tres estados; mantienen los textos de selección/atención propios del profesional. |
+| `src/shared/screens/profesionales/profesionales.estilos.css` | Da un color semántico distinto al estado inhabilitado en ambos temas. |
+| `src/connected/modules/recursos/recursos.inhabilitados.js` | Valida tipos e IDs y centraliza lectura de listas/detalles y el POST de Recepción. |
 | `src/connected/modules/{profesionales,servicios,sucursales}/operations.js` | Sustituyen `DELETE` por los POST de inhabilitación; el estado operativo sigue en rutas separadas. |
-| `src/connected/screens/recursos/retired-view.js` y `.css` | Presentan la sección separada, estados de carga, vacío, error y detalle autorizado, con diseño adaptable. |
+| `src/connected/screens/recursos/inhabilitados.vista.js` y `.css` | Presentan la sección separada, estados de carga, vacío, error y detalle autorizado, con diseño adaptable. |
 | `src/connected/screens/{profesionales,recepcionistas,servicios,sucursales}/view.js` | Ofrecen «Inhabilitar» y la consulta separada donde corresponde. |
 | `src/connected/screens/{profesionales,recepcionistas,servicios,sucursales}/actions.js` | Confirman el retiro, conservan errores en el diálogo y anuncian éxito solo tras respuesta correcta. |
-| `src/shared/actions.js` y `src/shared/app.js` | Despachan las nuevas acciones y cierran correctamente los menús; la demo conserva su ruta. |
+| `src/shared/aplicacion.acciones.js` y `src/shared/aplicacion.nucleo.js` | Despachan las nuevas acciones y cierran correctamente los menús; la demo conserva su ruta. |
 | `tests/recursos.inhabilitados.test.js` y tests conectados existentes de tres recursos | Prueban tres estados, rol, rutas, cuerpo de POST, IDs inválidos y errores sin ocultar. |
 | `tests/navegador/recursos.inhabilitados.spec.js` y `tests/navegador/integracion.preparacion.js` | Prueban los cuatro retiros y detalles reales en el negocio 2 de la base efímera, la demo y capturas visuales. |
 | `tareas.md` | Marca T035–T040 como terminadas. |
