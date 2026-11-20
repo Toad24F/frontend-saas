@@ -81,7 +81,7 @@ html[data-theme='dark'] .btn-danger-soft { background: #4a2a2d; border-color: #7
 html[data-theme='dark'] :is(
   .stat-card, .calendario-panel, .surface, .empty-state, .professional-card,
   .service-card, .branch-card, .settings-card, .opcion-modo-agenda, .bloqueo-entrada,
-  .notification-card, .message-preview, .report-card, .report-filters,
+  .notification-card, .notificaciones-vista-previa, .report-card, .reportes-filtros,
   .reserva-demo-superficie, .reserva-demo-opcion, .reserva-demo-fecha, .reserva-demo-horario,
   .opcion-negocio, .section-card
 ) {
@@ -145,9 +145,9 @@ html[data-theme='dark'] .horario-tabla .horario-franja-inactiva td:last-child {
   color: var(--muted) !important;
 }
 
-html[data-theme='dark'] .daily-insight { background: radial-gradient(circle at 85% 18%, #49414a, transparent 42%), radial-gradient(circle at 12% 88%, #5a3d39, transparent 46%), #2a272d; border-color: #51434a; }
-html[data-theme='dark'] .daily-insight::before { background: rgba(26, 24, 29, .52); border-color: rgba(241, 219, 209, .14); }
-html[data-theme='dark'] .daily-insight :is(h2, p) { color: var(--ink); }
+html[data-theme='dark'] .resumen-destacado { background: radial-gradient(circle at 85% 18%, #49414a, transparent 42%), radial-gradient(circle at 12% 88%, #5a3d39, transparent 46%), #2a272d; border-color: #51434a; }
+html[data-theme='dark'] .resumen-destacado::before { background: rgba(26, 24, 29, .52); border-color: rgba(241, 219, 209, .14); }
+html[data-theme='dark'] .resumen-destacado :is(h2, p) { color: var(--ink); }
 html[data-theme='dark'] .reserva-demo { background: var(--canvas); }
 html[data-theme='dark'] .portal-demo-marca { color: var(--ink); }
 html[data-theme='dark'] .reserva-demo :is(h1, h2, h3, h4, .reserva-demo-opcion-texto > strong, .reserva-demo-resumen-encabezado h3, .reserva-demo-encabezado-fecha h3) { color: var(--ink); }
@@ -182,8 +182,8 @@ html[data-theme='dark'] .app-toast.glass-effect { background: var(--glass-surfac
 }
 .main-layout :is(.stat-card, .calendario-panel, .surface, .empty-state,
   .professional-card, .service-card, .branch-card, .settings-card,
-  .opcion-modo-agenda, .bloqueo-entrada, .notification-card, .message-preview,
-  .report-card, .report-filters, .section-card),
+  .opcion-modo-agenda, .bloqueo-entrada, .notification-card, .notificaciones-vista-previa,
+  .report-card, .reportes-filtros, .section-card),
 .reserva-demo :is(.reserva-demo-superficie, .reserva-demo-opcion, .reserva-demo-fecha, .reserva-demo-horario) {
   background-color: var(--surface);
   border-color: var(--border);
@@ -342,7 +342,7 @@ html[data-theme='light'] :is(.page-heading h1, .section-heading h2,
   .reserva-demo-titulo h2, .reserva-demo-opcion-texto > strong, .reserva-demo-resumen-encabezado h3,
   .reserva-demo-resumen-precio > strong, .detail-list strong, .app-table td strong) { color: var(--ink); }
 html[data-theme='light'] :is(.section-heading p, .subtle-text, .field-hint,
-  .optional, .form-label, .eyebrow, .footer-logo, .bar-column,
+  .optional, .form-label, .eyebrow, .footer-logo, .resumen-columna,
   .app-table td small, .busqueda-tabla-clientes, .search-field, .filter-select > .icon,
   .profile-button small, .profile-button > .icon, .encabezado-dia,
   .encabezado-hora, .dia-sin-atencion, .reserva-demo-encabezado-fecha > span) { color: var(--muted); }
@@ -396,15 +396,15 @@ html[data-theme='light'] .app-table td { color: var(--ink); }
 html[data-theme='light'] .app-table tbody tr:hover { background: var(--surface-soft); }
 html[data-theme='light'] .app-dialog :is(.dialog-header, .dialog-footer) { background: var(--surface-soft); }
 html[data-theme='light'] .app-dialog::backdrop { background: rgba(37, 42, 46, 0.42); }
-html[data-theme='light'] .daily-insight {
+html[data-theme='light'] .resumen-destacado {
   background: var(--accent-soft);
   border-color: #ecd5ca;
 }
-html[data-theme='light'] .daily-insight::before { content: none; }
-html[data-theme='light'] .daily-insight :is(h2, p) { color: var(--ink); }
-html[data-theme='light'] .daily-insight :is(.eyebrow, .insight-icon) { color: var(--accent-dark); }
-html[data-theme='light'] .daily-insight .btn { background: var(--surface); border-color: #ecd5ca; }
-html[data-theme='light'] .bar-fill:not(.highlight) { background: #c5cbd0; }
+html[data-theme='light'] .resumen-destacado::before { content: none; }
+html[data-theme='light'] .resumen-destacado :is(h2, p) { color: var(--ink); }
+html[data-theme='light'] .resumen-destacado :is(.eyebrow, .resumen-icono-destacado) { color: var(--accent-dark); }
+html[data-theme='light'] .resumen-destacado .btn { background: var(--surface); border-color: #ecd5ca; }
+html[data-theme='light'] .resumen-barra:not(.resumen-barra-hoy) { background: #c5cbd0; }
 html[data-theme='light'] .reserva-demo-lateral { background: var(--surface-soft); }
 html[data-theme='light'] .reserva-demo-opcion-marca { border-color: var(--border-strong); }
 html[data-theme='light'] .selected > .reserva-demo-opcion-marca { border-color: var(--accent); }

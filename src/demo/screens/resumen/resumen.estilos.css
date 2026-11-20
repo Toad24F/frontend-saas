@@ -1,17 +1,17 @@
-.overview-grid {
+.resumen-cuadricula {
   display: grid;
   grid-template-columns: 1.6fr 1fr;
   gap: 22px;
   margin-bottom: 24px;
 }
-.bar-chart {
+.resumen-grafica {
   padding: 10px 26px 25px;
   display: flex;
   justify-content: space-around;
   height: 235px;
   gap: 15px;
 }
-.bar-column {
+.resumen-columna {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -20,27 +20,27 @@
   font-size: 11px;
   color: #929ca5;
 }
-.bar-column > strong {
+.resumen-columna > strong {
   font-size: 12px;
   font-weight: 500;
 }
-.bar-track {
+.resumen-carril {
   width: 60%;
   height: 160px;
   display: flex;
   align-items: flex-end;
   border-bottom: 1px solid #edf0f1;
 }
-.bar-fill {
+.resumen-barra {
   width: 100%;
   background: #d9e4dc;
   border-radius: 5px 5px 0 0;
   min-height: 3px;
 }
-.bar-fill.highlight {
+.resumen-barra.resumen-barra-hoy {
   background: var(--accent);
 }
-.daily-insight {
+.resumen-destacado {
   padding: 28px;
   background:
     radial-gradient(circle at 85% 18%, #c9e1d4 0, transparent 42%),
@@ -51,7 +51,7 @@
   position: relative;
   isolation: isolate;
 }
-.daily-insight::before {
+.resumen-destacado::before {
   content: '';
   position: absolute;
   inset: 12px;
@@ -63,29 +63,29 @@
   border-radius: 12px;
   box-shadow: 0 12px 30px rgba(39, 55, 45, 0.08);
 }
-.insight-icon {
+.resumen-icono-destacado {
   position: absolute;
   top: 25px;
   right: 25px;
   color: #a0b49c;
 }
-.daily-insight .eyebrow {
+.resumen-destacado .eyebrow {
   color: #8da083;
   font-size: 9px;
 }
-.daily-insight h2 {
+.resumen-destacado h2 {
   font-size: 24px;
   color: #344f3c;
   line-height: 1.5;
   margin: 17px 0 12px;
   letter-spacing: -0.7px;
 }
-.daily-insight p {
+.resumen-destacado p {
   font-size: 12px;
   max-width: 320px;
   color: #536b5a;
 }
-.daily-insight .btn {
+.resumen-destacado .btn {
   font-size: 12px;
   margin-top: 23px;
   background: #ffffffaa;

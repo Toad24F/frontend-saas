@@ -499,7 +499,7 @@ window.addEventListener('cita-sesion-expirada', () => { document.querySelector('
 export async function start() {
   try {
     document.documentElement.dataset.appMode = isDemo ? 'demo' : 'connected';
-    if (isDemo) await (await import('../demo/data.js')).loadData();
+    if (isDemo) await (await import('../demo/demo.datos.js')).cargarDatosDemo();
     else {
       if (!await restaurarSesion()) { mostrarIngresoConectado(); return; }
       state.tenantId = await loadBackendData();

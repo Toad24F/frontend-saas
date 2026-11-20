@@ -15,7 +15,7 @@ export function resolveEntry(pathname, search) {
 export async function boot(location, loaders = {
   public: () => import('./connected/portal-publico/portal.entrada.js'),
   connected: () => import('./connected/entry.js'),
-  demo: () => import('./demo/entry.js'),
+  demo: () => import('./demo/demo.entrada.js'),
 }) {
   const entry = resolveEntry(location.pathname, location.search);
   const module = await loaders[entry.mode]();

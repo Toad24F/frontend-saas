@@ -1,7 +1,7 @@
 # Reglas y plan de traducción de la nomenclatura del frontend
 
 Fecha de definición: 2026-11-16  
-Estado: implementación por conjuntos. Completados los conjuntos 0 a 12.
+Estado: implementación por conjuntos. Completados los conjuntos 0 a 13.
 
 ## Objetivo
 
@@ -307,16 +307,18 @@ Resultado del 2026-11-20 en [Plataforma, permisos y recursos inhabilitados](resu
 
 ### 13. Demo restante
 
-- [ ] Traducir juntos `demo/data.js`, `schedule.js`, `entry.js` y los imports que los consumen.
-- [ ] Traducir juntos las pantallas de resumen, reportes, configuración y notificaciones con sus estilos.
-- [ ] Revisar que los datos ficticios sigan claramente aislados del modo conectado.
-- [ ] Actualizar pruebas y verificaciones visuales correspondientes.
+- [x] Traducir juntos `demo/data.js`, `schedule.js`, `entry.js` y los imports que los consumen.
+- [x] Traducir juntos las pantallas de resumen, reportes, configuración y notificaciones con sus estilos.
+- [x] Revisar que los datos ficticios sigan claramente aislados del modo conectado.
+- [x] Actualizar pruebas y verificaciones visuales correspondientes.
+
+Resultado del 2026-11-20 en [Pantallas restantes de la demo](resultado-demo-restante-2026-11-20.md).
 
 ### 14. Núcleo compartido — REALIZAR CON MUCHO CUIDADO
 
 Estos archivos son consumidos por gran parte de la aplicación. El conjunto no debe traducirse mientras otros cambios amplios estén activos en las mismas rutas.
 
-- [ ] Traducir coordinadamente `main.js`, `entry-router.js`, `connected/entry.js`, `demo/entry.js` y los índices de pantallas.
+- [ ] Traducir coordinadamente `main.js`, `entry-router.js`, `connected/entry.js` y los índices de pantallas. Actualizar los imports de `demo/demo.entrada.js` si cambia la interfaz del núcleo.
 - [ ] Traducir coordinadamente `shared/app.js`, `actions.js`, `data.js`, `ui.js`, `forms.js` e `icons.js`.
 - [ ] Traducir `shared/calendar-layout.js`, `resource-status.js` y `account-portal.js` con sus pruebas.
 - [ ] Revisar `connected/backend.js`, `mode.js` y `connected/modules/datos/load.js` sin cambiar contratos ni variables de entorno.

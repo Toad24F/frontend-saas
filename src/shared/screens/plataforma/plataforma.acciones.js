@@ -4,7 +4,7 @@ import { db, tenantById } from '../../data.js';
 import { icon } from '../../icons.js';
 import { modal, toast, escape as escapar, avatar } from '../../ui.js';
 import { field as campo, basicForm } from '../../forms.js';
-import { reportState } from '../../../demo/screens/reportes/state.js';
+import { estadoReportes } from '../../../demo/screens/reportes/reportes.estado.js';
 export function cambiarEspacioTrabajo() {
   if (!isDemo) { modal('Tu espacio de trabajo', `<div class="dialog-body"><p>${escapar(user.nombre)} · ${escapar(etiquetaRol(user.rol))}</p><a class="btn btn-light" href="${modeUrl(location.pathname.includes('/cuenta') ? '/admin/agenda' : location.pathname.includes('/negocio/') ? '/admin/plataforma' : location.pathname, true)}">Ver demo para comparar</a><button class="btn btn-light" id="cerrar-sesion-espacio">Cerrar sesión</button></div>`); document.querySelector('#cerrar-sesion-espacio').onclick = async () => { try { await cerrarSesion(); location.reload(); } catch (error) { toast(error.message); } }; return; }
   const dialogo = modal(
@@ -17,7 +17,7 @@ export function cambiarEspacioTrabajo() {
         state.tenantId = Number(boton.dataset.elegirNegocio);
         state.branch = state.professional = state.status = 'all';
         state.profesionalHorario = null;
-        reportState.branch = 'all';
+        estadoReportes.sucursal = 'todas';
         dialogo.close();
         render();
         toast(`Espacio actual: ${tenantById(state.tenantId).name}`);
@@ -47,7 +47,7 @@ export function registrarNegocio() {
           .map((parte) => parte[0])
           .join(''),
         mode: 'free',
-        reminder: 24,
+        horasRecordatorio: 24,
       });
     },
   );

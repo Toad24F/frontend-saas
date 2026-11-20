@@ -18,7 +18,7 @@ import {
   seEmpalman,
   buscarFechasDemo,
 } from '../src/demo/disponibilidad.motor.js';
-import { loadData } from '../src/demo/data.js';
+import { cargarDatosDemo } from '../src/demo/demo.datos.js';
 import { escape } from '../src/shared/ui.js';
 const fixture = JSON.parse(
   await readFile(new URL('../public/data/demo.json', import.meta.url), 'utf8'),
@@ -27,7 +27,7 @@ beforeEach(async () => {
   const previous = globalThis.fetch;
   globalThis.fetch = async () => new Response(JSON.stringify(fixture));
   try {
-    await loadData();
+    await cargarDatosDemo();
   } finally {
     globalThis.fetch = previous;
   }

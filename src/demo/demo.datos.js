@@ -1,6 +1,6 @@
 import { db, replaceData, TODAY, addDays, date, time, minutes } from '../shared/data.js';
 
-const names = [
+const nombres = [
   'María González',
   'Juan Pérez',
   'Laura Méndez',
@@ -22,16 +22,16 @@ const names = [
   'Lucía Romero',
   'Diego Aguirre',
 ];
-export async function loadData() {
-  const response = await fetch('/data/demo.json');
-  if (!response.ok)
+export async function cargarDatosDemo() {
+  const respuesta = await fetch('/data/demo.json');
+  if (!respuesta.ok)
     throw new Error('No se pudieron cargar los datos de demostración.');
-  replaceData(await response.json());
-  db.clients = names.map((name, i) => ({
-    id: i + 1,
+  replaceData(await respuesta.json());
+  db.clients = nombres.map((nombre, indice) => ({
+    id: indice + 1,
     tenantId: 1,
-    name,
-    phone: `614555${String(i + 10).padStart(4, '0')}`,
+    name: nombre,
+    phone: `614555${String(indice + 10).padStart(4, '0')}`,
   }));
   db.clients.push({
     id: 21,
@@ -42,22 +42,22 @@ export async function loadData() {
   db.appointments = [];
   db.blocks = [];
   db.holds = [];
-  db.schedules = db.professionals.flatMap((p) =>
-    Array.from({ length: 6 }, (_, i) => ({
-      id: p.id * 10 + i,
-      tenantId: p.tenantId,
-      professionalId: p.id,
-      day: i + 1,
-      branchId: p.branchIds[i % p.branchIds.length],
+  db.schedules = db.professionals.flatMap((profesional) =>
+    Array.from({ length: 6 }, (_, indice) => ({
+      id: profesional.id * 10 + indice,
+      tenantId: profesional.tenantId,
+      professionalId: profesional.id,
+      day: indice + 1,
+      branchId: profesional.branchIds[indice % profesional.branchIds.length],
       start: '09:00',
-      breakStart: p.id === 1 && i === 5 ? '' : '13:00',
-      breakEnd: p.id === 1 && i === 5 ? '' : '14:00',
-      end: i === 5 ? (p.id === 1 ? '13:00' : '14:00') : '18:00',
-      enabled: i < 5 || (p.id === 1 && i === 5),
+      breakStart: profesional.id === 1 && indice === 5 ? '' : '13:00',
+      breakEnd: profesional.id === 1 && indice === 5 ? '' : '14:00',
+      end: indice === 5 ? (profesional.id === 1 ? '13:00' : '14:00') : '18:00',
+      enabled: indice < 5 || (profesional.id === 1 && indice === 5),
     })),
   );
   db.schedules.push({
-    id: Math.max(...db.schedules.map((s) => s.id)) + 1,
+    id: Math.max(...db.schedules.map((franja) => franja.id)) + 1,
     tenantId: 1,
     professionalId: 1,
     day: 6,
@@ -68,8 +68,8 @@ export async function loadData() {
     end: '18:00',
     enabled: true,
   });
-  const monday = addDays(TODAY, 1 - (date(TODAY).getDay() || 7));
-  const seeds = [
+  const lunes = addDays(TODAY, 1 - (date(TODAY).getDay() || 7));
+  const citasDeEjemplo = [
     [0, '09:00', 1, 1, 'completada'],
     [0, '10:15', 2, 2, 'completada'],
     [0, '11:30', 3, 3, 'completada'],
@@ -94,21 +94,21 @@ export async function loadData() {
     [4, '14:00', 1, 2, 'confirmada'],
     [4, '15:30', 2, 3, 'no_asistio'],
   ];
-  seeds.forEach(([d, start, p, c, status], i) => {
-    const professional = db.professionals.find((x) => x.id === p),
-      service = db.services.find((x) => x.id === professional.serviceIds[0]);
+  citasDeEjemplo.forEach(([desplazamiento, inicio, profesionalId, clienteId, estado], indice) => {
+    const profesional = db.professionals.find((registro) => registro.id === profesionalId),
+      servicio = db.services.find((registro) => registro.id === profesional.serviceIds[0]);
     db.appointments.push({
-      id: i + 1,
+      id: indice + 1,
       tenantId: 1,
-      branchId: professional.branchIds[d % 2],
-      professionalId: p,
-      serviceId: service.id,
-      clientId: c,
-      date: addDays(monday, d),
-      start,
-      end: time(minutes(start) + service.duration),
-      status,
-      folio: `CB-2609-${String(i + 1).padStart(4, '0')}`,
+      branchId: profesional.branchIds[desplazamiento % 2],
+      professionalId: profesionalId,
+      serviceId: servicio.id,
+      clientId: clienteId,
+      date: addDays(lunes, desplazamiento),
+      start: inicio,
+      end: time(minutes(inicio) + servicio.duration),
+      status: estado,
+      folio: `CB-2609-${String(indice + 1).padStart(4, '0')}`,
       reason: '',
       origin: 'portal_publico',
     });
@@ -133,8 +133,8 @@ export async function loadData() {
     tenantId: 1,
     professionalId: 4,
     branchId: 1,
-    date: addDays(monday, 2),
-    endDate: addDays(monday, 2),
+    date: addDays(lunes, 2),
+    endDate: addDays(lunes, 2),
     start: '09:00',
     end: '11:00',
     type: 'emergencia',

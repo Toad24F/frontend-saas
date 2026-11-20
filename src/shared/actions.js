@@ -14,11 +14,11 @@ import {
 } from './data.js';
 import { icon } from './icons.js';
 import { modal, toast, escape as esc } from './ui.js';
-import { reportState } from '../demo/screens/reportes/state.js';
+import { estadoReportes } from '../demo/screens/reportes/reportes.estado.js';
 import { tablaCitas } from './screens/agenda/agenda.tabla.js';
 import { renderFranjaHorario, cambiarAlcanceBloqueos } from './screens/disponibilidad/disponibilidad.vista.js';
 import { leerFranjasHorario, cambiarEstadoFranja } from './screens/disponibilidad/disponibilidad.horario-franjas.js';
-import { appointmentCovered } from '../demo/schedule.js';
+import { citaCubiertaPorHorarioDemo } from '../demo/demo.horario.js';
 import { limpiarErroresDisponibilidad, limpiarCampoDisponibilidad, mostrarErroresDisponibilidad, mostrarErrorGeneralDisponibilidad, validarFranjasHorario, interpretarErroresHorario } from './screens/disponibilidad/disponibilidad.errores.js';
 import { validarConfiguracionDemo, validarRangoInclusivo } from './screens/disponibilidad/disponibilidad.contrato-operativo.js';
 let draftScheduleId = -1;
@@ -153,7 +153,7 @@ export async function handleClick(e) {
     }
     const action = e.target.closest('[data-action]')?.dataset.action;
     if (!isDemo && user.rol === 'profesional' && action === 'nuevo-profesional') { toast('Tu cuenta puede editar sus servicios desde Editar profesional.'); return; }
-    if (!isDemo && (['nueva-cita', 'nuevo-cliente', 'copy-link', 'filter-reports', 'export-report'].includes(action) || e.target.closest('[data-horario-fecha], button[data-mode]'))) { toast(pending); return; }
+    if (!isDemo && (['nueva-cita', 'nuevo-cliente', 'copy-link', 'filtrar-reportes', 'imprimir-reporte'].includes(action) || e.target.closest('[data-horario-fecha], button[data-mode]'))) { toast(pending); return; }
     const actionMap = {
       'nueva-recepcionista': async () => (await import('../connected/screens/recepcionistas/recepcionistas.acciones.js')).nuevaRecepcionista(),
       'cambiar-contrasena-cuenta': async () => (await import('../connected/screens/cuenta/cuenta.acciones.js')).cambiarContrasena(),
@@ -183,19 +183,19 @@ export async function handleClick(e) {
           document.querySelector('#copy-url').select();
         }
       },
-      'filter-reports': () => {
-        const from = document.querySelector('#report-from').value,
-          to = document.querySelector('#report-to').value;
-        if (!from || !to || from > to) {
+      'filtrar-reportes': () => {
+        const desde = document.querySelector('#reportes-desde').value,
+          hasta = document.querySelector('#reportes-hasta').value;
+        if (!desde || !hasta || desde > hasta) {
           toast('Selecciona un rango válido de fechas.');
           return;
         }
-        reportState.from = from;
-        reportState.to = to;
-        reportState.branch = document.querySelector('#report-branch').value;
+        estadoReportes.desde = desde;
+        estadoReportes.hasta = hasta;
+        estadoReportes.sucursal = document.querySelector('#reportes-sucursal').value;
         render();
       },
-      'export-report': () => {
+      'imprimir-reporte': () => {
         toast('Elige “Guardar como PDF” en el diálogo de impresión.');
         window.print();
       },
@@ -384,7 +384,7 @@ document.addEventListener('submit', async (e) => {
     return;
   }
   if (
-    !['formulario-horario', 'business-form', 'notification-form'].includes(form.id)
+    !['formulario-horario', 'formulario-negocio-demo', 'formulario-notificaciones-demo'].includes(form.id)
   )
     return;
   e.preventDefault();
@@ -396,17 +396,17 @@ document.addEventListener('submit', async (e) => {
   try {
     const f = new FormData(form),
       t = tenantById(state.tenantId);
-    if (form.id === 'business-form') {
-      if (!f.get('name').trim())
+    if (form.id === 'formulario-negocio-demo') {
+      if (!f.get('nombre').trim())
         throw new Error('El nombre del negocio es obligatorio.');
-      t.name = f.get('name').trim();
-      t.email = f.get('email');
-      t.phone = f.get('phone');
+      t.name = f.get('nombre').trim();
+      t.email = f.get('correo');
+      t.phone = f.get('telefono');
     }
-    if (form.id === 'notification-form') {
-      t.confirmations = f.has('confirm');
-      t.reminders = f.has('remind');
-      t.reminder = Number(f.get('hours'));
+    if (form.id === 'formulario-notificaciones-demo') {
+      t.confirmacionesActivas = f.has('confirmacion');
+      t.recordatoriosActivos = f.has('recordatorio');
+      t.horasRecordatorio = Number(f.get('horas'));
     }
     if (form.id === 'formulario-horario') {
       const p = Number(document.querySelector('#profesional-horario').value);
@@ -428,7 +428,7 @@ document.addEventListener('submit', async (e) => {
       const active = list('appointments', state.tenantId).filter((a) =>
         a.professionalId === p && a.date >= TODAY &&
         !['cancelada', 'no_asistio', 'completada'].includes(a.status));
-      if (active.some((a) => !appointmentCovered(a, updates)))
+      if (active.some((a) => !citaCubiertaPorHorarioDemo(a, updates)))
         throw new Error('El cambio dejaría citas activas fuera del horario. Reprograma esas citas primero.');
       let nextId = Math.max(0, ...db.schedules.map((s) => s.id)) + 1;
       db.schedules = db.schedules.filter((s) => !(s.tenantId === state.tenantId && s.professionalId === p))

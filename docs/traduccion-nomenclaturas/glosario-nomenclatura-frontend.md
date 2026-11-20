@@ -274,3 +274,17 @@ El [resultado de Agenda](resultado-agenda-2026-11-18.md) registra la corresponde
 
 El [resultado de Plataforma, permisos y recursos inhabilitados](resultado-plataforma-permisos-recursos-2026-11-20.md) registra las rutas de archivo y las interfaces conservadas.
 
+## Equivalencias de las pantallas restantes de la demo
+
+| Nombre anterior | Nombre adoptado |
+| --- | --- |
+| `loadData`, `validateSchedules`, `appointmentCovered` | `cargarDatosDemo`, `validarFranjasDemo`, `citaCubiertaPorHorarioDemo` |
+| `overview`, `reports`, `settings`, `notifications` | `renderResumenDemo`, `renderReportesDemo`, `renderConfiguracionDemo`, `renderNotificacionesDemo` |
+| `reportData`, `reportState` | `filtrarCitasReporte`, `estadoReportes` |
+| `from`, `to`, `branch`, `all` en los filtros de Reportes | `desde`, `hasta`, `sucursal`, `todas` |
+| `filter-reports`, `export-report` | `filtrar-reportes`, `imprimir-reporte` |
+| `business-form`, `notification-form` | `formulario-negocio-demo`, `formulario-notificaciones-demo` |
+| `confirmations`, `reminders`, `reminder` del negocio ficticio | `confirmacionesActivas`, `recordatoriosActivos`, `horasRecordatorio` |
+
+Las rutas de archivo, los cambios de selectores y sus comprobaciones se registran en el [resultado de la demo](resultado-demo-restante-2026-11-20.md).
+

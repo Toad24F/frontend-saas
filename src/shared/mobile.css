@@ -1,7 +1,7 @@
 .mobile-tabbar { display: none; }
 
 /* Keep the table's screen-reader-only heading inside its scroll container. */
-.overview-today .table-responsive { position: relative; }
+.resumen-citas-hoy .table-responsive { position: relative; }
 
 @media (min-width: 767px) and (max-width: 900px) {
   .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -140,9 +140,9 @@
   .app-dialog .table-responsive { max-width: 100%; overflow-x: auto; }
 
   /* The overview keeps its table semantics, but each appointment fits the phone. */
-  .overview-today .table-responsive { overflow: visible; }
-  .overview-today .app-table { display: block; width: 100%; min-width: 0; }
-  .overview-today .app-table thead {
+  .resumen-citas-hoy .table-responsive { overflow: visible; }
+  .resumen-citas-hoy .app-table { display: block; width: 100%; min-width: 0; }
+  .resumen-citas-hoy .app-table thead {
     position: absolute;
     width: 1px;
     height: 1px;
@@ -150,13 +150,13 @@
     clip-path: inset(50%);
     white-space: nowrap;
   }
-  .overview-today .app-table tbody {
+  .resumen-citas-hoy .app-table tbody {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     gap: 10px;
     padding: 0 12px 12px;
   }
-  .overview-today .app-table tr {
+  .resumen-citas-hoy .app-table tr {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     gap: 8px 12px;
@@ -166,23 +166,23 @@
     border-radius: 16px;
     background: color-mix(in srgb, var(--surface) 80%, var(--surface-soft));
   }
-  .overview-today .app-table td {
+  .resumen-citas-hoy .app-table td {
     display: block;
     min-width: 0;
     padding: 0;
     border: 0;
     overflow-wrap: anywhere;
   }
-  .overview-today .app-table td:first-child { grid-column: 1; grid-row: 1; }
-  .overview-today .app-table td:nth-child(2) { grid-column: 1 / -1; grid-row: 2; }
-  .overview-today .app-table td:nth-child(3) { grid-column: 1; grid-row: 3; }
-  .overview-today .app-table td:nth-child(4) { grid-column: 2; grid-row: 3; align-self: center; text-align: right; }
-  .overview-today .app-table td:nth-child(5) { grid-column: 1 / -1; grid-row: 4; }
-  .overview-today .app-table td:last-child { grid-column: 2; grid-row: 1; }
-  .overview-today .app-table td:last-child .icon-btn { min-width: 44px; min-height: 44px; }
-  .overview-today .person-cell > span:last-child { min-width: 0; }
-  .overview-today .app-table td:nth-child(3) small { margin-top: 2px; }
-  .overview-today .app-table td:nth-child(4) { font-size: 11px; color: var(--muted); }
+  .resumen-citas-hoy .app-table td:first-child { grid-column: 1; grid-row: 1; }
+  .resumen-citas-hoy .app-table td:nth-child(2) { grid-column: 1 / -1; grid-row: 2; }
+  .resumen-citas-hoy .app-table td:nth-child(3) { grid-column: 1; grid-row: 3; }
+  .resumen-citas-hoy .app-table td:nth-child(4) { grid-column: 2; grid-row: 3; align-self: center; text-align: right; }
+  .resumen-citas-hoy .app-table td:nth-child(5) { grid-column: 1 / -1; grid-row: 4; }
+  .resumen-citas-hoy .app-table td:last-child { grid-column: 2; grid-row: 1; }
+  .resumen-citas-hoy .app-table td:last-child .icon-btn { min-width: 44px; min-height: 44px; }
+  .resumen-citas-hoy .person-cell > span:last-child { min-width: 0; }
+  .resumen-citas-hoy .app-table td:nth-child(3) small { margin-top: 2px; }
+  .resumen-citas-hoy .app-table td:nth-child(4) { font-size: 11px; color: var(--muted); }
 
   html[data-theme='dark'] .mobile-tabbar {
     background: rgba(31, 32, 38, 0.94);

@@ -273,7 +273,7 @@
 @supports not ((backdrop-filter: blur(10px)) or (-webkit-backdrop-filter: blur(10px))) {
   .workspace-identity.glass-effect { background: #303a32; }
   .reserva-demo-resumen.glass-effect { background: #f5f8f3; }
-  .daily-insight::before { background: #f4f8f2; }
+  .resumen-destacado::before { background: #f4f8f2; }
 }
 .reserva-demo-resumen-encabezado {
   display: flex;
@@ -654,7 +654,7 @@
 .portal-demo-no-disponible .brand {
   margin-bottom: 35px;
 }
-.print-heading p {
+.reportes-encabezado-impresion p {
   font-size: 13px;
 }
 

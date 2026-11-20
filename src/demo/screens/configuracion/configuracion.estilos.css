@@ -1,13 +1,13 @@
-.settings-grid {
+.configuracion-cuadricula {
   display: grid;
   grid-template-columns: 1.4fr 1fr;
   gap: 23px;
   align-items: start;
 }
-.settings-form {
+.configuracion-formulario {
   padding: 5px 25px 25px;
 }
-.business-identity {
+.configuracion-identidad {
   display: flex;
   align-items: center;
   gap: 15px;
@@ -15,25 +15,25 @@
   margin-bottom: 22px;
   border-bottom: 1px solid var(--border);
 }
-.business-identity strong {
+.configuracion-identidad strong {
   font-size: 15px;
   font-weight: 600;
 }
-.business-identity p {
+.configuracion-identidad p {
   font-size: 12px;
   margin-top: 6px;
 }
-.public-link-card {
+.configuracion-tarjeta-portal {
   padding: 25px;
 }
-.public-link-card h2 {
+.configuracion-tarjeta-portal h2 {
   margin-top: 22px;
   margin-bottom: 12px;
 }
-.public-link-card p {
+.configuracion-tarjeta-portal p {
   font-size: 13px;
 }
-.public-url {
+.configuracion-url-publica {
   background: #f6f7f8;
   border: 1px dashed #dee2e5;
   border-radius: 6px;
@@ -43,17 +43,17 @@
   color: #87928b;
   word-break: break-all;
 }
-.demo-settings {
+.configuracion-demo {
   margin-top: 22px;
   padding: 25px;
 }
-.demo-settings h2 {
+.configuracion-demo h2 {
   font-size: 16px;
 }
-.demo-settings p {
+.configuracion-demo p {
   font-size: 12px;
   margin: 12px 0 20px;
 }
-.demo-settings .text-button {
+.configuracion-demo .text-button {
   display: flex;
 }

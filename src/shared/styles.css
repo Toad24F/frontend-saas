@@ -1615,45 +1615,45 @@ html[data-theme='dark'] .sidebar .brand .brand-logo-on-light { display: none; }
   .entity-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  .report-tables,
-  .notification-grid {
+  .reportes-tablas,
+  .notificaciones-cuadricula {
     grid-template-columns: 1fr;
   }
-  .notification-grid .message-preview {
+  .notificaciones-cuadricula .notificaciones-vista-previa {
     max-width: 600px;
   }
-  .overview-grid {
+  .resumen-cuadricula {
     grid-template-columns: 1.3fr 1fr;
   }
-  .daily-insight {
+  .resumen-destacado {
     padding: 25px;
   }
-  .daily-insight h2 {
+  .resumen-destacado h2 {
     font-size: 21px;
   }
-  .settings-grid {
+  .configuracion-cuadricula {
     grid-template-columns: 1fr 1fr;
   }
-  .report-filters {
+  .reportes-filtros {
     gap: 12px;
     flex-wrap: wrap;
   }
-  .report-filters > label {
+  .reportes-filtros > label {
     min-width: 145px;
   }
 }
 @media (max-width: 1000px) {
-  .overview-grid,
-  .settings-grid {
+  .resumen-cuadricula,
+  .configuracion-cuadricula {
     grid-template-columns: 1fr;
   }
-  .daily-insight {
+  .resumen-destacado {
     padding: 25px 30px;
   }
-  .daily-insight h2 br {
+  .resumen-destacado h2 br {
     display: none;
   }
-  .daily-insight p {
+  .resumen-destacado p {
     max-width: 100%;
   }
   .opcion-modo-agenda {
@@ -1708,10 +1708,10 @@ html[data-theme='dark'] .sidebar .brand .brand-logo-on-light { display: none; }
 @media (max-width: 767px) {
   .entity-grid,
   .branch-grid,
-  .overview-grid,
-  .settings-grid,
-  .notification-grid,
-  .report-tables,
+  .resumen-cuadricula,
+  .configuracion-cuadricula,
+  .notificaciones-cuadricula,
+  .reportes-tablas,
   .opciones-modo-agenda {
     grid-template-columns: 1fr;
   }
@@ -1766,35 +1766,35 @@ html[data-theme='dark'] .sidebar .brand .brand-logo-on-light { display: none; }
   .appointment-identity > .status-badge {
     margin-left: 70px;
   }
-  .report-filters {
+  .reportes-filtros {
     padding: 20px;
     gap: 15px;
   }
-  .report-filters label {
+  .reportes-filtros label {
     min-width: 125px;
   }
-  .report-filters > .btn {
+  .reportes-filtros > .btn {
     width: 100%;
   }
-  .report-tables .app-table {
+  .reportes-tablas .app-table {
     min-width: 370px;
   }
-  .whatsapp-banner {
+  .notificaciones-aviso-whatsapp {
     padding: 20px;
     gap: 13px;
     flex-wrap: wrap;
   }
-  .whatsapp-banner h2 {
+  .notificaciones-aviso-whatsapp h2 {
     font-size: 16px;
     line-height: 1.6;
   }
-  .whatsapp-banner p {
+  .notificaciones-aviso-whatsapp p {
     font-size: 12px;
   }
-  .whatsapp-banner > .soft-tag {
+  .notificaciones-aviso-whatsapp > .soft-tag {
     margin-left: 60px;
   }
-  .whatsapp-symbol {
+  .notificaciones-icono-whatsapp {
     width: 44px;
     height: 44px;
   }
@@ -2072,7 +2072,7 @@ html[data-theme='dark'] .sidebar .brand .brand-logo-on-light { display: none; }
   .topbar,
   .app-footer,
   .page-heading,
-  .report-filters,
+  .reportes-filtros,
   .toast-region,
   .sidebar-overlay {
     display: none !important;
@@ -2084,39 +2084,39 @@ html[data-theme='dark'] .sidebar .brand .brand-logo-on-light { display: none; }
     padding: 0 !important;
     max-width: none;
   }
-  #printable-report .print-heading {
+  #reportes-imprimible .reportes-encabezado-impresion {
     display: block;
     margin-bottom: 25px;
   }
-  #printable-report h1 {
+  #reportes-imprimible h1 {
     font-size: 24px;
   }
-  #printable-report .stats-grid {
+  #reportes-imprimible .stats-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 12px;
   }
-  #printable-report .stat-card {
+  #reportes-imprimible .stat-card {
     padding: 14px;
   }
-  #printable-report .stat-number {
+  #reportes-imprimible .stat-number {
     font-size: 25px;
   }
-  #printable-report .report-tables {
+  #reportes-imprimible .reportes-tablas {
     display: block;
   }
-  #printable-report .surface {
+  #reportes-imprimible .surface {
     margin-bottom: 20px;
     break-inside: avoid;
   }
-  #printable-report .app-table {
+  #reportes-imprimible .app-table {
     min-width: 0;
     width: 100%;
   }
-  #printable-report .table-responsive {
+  #reportes-imprimible .table-responsive {
     overflow: visible;
   }
-  #printable-report .information-note {
+  #reportes-imprimible .information-note {
     font-size: 11px;
   }
   dialog {

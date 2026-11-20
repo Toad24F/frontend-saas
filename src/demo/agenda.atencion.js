@@ -1,5 +1,5 @@
 import { horaAMinutos } from '../shared/screens/agenda/agenda.utilidades.js';
-import { appointmentCovered as citaCubierta } from './schedule.js';
+import { citaCubiertaPorHorarioDemo } from './demo.horario.js';
 
 export function atencionDemo(dias, persona, sucursal, horarios, bloqueos) {
   if (persona === 'all') return null;
@@ -19,7 +19,7 @@ export function atencionDemo(dias, persona, sucursal, horarios, bloqueos) {
 }
 export function causasCitaDemo(elemento, horarios, bloqueos) {
   const causas = [];
-  if (!citaCubierta(elemento, horarios.filter((x) => x.professionalId === elemento.professionalId))) causas.push({ codigo: 'horario_insuficiente' });
+  if (!citaCubiertaPorHorarioDemo(elemento, horarios.filter((x) => x.professionalId === elemento.professionalId))) causas.push({ codigo: 'horario_insuficiente' });
   if (bloqueos.some((x) => (!x.professionalId || x.professionalId === elemento.professionalId) && (!x.branchId || x.branchId === elemento.branchId) && x.date <= elemento.date && x.endDate >= elemento.date && (!x.start || elemento.start < x.end && elemento.end > x.start))) causas.push({ codigo: 'bloqueo' });
   return causas;
 }

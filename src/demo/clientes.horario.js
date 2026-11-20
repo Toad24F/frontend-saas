@@ -1,5 +1,5 @@
 import { list, resource, minutes, time, TODAY } from '../shared/data.js';
-import { appointmentCovered } from './schedule.js';
+import { citaCubiertaPorHorarioDemo } from './demo.horario.js';
 import { crearPayloadCliente } from '../connected/modules/clientes/clientes.client.js';
 import { crearPayloadCambioHorario } from '../connected/modules/agenda/agenda.cambio-horario.js';
 
@@ -55,7 +55,7 @@ export function moverCitaDemo(id, negocioId, valores) {
   );
   if (
     minutes(propuesta.end) >= 1440 ||
-    !appointmentCovered(propuesta, franjas) ||
+    !citaCubiertaPorHorarioDemo(propuesta, franjas) ||
     conflicto ||
     bloqueo
   )
