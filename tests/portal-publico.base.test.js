@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { resolveEntry, boot } from '../src/entry-router.js';
+import { resolverEntrada, iniciarEntrada } from '../src/entrada.enrutador.js';
 import { crearPortalClient, ErrorPortalPublico } from '../src/connected/portal-publico/portal.http.js';
 import { iniciarSesionNavegador } from '../src/connected/portal-publico/portal.sesion-navegador.js';
 
@@ -12,28 +12,28 @@ const respuesta = (datos, estado = 200) => Response.json(datos, { status: estado
 
 // Las entradas se prueban sin DOM: el portal conectado no debe cargar el panel o la demo.
 test('T098: reserva pública elige entrada aislada, conserva demo explícita y no exige login', async () => {
-  assert.deepEqual(resolveEntry('/reservas/cl%C3%ADnica%20centro', ''), { mode: 'public', slug });
-  assert.equal(resolveEntry('/reservas/centro/', '?demo=1').mode, 'demo');
-  assert.equal(resolveEntry('/admin/agenda', '').mode, 'connected');
-  assert.equal(resolveEntry('/reservas/%ZZ', '').slug, null);
-  assert.equal(resolveEntry('/reservas/', '').mode, 'public');
-  assert.equal(resolveEntry('/reservas/centro/extra', '').slug, null);
+  assert.deepEqual(resolverEntrada('/reservas/cl%C3%ADnica%20centro', ''), { modo: 'publico', slug });
+  assert.equal(resolverEntrada('/reservas/centro/', '?demo=1').modo, 'demo');
+  assert.equal(resolverEntrada('/admin/agenda', '').modo, 'conectado');
+  assert.equal(resolverEntrada('/reservas/%ZZ', '').slug, null);
+  assert.equal(resolverEntrada('/reservas/', '').modo, 'publico');
+  assert.equal(resolverEntrada('/reservas/centro/extra', '').slug, null);
   const llamadas = [];
-  await boot({ pathname: '/reservas/centro', search: '' }, {
-    public: async () => ({ iniciarPortalPublico: (valor) => llamadas.push(valor) }),
-    connected: () => { throw Error('No cargar administración'); },
+  await iniciarEntrada({ pathname: '/reservas/centro', search: '' }, {
+    publico: async () => ({ iniciarPortalPublico: (valor) => llamadas.push(valor) }),
+    conectado: () => { throw Error('No cargar administración'); },
     demo: () => { throw Error('No cargar demo'); },
   });
   assert.deepEqual(llamadas, ['centro']);
-  for (const modo of ['demo', 'connected']) {
+  for (const modo of ['demo', 'conectado']) {
     const modosCargados = [];
-    await boot({ pathname: '/admin/agenda', search: modo === 'demo' ? '?demo=1' : '' }, {
+    await iniciarEntrada({ pathname: '/admin/agenda', search: modo === 'demo' ? '?demo=1' : '' }, {
       [modo]: async () => { modosCargados.push(modo); return {}; },
     });
     assert.deepEqual(modosCargados, [modo]);
   }
   const codigoFuente = await readFile(new URL('../src/connected/portal-publico/portal.entrada.js', import.meta.url), 'utf8');
-  assert.doesNotMatch(codigoFuente, /shared\/app|demo\/|backend\.js|auth\//);
+  assert.doesNotMatch(codigoFuente, /shared\/aplicacion\.nucleo|demo\/|backend\.js|auth\//);
 });
 
 // El doble HTTP comprueba el contrato real de cabeceras y no usa credenciales administrativas.

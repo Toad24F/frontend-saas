@@ -29,13 +29,13 @@ export function handleNavegacionAgenda(evento, estado, render) {
   const grupo = evento.target.closest('[data-agenda-densidad]');
   if (grupo) {
     const desplazamiento = contenedorDesplazable();
-    anterior = { fecha: estado.date, top: desplazamiento?.scrollTop || 0, left: desplazamiento?.scrollLeft || 0, limiteSuperior: window.scrollY, dia: grupo.dataset.grupoDia, ids: grupo.dataset.ids };
+    anterior = { fecha: estado.fecha, top: desplazamiento?.scrollTop || 0, left: desplazamiento?.scrollLeft || 0, limiteSuperior: window.scrollY, dia: grupo.dataset.grupoDia, ids: grupo.dataset.ids };
     pendiente = { ids: grupo.dataset.ids.split(',').map(Number), inicio: Number(grupo.dataset.grupoInicio), dia: grupo.dataset.grupoDia };
-    estado.date = grupo.dataset.grupoDia; estado.calendarView = 'day'; render(); return true;
+    estado.fecha = grupo.dataset.grupoDia; estado.vistaCalendario = 'day'; render(); return true;
   }
   if (evento.target.closest('[data-agenda-volver]') && anterior) {
     const guardado = anterior; anterior = null; resaltado = null; pendiente = null; retornoPendiente = guardado;
-    estado.date = guardado.fecha; estado.calendarView = 'week'; render();
+    estado.fecha = guardado.fecha; estado.vistaCalendario = 'week'; render();
     return true;
   }
   // Una navegación explícita distinta cancela un salto pendiente de una respuesta remota.

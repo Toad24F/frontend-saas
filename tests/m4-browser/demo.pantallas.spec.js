@@ -142,7 +142,7 @@ for (const [ancho, tema] of [[1366, 'light'], [1366, 'dark'], [390, 'light'], [3
       await pagina.goto(`/admin/${ruta}?demo=1`);
       await expect(pagina.getByRole('heading', { name: titulo, exact: true })).toBeVisible();
       await expect(pagina.locator('html')).toHaveAttribute('data-theme', tema);
-      expect(await pagina.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), ruta).toBe(true);
+      await expect.poll(() => pagina.evaluate(() => document.documentElement.scrollWidth - innerWidth), { message: ruta }).toBeLessThanOrEqual(1);
       if (ancho === 390) await expect(pagina.getByRole('navigation', { name: 'Navegación inferior' })).toBeVisible();
       await pagina.screenshot({ path: infoPrueba.outputPath(`${ruta}-${ancho}-${tema}.png`), animations: 'disabled', fullPage: true });
     }

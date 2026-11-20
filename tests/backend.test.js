@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { api, iniciarSesion, restaurarSesion, loadBackendData, crearPayloadCatalogo, crearPayloadHorario, modeUrl, paginaPermitida, paginaInicial } from '../src/connected/backend.js';
-import { db } from '../src/shared/data.js';
+import { api, iniciarSesion, restaurarSesion, cargarDatosBackend, crearPayloadCatalogo, crearPayloadHorario, urlSegunModo, paginaPermitida, paginaInicial } from '../src/connected/backend.js';
+import { datosAplicacion } from '../src/shared/aplicacion.datos.js';
 import { validarContrasenaNueva } from '../src/connected/modules/autenticacion/contrasena.politica.js';
 import { obtenerCupoSucursales } from '../src/connected/modules/sucursales/sucursales.cupo.js';
 
@@ -21,8 +21,8 @@ test('semana completa: conserva IDs y orden por día sin descanso incrustado; ex
 test('catálogos solo envían los campos admitidos por el backend', () => {
   assert.deepEqual(crearPayloadCatalogo('services', { name: 'Consulta', price: 350.5, duration: 20, description: 'demo', tenantId: 9 }), { nombre: 'Consulta', descripcion: 'demo', costo: '350.5', duracionMinutos: 20 });
   assert.deepEqual(crearPayloadCatalogo('branches', { name: 'Centro', address: 'Calle 1', phone: '+52 614 1234567', timezone: 'America/Chihuahua', notes: '', maps: '' }), { nombre: 'Centro', direccion: 'Calle 1', telefono: '+52 614 1234567', zonaHoraria: 'America/Chihuahua', notasLlegada: null, urlGoogleMaps: null });
-  assert.equal(modeUrl('/admin/profesionales', true), '/admin/profesionales?demo=1');
-  assert.equal(modeUrl('/admin/profesionales', false), '/admin/profesionales');
+  assert.equal(urlSegunModo('/admin/profesionales', true), '/admin/profesionales?demo=1');
+  assert.equal(urlSegunModo('/admin/profesionales', false), '/admin/profesionales');
 });
 
 test('las contraseñas nuevas respetan longitud, bytes y confirmación', () => {
@@ -91,19 +91,19 @@ test('carga datos reales aislados del negocio, sin inventar citas, y envía auto
     assert.equal(paginaInicial(), 'agenda');
     assert.equal(paginaPermitida('servicios'), true);
     assert.equal(paginaPermitida('agenda'), true);
-    assert.equal(await loadBackendData(), 7);
-    assert.equal(db.tenants[0].name, 'Clínica Central');
-    assert.equal(db.tenants[0].slug, 'clinica-central');
+    assert.equal(await cargarDatosBackend(), 7);
+    assert.equal(datosAplicacion.tenants[0].name, 'Clínica Central');
+    assert.equal(datosAplicacion.tenants[0].slug, 'clinica-central');
     assert.deepEqual(obtenerCupoSucursales(), responses['/sucursales/cupo']);
-    assert.deepEqual(db.professionals[0].branchIds, [20]);
-    assert.deepEqual(db.professionals[0].serviceIds, [10]);
-    assert.equal(db.professionals[0].active, false);
-    assert.equal(db.schedules[0].end, '00:00');
-    assert.equal(db.blocks[0].professionalId, 30);
-    assert.equal(db.receptionists[0].email, 'recepcion@example.com');
-    assert.deepEqual(db.appointments, []);
-    assert.deepEqual(db.clients, []);
-    assert.equal(db.professionals[0].tenantId, 7);
+    assert.deepEqual(datosAplicacion.professionals[0].branchIds, [20]);
+    assert.deepEqual(datosAplicacion.professionals[0].serviceIds, [10]);
+    assert.equal(datosAplicacion.professionals[0].active, false);
+    assert.equal(datosAplicacion.schedules[0].end, '00:00');
+    assert.equal(datosAplicacion.blocks[0].professionalId, 30);
+    assert.equal(datosAplicacion.receptionists[0].email, 'recepcion@example.com');
+    assert.deepEqual(datosAplicacion.appointments, []);
+    assert.deepEqual(datosAplicacion.clients, []);
+    assert.equal(datosAplicacion.professionals[0].tenantId, 7);
     assert.ok(requests.slice(1).every(({ options }) => options.headers.Authorization === 'Bearer test-token'));
   } finally { global.fetch = original; global.sessionStorage = storage; }
 });
@@ -129,24 +129,24 @@ test('el profesional ve sus sucursales asignadas y la autoría real de servicios
     assert.equal(paginaInicial(), 'agenda');
     assert.equal(paginaPermitida('profesionales'), false);
     assert.equal(paginaPermitida('cuenta'), true);
-    await loadBackendData();
-    assert.deepEqual(db.professionals[0].branchIds, [20]);
-    assert.equal(db.branches[0].name, 'Centro');
-    assert.equal(db.branches.length, 1);
-    assert.equal(db.branches[0].address, 'Av. Principal 10');
-    assert.equal(db.branches[0].phone, '6141234567');
-    assert.equal(db.branches[0].maps, 'https://www.google.com/maps?q=Centro');
-    assert.equal(db.branches[0].notes, 'Entrada norte');
-    assert.equal(db.branches[0].active, false);
-    assert.equal(db.services[0].description, 'Inicial');
-    assert.equal(db.services[0].creatorId, 5);
+    await cargarDatosBackend();
+    assert.deepEqual(datosAplicacion.professionals[0].branchIds, [20]);
+    assert.equal(datosAplicacion.branches[0].name, 'Centro');
+    assert.equal(datosAplicacion.branches.length, 1);
+    assert.equal(datosAplicacion.branches[0].address, 'Av. Principal 10');
+    assert.equal(datosAplicacion.branches[0].phone, '6141234567');
+    assert.equal(datosAplicacion.branches[0].maps, 'https://www.google.com/maps?q=Centro');
+    assert.equal(datosAplicacion.branches[0].notes, 'Entrada norte');
+    assert.equal(datosAplicacion.branches[0].active, false);
+    assert.equal(datosAplicacion.services[0].description, 'Inicial');
+    assert.equal(datosAplicacion.services[0].creatorId, 5);
     global.fetch = async (url) => new URL(url).pathname === '/sucursales'
       ? Response.json({ message: 'Acceso denegado: privilegios insuficientes.' }, { status: 403 })
       : Response.json(responses[new URL(url).pathname]);
-    await loadBackendData();
-    assert.equal(db.branches[0].name, 'Centro');
-    assert.equal(db.branches[0].address, '');
-    assert.equal(db.branches[0].active, false);
+    await cargarDatosBackend();
+    assert.equal(datosAplicacion.branches[0].name, 'Centro');
+    assert.equal(datosAplicacion.branches[0].address, '');
+    assert.equal(datosAplicacion.branches[0].active, false);
   } finally { global.fetch = original; global.sessionStorage = storage; }
 });
 
@@ -166,10 +166,10 @@ test('el panel SA resume licencias y envíos reales sin datos de citas', async (
     assert.equal(paginaInicial(), 'plataforma');
     assert.equal(paginaPermitida('negocio'), true);
     assert.equal(paginaPermitida('recepcionistas'), false);
-    await loadBackendData();
-    assert.equal(db.tenants[0].license, 'suspension_pendiente');
-    assert.equal(db.tenants[0].failedDeliveries, 1);
-    assert.equal(db.tenants[0].category, 'Pendiente de activación');
-    assert.deepEqual(db.appointments, []);
+    await cargarDatosBackend();
+    assert.equal(datosAplicacion.tenants[0].license, 'suspension_pendiente');
+    assert.equal(datosAplicacion.tenants[0].failedDeliveries, 1);
+    assert.equal(datosAplicacion.tenants[0].category, 'Pendiente de activación');
+    assert.deepEqual(datosAplicacion.appointments, []);
   } finally { global.fetch = original; global.sessionStorage = storage; }
 });

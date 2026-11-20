@@ -1,7 +1,7 @@
-import { api, user } from '../../backend.js';
-import { state, render } from '../../../shared/app.js';
-import { pageHead, escape as esc, empty } from '../../../shared/ui.js';
-import { icon } from '../../../shared/icons.js';
+import { api, usuarioActual } from '../../backend.js';
+import { estadoAplicacion, render } from '../../../shared/aplicacion.nucleo.js';
+import { renderEncabezadoPagina, escaparHtml as esc, renderEstadoVacio } from '../../../shared/interfaz.componentes.js';
+import { renderIcono } from '../../../shared/iconos.catalogo.js';
 import { puedeGestionarCitas } from '../../modules/agenda/agenda.contrato-manual.js';
 import { crearClientesClient } from '../../modules/clientes/clientes.client.js';
 import { crearAgendaStore } from '../../modules/agenda/agenda.store.js';
@@ -15,7 +15,7 @@ let identidad = '',
   filtros = { busqueda: '', pagina: 1 };
 let direccionFocoPendiente = null;
 const identidadSesion = () =>
-  user ? `${user.negocioId}:${user.id}:${user.sesionId || ''}` : '';
+  usuarioActual ? `${usuarioActual.negocioId}:${usuarioActual.id}:${usuarioActual.sesionId || ''}` : '';
 function reiniciar() {
   directorioStore.reset();
   identidad = '';
@@ -28,7 +28,7 @@ async function cargarDirectorio(forzar = false) {
   if (!forzar && directorioStore.state.key === JSON.stringify(filtros)) return;
   const identidadConsulta = identidad;
   if (await directorioStore.load({ ...filtros })) {
-    if (identidadConsulta !== identidadSesion() || state.page !== 'clientes') return;
+    if (identidadConsulta !== identidadSesion() || estadoAplicacion.pagina !== 'clientes') return;
     const entrada = document.querySelector('#busqueda-directorio-conectado'),
       teniaFoco = entrada === document.activeElement;
     const textoIngresado = entrada?.value,
@@ -54,10 +54,10 @@ function renderPaginador(datos) {
   return `<div class="table-footer directorio-paginacion"><span>${datos.clientes.length} fichas en esta página · Página ${datos.pagina}</span><div><button class="btn btn-light" data-directorio-pagina="${datos.pagina - 1}" ${datos.pagina === 1 ? 'disabled' : ''}>Página anterior</button><button class="btn btn-light" data-directorio-pagina="${datos.pagina + 1}" ${!datos.hayMas ? 'disabled' : ''}>Siguiente página</button></div></div>`;
 }
 const renderBotonFicha = (ficha) =>
-  `<button class="text-button" data-directorio-abrir="${ficha.id}" aria-label="Ver ficha de ${esc(ficha.nombreCompleto)}">Ver ficha ${icon('chevron')}</button>`;
+  `<button class="text-button" data-directorio-abrir="${ficha.id}" aria-label="Ver ficha de ${esc(ficha.nombreCompleto)}">Ver ficha ${renderIcono('chevron')}</button>`;
 export function clientes() {
-  if (!puedeGestionarCitas(user?.rol))
-    return empty(
+  if (!puedeGestionarCitas(usuarioActual?.rol))
+    return renderEstadoVacio(
       'Acceso no disponible',
       'Tu cuenta no permite consultar el directorio.',
     );
@@ -79,7 +79,7 @@ export function clientes() {
     const fichas = modelo.data.clientes;
     contenido = fichas.length
       ? `<div class="table-responsive directorio-tabla"><table class="table app-table align-middle"><thead><tr><th>Nombre completo</th><th>WhatsApp</th><th>Acciones</th></tr></thead><tbody>${fichas.map((ficha) => `<tr><td><strong>${esc(ficha.nombreCompleto)}</strong><small class="directorio-identificador">Cliente #${ficha.id}</small></td><td>${esc(ficha.telefono)}</td><td>${renderBotonFicha(ficha)}</td></tr>`).join('')}</tbody></table></div><div class="directorio-tarjetas">${fichas.map((ficha) => `<article><h3>${esc(ficha.nombreCompleto)}</h3><p>Cliente #${ficha.id} · ${esc(ficha.telefono)}</p>${renderBotonFicha(ficha)}</article>`).join('')}</div>`
-      : empty(
+      : renderEstadoVacio(
           'Sin clientes',
           filtros.busqueda
             ? 'Prueba otro nombre o teléfono.'
@@ -87,7 +87,7 @@ export function clientes() {
         );
     contenido += renderPaginador(modelo.data);
   }
-  return `${pageHead('Clientes', 'Conoce a las personas que confían en tu negocio.', '<button class="btn btn-primary" data-directorio-nuevo>Nuevo cliente</button>')}<section class="surface directorio-clientes" aria-label="Directorio de clientes"><div class="section-heading"><h2>Tu directorio</h2><form id="filtros-directorio-conectado"><label class="search-field">${icon('search')}<input id="busqueda-directorio-conectado" name="busqueda" aria-label="Buscar clientes" placeholder="Nombre o teléfono…" type="search" maxlength="150" value="${esc(filtros.busqueda)}"></label><button type="submit" class="btn btn-light">Buscar</button></form></div><div aria-busy="${modelo.busy}" aria-live="polite">${contenido}</div></section>`;
+  return `${renderEncabezadoPagina('Clientes', 'Conoce a las personas que confían en tu negocio.', '<button class="btn btn-primary" data-directorio-nuevo>Nuevo cliente</button>')}<section class="surface directorio-clientes" aria-label="Directorio de clientes"><div class="section-heading"><h2>Tu directorio</h2><form id="filtros-directorio-conectado"><label class="search-field">${renderIcono('search')}<input id="busqueda-directorio-conectado" name="busqueda" aria-label="Buscar clientes" placeholder="Nombre o teléfono…" type="search" maxlength="150" value="${esc(filtros.busqueda)}"></label><button type="submit" class="btn btn-light">Buscar</button></form></div><div aria-busy="${modelo.busy}" aria-live="polite">${contenido}</div></section>`;
 }
 const recargarDirectorio = async () => {
   await cargarDirectorio(true);
@@ -95,8 +95,8 @@ const recargarDirectorio = async () => {
 document.addEventListener('submit', (evento) => {
   if (
     evento.target.id !== 'filtros-directorio-conectado' ||
-    state.page !== 'clientes' ||
-    !puedeGestionarCitas(user?.rol)
+    estadoAplicacion.pagina !== 'clientes' ||
+    !puedeGestionarCitas(usuarioActual?.rol)
   )
     return;
   evento.preventDefault();
@@ -115,8 +115,8 @@ document.addEventListener('click', (evento) => {
   );
   if (
     !control ||
-    state.page !== 'clientes' ||
-    !puedeGestionarCitas(user?.rol) ||
+    estadoAplicacion.pagina !== 'clientes' ||
+    !puedeGestionarCitas(usuarioActual?.rol) ||
     control.disabled
   )
     return;

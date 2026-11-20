@@ -1,41 +1,41 @@
-import { isDemo, api, user, etiquetaRol, cerrarSesion, modeUrl } from '../../../connected/backend.js';
-import { state, render } from '../../app.js';
-import { db, tenantById } from '../../data.js';
-import { icon } from '../../icons.js';
-import { modal, toast, escape as escapar, avatar } from '../../ui.js';
-import { field as campo, basicForm } from '../../forms.js';
+import { esDemo, api, usuarioActual, etiquetaRol, cerrarSesion, urlSegunModo } from '../../../connected/backend.js';
+import { estadoAplicacion, render } from '../../aplicacion.nucleo.js';
+import { datosAplicacion, obtenerNegocio } from '../../aplicacion.datos.js';
+import { renderIcono } from '../../iconos.catalogo.js';
+import { abrirDialogo, mostrarAviso, escaparHtml as escapar, avatar } from '../../interfaz.componentes.js';
+import { renderCampo as campo, abrirFormulario } from '../../formularios.componentes.js';
 import { estadoReportes } from '../../../demo/screens/reportes/reportes.estado.js';
 export function cambiarEspacioTrabajo() {
-  if (!isDemo) { modal('Tu espacio de trabajo', `<div class="dialog-body"><p>${escapar(user.nombre)} · ${escapar(etiquetaRol(user.rol))}</p><a class="btn btn-light" href="${modeUrl(location.pathname.includes('/cuenta') ? '/admin/agenda' : location.pathname.includes('/negocio/') ? '/admin/plataforma' : location.pathname, true)}">Ver demo para comparar</a><button class="btn btn-light" id="cerrar-sesion-espacio">Cerrar sesión</button></div>`); document.querySelector('#cerrar-sesion-espacio').onclick = async () => { try { await cerrarSesion(); location.reload(); } catch (error) { toast(error.message); } }; return; }
-  const dialogo = modal(
+  if (!esDemo) { abrirDialogo('Tu espacio de trabajo', `<div class="dialog-body"><p>${escapar(usuarioActual.nombre)} · ${escapar(etiquetaRol(usuarioActual.rol))}</p><a class="btn btn-light" href="${urlSegunModo(location.pathname.includes('/cuenta') ? '/admin/agenda' : location.pathname.includes('/negocio/') ? '/admin/plataforma' : location.pathname, true)}">Ver demo para comparar</a><button class="btn btn-light" id="cerrar-sesion-espacio">Cerrar sesión</button></div>`); document.querySelector('#cerrar-sesion-espacio').onclick = async () => { try { await cerrarSesion(); location.reload(); } catch (error) { mostrarAviso(error.message); } }; return; }
+  const dialogo = abrirDialogo(
     'Cambiar espacio de trabajo',
-    `<div class="dialog-body"><p class="mb-4">Explora dos negocios independientes con datos ficticios. Este selector solo existe en el prototipo.</p><div class="opciones-negocio">${db.tenants.map((negocio) => `<button class="opcion-negocio ${negocio.id === state.tenantId ? 'seleccionada' : ''}" data-elegir-negocio="${negocio.id}" ${negocio.suspended ? 'disabled' : ''}>${avatar(negocio.initials, 'mint')}<span><strong>${escapar(negocio.name)}</strong><small>${negocio.suspended ? 'Suspendido' : escapar(negocio.category)}</small></span>${negocio.id === state.tenantId ? icon('check') : icon('chevron')}</button>`).join('')}</div></div>`,
+    `<div class="dialog-body"><p class="mb-4">Explora dos negocios independientes con datos ficticios. Este selector solo existe en el prototipo.</p><div class="opciones-negocio">${datosAplicacion.tenants.map((negocio) => `<button class="opcion-negocio ${negocio.id === estadoAplicacion.negocioId ? 'seleccionada' : ''}" data-elegir-negocio="${negocio.id}" ${negocio.suspended ? 'disabled' : ''}>${avatar(negocio.initials, 'mint')}<span><strong>${escapar(negocio.name)}</strong><small>${negocio.suspended ? 'Suspendido' : escapar(negocio.category)}</small></span>${negocio.id === estadoAplicacion.negocioId ? renderIcono('check') : renderIcono('chevron')}</button>`).join('')}</div></div>`,
   );
   dialogo.querySelectorAll('[data-elegir-negocio]').forEach(
     (boton) =>
       (boton.onclick = () => {
-        state.tenantId = Number(boton.dataset.elegirNegocio);
-        state.branch = state.professional = state.status = 'all';
-        state.profesionalHorario = null;
+        estadoAplicacion.negocioId = Number(boton.dataset.elegirNegocio);
+        estadoAplicacion.sucursal = estadoAplicacion.profesional = estadoAplicacion.estadoCita = 'all';
+        estadoAplicacion.profesionalHorario = null;
         estadoReportes.sucursal = 'todas';
         dialogo.close();
         render();
-        toast(`Espacio actual: ${tenantById(state.tenantId).name}`);
+        mostrarAviso(`Espacio actual: ${obtenerNegocio(estadoAplicacion.negocioId).name}`);
       }),
   );
 }
 export function registrarNegocio() {
-  basicForm(
-    isDemo ? 'Registrar negocio de ejemplo' : 'Registrar negocio',
-    `${campo('Nombre del negocio', 'nombre', '', 'text', 'required maxlength="150"')}${campo('Slug del portal', 'identificador', '', 'text', 'required pattern="[a-z0-9]+(-[a-z0-9]+)*" maxlength="80" placeholder="mi-consultorio"')}${campo(isDemo ? 'Correo de contacto' : 'Correo del administrador', 'correo', '', 'email', 'required')}${isDemo ? '' : campo('RFC', 'rfc', '', 'text', 'required maxlength="13"') + campo('Límite de sucursales', 'limite', 1, 'number', 'required min="1" step="1"')}`,
+  abrirFormulario(
+    esDemo ? 'Registrar negocio de ejemplo' : 'Registrar negocio',
+    `${campo('Nombre del negocio', 'nombre', '', 'text', 'required maxlength="150"')}${campo('Slug del portal', 'identificador', '', 'text', 'required pattern="[a-z0-9]+(-[a-z0-9]+)*" maxlength="80" placeholder="mi-consultorio"')}${campo(esDemo ? 'Correo de contacto' : 'Correo del administrador', 'correo', '', 'email', 'required')}${esDemo ? '' : campo('RFC', 'rfc', '', 'text', 'required maxlength="13"') + campo('Límite de sucursales', 'limite', 1, 'number', 'required min="1" step="1"')}`,
     (formulario) => {
-      if (!isDemo) return api('/negocios', 'POST', { nombre: formulario.get('nombre').trim(), identificadorPublico: formulario.get('identificador'), emailAdministrador: formulario.get('correo'), rfc: formulario.get('rfc'), limiteSucursales: Number(formulario.get('limite')) });
-      if (db.tenants.some((negocio) => negocio.slug === formulario.get('identificador')))
+      if (!esDemo) return api('/negocios', 'POST', { nombre: formulario.get('nombre').trim(), identificadorPublico: formulario.get('identificador'), emailAdministrador: formulario.get('correo'), rfc: formulario.get('rfc'), limiteSucursales: Number(formulario.get('limite')) });
+      if (datosAplicacion.tenants.some((negocio) => negocio.slug === formulario.get('identificador')))
         throw new Error('Ese enlace ya está asignado a otro negocio.');
       const nombre = formulario.get('nombre').trim();
       if (!nombre) throw new Error('Escribe el nombre del negocio.');
-      db.tenants.push({
-        id: Math.max(...db.tenants.map((negocio) => negocio.id)) + 1,
+      datosAplicacion.tenants.push({
+        id: Math.max(...datosAplicacion.tenants.map((negocio) => negocio.id)) + 1,
         name: nombre,
         slug: formulario.get('identificador'),
         email: formulario.get('correo'),

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { resourceStatus } from '../src/shared/resource-status.js';
+import { estadoRecurso } from '../src/shared/recursos.estado.js';
 import { puedeConsultarInhabilitados, listarInhabilitados, consultarDetalleInhabilitado, inhabilitarRecepcionista,
   restaurarInhabilitado } from '../src/connected/modules/recursos/recursos.inhabilitados.js';
 import { consultarCitasAfectadas, motivosAfectacion } from '../src/connected/modules/recursos/recursos.afectaciones.js';
@@ -8,10 +8,10 @@ import { consultarCitasAfectadas, motivosAfectacion } from '../src/connected/mod
 // La marca de inhabilitación tiene precedencia sobre activo; restaurar solo
 // retira esa marca y el estado operativo sigue inactivo hasta otro comando.
 test('FALA-T035: tres estados distintos y restaurado aún inactivo', () => {
-  assert.equal(resourceStatus({ activo: true, inhabilitadoEn: null }).label, 'Activo');
-  assert.equal(resourceStatus({ activo: false, inhabilitadoEn: null }).label, 'Inactivo');
-  assert.equal(resourceStatus({ activo: false, inhabilitadoEn: '2026-11-04T10:00:00Z' }).label, 'Inhabilitado');
-  assert.equal(resourceStatus({ activo: true, inhabilitadoEn: '2026-11-04T10:00:00Z' }).label, 'Inhabilitado');
+  assert.equal(estadoRecurso({ activo: true, inhabilitadoEn: null }).etiqueta, 'Activo');
+  assert.equal(estadoRecurso({ activo: false, inhabilitadoEn: null }).etiqueta, 'Inactivo');
+  assert.equal(estadoRecurso({ activo: false, inhabilitadoEn: '2026-11-04T10:00:00Z' }).etiqueta, 'Inhabilitado');
+  assert.equal(estadoRecurso({ activo: true, inhabilitadoEn: '2026-11-04T10:00:00Z' }).etiqueta, 'Inhabilitado');
 });
 
 test('FALA-T037: recepción inhabilita sin confundir desactivar o reactivar', async () => {

@@ -9,7 +9,7 @@ for (const width of [1366, 390]) for (const theme of ['light', 'dark']) {
     await page.locator('[data-agenda-vista="day"]').click();
     await expect(page.locator('.calendario-evento')).toHaveCount(1);
     if (width === 390) {
-      expect(await page.locator('.columna-dia').evaluate((el) => el.getBoundingClientRect().width)).toBeGreaterThanOrEqual(310);
+      await expect.poll(() => page.locator('.columna-dia').evaluate((el) => el.getBoundingClientRect().width)).toBeGreaterThanOrEqual(310);
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     }
     const card = page.locator('.calendario-evento');

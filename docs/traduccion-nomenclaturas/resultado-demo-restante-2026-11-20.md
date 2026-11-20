@@ -19,7 +19,7 @@ Se ajustaron los consumidores en el enrutador de entrada, el índice de pantalla
 ## Separación entre modos
 
 - El indicador `?demo=1` y las rutas públicas y administrativas conservan su comportamiento. `demo.datos.js` sigue cargando `/data/demo.json` de forma diferida y exclusiva de la demo.
-- Los nombres de las colecciones y los campos compartidos por Agenda, Disponibilidad, catálogos y reservas conservan la estructura que consumen esas pantallas. La traducción de ese modelo y las interfaces del núcleo compartido corresponde al conjunto 14. Los campos de los formularios y el estado de Reportes traducidos son internos de la demo.
+- Los nombres de las colecciones y los campos compartidos por Agenda, Disponibilidad, catálogos y reservas conservan la estructura que consumen esas pantallas. La nomenclatura de los accesos al modelo se actualizó en el conjunto 14. Los campos de los formularios y el estado de Reportes traducidos son internos de la demo.
 - Configuración y Notificaciones conservan los cambios en memoria. El reporte utiliza la impresión del navegador. El modo conectado conserva su navegación según el rol y usa la API autenticada.
 
 ## Verificación

@@ -1,4 +1,4 @@
-import { db, replaceData, TODAY, addDays, date, time, minutes } from '../shared/data.js';
+import { datosAplicacion, reemplazarDatos, HOY, sumarDias, crearFecha, minutosAHora, horaAMinutos } from '../shared/aplicacion.datos.js';
 
 const nombres = [
   'María González',
@@ -26,23 +26,23 @@ export async function cargarDatosDemo() {
   const respuesta = await fetch('/data/demo.json');
   if (!respuesta.ok)
     throw new Error('No se pudieron cargar los datos de demostración.');
-  replaceData(await respuesta.json());
-  db.clients = nombres.map((nombre, indice) => ({
+  reemplazarDatos(await respuesta.json());
+  datosAplicacion.clients = nombres.map((nombre, indice) => ({
     id: indice + 1,
     tenantId: 1,
     name: nombre,
     phone: `614555${String(indice + 10).padStart(4, '0')}`,
   }));
-  db.clients.push({
+  datosAplicacion.clients.push({
     id: 21,
     tenantId: 2,
     name: 'Isabel Fuentes',
     phone: '6145550210',
   });
-  db.appointments = [];
-  db.blocks = [];
-  db.holds = [];
-  db.schedules = db.professionals.flatMap((profesional) =>
+  datosAplicacion.appointments = [];
+  datosAplicacion.blocks = [];
+  datosAplicacion.holds = [];
+  datosAplicacion.schedules = datosAplicacion.professionals.flatMap((profesional) =>
     Array.from({ length: 6 }, (_, indice) => ({
       id: profesional.id * 10 + indice,
       tenantId: profesional.tenantId,
@@ -56,8 +56,8 @@ export async function cargarDatosDemo() {
       enabled: indice < 5 || (profesional.id === 1 && indice === 5),
     })),
   );
-  db.schedules.push({
-    id: Math.max(...db.schedules.map((franja) => franja.id)) + 1,
+  datosAplicacion.schedules.push({
+    id: Math.max(...datosAplicacion.schedules.map((franja) => franja.id)) + 1,
     tenantId: 1,
     professionalId: 1,
     day: 6,
@@ -68,7 +68,7 @@ export async function cargarDatosDemo() {
     end: '18:00',
     enabled: true,
   });
-  const lunes = addDays(TODAY, 1 - (date(TODAY).getDay() || 7));
+  const lunes = sumarDias(HOY, 1 - (crearFecha(HOY).getDay() || 7));
   const citasDeEjemplo = [
     [0, '09:00', 1, 1, 'completada'],
     [0, '10:15', 2, 2, 'completada'],
@@ -95,32 +95,32 @@ export async function cargarDatosDemo() {
     [4, '15:30', 2, 3, 'no_asistio'],
   ];
   citasDeEjemplo.forEach(([desplazamiento, inicio, profesionalId, clienteId, estado], indice) => {
-    const profesional = db.professionals.find((registro) => registro.id === profesionalId),
-      servicio = db.services.find((registro) => registro.id === profesional.serviceIds[0]);
-    db.appointments.push({
+    const profesional = datosAplicacion.professionals.find((registro) => registro.id === profesionalId),
+      servicio = datosAplicacion.services.find((registro) => registro.id === profesional.serviceIds[0]);
+    datosAplicacion.appointments.push({
       id: indice + 1,
       tenantId: 1,
       branchId: profesional.branchIds[desplazamiento % 2],
       professionalId: profesionalId,
       serviceId: servicio.id,
       clientId: clienteId,
-      date: addDays(lunes, desplazamiento),
+      date: sumarDias(lunes, desplazamiento),
       start: inicio,
-      end: time(minutes(inicio) + servicio.duration),
+      end: minutosAHora(horaAMinutos(inicio) + servicio.duration),
       status: estado,
       folio: `CB-2609-${String(indice + 1).padStart(4, '0')}`,
       reason: '',
       origin: 'portal_publico',
     });
   });
-  db.appointments.push({
+  datosAplicacion.appointments.push({
     id: 24,
     tenantId: 2,
     branchId: 3,
     professionalId: 5,
     serviceId: 5,
     clientId: 21,
-    date: TODAY,
+    date: HOY,
     start: '09:00',
     end: '10:00',
     status: 'confirmada',
@@ -128,17 +128,17 @@ export async function cargarDatosDemo() {
     reason: '',
     origin: 'portal_publico',
   });
-  db.blocks.push({
+  datosAplicacion.blocks.push({
     id: 1,
     tenantId: 1,
     professionalId: 4,
     branchId: 1,
-    date: addDays(lunes, 2),
-    endDate: addDays(lunes, 2),
+    date: sumarDias(lunes, 2),
+    endDate: sumarDias(lunes, 2),
     start: '09:00',
     end: '11:00',
     type: 'emergencia',
     reason: 'Capacitación del equipo',
   });
-  return db;
+  return datosAplicacion;
 }

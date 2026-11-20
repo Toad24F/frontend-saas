@@ -1,3 +1,3 @@
-import { start as iniciar } from '../shared/app.js';
+import { iniciarAplicacion } from '../shared/aplicacion.nucleo.js';
 
-iniciar();
+iniciarAplicacion();

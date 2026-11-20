@@ -1,6 +1,6 @@
-import { escape as esc } from '../../ui.js';
-import { icon } from '../../icons.js';
-import { statuses } from '../../data.js';
+import { escaparHtml as esc } from '../../interfaz.componentes.js';
+import { renderIcono } from '../../iconos.catalogo.js';
+import { etiquetasEstadoCita } from '../../aplicacion.datos.js';
 
 export function botonMenuEstado(elemento) {
   return `data-agenda-menu-estado="${elemento.id}" aria-haspopup="menu" aria-expanded="false"`;
@@ -87,11 +87,11 @@ export function instalarMenuEstado({ active: activo, read: leer, change: cambiar
     try {
       const detalle = await leer(id);
       if (!valido()) { if (vigente === entrada) cerrar(); return; }
-      if (!detalle || detalle.id !== id || !statuses[detalle.estado]) throw new Error('Detalle inválido');
-      el.innerHTML = `<p class="agenda-titulo-menu">${esc(detalle.nombreContacto ?? 'Paciente')}<small>${esc(detalle.fechaLocal)} · ${esc(detalle.horaInicio.slice(0, 5))}</small></p>${Object.entries(statuses).map(([valor, etiqueta]) => {
+      if (!detalle || detalle.id !== id || !etiquetasEstadoCita[detalle.estado]) throw new Error('Detalle inválido');
+      el.innerHTML = `<p class="agenda-titulo-menu">${esc(detalle.nombreContacto ?? 'Paciente')}<small>${esc(detalle.fechaLocal)} · ${esc(detalle.horaInicio.slice(0, 5))}</small></p>${Object.entries(etiquetasEstadoCita).map(([valor, etiqueta]) => {
         const motivo = motivoOpcionEstado(detalle, valor, ahora());
-        return `<button type="button" role="menuitemradio" aria-checked="${valor === detalle.estado}" data-siguiente-estado="${valor}" ${motivo ? 'disabled' : ''}><span class="legend-dot agenda-indicador-estado ${valor}"></span><span>${etiqueta}${motivo ? `<small>${esc(motivo)}</small>` : ''}</span>${valor === detalle.estado ? icon('check') : ''}</button>`;
-      }).join('')}<button role="menuitem" type="button" data-menu-detalle>Ver detalle de la cita ${icon('chevron')}</button>`;
+        return `<button type="button" role="menuitemradio" aria-checked="${valor === detalle.estado}" data-siguiente-estado="${valor}" ${motivo ? 'disabled' : ''}><span class="legend-dot agenda-indicador-estado ${valor}"></span><span>${etiqueta}${motivo ? `<small>${esc(motivo)}</small>` : ''}</span>${valor === detalle.estado ? renderIcono('check') : ''}</button>`;
+      }).join('')}<button role="menuitem" type="button" data-menu-detalle>Ver detalle de la cita ${renderIcono('chevron')}</button>`;
       posicion(); el.querySelector('button:not(:disabled)')?.focus({ preventScroll: true });
       el.querySelector('[data-menu-detalle]').onclick = () => { cerrar(true); abrirDetalle(id); };
       for (const button of el.querySelectorAll('[data-siguiente-estado]')) button.onclick = async () => {

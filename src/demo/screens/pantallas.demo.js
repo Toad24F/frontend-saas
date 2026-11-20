@@ -8,9 +8,9 @@ import { renderReportesDemo } from './reportes/reportes.vista.js';
 import { renderNotificacionesDemo } from './notificaciones/notificaciones.vista.js';
 import { renderConfiguracionDemo } from './configuracion/configuracion.vista.js';
 import { plataforma } from '../../shared/screens/plataforma/plataforma.vista.js';
-import { empty, button } from '../../shared/ui.js';
+import { renderEstadoVacio, renderBoton } from '../../shared/interfaz.componentes.js';
 
-const views = {
+const pantallas = {
   resumen: renderResumenDemo,
   clientes,
   profesionales,
@@ -23,6 +23,6 @@ const views = {
   plataforma,
 };
 
-export function renderView(page) {
-  return views[page]?.() ?? empty('Esta página no existe', 'Vuelve a tu agenda para continuar.', button('Ir a la agenda', 'go-agenda', 'calendar'));
+export function renderPantalla(pagina) {
+  return pantallas[pagina]?.() ?? renderEstadoVacio('Esta página no existe', 'Vuelve a tu agenda para continuar.', renderBoton('Ir a la agenda', 'ir-agenda', 'calendar'));
 }

@@ -8,15 +8,15 @@
   import '../../src/shared/theme.css';
   import '../../src/connected/screens/cuenta/cuenta.estilos.css';
   import '../../src/shared/account-portal.css';
-  import { renderAccountPortal, bindAccountPortal } from '../../src/shared/account-portal.js';
+  import { renderPortalCuenta, vincularPortalCuenta } from '../../src/shared/cuenta.portal.js';
   // El caso predeterminado reproduce el contrato actual: no expone el slug.
   // El caso demo comprueba controles con un enlace ficticio y ?demo=1 explícito.
   const demo = new URL(location.href).searchParams.get('case') === 'demo';
-  document.querySelector('#fixture').innerHTML = renderAccountPortal({
-    user: { rol: 'admin_negocio', negocioId: 7 },
-    tenant: { id: 7, slug: demo ? 'clinica-bienestar' : '' }, origin: location.origin, demo,
+  document.querySelector('#fixture').innerHTML = renderPortalCuenta({
+    usuario: { rol: 'admin_negocio', negocioId: 7 },
+    negocio: { id: 7, slug: demo ? 'clinica-bienestar' : '' }, origen: location.origin, demo,
   });
-  bindAccountPortal(document);
+  vincularPortalCuenta(document);
   document.querySelector('#theme').onclick = () => {
     document.documentElement.dataset.theme = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light';
   };

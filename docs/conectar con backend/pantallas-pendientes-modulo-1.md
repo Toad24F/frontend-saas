@@ -4,7 +4,7 @@
 
 ## Base de la revisión
 
-Se contrastaron el [estado actual del backend](../../backend/docs/actual.md) con los controladores registrados en el backend y las [pantallas conectadas](../src/connected/screens/index.js), su [carga de datos](../src/connected/modules/datos/load.js) y sus [permisos de navegación](../../src/connected/modules/permisos/permisos.paginas.js). Para la oferta de servicios prevalece el [contrato implementado del fix](../../backend/docs/Fix-modulo-1/contrato-implementado.md) sobre documentos históricos incompatibles. La [cobertura del prototipo](requerimientos.md) describe la demo, no confirma una API disponible.
+Se contrastaron el [estado actual del backend](../../backend/docs/actual.md) con los controladores registrados en el backend y las [pantallas conectadas](../../src/connected/screens/pantallas.conectadas.js), su [carga de datos](../../src/connected/modules/datos/datos.carga.js) y sus [permisos de navegación](../../src/connected/modules/permisos/permisos.paginas.js). Para la oferta de servicios prevalece el [contrato implementado del fix](../../backend/docs/Fix-modulo-1/contrato-implementado.md) sobre documentos históricos incompatibles. La [cobertura del prototipo](requerimientos.md) describe la demo, no confirma una API disponible.
 
 El módulo 1 que hoy expone HTTP comprende autenticación, negocios y licencias, personal, sucursales, servicios, oferta por sucursal, horarios, excepciones y bloqueos. La interfaz conectada solo muestra una parte de ello. Las pantallas de agenda, clientes, reservas, reportes y notificaciones de la demo no tienen todavía datos operativos equivalentes en el backend.
 

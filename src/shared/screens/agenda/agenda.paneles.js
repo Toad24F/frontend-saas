@@ -1,8 +1,8 @@
-import { modal } from '../../ui.js';
+import { abrirDialogo } from '../../interfaz.componentes.js';
 
 // Conserva el dialog nativo (Escape, foco y capa superior) con la misma carcasa lateral de otros formularios.
 export function panelAgenda(titulo, cuerpo, ancho = true) {
-  const panel = modal(titulo, cuerpo, ancho);
+  const panel = abrirDialogo(titulo, cuerpo, ancho);
   panel.classList.add('form-drawer', 'agenda-panel-lateral');
   return panel;
 }

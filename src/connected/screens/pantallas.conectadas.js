@@ -6,13 +6,13 @@ import { plataforma } from '../../shared/screens/plataforma/plataforma.vista.js'
 import { cuenta } from './cuenta/cuenta.vista.js';
 import { renderDetalleNegocio } from './negocio/negocio.vista.js';
 import { recepcionistas } from './recepcionistas/recepcionistas.vista.js';
-import { empty } from '../../shared/ui.js';
+import { renderEstadoVacio } from '../../shared/interfaz.componentes.js';
 import { agenda } from './agenda/agenda.vista.js';
 import { clientes } from './clientes/clientes.vista.js';
 import './disponibilidad/disponibilidad.acciones.js';
 import './cuenta/cuenta.acciones.js';
 
-const views = {
+const pantallas = {
   agenda,
   clientes,
   profesionales,
@@ -25,6 +25,6 @@ const views = {
   recepcionistas,
 };
 
-export function renderView(page) {
-  return views[page]?.() ?? empty('Esta página no existe', 'Vuelve a tu agenda para continuar.');
+export function renderPantalla(pagina) {
+  return pantallas[pagina]?.() ?? renderEstadoVacio('Esta página no existe', 'Vuelve a tu agenda para continuar.');
 }

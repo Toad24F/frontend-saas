@@ -1,7 +1,7 @@
-import { api, iniciarSesion, modeUrl } from '../../backend.js';
+import { api, iniciarSesion, urlSegunModo } from '../../backend.js';
 import { validarContrasenaNueva } from '../../modules/autenticacion/contrasena.politica.js';
-import { icon } from '../../../shared/icons.js';
-import { escape as escapar } from '../../../shared/ui.js';
+import { renderIcono } from '../../../shared/iconos.catalogo.js';
+import { escaparHtml as escapar } from '../../../shared/interfaz.componentes.js';
 import './autenticacion.estilos.css';
 
 const campoEntrada = (etiqueta, id, tipo, autocomplete, extra = '') =>
@@ -34,10 +34,10 @@ export function renderAutenticacion(mensaje = '', alIngresar) {
       '<img class="autenticacion-logo-claro" src="/brand/citalendar-logo.svg" alt="Citalendar">' +
       '<img class="autenticacion-logo-oscuro" src="/brand/citalendar-logo-light.svg" alt="">' +
       '</div><div class="autenticacion-acciones-cabecera"><a class="autenticacion-enlace-demo" href="' +
-      modeUrl('/admin/agenda', true) + '">Ver demo <span aria-hidden="true">↗</span></a>' +
+      urlSegunModo('/admin/agenda', true) + '">Ver demo <span aria-hidden="true">↗</span></a>' +
       '<button type="button" class="autenticacion-selector-tema theme-toggle" data-action="theme" ' +
       'aria-label="Activar modo ' + (oscuro ? 'claro' : 'oscuro') + '" aria-pressed="' + oscuro +
-      '" title="Modo ' + (oscuro ? 'claro' : 'oscuro') + '">' + icon(oscuro ? 'sun' : 'moon') +
+      '" title="Modo ' + (oscuro ? 'claro' : 'oscuro') + '">' + renderIcono(oscuro ? 'sun' : 'moon') +
       '</button></div></header>' +
       '<div class="autenticacion-contenido-interior">' + contenido + '</div>' +
       '<footer class="autenticacion-pie">Un poco más de orden. Más tiempo para cuidar.</footer></section>' +

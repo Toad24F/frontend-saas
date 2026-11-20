@@ -288,3 +288,19 @@ El [resultado de Plataforma, permisos y recursos inhabilitados](resultado-plataf
 
 Las rutas de archivo, los cambios de selectores y sus comprobaciones se registran en el [resultado de la demo](resultado-demo-restante-2026-11-20.md).
 
+## Equivalencias del núcleo compartido
+
+| Nombre anterior | Nombre adoptado |
+| --- | --- |
+| `boot`, `resolveEntry`, `start`, `renderView` | `iniciarEntrada`, `resolverEntrada`, `iniciarAplicacion`, `renderPantalla` |
+| `state`, `navigate`, `renderShell`, `handleClick` | `estadoAplicacion`, `navegar`, `renderEstructuraAplicacion`, `handleClicAplicacion` |
+| `tenantId`, `page`, `calendarView`, `date` del estado volátil | `negocioId`, `pagina`, `vistaCalendario`, `fecha` |
+| `branch`, `professional`, `status`, `search`, `agendaHistory`, `businessId` del estado volátil | `sucursal`, `profesional`, `estadoCita`, `busqueda`, `historialAgenda`, `detalleNegocioId` |
+| `db`, `replaceData`, `list`, `resource`, `tenantById`, `appointmentInfo` | `datosAplicacion`, `reemplazarDatos`, `listarRegistros`, `obtenerRecurso`, `obtenerNegocio`, `ampliarDatosCita` |
+| `TODAY`, `date`, `iso`, `addDays`, `time`, `minutes` | `HOY`, `crearFecha`, `fechaIso`, `sumarDias`, `minutosAHora`, `horaAMinutos` |
+| `escape`, `modal`, `toast`, `pageHead`, `empty`, `badge`, `button`, `icon` | `escaparHtml`, `abrirDialogo`, `mostrarAviso`, `renderEncabezadoPagina`, `renderEstadoVacio`, `renderEtiquetaEstado`, `renderBoton`, `renderIcono` |
+| `field`, `select`, `basicForm`, `errorSlot`, `formError` | `renderCampo`, `renderSelector`, `abrirFormulario`, `espacioErrorFormulario`, `mostrarErrorFormulario` |
+| `calendarColumns`, `resourceStatus` | `columnasCalendario`, `estadoRecurso` |
+| `accountPortalUrl`, `renderAccountPortal`, `copyAccountPortal`, `bindAccountPortal` | `urlPortalCuenta`, `renderPortalCuenta`, `copiarEnlacePortalCuenta`, `vincularPortalCuenta` |
+| `isDemo`, `pending`, `modeUrl`, `loadBackendData`, `user` de la fachada | `esDemo`, `mensajePendiente`, `urlSegunModo`, `cargarDatosBackend`, `usuarioActual` |
+

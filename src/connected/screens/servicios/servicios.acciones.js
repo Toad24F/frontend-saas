@@ -1,16 +1,16 @@
-import { loadBackendData, user } from '../../backend.js';
+import { cargarDatosBackend, usuarioActual } from '../../backend.js';
 import { inhabilitarServicio } from '../../modules/servicios/servicios.operaciones.js';
-import { render, state } from '../../../shared/app.js';
-import { resource } from '../../../shared/data.js';
-import { errorSlot } from '../../../shared/forms.js';
-import { escape, modal, toast } from '../../../shared/ui.js';
+import { render, estadoAplicacion } from '../../../shared/aplicacion.nucleo.js';
+import { obtenerRecurso } from '../../../shared/aplicacion.datos.js';
+import { espacioErrorFormulario } from '../../../shared/formularios.componentes.js';
+import { escaparHtml, abrirDialogo, mostrarAviso } from '../../../shared/interfaz.componentes.js';
 
 export function confirmarInhabilitacionServicio(id) {
-  if (user?.rol !== 'admin_negocio' || state.page !== 'servicios') return;
-  const servicio = resource('services', id, state.tenantId);
+  if (usuarioActual?.rol !== 'admin_negocio' || estadoAplicacion.pagina !== 'servicios') return;
+  const servicio = obtenerRecurso('services', id, estadoAplicacion.negocioId);
   // El usuario confirma un retiro recuperable. Desactivar sigue disponible
   // como estado operativo distinto en el menú de la tarjeta.
-  const dialogo = modal('Inhabilitar servicio', `<div class="dialog-body"><p><strong>${escape(servicio.name)}</strong> saldrá de los listados operativos. Podrás consultarlo en Inhabilitados y restaurarlo como inactivo más adelante.</p>${errorSlot}</div><div class="dialog-footer"><button type="button" class="btn btn-light" data-dismiss>Cancelar</button><button type="button" class="btn action-danger" data-confirm>Inhabilitar servicio</button></div>`);
+  const dialogo = abrirDialogo('Inhabilitar servicio', `<div class="dialog-body"><p><strong>${escaparHtml(servicio.name)}</strong> saldrá de los listados operativos. Podrás consultarlo en Inhabilitados y restaurarlo como inactivo más adelante.</p>${espacioErrorFormulario}</div><div class="dialog-footer"><button type="button" class="btn btn-light" data-dismiss>Cancelar</button><button type="button" class="btn action-danger" data-confirm>Inhabilitar servicio</button></div>`);
   dialogo.querySelector('[data-dismiss]').onclick = () => dialogo.close();
   dialogo.querySelector('[data-confirm]').onclick = async (evento) => {
     const boton = evento.currentTarget;
@@ -20,8 +20,8 @@ export function confirmarInhabilitacionServicio(id) {
     try {
       await inhabilitarServicio(servicio.id);
       dialogo.close();
-      try { await loadBackendData(); render(); toast('Servicio inhabilitado.'); }
-      catch (error) { toast(`Servicio inhabilitado. No se pudo actualizar el catálogo: ${error.message}`); }
+      try { await cargarDatosBackend(); render(); mostrarAviso('Servicio inhabilitado.'); }
+      catch (error) { mostrarAviso(`Servicio inhabilitado. No se pudo actualizar el catálogo: ${error.message}`); }
     } catch (error) {
       const destino = dialogo.querySelector('#form-error');
       destino.textContent = error.message;

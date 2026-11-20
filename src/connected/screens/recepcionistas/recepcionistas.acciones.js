@@ -1,28 +1,28 @@
-import { api, loadBackendData } from '../../backend.js';
+import { api, cargarDatosBackend } from '../../backend.js';
 import { validarContrasenaNueva } from '../../modules/autenticacion/contrasena.politica.js';
-import { list } from '../../../shared/data.js';
-import { escape } from '../../../shared/ui.js';
-import { render, state } from '../../../shared/app.js';
-import { field, basicForm, errorSlot } from '../../../shared/forms.js';
-import { modal, toast } from '../../../shared/ui.js';
+import { listarRegistros } from '../../../shared/aplicacion.datos.js';
+import { escaparHtml } from '../../../shared/interfaz.componentes.js';
+import { render, estadoAplicacion } from '../../../shared/aplicacion.nucleo.js';
+import { renderCampo, abrirFormulario, espacioErrorFormulario } from '../../../shared/formularios.componentes.js';
+import { abrirDialogo, mostrarAviso } from '../../../shared/interfaz.componentes.js';
 import { mostrarErroresProfesional, limpiarErroresProfesional, limpiarCampoProfesional } from '../../../shared/screens/profesionales/profesionales.errores.js';
 import { validarRecepcionista, interpretarErrorRecepcionista } from './recepcionistas.errores.js';
 import { leerCupoRolPropio, renderAvisoCupoPropio } from '../negocio/usuarios.cupo.js';
 import { inhabilitarRecepcionista } from '../../modules/recursos/recursos.inhabilitados.js';
 
-const campoMarcado = (...argumentos) => field(...argumentos).replace('class="form-field"', `class="form-field" data-campo-profesional="${argumentos[1]}"`);
+const campoMarcado = (...argumentos) => renderCampo(...argumentos).replace('class="form-field"', `class="form-field" data-campo-profesional="${argumentos[1]}"`);
 const camposContrasena = () => campoMarcado('Contraseña', 'password', '', 'password', 'required minlength="12" autocomplete="new-password"');
 
 function formularioRecepcionista(titulo, contenido, alGuardar, restablecimiento = false) {
-  const dialogo = basicForm(titulo, contenido, alGuardar, false, {
-    drawer: !restablecimiento,
-    validate(formulario) {
+  const dialogo = abrirFormulario(titulo, contenido, alGuardar, false, {
+    panelLateral: !restablecimiento,
+    validar(formulario) {
       const errores = validarRecepcionista(new FormData(formulario), restablecimiento);
       if (!Object.keys(errores).length) { limpiarErroresProfesional(formulario); return true; }
       mostrarErroresProfesional(formulario, errores);
       return false;
     },
-    onError(error, formulario) {
+    alFallar(error, formulario) {
       const errores = interpretarErrorRecepcionista(error);
       if (errores) mostrarErroresProfesional(formulario, errores);
       else {
@@ -65,13 +65,13 @@ export async function accionRecepcionista(accion, id) {
     return;
   }
   if (!['desactivar', 'reactivar', 'inhabilitar'].includes(accion)) return;
-  const persona = list('receptionists', state.tenantId).find((elemento) => elemento.id === id);
+  const persona = listarRegistros('receptionists', estadoAplicacion.negocioId).find((elemento) => elemento.id === id);
   if (!persona) return;
   const reactivando = accion === 'reactivar';
   const inhabilitando = accion === 'inhabilitar';
   // Inhabilitar retira la cuenta de la lista; desactivar conserva la cuenta
   // visible y reactivar sigue sujeto al cupo del servidor.
-  const dialogo = modal(reactivando ? 'Reactivar recepcionista' : inhabilitando ? 'Inhabilitar recepcionista' : 'Desactivar recepcionista', `<div class="dialog-body">${reactivando ? await introduccionCupo() : ''}<p><strong>${escape(persona.name)}</strong>: ${reactivando ? 'Se habilitará de nuevo su cuenta. Tendrá que iniciar sesión.' : inhabilitando ? 'Se retirará de los listados operativos y se cerrarán sus sesiones. Podrás consultarla en Inhabilitados y restaurarla como inactiva más adelante.' : 'Se desactivará la cuenta y se cerrarán sus sesiones.'}</p>${errorSlot}</div><div class="dialog-footer"><button class="btn btn-light" data-dismiss>Cancelar</button><button class="btn ${reactivando ? 'btn-primary' : inhabilitando ? 'action-danger' : 'action-caution'}" data-confirm>${reactivando ? 'Reactivar' : inhabilitando ? 'Inhabilitar' : 'Desactivar'}</button></div>`);
+  const dialogo = abrirDialogo(reactivando ? 'Reactivar recepcionista' : inhabilitando ? 'Inhabilitar recepcionista' : 'Desactivar recepcionista', `<div class="dialog-body">${reactivando ? await introduccionCupo() : ''}<p><strong>${escaparHtml(persona.name)}</strong>: ${reactivando ? 'Se habilitará de nuevo su cuenta. Tendrá que iniciar sesión.' : inhabilitando ? 'Se retirará de los listados operativos y se cerrarán sus sesiones. Podrás consultarla en Inhabilitados y restaurarla como inactiva más adelante.' : 'Se desactivará la cuenta y se cerrarán sus sesiones.'}</p>${espacioErrorFormulario}</div><div class="dialog-footer"><button class="btn btn-light" data-dismiss>Cancelar</button><button class="btn ${reactivando ? 'btn-primary' : inhabilitando ? 'action-danger' : 'action-caution'}" data-confirm>${reactivando ? 'Reactivar' : inhabilitando ? 'Inhabilitar' : 'Desactivar'}</button></div>`);
   dialogo.querySelector('[data-dismiss]').onclick = () => dialogo.close();
   dialogo.querySelector('[data-confirm]').onclick = async (evento) => {
     const boton = evento.currentTarget;
@@ -79,11 +79,11 @@ export async function accionRecepcionista(accion, id) {
     try {
       if (inhabilitando) await inhabilitarRecepcionista(id);
       else await api(`/recepcionistas/${id}/${reactivando ? 'reactivar' : 'desactivar'}`, 'POST', {});
-      try { await loadBackendData(); }
-      catch (error) { toast('Cambio guardado. No se pudo actualizar la lista: ' + error.message); }
+      try { await cargarDatosBackend(); }
+      catch (error) { mostrarAviso('Cambio guardado. No se pudo actualizar la lista: ' + error.message); }
       dialogo.close();
       render();
-      toast(reactivando ? 'Recepcionista reactivada.' : inhabilitando ? 'Recepcionista inhabilitada.' : 'Recepcionista desactivada.');
+      mostrarAviso(reactivando ? 'Recepcionista reactivada.' : inhabilitando ? 'Recepcionista inhabilitada.' : 'Recepcionista desactivada.');
     } catch (error) {
       const destino = dialogo.querySelector('#form-error');
       destino.textContent = error.message;

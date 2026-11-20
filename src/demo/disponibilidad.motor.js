@@ -1,14 +1,14 @@
 import {
-  db,
-  list,
-  resource,
-  minutes,
-  time,
-  date,
-  addDays,
-  TODAY,
-  tenantById,
-} from '../shared/data.js';
+  datosAplicacion,
+  listarRegistros,
+  obtenerRecurso,
+  horaAMinutos,
+  minutosAHora,
+  crearFecha,
+  sumarDias,
+  HOY,
+  obtenerNegocio,
+} from '../shared/aplicacion.datos.js';
 export const seEmpalman = (inicio, fin, otroInicio, otroFin) =>
   inicio < otroFin && fin > otroInicio;
 /** Motor de demostración en memoria. No implementa una exclusión distribuida. */
@@ -21,37 +21,37 @@ export function buscarHorariosDemo({
   ignoreHold: apartadoIgnorado = null,
   mode: modo = null,
 }) {
-  const servicio = resource('services', servicioId, negocioId),
-    profesional = resource('professionals', profesionalId, negocioId);
-  resource('branches', sucursalId, negocioId);
+  const servicio = obtenerRecurso('services', servicioId, negocioId),
+    profesional = obtenerRecurso('professionals', profesionalId, negocioId);
+  obtenerRecurso('branches', sucursalId, negocioId);
   if (
     !profesional.serviceIds.includes(servicio.id) ||
     !profesional.branchIds.includes(Number(sucursalId)) ||
-    dia < TODAY
+    dia < HOY
   )
     return [];
-  const franjas = list('schedules', negocioId).filter(
+  const franjas = listarRegistros('schedules', negocioId).filter(
     (franja) =>
       franja.professionalId === profesional.id &&
       franja.branchId === Number(sucursalId) &&
-      franja.day === date(dia).getDay() &&
+      franja.day === crearFecha(dia).getDay() &&
       franja.enabled,
   );
   if (!franjas.length) return [];
-  const citas = list('appointments', negocioId).filter(
+  const citas = listarRegistros('appointments', negocioId).filter(
     (cita) =>
       cita.professionalId === profesional.id &&
       cita.date === dia &&
       !['cancelada', 'no_asistio'].includes(cita.status),
   );
-  const apartados = list('holds', negocioId).filter(
+  const apartados = listarRegistros('holds', negocioId).filter(
     (apartado) =>
       apartado.professionalId === profesional.id &&
       apartado.date === dia &&
       apartado.expiresAt > Date.now() &&
       apartado.id !== apartadoIgnorado,
   );
-  const bloqueos = list('blocks', negocioId).filter(
+  const bloqueos = listarRegistros('blocks', negocioId).filter(
     (bloqueo) =>
       (!bloqueo.professionalId || bloqueo.professionalId === profesional.id) &&
       (!bloqueo.branchId || bloqueo.branchId === Number(sucursalId)) &&
@@ -60,8 +60,8 @@ export function buscarHorariosDemo({
   );
   const resultado = [];
   for (const franja of franjas) for (
-    let inicio = minutes(franja.start);
-    inicio + servicio.duration <= minutes(franja.end);
+    let inicio = horaAMinutos(franja.start);
+    inicio + servicio.duration <= horaAMinutos(franja.end);
     inicio += 15
   ) {
     const fin = inicio + servicio.duration;
@@ -69,33 +69,33 @@ export function buscarHorariosDemo({
       seEmpalman(
         inicio,
         fin,
-        minutes(franja.breakStart),
-        minutes(franja.breakEnd),
+        horaAMinutos(franja.breakStart),
+        horaAMinutos(franja.breakEnd),
       )
     )
       continue;
     if (
       [...citas, ...apartados].some((cita) =>
-        seEmpalman(inicio, fin, minutes(cita.start), minutes(cita.end)),
+        seEmpalman(inicio, fin, horaAMinutos(cita.start), horaAMinutos(cita.end)),
       )
     )
       continue;
     if (
       bloqueos.some(
         (bloqueo) =>
-          !bloqueo.start || seEmpalman(inicio, fin, minutes(bloqueo.start), minutes(bloqueo.end)),
+          !bloqueo.start || seEmpalman(inicio, fin, horaAMinutos(bloqueo.start), horaAMinutos(bloqueo.end)),
       )
     )
       continue;
-    resultado.push(time(inicio));
+    resultado.push(minutosAHora(inicio));
   }
   const unicos = [...new Set(resultado)].sort();
-  if ((modo || tenantById(negocioId).mode) === 'compact' && unicos.length) {
+  if ((modo || obtenerNegocio(negocioId).mode) === 'compact' && unicos.length) {
     const consecutivos = unicos.filter((hora) =>
       citas.some(
         (cita) =>
-          minutes(cita.end) === minutes(hora) ||
-          minutes(hora) + servicio.duration === minutes(cita.start),
+          horaAMinutos(cita.end) === horaAMinutos(hora) ||
+          horaAMinutos(hora) + servicio.duration === horaAMinutos(cita.start),
       ),
     );
     return consecutivos.length ? consecutivos : [unicos[0]];
@@ -104,18 +104,18 @@ export function buscarHorariosDemo({
 }
 export function buscarFechasDemo(opciones, cantidad = 14) {
   return Array.from({ length: cantidad }, (_, indice) =>
-    addDays(opciones.from || TODAY, indice),
+    sumarDias(opciones.from || HOY, indice),
   )
     .map((dia) => ({ day: dia, slots: buscarHorariosDemo({ ...opciones, day: dia }) }))
     .filter((fecha) => fecha.slots.length);
 }
 export function liberarApartadoDemo(id) {
-  db.holds = db.holds.filter((apartado) => apartado.id !== id);
+  datosAplicacion.holds = datosAplicacion.holds.filter((apartado) => apartado.id !== id);
 }
 export function apartarHorarioDemo(opciones, inicio) {
   if (!buscarHorariosDemo({ ...opciones, mode: 'free' }).includes(inicio))
     throw new Error('Ese horario ya no está disponible. Elige otro.');
-  const servicio = resource('services', opciones.serviceId, opciones.tenantId);
+  const servicio = obtenerRecurso('services', opciones.serviceId, opciones.tenantId);
   const apartado = {
     id: crypto.randomUUID(),
     tenantId: opciones.tenantId,
@@ -124,11 +124,11 @@ export function apartarHorarioDemo(opciones, inicio) {
     branchId: Number(opciones.branchId),
     date: opciones.day,
     start: inicio,
-    end: time(minutes(inicio) + servicio.duration),
+    end: minutosAHora(horaAMinutos(inicio) + servicio.duration),
     expiresAt: Date.now() + 5 * 60 * 1000,
   };
-  db.holds = db.holds.filter((apartado) => apartado.expiresAt > Date.now());
-  db.holds.push(apartado);
+  datosAplicacion.holds = datosAplicacion.holds.filter((apartado) => apartado.expiresAt > Date.now());
+  datosAplicacion.holds.push(apartado);
   return apartado;
 }
 export function validarContactoDemo(nombre, telefono) {
@@ -140,7 +140,7 @@ export function validarContactoDemo(nombre, telefono) {
 export function crearCitaDemo(opciones, contacto, apartadoId = null) {
   validarContactoDemo(contacto.name, contacto.phone);
   if (apartadoId) {
-    const apartado = db.holds.find(
+    const apartado = datosAplicacion.holds.find(
       (apartado) =>
         apartado.id === apartadoId &&
         apartado.tenantId === opciones.tenantId &&
@@ -161,12 +161,12 @@ export function crearCitaDemo(opciones, contacto, apartadoId = null) {
     )
   )
     throw new Error('El horario ya no está disponible. Selecciona otro.');
-  const servicio = resource('services', opciones.serviceId, opciones.tenantId);
+  const servicio = obtenerRecurso('services', opciones.serviceId, opciones.tenantId);
   // El formulario manual de demo elige ficha por ID o crea una persona nueva.
   // El portal de ejemplo conserva su comportamiento previo cuando no envía estas opciones.
   let cliente = opciones.clientId != null
-    ? resource('clients', opciones.clientId, opciones.tenantId)
-    : opciones.newClient ? null : list('clients', opciones.tenantId).find((ficha) => ficha.phone === contacto.phone);
+    ? obtenerRecurso('clients', opciones.clientId, opciones.tenantId)
+    : opciones.newClient ? null : listarRegistros('clients', opciones.tenantId).find((ficha) => ficha.phone === contacto.phone);
   if (cliente) {
     if (
       cliente.name.toLocaleLowerCase() !==
@@ -177,14 +177,14 @@ export function crearCitaDemo(opciones, contacto, apartadoId = null) {
       );
   } else {
     cliente = {
-      id: Math.max(0, ...db.clients.map((ficha) => ficha.id)) + 1,
+      id: Math.max(0, ...datosAplicacion.clients.map((ficha) => ficha.id)) + 1,
       tenantId: opciones.tenantId,
       name: contacto.name.trim(),
       phone: contacto.phone,
     };
-    db.clients.push(cliente);
+    datosAplicacion.clients.push(cliente);
   }
-  const id = Math.max(0, ...db.appointments.map((cita) => cita.id)) + 1;
+  const id = Math.max(0, ...datosAplicacion.appointments.map((cita) => cita.id)) + 1;
   const cita = {
     id,
     tenantId: opciones.tenantId,
@@ -194,13 +194,13 @@ export function crearCitaDemo(opciones, contacto, apartadoId = null) {
     clientId: cliente.id,
     date: opciones.day,
     start: opciones.start,
-    end: time(minutes(opciones.start) + servicio.duration),
+    end: minutosAHora(horaAMinutos(opciones.start) + servicio.duration),
     status: 'confirmada',
-    folio: `${tenantById(opciones.tenantId).initials}-${opciones.day.replaceAll('-', '').slice(2)}-${String(id).padStart(4, '0')}`,
+    folio: `${obtenerNegocio(opciones.tenantId).initials}-${opciones.day.replaceAll('-', '').slice(2)}-${String(id).padStart(4, '0')}`,
     reason: contacto.reason || '',
     origin: opciones.origin || 'portal_publico',
   };
-  db.appointments.push(cita);
+  datosAplicacion.appointments.push(cita);
   if (apartadoId) liberarApartadoDemo(apartadoId);
   return cita;
 }

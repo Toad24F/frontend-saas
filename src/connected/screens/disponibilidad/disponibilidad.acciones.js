@@ -1,8 +1,8 @@
-import { api, loadBackendData, user } from '../../backend.js';
-import { state, render } from '../../../shared/app.js';
-import { list } from '../../../shared/data.js';
-import { basicForm } from '../../../shared/forms.js';
-import { toast, escape as esc } from '../../../shared/ui.js';
+import { api, cargarDatosBackend, usuarioActual } from '../../backend.js';
+import { estadoAplicacion, render } from '../../../shared/aplicacion.nucleo.js';
+import { listarRegistros } from '../../../shared/aplicacion.datos.js';
+import { abrirFormulario } from '../../../shared/formularios.componentes.js';
+import { mostrarAviso, escaparHtml as esc } from '../../../shared/interfaz.componentes.js';
 import { consultarCitasAfectadas, consultarHorariosDisponibles, consultarDatosDisponibilidad, invalidarProyeccion, actualizarDatosDisponibilidad, actualizarConfiguracionAgenda, guardarConfiguracionConectada, seleccionarHorarioConsultado, consultarProfesionalHorario, establecerErroresAfectadas, mostrarProyeccion, establecerErroresConsulta, establecerFiltrosConsulta, validarInicioConsultado } from './disponibilidad.vista.js';
 import { consultarBorradorAsignaciones, limpiarBorradorAsignaciones, validarAsignacionesVigentes } from '../../../shared/screens/disponibilidad/disponibilidad.asignaciones-sucursales.js';
 import { validarRangoInclusivo } from '../../../shared/screens/disponibilidad/disponibilidad.contrato-operativo.js';
@@ -11,7 +11,7 @@ import { limpiarErroresDisponibilidad, limpiarCampoDisponibilidad, mostrarErrore
 const rutaProfesional = (personaId = consultarProfesionalHorario().id) => `/profesionales/${personaId}`;
 const renderCasillasServicios = (elementos, seleccionados) => `<div class="oferta-opciones" data-disponibilidad-campo="serviceIds" tabindex="-1">${elementos.map((elemento) => `<label class="form-check"><input class="form-check-input" type="checkbox" name="serviceIds" value="${elemento.id}" ${seleccionados.includes(elemento.id) ? 'checked' : ''} ${elemento.disabled ? 'disabled' : ''}><span>${esc(elemento.name)}</span></label>`).join('')}</div>`;
 const opcionesFormularioServicios = {
-  onError(error, formulario) {
+  alFallar(error, formulario) {
     if (/servicio|serviceIds/i.test(error.message || '')) mostrarErroresDisponibilidad(formulario, { serviceIds: error.message });
     else mostrarErrorGeneralDisponibilidad(formulario, error, '#form-error');
   },
@@ -19,7 +19,7 @@ const opcionesFormularioServicios = {
 
 async function editarServiciosGenerales() {
   const servicios = await api(`${rutaProfesional()}/servicios`);
-  const dialogo = basicForm('Servicios generales', `<p class="field-hint">Selecciona los servicios que ofrece este profesional. Los ajustes por sucursal se conservan al desmarcar.</p>${renderCasillasServicios(servicios.map((elemento) => ({ id: elemento.id, name: elemento.nombre, disabled: !elemento.activo && !elemento.seleccionado })), servicios.filter((elemento) => elemento.seleccionado).map((elemento) => elemento.id))}`, async (formulario) => {
+  const dialogo = abrirFormulario('Servicios generales', `<p class="field-hint">Selecciona los servicios que ofrece este profesional. Los ajustes por sucursal se conservan al desmarcar.</p>${renderCasillasServicios(servicios.map((elemento) => ({ id: elemento.id, name: elemento.nombre, disabled: !elemento.activo && !elemento.seleccionado })), servicios.filter((elemento) => elemento.seleccionado).map((elemento) => elemento.id))}`, async (formulario) => {
     await api(`${rutaProfesional()}/servicios`, 'PUT', { servicioIds: formulario.getAll('serviceIds').map(Number) });
     await actualizarDatosDisponibilidad(true);
   }, true, opcionesFormularioServicios);
@@ -28,7 +28,7 @@ async function editarServiciosGenerales() {
 }
 
 async function guardarSucursalesAsignadas(formulario) {
-  if (user.rol !== 'admin_negocio') throw new Error('No tienes permiso para cambiar asignaciones.');
+  if (usuarioActual.rol !== 'admin_negocio') throw new Error('No tienes permiso para cambiar asignaciones.');
   const persona = consultarProfesionalHorario();
   if (!persona || persona.id !== Number(formulario.dataset.personaId)) throw new Error('La selección de profesional cambió. Actualiza la vista.');
   const borrador = consultarBorradorAsignaciones(persona.id, persona.branchIds);
@@ -42,13 +42,13 @@ async function guardarSucursalesAsignadas(formulario) {
   limpiarBorradorAsignaciones(persona.id);
   invalidarProyeccion();
   try {
-    await loadBackendData();
+    await cargarDatosBackend();
     await actualizarDatosDisponibilidad(true);
     render();
-    toast('Asignaciones guardadas.');
+    mostrarAviso('Asignaciones guardadas.');
   } catch (error) {
     render();
-    toast('Asignaciones guardadas. No se pudo actualizar la vista: ' + error.message);
+    mostrarAviso('Asignaciones guardadas. No se pudo actualizar la vista: ' + error.message);
   }
 }
 
@@ -57,7 +57,7 @@ async function editarServiciosSucursal(sucursalId) {
   if (!sucursal) throw new Error('La sucursal no está asignada a este profesional.');
   const seleccion = await api(`${rutaProfesional()}/sucursales/${sucursalId}/servicios`);
   const permitidos = sucursal.servicios.filter((elemento) => elemento.servicioActivo && elemento.seleccionGeneralActiva);
-  const dialogo = basicForm(`Servicios en ${esc(sucursal.nombre)}`, `<p class="field-hint">Solo aparecen los servicios activos y seleccionados en general.</p>${renderCasillasServicios(permitidos.map((elemento) => ({ id: elemento.id, name: elemento.nombre })), seleccion.servicioIds || [])}`, async (formulario) => {
+  const dialogo = abrirFormulario(`Servicios en ${esc(sucursal.nombre)}`, `<p class="field-hint">Solo aparecen los servicios activos y seleccionados en general.</p>${renderCasillasServicios(permitidos.map((elemento) => ({ id: elemento.id, name: elemento.nombre })), seleccion.servicioIds || [])}`, async (formulario) => {
     await api(`${rutaProfesional()}/sucursales/${sucursalId}/servicios`, 'PUT', { servicioIds: formulario.getAll('serviceIds').map(Number) });
     await actualizarDatosDisponibilidad(true);
   }, true, opcionesFormularioServicios);
@@ -72,7 +72,7 @@ async function alternarAtencion(sucursalId, boton) {
   try {
     await api(`${rutaProfesional()}/sucursales/${sucursalId}/atencion`, 'PUT', { activo: !sucursal.atencionActiva });
     await actualizarDatosDisponibilidad(true);
-    toast(sucursal.atencionActiva ? 'Atención pausada en la sucursal.' : 'Atención activada en la sucursal.');
+    mostrarAviso(sucursal.atencionActiva ? 'Atención pausada en la sucursal.' : 'Atención activada en la sucursal.');
   } catch (error) { boton.disabled = false; throw error; }
 }
 
@@ -103,7 +103,7 @@ export async function handleClicDisponibilidad(evento) {
 }
 
 document.addEventListener('submit', async (evento) => {
-  if (state.page !== 'disponibilidad') return;
+  if (estadoAplicacion.pagina !== 'disponibilidad') return;
   evento.preventDefault();
   const formulario = evento.target;
   if (formulario.id === 'formulario-asignaciones-sucursales') {
@@ -129,7 +129,7 @@ document.addEventListener('submit', async (evento) => {
     const leerNumero = (nombre) => datos.get(nombre) === null || datos.get(nombre) === '' ? Number.NaN : Number(datos.get(nombre));
     const valores = { modo: datos.get('modo'), tiempoEntreCitasMinutos: leerNumero('tiempoEntreCitasMinutos'), anticipacionMinutos: leerNumero('anticipacionMinutos'), diasFuturos: leerNumero('diasFuturos') };
     const guardado = await guardarConfiguracionConectada(valores);
-    if (guardado) toast('Reglas de agenda guardadas.');
+    if (guardado) mostrarAviso('Reglas de agenda guardadas.');
     return;
   }
   if (formulario.id === 'formulario-consulta-horarios') {

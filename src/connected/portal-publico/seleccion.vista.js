@@ -1,6 +1,6 @@
 import { etiquetaFecha, fechaValida } from './portal.fechas.js';
 import { anuncioPortal, crearAnunciador, enfocarControlPortal } from './portal.accesibilidad.js';
-import { icon } from '../../shared/icons.js';
+import { renderIcono } from '../../shared/iconos.catalogo.js';
 import { escaparTextoPortal, crearFiltrosIniciales, paginarOpciones, renderFiltrosOpciones, renderPaginacionOpciones, renderEsqueletoPortal, horariosDelPeriodo } from '../../shared/portal-publico/portal.opciones.js';
 
 // Escape local para no importar el módulo UI del panel ni sus datos de demo.
@@ -53,7 +53,7 @@ export function renderSeleccion(estado) {
         `${elemento.duracionMinutos} min`, ...(elemento.costo === undefined ? [] : [monedaMostrada(elemento.costo)]),
       ].join(' · ') : paso === 1 ? [elemento.direccion, elemento.telefono].filter(Boolean).join(' · ') : elemento.especialidad;
       const descripcion = paso === 0 ? elemento.descripcion : paso === 1 ? elemento.indicaciones : '';
-      return `<label class="portal-opcion"><input type="radio" name="portal-opcion" data-seleccion="${claves[paso]}" value="${elemento.id}" ${seleccion[claves[paso]] === elemento.id ? 'checked' : ''}><span class="portal-opcion-simbolo" aria-hidden="true">${paso === 0 ? icon('briefcase') : paso === 1 ? icon('pin') : escaparTextoPortal(elemento.nombre.trim().charAt(0))}</span><span class="portal-opcion-texto"><strong>${escaparTextoPortal(elemento.nombre)}</strong>${descripcion ? `<span class="portal-opcion-descripcion">${escaparTextoPortal(descripcion)}</span>` : ''}${detalles ? `<small>${escaparTextoPortal(detalles)}</small>` : ''}</span><span class="portal-opcion-marca" aria-hidden="true">${icon('check')}</span></label>`;
+      return `<label class="portal-opcion"><input type="radio" name="portal-opcion" data-seleccion="${claves[paso]}" value="${elemento.id}" ${seleccion[claves[paso]] === elemento.id ? 'checked' : ''}><span class="portal-opcion-simbolo" aria-hidden="true">${paso === 0 ? renderIcono('briefcase') : paso === 1 ? renderIcono('pin') : escaparTextoPortal(elemento.nombre.trim().charAt(0))}</span><span class="portal-opcion-texto"><strong>${escaparTextoPortal(elemento.nombre)}</strong>${descripcion ? `<span class="portal-opcion-descripcion">${escaparTextoPortal(descripcion)}</span>` : ''}${detalles ? `<small>${escaparTextoPortal(detalles)}</small>` : ''}</span><span class="portal-opcion-marca" aria-hidden="true">${renderIcono('check')}</span></label>`;
     }).join('')}</fieldset>${utilizable && !resultado.total ? '<div class="portal-vacio"><h3>No encontramos coincidencias</h3><p>Prueba otra búsqueda o limpia los filtros.</p><button type="button" class="btn btn-light" data-portal-limpiar>Limpiar filtros</button></div>' : ''}${utilizable ? renderPaginacionOpciones(resultado) : ''}</div>`;
   } else {
     const zona = estado.zonaHoraria || estado.opciones.sucursales.find((elemento) => elemento.id === seleccion.sucursalId)?.zonaHoraria;

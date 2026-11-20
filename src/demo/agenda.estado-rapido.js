@@ -1,31 +1,31 @@
 import { instalarMenuEstado, motivoOpcionEstado } from '../shared/screens/agenda/agenda.menu-estado.js';
-import { state as estado, render } from '../shared/app.js';
-import { TODAY, resource, appointmentInfo, statuses } from '../shared/data.js';
-import { toast } from '../shared/ui.js';
+import { estadoAplicacion as estado, render } from '../shared/aplicacion.nucleo.js';
+import { HOY, obtenerRecurso, ampliarDatosCita, etiquetasEstadoCita } from '../shared/aplicacion.datos.js';
+import { mostrarAviso } from '../shared/interfaz.componentes.js';
 import { abrirDetalleDemo as abrirDetalle } from '../shared/screens/agenda/agenda.acciones.js';
 
-const ahora = () => new Date(`${TODAY}T18:00:00Z`);
+const ahora = () => new Date(`${HOY}T18:00:00Z`);
 const leer = (id) => {
-  const a = resource('appointments', id, estado.tenantId), info = appointmentInfo(a);
+  const a = obtenerRecurso('appointments', id, estado.negocioId), info = ampliarDatosCita(a);
   return { id: a.id, estado: a.status, fechaLocal: a.date, fechaFinLocal: a.date, horaInicio: a.start, horaFin: a.end,
     zonaHoraria: 'America/Chihuahua', nombreContacto: info.client.name, nombreSucursal: info.branch.name, nombreServicio: info.service.name };
 };
 instalarMenuEstado({
-  active: () => document.documentElement.dataset.appMode === 'demo' && estado.page === 'agenda' ? `demo:${estado.tenantId}` : null,
+  active: () => document.documentElement.dataset.appMode === 'demo' && estado.pagina === 'agenda' ? `demo:${estado.negocioId}` : null,
   read: leer, now: ahora, openDetail: abrirDetalle,
   errorText: (error) => error.message,
-  change: async (observado, estado) => {
+  change: async (observado, siguienteEstado) => {
     const vigente = leer(observado.id);
     if (vigente.estado !== observado.estado) throw new Error('La cita cambió. Actualiza la cita antes de guardar.');
-    const motivo = motivoOpcionEstado(vigente, estado, ahora());
+    const motivo = motivoOpcionEstado(vigente, siguienteEstado, ahora());
     if (motivo) throw new Error(motivo);
     if (vigente.estado === 'cancelada') throw new Error('La reactivación requiere revisar el horario desde el detalle de la demostración.');
-    resource('appointments', observado.id, estado.tenantId).status = estado;
-    return { id: observado.id, estado };
+    obtenerRecurso('appointments', observado.id, estado.negocioId).status = siguienteEstado;
+    return { id: observado.id, estado: siguienteEstado };
   },
   changed: ({ id, estado }, { restoreFocus: restaurarFoco }) => {
     render();
     if (restaurarFoco) document.querySelector(`[data-agenda-menu-estado="${id}"]`)?.focus({ preventScroll: true });
-    toast(`Demostración: estado ${statuses[estado]}. Solo datos locales.`);
+    mostrarAviso(`Demostración: estado ${etiquetasEstadoCita[estado]}. Solo datos locales.`);
   },
 });

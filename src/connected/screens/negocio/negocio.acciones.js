@@ -1,7 +1,7 @@
-import { api, loadBackendData, user as usuario } from '../../backend.js';
-import { state as estado, render } from '../../../shared/app.js';
-import { field as campo, basicForm, errorSlot } from '../../../shared/forms.js';
-import { modal, toast, escape } from '../../../shared/ui.js';
+import { api, cargarDatosBackend, usuarioActual as usuario } from '../../backend.js';
+import { estadoAplicacion as estado, render } from '../../../shared/aplicacion.nucleo.js';
+import { renderCampo as campo, abrirFormulario, espacioErrorFormulario } from '../../../shared/formularios.componentes.js';
+import { abrirDialogo, mostrarAviso, escaparHtml } from '../../../shared/interfaz.componentes.js';
 import { datosDetalleNegocio, invalidarDetalleNegocio } from './negocio.vista.js';
 import { crearOperacionesLicencia, validarPlazoSuspension } from './licencia.operaciones.js';
 import { guardarLimitesUsuarios } from './usuarios.cupo.js';
@@ -11,15 +11,15 @@ const operacionesLicencia = () => crearOperacionesLicencia({ api, actorId: usuar
 async function ejecutarAccionNegocio(solicitar, mensaje) {
   const resultado = await solicitar();
   invalidarDetalleNegocio();
-  try { await loadBackendData(); }
-  catch (error) { toast('Cambio guardado. No se pudo actualizar el panel: ' + error.message); }
+  try { await cargarDatosBackend(); }
+  catch (error) { mostrarAviso('Cambio guardado. No se pudo actualizar el panel: ' + error.message); }
   render();
-  toast(mensaje);
+  mostrarAviso(mensaje);
   return resultado;
 }
 
 function confirmarAccionNegocio(titulo, descripcion, etiqueta, solicitar, mensajeExito) {
-  const dialogo = modal(titulo, `<div class="dialog-body"><p>${descripcion}</p>${errorSlot}</div><div class="dialog-footer"><button type="button" class="btn btn-light" data-dismiss>Cancelar</button><button type="button" class="btn btn-primary" data-confirm>${etiqueta}</button></div>`);
+  const dialogo = abrirDialogo(titulo, `<div class="dialog-body"><p>${descripcion}</p>${espacioErrorFormulario}</div><div class="dialog-footer"><button type="button" class="btn btn-light" data-dismiss>Cancelar</button><button type="button" class="btn btn-primary" data-confirm>${etiqueta}</button></div>`);
   dialogo.querySelector('[data-dismiss]').onclick = () => dialogo.close();
   dialogo.querySelector('[data-confirm]').onclick = async (evento) => {
     const botonEnviar = evento.currentTarget;
@@ -40,17 +40,17 @@ function confirmarAccionNegocio(titulo, descripcion, etiqueta, solicitar, mensaj
 
 export function accionNegocio(accion, valor = null) {
   if (usuario?.rol !== 'superadmin') return;
-  const id = Number(estado.businessId);
+  const id = Number(estado.detalleNegocioId);
   if (!Number.isSafeInteger(id) || id < 1) return;
   const detalle = datosDetalleNegocio();
   if (accion === 'correo') {
-    basicForm('Corregir correo de invitación', `<p class="form-intro">Se invalidará el código anterior y se encolará un nuevo correo si cambias el destinatario.</p>${campo('Nuevo correo del administrador', 'correo', detalle?.negocio.administrador?.email || detalle?.negocio.emailContacto || '', 'email', 'required autocomplete="email"')}`, async (formulario) => {
+    abrirFormulario('Corregir correo de invitación', `<p class="form-intro">Se invalidará el código anterior y se encolará un nuevo correo si cambias el destinatario.</p>${campo('Nuevo correo del administrador', 'correo', detalle?.negocio.administrador?.email || detalle?.negocio.emailContacto || '', 'email', 'required autocomplete="email"')}`, async (formulario) => {
       await api(`/negocios/${id}/correo-administrador`, 'PATCH', { correo: formulario.get('correo').trim() });
       invalidarDetalleNegocio();
     });
   }
   if (accion === 'limite') {
-    basicForm('Cambiar límite de sucursales', campo('Sucursales activas permitidas', 'limiteSucursales', detalle?.cupoSucursales.limiteSucursalesActivas || 1, 'number', 'required min="1" step="1"'), async (formulario) => {
+    abrirFormulario('Cambiar límite de sucursales', campo('Sucursales activas permitidas', 'limiteSucursales', detalle?.cupoSucursales.limiteSucursalesActivas || 1, 'number', 'required min="1" step="1"'), async (formulario) => {
       await api(`/negocios/${id}/limite-sucursales`, 'PATCH', { limiteSucursales: Number(formulario.get('limiteSucursales')) });
       invalidarDetalleNegocio();
     });
@@ -58,7 +58,7 @@ export function accionNegocio(accion, valor = null) {
   if (accion === 'limites-usuarios' && detalle?.cupoUsuarios) {
     // El diálogo conserva el borrador ante 400/409. Nunca sustituye el cupo
     // leído del servidor por una cuenta calculada desde listas locales.
-    basicForm('Cambiar cupos de usuarios', `<p class="form-intro">El mínimo de cada rol es uno. No puedes reducir un límite por debajo de las cuentas activas.</p>
+    abrirFormulario('Cambiar cupos de usuarios', `<p class="form-intro">El mínimo de cada rol es uno. No puedes reducir un límite por debajo de las cuentas activas.</p>
       ${campo('Límite de profesionales activos', 'profesionales', detalle.cupoUsuarios.profesionales.limite, 'number', 'required min="1" step="1"')}
       ${campo('Límite de recepcionistas activos', 'recepcionistas', detalle.cupoUsuarios.recepcionistas.limite, 'number', 'required min="1" step="1"')}`, async (formulario) => {
       await guardarLimitesUsuarios(id, { profesionales: Number(formulario.get('profesionales')),
@@ -74,7 +74,7 @@ export function accionNegocio(accion, valor = null) {
   }, 'Recuperación encolada.');
   if (accion === 'suspender' && detalle?.vigencia?.estado === 'vigente') {
     // Se muestra un borrador; el cuerpo exacto queda congelado al primer POST.
-    const dialogo = modal('Programar suspensión', `<form id="licencia-formulario-suspension" class="dialog-body"><p>El plazo inicia en dos días. Cero bloquea el acceso inmediatamente; el bloqueo programado que responda el servidor será la fecha efectiva.</p><label for="licencia-plazo">Plazo en días</label><input class="form-control" id="licencia-plazo" name="plazoDias" type="number" min="0" max="30" step="1" value="2" required>${errorSlot}<div class="dialog-footer"><button type="button" class="btn btn-light" data-dismiss>Cancelar</button><button type="submit" class="btn btn-danger negocio-boton-suspender">Programar suspensión</button></div></form>`);
+    const dialogo = abrirDialogo('Programar suspensión', `<form id="licencia-formulario-suspension" class="dialog-body"><p>El plazo inicia en dos días. Cero bloquea el acceso inmediatamente; el bloqueo programado que responda el servidor será la fecha efectiva.</p><label for="licencia-plazo">Plazo en días</label><input class="form-control" id="licencia-plazo" name="plazoDias" type="number" min="0" max="30" step="1" value="2" required>${espacioErrorFormulario}<div class="dialog-footer"><button type="button" class="btn btn-light" data-dismiss>Cancelar</button><button type="submit" class="btn btn-danger negocio-boton-suspender">Programar suspensión</button></div></form>`);
     dialogo.querySelector('[data-dismiss]').onclick = () => dialogo.close();
     dialogo.querySelector('form').onsubmit = async (evento) => {
       evento.preventDefault();
@@ -96,11 +96,11 @@ export function accionNegocio(accion, valor = null) {
   if (accion === 'renovar' && detalle?.vigencia && detalle.vigencia.estado !== 'pendiente')
     confirmarAccionNegocio('Renovar licencia', 'Se añadirá un año calendario. Renovar no elimina una suspensión activa; el nuevo estado lo confirma el servidor.', 'Renovar un año',
       () => operacionesLicencia().ejecutar('renovar', id, detalle.negocio.licencia.id, {}), 'Renovación registrada. Consulta el historial para comprobar el correo.');
-  if (accion === 'reintentar' && typeof valor === 'string' && /^\d+$/.test(valor)) confirmarAccionNegocio('Reintentar correo', `Se volverá a dejar pendiente el envío ${escape(valor)} si su código y destinatario siguen vigentes.`, 'Reintentar', () => api(`/negocios/${id}/reintentar-envio`, 'POST', { envioId: valor }), 'Correo encolado para reintento.');
+  if (accion === 'reintentar' && typeof valor === 'string' && /^\d+$/.test(valor)) confirmarAccionNegocio('Reintentar correo', `Se volverá a dejar pendiente el envío ${escaparHtml(valor)} si su código y destinatario siguen vigentes.`, 'Reintentar', () => api(`/negocios/${id}/reintentar-envio`, 'POST', { envioId: valor }), 'Correo encolado para reintento.');
 }
 
 export async function reintentarOperacionLicencia() {
   if (usuario?.rol !== 'superadmin') return;
   try { await ejecutarAccionNegocio(() => operacionesLicencia().reintentar(), 'Operación comprobada. Consulta el historial para comprobar el correo.'); }
-  catch (error) { toast(error.message); }
+  catch (error) { mostrarAviso(error.message); }
 }

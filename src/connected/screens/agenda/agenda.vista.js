@@ -3,11 +3,11 @@ import { resolverSucursalesAgenda } from '../../../shared/screens/agenda/agenda.
 import { instalarEstadoRapido } from './agenda.estado-rapido.js';
 import '../../../shared/screens/agenda/agenda.menu-estado.css';
 import { estructuraAgenda } from '../../../shared/screens/agenda/agenda.estructura.js';
-import { api, user } from '../../backend.js';
-import { state as estado, render } from '../../../shared/app.js';
-import { list, statuses, tenantById } from '../../../shared/data.js';
-import { escape as esc, pageHead, badge } from '../../../shared/ui.js';
-import { icon } from '../../../shared/icons.js';
+import { api, usuarioActual } from '../../backend.js';
+import { estadoAplicacion as estado, render } from '../../../shared/aplicacion.nucleo.js';
+import { listarRegistros, etiquetasEstadoCita, obtenerNegocio } from '../../../shared/aplicacion.datos.js';
+import { escaparHtml as esc, renderEncabezadoPagina, renderEtiquetaEstado } from '../../../shared/interfaz.componentes.js';
+import { renderIcono } from '../../../shared/iconos.catalogo.js';
 import { textoMotivoDisponibilidad } from '../../../shared/screens/disponibilidad/disponibilidad.contrato-operativo.js';
 import { crearAgendaClient } from '../../modules/agenda/agenda.client.js';
 import { crearAgendaStore } from '../../modules/agenda/agenda.store.js';
@@ -39,10 +39,10 @@ const atencionColumnas = crearAgendaStore(async (consulta) => {
   return Object.fromEntries(consulta.ids.map((id, indice) => [id, resultados[indice].status === 'fulfilled' ? { data: resultados[indice].value } : { error: 'No se pudo consultar la atención. Usa Actualizar agenda.' }]));
 });
 function consultaAtencionColumnas() {
-  if (!['day', 'week'].includes(estado.calendarView) || (estado.calendarView === 'week' && user?.rol === 'recepcionista') || estado.professional !== 'all' || user?.rol === 'profesional' || estado.branch === 'none' || !store.state.data || store.state.busy) return null;
-  const ids = new Set(list('professionals', estado.tenantId).filter((p) => p.active !== false && (estado.branch === 'all' || p.branchIds?.includes(Number(estado.branch)))).map((p) => p.id));
+  if (!['day', 'week'].includes(estado.vistaCalendario) || (estado.vistaCalendario === 'week' && usuarioActual?.rol === 'recepcionista') || estado.profesional !== 'all' || usuarioActual?.rol === 'profesional' || estado.sucursal === 'none' || !store.state.data || store.state.busy) return null;
+  const ids = new Set(listarRegistros('professionals', estado.negocioId).filter((p) => p.active !== false && (estado.sucursal === 'all' || p.branchIds?.includes(Number(estado.sucursal)))).map((p) => p.id));
   for (const elemento of store.state.data.citas) ids.add(elemento.personalId);
-  return { ...periodoCalendario(estado.calendarView, estado.date), branch: estado.branch, ids: [...ids].sort((a, b) => a - b) };
+  return { ...periodoCalendario(estado.vistaCalendario, estado.fecha), branch: estado.sucursal, ids: [...ids].sort((a, b) => a - b) };
 }
 function modelosAtencionColumnas() {
   const consulta = consultaAtencionColumnas();
@@ -55,7 +55,7 @@ async function cargarAtencionColumnas(forzar) {
   if (!forzar && atencionColumnas.state.key === JSON.stringify(consulta)) return;
   const ambito = identidad, claveAnterior = atencionColumnas.state.key, anterior = JSON.stringify(atencionColumnas.state.data);
   if (await atencionColumnas.load(consulta)) {
-    if (ambito === identidad && estado.page === 'agenda' && (claveAnterior !== atencionColumnas.state.key || anterior !== JSON.stringify(atencionColumnas.state.data))) renderAgendaConservandoPosicion(render);
+    if (ambito === identidad && estado.pagina === 'agenda' && (claveAnterior !== atencionColumnas.state.key || anterior !== JSON.stringify(atencionColumnas.state.data))) renderAgendaConservandoPosicion(render);
   }
 }
 let soloAfectadas = false;
@@ -73,32 +73,32 @@ function reiniciar() {
 }
 window.addEventListener('cita-sesion-expirada', reiniciar);
 function comprobarSesion() {
-  const siguiente = `${user?.id}:${user?.negocioId}:${user?.sesionId}`;
-  if (identidad !== siguiente) { reiniciar(); identidad = siguiente; estado.date = hoyCivil(); estado.branch = estado.professional = estado.status = 'all'; estado.search = ''; estado.agendaHistory = false; if (user.rol !== 'recepcionista') sincronizarSucursal(true); }
+  const siguiente = `${usuarioActual?.id}:${usuarioActual?.negocioId}:${usuarioActual?.sesionId}`;
+  if (identidad !== siguiente) { reiniciar(); identidad = siguiente; estado.fecha = hoyCivil(); estado.sucursal = estado.profesional = estado.estadoCita = 'all'; estado.busqueda = ''; estado.historialAgenda = false; if (usuarioActual.rol !== 'recepcionista') sincronizarSucursal(true); }
 }
 function sincronizarSucursal(inicial = false) {
-  const resultado = resolverSucursalesAgenda({ sucursales: [...opcionesDisponibles.branches].map(([id, nombre]) => ({ id, name: nombre })), profesionales: list('professionals', estado.tenantId), profesional: user.rol === 'profesional' ? String(user.id) : estado.professional, sucursal: estado.branch, historial: estado.agendaHistory, inicial });
+  const resultado = resolverSucursalesAgenda({ sucursales: [...opcionesDisponibles.branches].map(([id, nombre]) => ({ id, name: nombre })), profesionales: listarRegistros('professionals', estado.negocioId), profesional: usuarioActual.rol === 'profesional' ? String(usuarioActual.id) : estado.profesional, sucursal: estado.sucursal, historial: estado.historialAgenda, inicial });
   if (inicial) {
-    const catalogo = list('branches', estado.tenantId);
-    const modeloInicial = resolverSucursalesAgenda({ sucursales: catalogo, profesionales: list('professionals', estado.tenantId), profesional: user.rol === 'profesional' ? String(user.id) : estado.professional, sucursal: estado.branch, inicial: true });
+    const catalogo = listarRegistros('branches', estado.negocioId);
+    const modeloInicial = resolverSucursalesAgenda({ sucursales: catalogo, profesionales: listarRegistros('professionals', estado.negocioId), profesional: usuarioActual.rol === 'profesional' ? String(usuarioActual.id) : estado.profesional, sucursal: estado.sucursal, inicial: true });
     // Sin catálogo autorizado no hay una sede predeterminada que podamos afirmar.
-    if (catalogo.length) estado.branch = modeloInicial.sucursal;
-  } else estado.branch = resultado.sucursal;
+    if (catalogo.length) estado.sucursal = modeloInicial.sucursal;
+  } else estado.sucursal = resultado.sucursal;
   return resultado;
 }
-const filtros = () => ({ ...periodoCalendario(estado.calendarView, estado.date), sucursalId: estado.branch, personalId: user.rol === 'profesional' ? 'all' : estado.professional, estado: estado.status, busqueda: estado.search, afectadas: soloAfectadas });
+const filtros = () => ({ ...periodoCalendario(estado.vistaCalendario, estado.fecha), sucursalId: estado.sucursal, personalId: usuarioActual.rol === 'profesional' ? 'all' : estado.profesional, estado: estado.estadoCita, busqueda: estado.busqueda, afectadas: soloAfectadas });
 function recordarOpciones(datos) {
   // Recepción no tiene rutas de catálogos. Sus opciones proceden de resúmenes autorizados ya recibidos.
   for (const elemento of datos?.citas || []) {
     opcionesDisponibles.branches.set(elemento.sucursalId, valorHistorico(elemento.nombreSucursal));
     opcionesDisponibles.people.set(elemento.personalId, valorHistorico(elemento.nombreProfesional));
   }
-  for (const elemento of list('branches', estado.tenantId)) opcionesDisponibles.branches.set(elemento.id, elemento.name);
-  for (const elemento of list('professionals', estado.tenantId)) opcionesDisponibles.people.set(elemento.id, elemento.name);
+  for (const elemento of listarRegistros('branches', estado.negocioId)) opcionesDisponibles.branches.set(elemento.id, elemento.name);
+  for (const elemento of listarRegistros('professionals', estado.negocioId)) opcionesDisponibles.people.set(elemento.id, elemento.name);
 }
 async function cargar(forzar = false, segundoPlano = false) {
   const consulta = filtros();
-  if (estado.branch === 'none') { store.use(consulta, { ...periodoCalendario(estado.calendarView, estado.date), citas: [] }); return; }
+  if (estado.sucursal === 'none') { store.use(consulta, { ...periodoCalendario(estado.vistaCalendario, estado.fecha), citas: [] }); return; }
   if (!forzar && store.state.key === JSON.stringify(consulta)) return;
   if (forzar && !segundoPlano) { cache.clear(); atencion.reset(); }
   const enCache = !forzar && cache.peek(consulta);
@@ -107,14 +107,14 @@ async function cargar(forzar = false, segundoPlano = false) {
   const anterior = store.state.data;
   const avisoAnterior = store.state.refreshError;
   if (await store.load(consulta, { background: segundoPlano || store.state.key === JSON.stringify(consulta), force: forzar })) {
-    if (!user || identidadVigente !== identidad) return;
+    if (!usuarioActual || identidadVigente !== identidad) return;
     recordarOpciones(store.state.data);
     if (segundoPlano && !avisoAnterior && !store.state.error && !store.state.refreshError && JSON.stringify(anterior) === JSON.stringify(store.state.data)) {
       const control = document.querySelector('[data-agenda-actualizar]');
       if (control) { control.disabled = false; control.setAttribute('aria-busy', 'false'); control.querySelector('span').textContent = 'Actualizar'; }
       return;
     }
-    if (estado.page === 'agenda') {
+    if (estado.pagina === 'agenda') {
       // La respuesta no borra un filtro que se está escribiendo ni pierde el foco por reconstruir la carcasa.
       const formulario = document.querySelector('#agenda-filtros-conectados');
       const borrador = formulario ? new FormData(formulario) : null;
@@ -156,24 +156,24 @@ async function cargar(forzar = false, segundoPlano = false) {
 }
 // La actualización periódica usa los filtros aplicados; no convierte texto aún sin aplicar en otra consulta.
 registrarRefrescoVivo(() => {
-  if (user && estado.page === 'agenda' && !store.state.busy && !store.state.refreshing) return Promise.all([cargar(true, true), cargarAtencion(true)]);
+  if (usuarioActual && estado.pagina === 'agenda' && !store.state.busy && !store.state.refreshing) return Promise.all([cargar(true, true), cargarAtencion(true)]);
 });
 // Mismos filtros compactos e iconos que la demo; cambian únicamente los nombres del contrato HTTP.
-const selectorCampo = (nombre, etiqueta, etiquetaTodas, opciones, valor, imagen) => `<label class="filter-select">${icon(imagen)}<select name="${nombre}" aria-label="${etiqueta}">${valor === 'none' ? '<option value="none" selected>Sin sucursales asignadas</option>' : ''}<option value="all" ${valor === 'all' ? 'selected' : ''}>${etiquetaTodas}</option>${[...opciones].map(([id, texto]) => `<option value="${esc(id)}" ${String(id) === String(valor) ? 'selected' : ''}>${esc(texto)}</option>`).join('')}</select>${icon('down')}</label>`;
+const selectorCampo = (nombre, etiqueta, etiquetaTodas, opciones, valor, imagen) => `<label class="filter-select">${renderIcono(imagen)}<select name="${nombre}" aria-label="${etiqueta}">${valor === 'none' ? '<option value="none" selected>Sin sucursales asignadas</option>' : ''}<option value="all" ${valor === 'all' ? 'selected' : ''}>${etiquetaTodas}</option>${[...opciones].map(([id, texto]) => `<option value="${esc(id)}" ${String(id) === String(valor) ? 'selected' : ''}>${esc(texto)}</option>`).join('')}</select>${renderIcono('down')}</label>`;
 
 function calendario(datos) {
-  const periodo = periodoCalendario(estado.calendarView, estado.date);
-  const dias = Array.from({ length: estado.calendarView === 'day' ? 1 : 7 }, (_, indice) => sumarDiasCiviles(periodo.desde, indice));
-  const equipo = estado.calendarView === 'week' && estado.professional === 'all' && user?.rol !== 'profesional' ? atencionEquipo(modelosAtencionColumnas(), user?.rol !== 'recepcionista') : undefined;
-  const opciones = { atencionEquipo: equipo, atencionPorProfesional: modelosAtencionColumnas(), profesional: user.rol === 'profesional' ? String(user.id) : estado.professional, profesionales: list('professionals', estado.tenantId), permitirCambiosEstado: puedeGestionarCitas(user?.rol), atencion: atencion.state.key === JSON.stringify(consultaAtencion()) ? atencion.state.data : null, sucursal: estado.branch, anchoColumna: Math.max(160, ((document.querySelector('.agenda-calendario')?.clientWidth || window.innerWidth - 300) - 58) / 7) };
-  const contenido = estado.calendarView === 'month' ? renderMes(estado.date, datos.citas, hoyCivil(), opciones) : renderLineaTiempo(dias, datos.citas, hoyCivil(), opciones);
+  const periodo = periodoCalendario(estado.vistaCalendario, estado.fecha);
+  const dias = Array.from({ length: estado.vistaCalendario === 'day' ? 1 : 7 }, (_, indice) => sumarDiasCiviles(periodo.desde, indice));
+  const equipo = estado.vistaCalendario === 'week' && estado.profesional === 'all' && usuarioActual?.rol !== 'profesional' ? atencionEquipo(modelosAtencionColumnas(), usuarioActual?.rol !== 'recepcionista') : undefined;
+  const opciones = { atencionEquipo: equipo, atencionPorProfesional: modelosAtencionColumnas(), profesional: usuarioActual.rol === 'profesional' ? String(usuarioActual.id) : estado.profesional, profesionales: listarRegistros('professionals', estado.negocioId), permitirCambiosEstado: puedeGestionarCitas(usuarioActual?.rol), atencion: atencion.state.key === JSON.stringify(consultaAtencion()) ? atencion.state.data : null, sucursal: estado.sucursal, anchoColumna: Math.max(160, ((document.querySelector('.agenda-calendario')?.clientWidth || window.innerWidth - 300) - 58) / 7) };
+  const contenido = estado.vistaCalendario === 'month' ? renderMes(estado.fecha, datos.citas, hoyCivil(), opciones) : renderLineaTiempo(dias, datos.citas, hoyCivil(), opciones);
   // Incluso un periodo vacío mantiene la cuadrícula para conservar la referencia temporal de la demo.
   return `${!datos.citas.length ? '<p class="agenda-resumen-vacio" role="status">Sin citas en este periodo</p>' : ''}${contenido}`;
 }
 function consultaAtencion() {
-  const persona = user?.rol === 'profesional' ? user.id : estado.professional;
-  return estado.calendarView !== 'month' && persona && persona !== 'all' && estado.branch !== 'none'
-    ? { ...periodoCalendario(estado.calendarView, estado.date), personalId: persona, sucursalId: estado.branch } : null;
+  const persona = usuarioActual?.rol === 'profesional' ? usuarioActual.id : estado.profesional;
+  return estado.vistaCalendario !== 'month' && persona && persona !== 'all' && estado.sucursal !== 'none'
+    ? { ...periodoCalendario(estado.vistaCalendario, estado.fecha), personalId: persona, sucursalId: estado.sucursal } : null;
 }
 async function cargarAtencion(forzar = false) {
   await cargarAtencionColumnas(forzar);
@@ -186,7 +186,7 @@ async function cargarAtencion(forzar = false) {
   const errorAnterior = atencion.state.error;
   if (await atencion.load(consulta)) {
     if (claveAnterior === atencion.state.key && !errorAnterior && !atencion.state.error && JSON.stringify(datosAnteriores) === JSON.stringify(atencion.state.data)) return;
-    if (ambito === identidad && estado.page === 'agenda') renderAgendaConservandoPosicion(render);
+    if (ambito === identidad && estado.pagina === 'agenda') renderAgendaConservandoPosicion(render);
   }
 }
 export function agenda() {
@@ -195,30 +195,30 @@ export function agenda() {
   const modeloSucursales = sincronizarSucursal();
   void cargar();
   const modelo = store.state;
-  const negocio = tenantById(estado.tenantId);
-  const portal = (negocio?.slug ? `<a class="btn btn-light" href="/reservas/${esc(negocio.slug)}" target="_blank" rel="noopener">${icon('external')}Portal de reservas</a>` : '') +
-    (puedeGestionarCitas(user?.rol) ? `<button type="button" class="btn btn-primary" data-agenda-nueva>${icon('plus')}${hayAltaManualPendiente(user) ? 'Comprobar envío pendiente' : 'Nueva cita'}</button>` : '');
+  const negocio = obtenerNegocio(estado.negocioId);
+  const portal = (negocio?.slug ? `<a class="btn btn-light" href="/reservas/${esc(negocio.slug)}" target="_blank" rel="noopener">${renderIcono('external')}Portal de reservas</a>` : '') +
+    (puedeGestionarCitas(usuarioActual?.rol) ? `<button type="button" class="btn btn-primary" data-agenda-nueva>${renderIcono('plus')}${hayAltaManualPendiente(usuarioActual) ? 'Comprobar envío pendiente' : 'Nueva cita'}</button>` : '');
   const zonas = [...new Set((modelo.data?.citas || []).map((elemento) => elemento.zonaHoraria))];
   void cargarAtencion(); aplicarEfectosAgenda();
   const modeloAtencion = consultaAtencion() ? atencion.state : null;
-  const avisoAtencion = consultaAtencionColumnas() ? "" : !modeloAtencion ? "" : modeloAtencion.busy ? `<p class="agenda-aviso-atencion" role="status">Consultando atención…</p>` : modeloAtencion.error ? `<div class="agenda-aviso-atencion" role="status">No se pudo comprobar la atención. ${esc(errorSeguro(modeloAtencion.error).message)}</div>` : modeloAtencion.data?.omisiones.some((x) => (estado.branch === 'all' || String(x.sucursalId) === String(estado.branch))) ? `<p class="agenda-aviso-atencion" role="status">Atención incompleta en algunas fechas por cambios de hora local. Esas fechas no se sombrean.</p>` : "";
-  const htmlFiltros = (user.rol !== "profesional" ? selectorCampo("personalId", "Profesional", "Todos los profesionales", opcionesDisponibles.people, estado.professional, "users") : "") + selectorCampo("sucursalId", "Sucursal", "Todas las sucursales", new Map(modeloSucursales.opciones.map((b) => [b.id, b.name])), estado.branch, "pin") + selectorCampo("estado", "Estado", "Todos los estados", new Map(Object.entries(statuses)), estado.status, "circleCheck") + ((estado.professional !== "all" || user.rol === "profesional") && modeloSucursales.conocido ? `<label class="agenda-filtro-historial"><input type="checkbox" data-agenda-ver-historial ${estado.agendaHistory ? "checked" : ""}> Consultar otras sucursales (histórico)</label>` : "");
+  const avisoAtencion = consultaAtencionColumnas() ? "" : !modeloAtencion ? "" : modeloAtencion.busy ? `<p class="agenda-aviso-atencion" role="status">Consultando atención…</p>` : modeloAtencion.error ? `<div class="agenda-aviso-atencion" role="status">No se pudo comprobar la atención. ${esc(errorSeguro(modeloAtencion.error).message)}</div>` : modeloAtencion.data?.omisiones.some((x) => (estado.sucursal === 'all' || String(x.sucursalId) === String(estado.sucursal))) ? `<p class="agenda-aviso-atencion" role="status">Atención incompleta en algunas fechas por cambios de hora local. Esas fechas no se sombrean.</p>` : "";
+  const htmlFiltros = (usuarioActual.rol !== "profesional" ? selectorCampo("personalId", "Profesional", "Todos los profesionales", opcionesDisponibles.people, estado.profesional, "users") : "") + selectorCampo("sucursalId", "Sucursal", "Todas las sucursales", new Map(modeloSucursales.opciones.map((b) => [b.id, b.name])), estado.sucursal, "pin") + selectorCampo("estado", "Estado", "Todos los estados", new Map(Object.entries(etiquetasEstadoCita)), estado.estadoCita, "circleCheck") + ((estado.profesional !== "all" || usuarioActual.rol === "profesional") && modeloSucursales.conocido ? `<label class="agenda-filtro-historial"><input type="checkbox" data-agenda-ver-historial ${estado.historialAgenda ? "checked" : ""}> Consultar otras sucursales (histórico)</label>` : "");
   const avisoRefresco = modelo.refreshError ? `<div class="agenda-error" data-aviso-en-vivo role="status"><strong>Agenda sin actualizar</strong><p>Se muestra la última consulta confirmada. ${esc(errorSeguro(modelo.refreshError).message)}</p><button class="btn btn-light" data-agenda-reintentar>Reintentar consulta</button></div>` : "";
-  const cuerpo = avisoRefresco + (modelo.busy ? esqueletoCalendario(estado.calendarView) : modelo.error ? panelError(modelo.error, "data-agenda-reintentar") : modelo.data ? calendario(modelo.data) : "");
-  return pageHead("Agenda", "Consulta y da seguimiento a las citas de tu negocio.", portal) + estructuraAgenda({ titulo: tituloCalendario(estado.calendarView, estado.date), vista: estado.calendarView, refrescando: modelo.refreshing, filtros: htmlFiltros, busqueda: estado.search, resumen: modelo.data?.citas, ocupado: modelo.busy, cuerpo, aviso: (user.rol === "recepcionista" ? '<p class="agenda-aviso-catalogo">Las opciones de profesionales y sucursales proceden de citas consultadas; no constituyen un catálogo completo de asignaciones.</p>' : estado.branch === "none" ? '<p class="agenda-aviso-atencion" role="status">Sin sucursales asignadas. Puedes consultar otras sucursales para revisar el histórico.</p>' : "") + avisoAtencion, soloAfectadas, zonas });
+  const cuerpo = avisoRefresco + (modelo.busy ? esqueletoCalendario(estado.vistaCalendario) : modelo.error ? panelError(modelo.error, "data-agenda-reintentar") : modelo.data ? calendario(modelo.data) : "");
+  return renderEncabezadoPagina("Agenda", "Consulta y da seguimiento a las citas de tu negocio.", portal) + estructuraAgenda({ titulo: tituloCalendario(estado.vistaCalendario, estado.fecha), vista: estado.vistaCalendario, refrescando: modelo.refreshing, filtros: htmlFiltros, busqueda: estado.busqueda, resumen: modelo.data?.citas, ocupado: modelo.busy, cuerpo, aviso: (usuarioActual.rol === "recepcionista" ? '<p class="agenda-aviso-catalogo">Las opciones de profesionales y sucursales proceden de citas consultadas; no constituyen un catálogo completo de asignaciones.</p>' : estado.sucursal === "none" ? '<p class="agenda-aviso-atencion" role="status">Sin sucursales asignadas. Puedes consultar otras sucursales para revisar el histórico.</p>' : "") + avisoAtencion, soloAfectadas, zonas });
 }
 
 // Detalle e historial se consultan por separado: errores de eventos no ocultan el snapshot autorizado.
 function htmlDetalle(elemento) {
   const campos = [ ['Folio', elemento.folio], ['Paciente', elemento.nombreContacto], ['Teléfono', elemento.telefonoContacto], ['Origen', elemento.origen === 'manual' ? 'Agendamiento manual' : 'Portal de reservas'], ['Servicio', elemento.nombreServicio], ['Profesional', elemento.nombreProfesional], ['Sucursal', elemento.nombreSucursal], ['Inicio', `${elemento.fechaLocal} · ${elemento.horaInicio}`], ['Fin', `${elemento.fechaFinLocal} · ${elemento.horaFin}`], ['Zona horaria', elemento.zonaHoraria], ['Costo histórico', elemento.costoAceptado], ['Notas de consulta', elemento.motivoConsulta] ];
-  return `${badge(elemento.estado)}<dl class="agenda-campos-detalle">${campos.map(([etiqueta, valor]) => `<div><dt>${etiqueta}</dt><dd>${esc(valorHistorico(valor))}</dd></div>`).join('')}</dl>${elemento.causas?.length ? `<ul>${elemento.causas.map((causa) => `<li>${esc(textoMotivoDisponibilidad(causa.codigo))}</li>`).join('')}</ul>` : ''}`;
+  return `${renderEtiquetaEstado(elemento.estado)}<dl class="agenda-campos-detalle">${campos.map(([etiqueta, valor]) => `<div><dt>${etiqueta}</dt><dd>${esc(valorHistorico(valor))}</dd></div>`).join('')}</dl>${elemento.causas?.length ? `<ul>${elemento.causas.map((causa) => `<li>${esc(textoMotivoDisponibilidad(causa.codigo))}</li>`).join('')}</ul>` : ''}`;
 }
 const etiquetasAcciones = { alta: 'Alta', cambio_estado: 'Cambio de estado', cancelacion: 'Cancelación', reactivacion: 'Reactivación', cambio_horario: 'Cambio de horario' };
 const etiquetasValores = { estado: 'Estado', version: 'Versión', origen: 'Origen', folio: 'Folio', clienteId: 'Cliente', sucursalId: 'Sucursal', servicioId: 'Servicio', personalId: 'Profesional', inicioUtc: 'Inicio UTC', finUtc: 'Fin UTC', separacionMinutos: 'Separación (minutos)', finOcupacionUtc: 'Fin de ocupación UTC', zonaHoraria: 'Zona horaria', costoAceptado: 'Costo histórico' };
 const htmlValores = (valores) => valores == null ? '<p>Sin valores registrados.</p>' : `<dl>${Object.entries(valores).filter(([claveInterna]) => etiquetasValores[claveInterna]).map(([claveInterna, valor]) => `<div><dt>${etiquetasValores[claveInterna]}</dt><dd>${esc(valorHistorico(valor))}</dd></div>`).join('')}</dl>`;
 export async function abrirCita(id) {
   const generacion = ++generacionDetalle;
-  const ambitoAbierto = `${user?.negocioId}:${user?.id}:${user?.sesionId || ''}`;
+  const ambitoAbierto = `${usuarioActual?.negocioId}:${usuarioActual?.id}:${usuarioActual?.sesionId || ''}`;
   if (!document.querySelector('#app-dialog')?.open) focoRetornoCita = document.activeElement;
   const dialogo = modal('Detalle de la cita', '<div class="dialog-body"><p role="status">Consultando detalle…</p></div>', true);
   // Una relectura reemplaza controles del panel; devolver el foco a la cita vigente al cerrar.
@@ -226,7 +226,7 @@ export async function abrirCita(id) {
   // Un historial largo necesita una superficie opaca para mantener legible el texto al desplazarlo.
   dialogo.classList.add('agenda-dialogo-cita');
   dialogo.addEventListener('close', () => { if (generacion === generacionDetalle) generacionDetalle++; }, { once: true });
-  const esVigente = () => Boolean(user) && ambitoAbierto === `${user.negocioId}:${user.id}:${user.sesionId || ''}`;
+  const esVigente = () => Boolean(usuarioActual) && ambitoAbierto === `${usuarioActual.negocioId}:${usuarioActual.id}:${usuarioActual.sesionId || ''}`;
   const activo = () => dialogo.open && generacion === generacionDetalle && esVigente();
   try {
     const detalle = await client.consultarDetalle(id);
@@ -234,17 +234,17 @@ export async function abrirCita(id) {
     if (!detalle || detalle.id !== id || !detalle.zonaHoraria) throw new Error('El detalle recibido no es válido.');
     dialogo.querySelector('.dialog-body').innerHTML = `${htmlDetalle(detalle)}<section class="agenda-historial" aria-label="Historial de la cita"><h3>Historial de la cita</h3><div data-agenda-historial></div></section>`;
     // Estado e historial conservan su autoridad de servidor; solo los roles de gestión reciben editor.
-    montarEditorEstado(dialogo, detalle, { role: user.rol, scope: ambitoAbierto, request: api, isCurrent: esVigente,
+    montarEditorEstado(dialogo, detalle, { role: usuarioActual.rol, scope: ambitoAbierto, request: api, isCurrent: esVigente,
       onReload: () => abrirCita(id),
       onChanged: async () => { await cargar(true); if (activo()) await abrirCita(id); },
     });
-    const ambitoSesion = `${user.negocioId}:${user.id}:${user.sesionId || ''}`;
-    montarEditorHorario(dialogo, detalle, { role: user.rol, scope: ambitoSesion, request: api,
-      isCurrent: () => Boolean(user) && ambitoSesion === `${user.negocioId}:${user.id}:${user.sesionId || ''}`,
+    const ambitoSesion = `${usuarioActual.negocioId}:${usuarioActual.id}:${usuarioActual.sesionId || ''}`;
+    montarEditorHorario(dialogo, detalle, { role: usuarioActual.rol, scope: ambitoSesion, request: api,
+      isCurrent: () => Boolean(usuarioActual) && ambitoSesion === `${usuarioActual.negocioId}:${usuarioActual.id}:${usuarioActual.sesionId || ''}`,
       onReload: () => abrirCita(id),
       onChanged: async (resultado) => {
-        estado.date = partesEnZonaHoraria(resultado.inicioUtc, resultado.zonaHoraria).date;
-        estado.search = ''; estado.branch = estado.professional = estado.status = 'all';
+        estado.fecha = partesEnZonaHoraria(resultado.inicioUtc, resultado.zonaHoraria).date;
+        estado.busqueda = ''; estado.sucursal = estado.profesional = estado.estadoCita = 'all';
         await cargar(true); if (activo()) await abrirCita(id);
       },
     });
@@ -280,30 +280,30 @@ export async function abrirCita(id) {
 // Controles propios evitan invocar las acciones de edición y creación reservadas a la demo.
 export function handleClicAgenda(evento) {
   const objetivo = evento.target.closest('[data-agenda-actualizar], [data-agenda-reintentar-atencion], [data-agenda-limpiar], [data-agenda-nueva], [data-agenda-vista], [data-agenda-mover], [data-agenda-fecha], [data-agenda-hoy], [data-agenda-reintentar], [data-agenda-cita]');
-  if (!objetivo || estado.page !== 'agenda') return false;
+  if (!objetivo || estado.pagina !== 'agenda') return false;
   if (objetivo.hasAttribute('data-agenda-actualizar')) {
     objetivo.disabled = true; objetivo.setAttribute('aria-busy', 'true'); objetivo.querySelector('span').textContent = 'Actualizando…';
     void Promise.all([cargar(true, true), cargarAtencion(true)]); return true;
   }
   if (objetivo.hasAttribute('data-agenda-reintentar-atencion')) { void cargarAtencion(true); render(); return true; }
-  if (objetivo.hasAttribute('data-agenda-limpiar')) { estado.search = ''; void cargar(); render(); document.querySelector('[name=busqueda]')?.focus(); return true; }
+  if (objetivo.hasAttribute('data-agenda-limpiar')) { estado.busqueda = ''; void cargar(); render(); document.querySelector('[name=busqueda]')?.focus(); return true; }
   if (objetivo.hasAttribute('data-agenda-nueva')) {
-    void abrirAltaManual({ day: estado.date,
-      catalogs: { services: list('services', estado.tenantId), branches: list('branches', estado.tenantId), people: list('professionals', estado.tenantId) },
+    void abrirAltaManual({ day: estado.fecha,
+      catalogs: { services: listarRegistros('services', estado.negocioId), branches: listarRegistros('branches', estado.negocioId), people: listarRegistros('professionals', estado.negocioId) },
       onSaved: async (resultado) => {
         // Reconsultar después del commit, sin insertar resultados supuestos en el calendario.
-        estado.date = partesEnZonaHoraria(resultado.inicioUtc, resultado.zonaHoraria).date;
-        estado.search = ''; estado.branch = estado.professional = estado.status = 'all';
+        estado.fecha = partesEnZonaHoraria(resultado.inicioUtc, resultado.zonaHoraria).date;
+        estado.busqueda = ''; estado.sucursal = estado.profesional = estado.estadoCita = 'all';
         await cargar(true);
       }, onCleared: () => render(),
     }); return true;
   }
   if (objetivo.hasAttribute('data-agenda-cita')) { void abrirCita(Number(objetivo.dataset.agendaCita)); return true; }
   if (objetivo.hasAttribute('data-agenda-reintentar')) { void cargar(true); render(); return true; }
-  if (objetivo.dataset.agendaVista) estado.calendarView = objetivo.dataset.agendaVista;
-  if (objetivo.dataset.agendaMover) estado.date = moverFechaCalendario(estado.calendarView, estado.date, Number(objetivo.dataset.agendaMover));
-  if (objetivo.dataset.agendaFecha) { estado.date = objetivo.dataset.agendaFecha; estado.calendarView = 'day'; }
-  if (objetivo.hasAttribute('data-agenda-hoy')) estado.date = hoyCivil();
+  if (objetivo.dataset.agendaVista) estado.vistaCalendario = objetivo.dataset.agendaVista;
+  if (objetivo.dataset.agendaMover) estado.fecha = moverFechaCalendario(estado.vistaCalendario, estado.fecha, Number(objetivo.dataset.agendaMover));
+  if (objetivo.dataset.agendaFecha) { estado.fecha = objetivo.dataset.agendaFecha; estado.vistaCalendario = 'day'; }
+  if (objetivo.hasAttribute('data-agenda-hoy')) estado.fecha = hoyCivil();
   render();
   // La carcasa se vuelve a crear; conservar el foco del control que originó el cambio.
   const atributo = [...objetivo.attributes].find((attr) => attr.name.startsWith('data-agenda-'));
@@ -313,12 +313,12 @@ export function handleClicAgenda(evento) {
 let temporizadorBusqueda;
 function aplicarFiltros(formulario) {
   clearTimeout(temporizadorBusqueda);
-  if (estado.page !== 'agenda' || !formulario.isConnected) return;
+  if (estado.pagina !== 'agenda' || !formulario.isConnected) return;
   const nombreEnfocado = document.activeElement?.name;
   const seleccion = document.activeElement?.selectionStart;
   const datos = new FormData(formulario);
-  if ((datos.get('personalId') || 'all') !== estado.professional) estado.agendaHistory = false;
-  estado.branch = datos.get('sucursalId'); estado.professional = datos.get('personalId') || 'all'; estado.status = datos.get('estado'); estado.search = datos.get('busqueda').trim();
+  if ((datos.get('personalId') || 'all') !== estado.profesional) estado.historialAgenda = false;
+  estado.sucursal = datos.get('sucursalId'); estado.profesional = datos.get('personalId') || 'all'; estado.estadoCita = datos.get('estado'); estado.busqueda = datos.get('busqueda').trim();
   sincronizarSucursal();
   void cargar(); render();
   const control = document.querySelector('#agenda-filtros-conectados')?.elements[nombreEnfocado || 'busqueda'];
@@ -331,7 +331,7 @@ document.addEventListener('submit', (evento) => {
   evento.preventDefault(); aplicarFiltros(evento.target);
 });
 document.addEventListener('change', (evento) => {
-  if (evento.target.matches('[data-agenda-ver-historial]')) { estado.agendaHistory = evento.target.checked; sincronizarSucursal(); render(); document.querySelector('[data-agenda-ver-historial]')?.focus(); return; }
+  if (evento.target.matches('[data-agenda-ver-historial]')) { estado.historialAgenda = evento.target.checked; sincronizarSucursal(); render(); document.querySelector('[data-agenda-ver-historial]')?.focus(); return; }
   if (evento.target.matches('[data-agenda-afectadas]')) { soloAfectadas = evento.target.checked; void cargar(); render(); document.querySelector('[data-agenda-afectadas]')?.focus(); return; }
   if (evento.target.closest('#agenda-filtros-conectados') && evento.target.tagName === 'SELECT') aplicarFiltros(evento.target.form);
 });

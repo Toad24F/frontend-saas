@@ -1,7 +1,7 @@
 # Reglas y plan de traducción de la nomenclatura del frontend
 
 Fecha de definición: 2026-11-16  
-Estado: implementación por conjuntos. Completados los conjuntos 0 a 13.
+Estado: implementación por conjuntos. Implementados los conjuntos 0 a 14. La integración de navegador con MariaDB queda pendiente.
 
 ## Objetivo
 
@@ -318,11 +318,14 @@ Resultado del 2026-11-20 en [Pantallas restantes de la demo](resultado-demo-rest
 
 Estos archivos son consumidos por gran parte de la aplicación. El conjunto no debe traducirse mientras otros cambios amplios estén activos en las mismas rutas.
 
-- [ ] Traducir coordinadamente `main.js`, `entry-router.js`, `connected/entry.js` y los índices de pantallas. Actualizar los imports de `demo/demo.entrada.js` si cambia la interfaz del núcleo.
-- [ ] Traducir coordinadamente `shared/app.js`, `actions.js`, `data.js`, `ui.js`, `forms.js` e `icons.js`.
-- [ ] Traducir `shared/calendar-layout.js`, `resource-status.js` y `account-portal.js` con sus pruebas.
-- [ ] Revisar `connected/backend.js`, `mode.js` y `connected/modules/datos/load.js` sin cambiar contratos ni variables de entorno.
-- [ ] Ejecutar todas las pruebas unitarias y de navegador después de este conjunto.
+- [x] Traducir coordinadamente `main.js`, `entry-router.js`, `connected/entry.js` y los índices de pantallas. Actualizar los imports de `demo/demo.entrada.js` si cambia la interfaz del núcleo.
+- [x] Traducir coordinadamente `shared/app.js`, `actions.js`, `data.js`, `ui.js`, `forms.js` e `icons.js`.
+- [x] Traducir `shared/calendar-layout.js`, `resource-status.js` y `account-portal.js` con sus pruebas.
+- [x] Revisar `connected/backend.js`, `mode.js` y `connected/modules/datos/load.js` sin cambiar contratos ni variables de entorno.
+- [x] Ejecutar todas las pruebas unitarias y las pruebas de navegador con API simulada.
+- [ ] Ejecutar la suite de navegador con MariaDB en un entorno autorizado para preparar una base efímera.
+
+Resultado del 2026-11-20 en [Núcleo compartido](resultado-nucleo-compartido-2026-11-20.md).
 
 ### 15. CSS global — REALIZAR CON MUCHO CUIDADO
 
@@ -332,7 +335,7 @@ Los selectores globales y las propiedades personalizadas pueden afectar todas la
 - [ ] Traducir las propiedades propias de `shared/theme.css` sin cambiar el sistema visual ni los valores de tema.
 - [ ] Traducir selectores propios de `shared/mobile.css` sin afectar la navegación inferior.
 - [ ] Traducir animaciones y selectores propios de `shared/motion.css` respetando preferencias de movimiento reducido.
-- [ ] Traducir `shared/account-portal.css` junto con `account-portal.js`.
+- [ ] Traducir `shared/account-portal.css` y actualizar sus selectores en `shared/cuenta.portal.js`.
 - [ ] Buscar cada selector anterior en `src/` y `tests/` antes de marcarlo como terminado.
 - [ ] Verificar todas las pantallas en escritorio y móvil, modo claro y oscuro.
 

@@ -2,19 +2,19 @@ import './reserva.estilos.css';
 import '../../../shared/portal-publico/portal.opciones.css';
 import { crearFiltrosIniciales, paginarOpciones, renderFiltrosOpciones, renderPaginacionOpciones, horariosDelPeriodo } from '../../../shared/portal-publico/portal.opciones.js';
 import {
-  db,
-  list as lista,
-  resource as recurso,
-  tenantById as negocioPorId,
-  TODAY,
-  formatDate as formatearFecha,
-  date as crearFecha,
-  money as formatearMoneda,
-  appointmentInfo as informacionCita,
-} from '../../../shared/data.js';
-import { state as estado, mountThemeToggle as montarSelectorTema } from '../../../shared/app.js';
-import { icon as icono } from '../../../shared/icons.js';
-import { escape as escapar, avatar, empty as renderVacio, toast } from '../../../shared/ui.js';
+  datosAplicacion,
+  listarRegistros as lista,
+  obtenerRecurso as recurso,
+  obtenerNegocio as negocioPorId,
+  HOY,
+  formatearFecha,
+  crearFecha,
+  formatearMoneda,
+  ampliarDatosCita as informacionCita,
+} from '../../../shared/aplicacion.datos.js';
+import { estadoAplicacion as estado, montarSelectorTema } from '../../../shared/aplicacion.nucleo.js';
+import { renderIcono as icono } from '../../../shared/iconos.catalogo.js';
+import { escaparHtml as escapar, avatar, renderEstadoVacio as renderVacio, mostrarAviso } from '../../../shared/interfaz.componentes.js';
 import {
   buscarFechasDemo,
   apartarHorarioDemo,
@@ -28,7 +28,7 @@ let reserva = {
   servicioId: null,
   sucursalId: null,
   profesionalId: null,
-  fecha: TODAY,
+  fecha: HOY,
   horaElegida: null,
   apartado: null,
   contacto: { nombre: '', telefono: '', motivo: '' },
@@ -83,7 +83,7 @@ function reiniciar(id) {
     servicioId: null,
     sucursalId: null,
     profesionalId: null,
-    fecha: TODAY,
+    fecha: HOY,
     horaElegida: null,
     apartado: null,
     contacto: { nombre: '', telefono: '', motivo: '' },
@@ -91,18 +91,18 @@ function reiniciar(id) {
   };
 }
 export function renderPortalReservas(slug) {
-  const negocio = db.tenants.find((t) => t.slug === slug);
+  const negocio = datosAplicacion.tenants.find((t) => t.slug === slug);
   if (!negocio || negocio.suspended) {
     document.querySelector('#app').innerHTML =
       `<div class="portal-demo-no-disponible"><a class="brand portal-demo-marca" href="/admin/agenda" data-nav="agenda" aria-label="Citalendar: volver al panel"><img class="brand-logo-on-light" src="/brand/citalendar-logo.svg" alt=""/><img class="brand-logo-on-dark" src="/brand/citalendar-logo-light.svg" alt=""/></a>${renderVacio('Este portal no está disponible', 'Revisa el enlace o comunícate directamente con el negocio.', '<a href="/admin/agenda" data-nav="agenda" class="btn btn-light">Volver a la demostración</a>')}</div>`;
     return;
   }
   if (reserva.negocioId !== negocio.id) reiniciar(negocio.id);
-  if (estado.tenantId !== negocio.id) {
-    estado.branch = estado.professional = estado.status = 'all';
+  if (estado.negocioId !== negocio.id) {
+    estado.sucursal = estado.profesional = estado.estadoCita = 'all';
     estado.profesionalHorario = null;
   }
-  estado.tenantId = negocio.id;
+  estado.negocioId = negocio.id;
   const pasoAnterior = Number(ultimaClavePaso.split(':')[1]);
   document.body.dataset.motionDirection = reserva.paso < pasoAnterior ? 'back' : 'forward';
   const clavePaso = `${negocio.id}:${reserva.paso}`;
@@ -152,14 +152,14 @@ function renderContenidoPaso() {
   if (reserva.paso <= 3) return renderCatalogoDemo();
   if (reserva.paso === 4) {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(reserva.fecha)) return '<p id="reserva-demo-error-fecha" role="alert">Elige una fecha válida para consultar horarios.</p>';
-    let fechas = buscarFechasDemo({ ...opciones(), from: TODAY }, 45);
+    let fechas = buscarFechasDemo({ ...opciones(), from: HOY }, 45);
     if (t.mode === 'compact') fechas = fechas.slice(0, 1);
 
     const disponibles = fechas.find((d) => d.day === reserva.fecha)?.slots || [];
     const mostrados = horariosDelPeriodo(disponibles.map((horaInicio) => ({ horaInicio })), periodo).map((horario) => horario.horaInicio);
     const siguienteDia = fechas.find((d) => d.day > reserva.fecha)?.day;
     const diasDisponibles = new Set(fechas.map((elemento) => elemento.day));
-    const marcaInicio = Date.parse(`${TODAY}T12:00:00Z`);
+    const marcaInicio = Date.parse(`${HOY}T12:00:00Z`);
     const calendario = Array.from({ length: 45 }, (_, indice) => {
       const dia = new Date(marcaInicio + indice * 86400000).toISOString().slice(0, 10);
       const habilitado = diasDisponibles.has(dia);
@@ -288,7 +288,7 @@ document.addEventListener('click', (evento) => {
       redibujar();
     } catch (error) {
       reserva.horaElegida = null;
-      toast(error.message);
+      mostrarAviso(error.message);
       redibujar();
     }
     return;
@@ -296,8 +296,8 @@ document.addEventListener('click', (evento) => {
   if (evento.target.closest('[data-copiar-folio]'))
     navigator.clipboard
       .writeText(reserva.citaConfirmada.folio)
-      .then(() => toast('Folio copiado.'))
-      .catch(() => toast(`Tu folio: ${reserva.citaConfirmada.folio}`));
+      .then(() => mostrarAviso('Folio copiado.'))
+      .catch(() => mostrarAviso(`Tu folio: ${reserva.citaConfirmada.folio}`));
 });
 document.addEventListener('change', (evento) => {
   if (!location.pathname.startsWith('/reservas/') || !reserva.negocioId) return;
@@ -330,9 +330,9 @@ document.addEventListener('submit', (evento) => {
     );
     reserva.apartado = null;
     reserva.paso = 6;
-    estado.date = reserva.fecha;
-    estado.branch = String(reserva.citaConfirmada.branchId);
-    estado.professional = estado.status = 'all';
+    estado.fecha = reserva.fecha;
+    estado.sucursal = String(reserva.citaConfirmada.branchId);
+    estado.profesional = estado.estadoCita = 'all';
     redibujar();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   } catch (error) {
@@ -364,6 +364,6 @@ setInterval(() => {
     reserva.paso = 4;
     reserva.horaElegida = null;
     redibujar();
-    toast('El tiempo de reserva terminó. Puedes seleccionar otro horario.');
+    mostrarAviso('El tiempo de reserva terminó. Puedes seleccionar otro horario.');
   }
 }, 1000);

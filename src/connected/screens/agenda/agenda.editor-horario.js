@@ -1,4 +1,4 @@
-import { escape as esc } from '../../../shared/ui.js';
+import { escaparHtml as esc } from '../../../shared/interfaz.componentes.js';
 import {
   borradorAgenda,
   guardarBorradorAgenda,
