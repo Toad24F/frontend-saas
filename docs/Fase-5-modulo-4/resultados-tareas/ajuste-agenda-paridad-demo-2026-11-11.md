@@ -27,8 +27,8 @@ Auditoría previa:
 | `src/connected/screens/agenda/presentation.js` | Nuevo módulo puro para métricas, títulos, cuadrícula por horas y mes. Reutiliza las clases CSS, iconos, colores y reparto de columnas de la demo. Divide citas nocturnas por fecha y amplía el eje horario para no perder citas tempranas o tardías. |
 | `src/connected/screens/agenda/view.js` | Sustituye las tarjetas por el calendario horario, recupera métricas y filtros compactos, importa los estilos de agenda compartidos y mantiene el cliente HTTP, control de respuestas obsoletas, detalle e historial. Añade búsqueda con debounce y filtros al cambiar; Enter aplica de inmediato. |
 | `src/connected/screens/agenda/style.css` | Retira el sistema visual alternativo. Conserva únicamente estilos necesarios para errores, vacío, foco y detalle/historial; la presentación principal procede de los estilos de demo. |
-| `tests/m4-agenda-presentation.test.js` | Cuatro tests Node nuevos escritos antes de producción: estructura/posición/escape, continuación nocturna y eje, mes con «más» y métricas reales o pendientes de consulta. |
-| `tests/m4-browser/agenda.spec.js` | Adapta las acciones de filtros a Enter/cambio de selector, comprueba la cuadrícula horaria y añade una comparación directa de estilos/geometría con la demo usando su mismo conjunto de datos y fecha. |
+| `tests/agenda.presentacion-conectada.test.js` | Cuatro tests Node nuevos escritos antes de producción: estructura/posición/escape, continuación nocturna y eje, mes con «más» y métricas reales o pendientes de consulta. |
+| `tests/m4-navegador/agenda.consulta-conectada.spec.js` | Adapta las acciones de filtros a Enter/cambio de selector, comprueba la cuadrícula horaria y añade una comparación directa de estilos/geometría con la demo usando su mismo conjunto de datos y fecha. |
 | `docs/Fase-5-modulo-4/tareas.md` | Enlaza la corrección manteniendo el punto de parada en T092. |
 | `docs/Fase-5-modulo-4/resultados-tareas/m4-t088-t092.md` | Actualiza los archivos y el flujo vigentes, identifica los resultados iniciales como históricos y remite a este informe. |
 | `README.md` | Aclara que la agenda real conserva la presentación de la demo. |
@@ -56,7 +56,7 @@ El diseño del calendario es el mismo; contenido y acciones responden al contrat
 
 ## Pruebas y evidencia
 
-Se escribió primero `tests/m4-agenda-presentation.test.js` y se ejecutó: rojo por `ERR_MODULE_NOT_FOUND` de `presentation.js`, sin ejecución de los cuatro casos internos. Después de implementar el módulo, **4/4** aprobados. Cubren clases de cuadrícula de demo y posición a las 10:00, escape de HTML, ausencia de acciones ficticias, dos segmentos nocturnos, eje 00:00–24:00, mes de 42 fechas con acceso a las restantes y métricas sin números supuestos.
+Se escribió primero `tests/agenda.presentacion-conectada.test.js` y se ejecutó: rojo por `ERR_MODULE_NOT_FOUND` de `presentation.js`, sin ejecución de los cuatro casos internos. Después de implementar el módulo, **4/4** aprobados. Cubren clases de cuadrícula de demo y posición a las 10:00, escape de HTML, ausencia de acciones ficticias, dos segmentos nocturnos, eje 00:00–24:00, mes de 42 fechas con acceso a las restantes y métricas sin números supuestos.
 
 La regresión de ocho casos M4 pasó después de adaptar las acciones de búsqueda. La prueba adicional de paridad obtuvo primero **1/1 aprobado**, 13,5 s: carga los datos de la demo en una API interceptada, fija la misma fecha en el navegador de pruebas y compara ambos modos a 1366 y 390 px, claro y oscuro. Comprueba familia/tamaño/peso tipográfico, padding, radios, colores y columnas de cabecera, métricas, panel, toolbar, filtros, selector de vista, cabecera horaria y tarjeta confirmada. También compara los cuatro números de métricas y el número de citas visibles. Se amplió para comparar además el mes, sus 42 fechas, las tarjetas mensuales y la apertura del día desde «más»; la prueba de flujo comprueba también la búsqueda automática sin Enter. No es una afirmación de igualdad píxel a píxel de toda la pantalla: navegación, acciones y anotaciones tienen las diferencias de contrato descritas arriba.
 
@@ -67,7 +67,7 @@ Se inspeccionaron capturas comparativas de demo/conectado en escritorio y móvil
 | Comando | Resultado |
 | --- | --- |
 | `npm test` | **228/228 aprobados**, 0 fallos, 0 omitidos; 1,229 s. |
-| `npx playwright test --config tests/m4-playwright.config.js` | **9/9 aprobados**, 0 fallos; 45,2 s. Incluye la comparación directa con demo y la búsqueda automática. |
+| `npx playwright test --config tests/m4-navegador.config.js` | **9/9 aprobados**, 0 fallos; 45,2 s. Incluye la comparación directa con demo y la búsqueda automática. |
 | `npm run build` | Aprobado, 156 módulos, 1,28 s. |
 | `git -c core.safecrlf=false diff --check` | Sin errores de espacios. Archivos nuevos y enlaces locales del seguimiento/informes comprobados adicionalmente: 0 problemas. |
 

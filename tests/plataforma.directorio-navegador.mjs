@@ -14,9 +14,9 @@ await mkdir('test-results/plataforma', { recursive: true });
 try {
   const contexto = await navegador.newContext({ reducedMotion: 'reduce' });
   await contexto.addInitScript(() => sessionStorage.setItem('cita-session', 'qa-simulado'));
-  await contexto.route((url) => /^\/(auth|negocios|licencias)(\/|$)/.test(url.pathname), async (route) => {
-    assert.equal(route.request().method(), 'GET');
-    const ruta = new URL(route.request().url()).pathname;
+  await contexto.route((url) => /^\/(auth|negocios|licencias)(\/|$)/.test(url.pathname), async (rutaInterceptada) => {
+    assert.equal(rutaInterceptada.request().method(), 'GET');
+    const ruta = new URL(rutaInterceptada.request().url()).pathname;
     const id = Number(ruta.split('/')[2]);
     const datos = ruta === '/auth/profile' ? { user: { sub: 1, rol: 'superadmin', nombre: 'Superadmin QA' } }
       : ruta === '/negocios' ? negocios
@@ -26,7 +26,7 @@ try {
               : ruta.endsWith('/cupo-usuarios') ? { profesionales: { activos: 1, limite: 5, disponibles: 4 }, recepcionistas: { activos: 1, limite: 3, disponibles: 2 } }
                 : negocios.find((negocio) => negocio.id === id);
     assert.ok(datos, ruta);
-    await route.fulfill({ json: datos });
+    await rutaInterceptada.fulfill({ json: datos });
   });
   const pagina = await contexto.newPage();
   pagina.on('pageerror', (error) => errores.push(error.message));
@@ -35,9 +35,9 @@ try {
   assert.equal(await pagina.locator('.plataforma-tabla tbody tr').count(), 10);
   assert.equal(await pagina.locator('button.plataforma-indicador, [data-plataforma-indicador]').count(), 0);
   assert.equal(await pagina.locator('.plataforma-filtros [data-plataforma-limpiar]').isDisabled(), true);
-  await pagina.route('**/negocios', (route) => route.request().method() === 'POST'
-    ? route.fulfill({ status: 201, json: { id: 24 } })
-    : route.fallback());
+  await pagina.route('**/negocios', (rutaInterceptada) => rutaInterceptada.request().method() === 'POST'
+    ? rutaInterceptada.fulfill({ status: 201, json: { id: 24 } })
+    : rutaInterceptada.fallback());
   await pagina.getByRole('button', { name: 'Registrar negocio', exact: true }).click();
   const altaConectada = pagina.getByRole('dialog');
   await altaConectada.getByLabel('Nombre del negocio').fill('Consultorio conectado');
@@ -94,7 +94,7 @@ try {
   await pagina.locator('[data-plataforma-actualizar]').click();
   await pagina.waitForFunction(() => document.querySelector('.plataforma-pie')?.textContent.includes('de 10 negocios'));
   assert.equal(await pagina.locator('[data-plataforma-pagina]').count(), 0);
-  await pagina.route('**/negocios', (route) => route.fulfill({ status: 503, json: { message: 'No disponible' } }));
+  await pagina.route('**/negocios', (rutaInterceptada) => rutaInterceptada.fulfill({ status: 503, json: { message: 'No disponible' } }));
   await pagina.locator('[data-plataforma-actualizar]').click();
   await pagina.getByRole('alert').waitFor();
   assert.match(await pagina.getByRole('alert').innerText(), /última consulta/);

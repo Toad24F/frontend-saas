@@ -12,9 +12,9 @@ Esta ejecución repitió la suite completa porque el backend había cambiado des
 
 | Archivo | Función en esta revisión |
 | --- | --- |
-| `tests/browser/global-setup.js` | Prepara backend y Vite, crea/migra/siembra la base temporal y limpia procesos y base al finalizar. Solo se ejecutó; no se modificó. |
-| `tests/browser/support.js` | Construye la URL pública y limita las lecturas SQL a la base temporal validada. Solo se ejecutó; no se modificó. |
-| `tests/browser/portal.spec.js` | Contiene los nueve recorridos de T117–T124. Solo se ejecutó; no se modificó. |
+| `tests/navegador/integracion.preparacion.js` | Prepara backend y Vite, crea/migra/siembra la base temporal y limpia procesos y base al finalizar. Solo se ejecutó; no se modificó. |
+| `tests/navegador/integracion.utilidades.js` | Construye la URL pública y limita las lecturas SQL a la base temporal validada. Solo se ejecutó; no se modificó. |
+| `tests/navegador/portal.reservas.spec.js` | Contiene los nueve recorridos de T117–T124. Solo se ejecutó; no se modificó. |
 | `playwright.config.js` | Fija Edge, un trabajador, el setup y las trazas ante fallo. Solo se utilizó; no se modificó. |
 | `docs/fase-4/resultados-tareas/resultado-t133.md` | Archivo nuevo: consolida el flujo, la cobertura, el resultado actual y sus límites. |
 | `../backend/docs/fase-4-modulo-3/tareas.md` | Se marca M3-T133 y se enlaza esta evidencia. |

@@ -12,9 +12,9 @@ Alcance: detalle de negocio conectado para superadmin. Se consultaron controlado
 | `src/connected/screens/negocio/view.js` | Usa la presentación de licencia y correo; muestra «Comprobar operación» si queda un intento pendiente. Conserva el estado vacío ilustrado de correos. |
 | `src/connected/screens/negocio/actions.js` | Conecta los botones al módulo idempotente. El formulario de suspensión inicia en dos días, acepta 0–30 y explica el bloqueo inmediato. Tras respuesta conocida refresca datos; ante fallo conserva el diálogo y el intento. Restringe las acciones a superadmin. |
 | `src/shared/actions.js` | Enruta «Comprobar operación» solo en la vista conectada de negocio y con rol superadmin. |
-| `tests/ala-licencias.test.js` (nuevo) | Verifica cabecera acotada, guardado previo, misma clave/cuerpo, bloqueo de renovación incompatible, plazos y representación de licencia/correo. Cada bloque tiene comentario de intención. |
-| `tests/browser/global-setup.js` | Siembra cuentas ficticias superadmin y administrador en la base efímera, con contraseña bcrypt de prueba. No crea cuentas en la base cotidiana. |
-| `tests/browser/licenses.spec.js` (nuevo) | Recorre la pantalla conectada con backend y base temporales: plazos 0/2/30, suspensión, renovación, respuesta perdida, correo por estado y permisos; genera capturas para revisión visual. Los comentarios explican el aislamiento y la repetición. |
+| `tests/ala-licencia.operaciones.test.js` (nuevo) | Verifica cabecera acotada, guardado previo, misma clave/cuerpo, bloqueo de renovación incompatible, plazos y representación de licencia/correo. Cada bloque tiene comentario de intención. |
+| `tests/navegador/integracion.preparacion.js` | Siembra cuentas ficticias superadmin y administrador en la base efímera, con contraseña bcrypt de prueba. No crea cuentas en la base cotidiana. |
+| `tests/navegador/licencia.operaciones.spec.js` (nuevo) | Recorre la pantalla conectada con backend y base temporales: plazos 0/2/30, suspensión, renovación, respuesta perdida, correo por estado y permisos; genera capturas para revisión visual. Los comentarios explican el aislamiento y la repetición. |
 | `docs/ajustes-licencias-administracion-agenda/tareas.md` | Marca T024–T030 y enlaza esta evidencia. |
 
 ## Flujo de la operación
@@ -27,7 +27,7 @@ Antes del primer POST, el navegador guarda en `sessionStorage` un marcador con a
 
 | Comprobación | Resultado real |
 | --- | --- |
-| `node --test tests/ala-licencias.test.js` antes de crear los módulos | Falló por módulo ausente; la prueba de presentación se añadió antes de crear ese módulo y volvió a fallar por ausencia. Tras implementar, los seis casos pasaron. |
+| `node --test tests/ala-licencia.operaciones.test.js` antes de crear los módulos | Falló por módulo ausente; la prueba de presentación se añadió antes de crear ese módulo y volvió a fallar por ausencia. Tras implementar, los seis casos pasaron. |
 | Primera ejecución Playwright de licencias | Falló 3/3 por selector ambiguo de contraseña del test. Tras corregirlo, 2/3 pasaron; el restante navegaba al siguiente negocio antes de que acabara el POST. Se esperó el cierre del diálogo. |
 | Playwright final `PORTAL_TEST_BACKEND_READ_ONLY=1 npm run test:browser -- --grep 'FALA-T030\|FALA-T029'` | **4/4 aprobadas**, código 0, 22.0 s. El caso visual también pasó aislado después de estabilizar capturas. La base y usuarios temporales se eliminan al finalizar. |
 | `npm test` | **173/173 aprobadas**, 0 fallidas, 0 omitidas, código 0. |

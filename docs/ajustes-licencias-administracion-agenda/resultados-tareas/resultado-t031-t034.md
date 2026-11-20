@@ -20,9 +20,9 @@ Se implementaron los cupos de profesionales y recepción en el frontend conectad
 | `src/connected/screens/profesionales/actions.js` | Informa cupo antes de reactivar profesional y mantiene el rechazo en el diálogo. |
 | `src/connected/screens/recepcionistas/actions.js` | Informa cupo al crear y reactivar recepción; conserva el rechazo. |
 | `src/shared/actions.js` | Espera las lecturas asíncronas antes de abrir las confirmaciones. |
-| `tests/ala-cupos-usuarios.test.js` | Nuevos casos de contrato, cuerpo PATCH, validación y propagación de 409. |
-| `tests/browser/global-setup.js` | Añade cuentas ficticias activas e inactivas únicamente a la base efímera de Playwright. |
-| `tests/browser/user-quotas.spec.js` | Nuevos recorridos reales de los dos roles, persistencia, rechazos, permisos y capturas visuales. |
+| `tests/ala-usuarios.cupo.test.js` | Nuevos casos de contrato, cuerpo PATCH, validación y propagación de 409. |
+| `tests/navegador/integracion.preparacion.js` | Añade cuentas ficticias activas e inactivas únicamente a la base efímera de Playwright. |
+| `tests/navegador/usuarios.cupo.spec.js` | Nuevos recorridos reales de los dos roles, persistencia, rechazos, permisos y capturas visuales. |
 | `tareas.md` | Marca T031–T034 como concluidas. |
 
 ## Pruebas y alcance

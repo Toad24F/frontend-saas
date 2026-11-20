@@ -4,7 +4,7 @@ import { crearPortalClient, ErrorPortalPublico } from '../src/connected/portal-p
 import { crearEnvio } from '../src/connected/portal-publico/reserva.envio.js';
 import { renderReserva } from '../src/connected/portal-publico/reserva.vista.js';
 import { crearIntentoStore } from '../src/connected/portal-publico/intento.store.js';
-import { memoryStorage } from './fixtures/memory-storage.js';
+import { crearAlmacenamientoEnMemoria } from './datos-prueba/memoria.almacenamiento.js';
 
 const marcador = { negocio: 'centro', apartadoId: 8, clave: 'attempt_test_000001' };
 
@@ -27,7 +27,7 @@ test('FALA-T022: cupo telefónico se distingue del conflicto público genérico'
 // Tras un 409 del escritor aún se consulta el intento propio: el rechazo HTTP
 // no autoriza borrar la referencia ni editar el contenido congelado.
 test('FALA-T021–T022: rechazo por cupo conserva marcador hasta resolución y explica su causa', async () => {
-  const almacenamiento = memoryStorage();
+  const almacenamiento = crearAlmacenamientoEnMemoria();
   const store = crearIntentoStore('centro', () => almacenamiento);
   const estados = [], llamadas = [];
   const client = { async solicitar(ruta, opciones) {
@@ -60,7 +60,7 @@ test('FALA-T021–T022: rechazo por cupo conserva marcador hasta resolución y e
 // La ausencia terminal ordinaria exige nueva consulta de disponibilidad y
 // no puede fabricar un folio o resultado histórico.
 test('FALA-T020–T021: rechazo operativo terminal reinicia sin resultado inventado', async () => {
-  const almacenamiento = memoryStorage();
+  const almacenamiento = crearAlmacenamientoEnMemoria();
   crearIntentoStore('centro', () => almacenamiento).guardar(marcador);
   const estados = [];
   let ausente = 0;

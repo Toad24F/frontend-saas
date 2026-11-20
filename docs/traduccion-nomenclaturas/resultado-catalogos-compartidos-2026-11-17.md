@@ -23,11 +23,11 @@ Las vistas de los cuatro catálogos y los estilos correspondientes adoptaron los
 ## Verificación
 
 - `npm test`: 295 pruebas aprobadas.
-- Pruebas dirigidas de Node: 19 aprobadas en `tests/detalle-edicion-conectado.test.js`, `tests/paginacion.local.test.js`, `tests/backend.test.js` y `tests/admin-review.test.js`.
+- Pruebas dirigidas de Node: 19 aprobadas en `tests/detalle-edicion-conectado.test.js`, `tests/paginacion.local.test.js`, `tests/conexion.backend.test.js` y `tests/administracion.revision.test.js`.
 - `npm run build`: 190 módulos transformados por Vite.
 - `node --check` y `git diff --check`: correctos.
-- `tests/browser-local-pagination.mjs`: aprobada en Edge con API simulada. Comprobó los cuatro catálogos y Bloqueos, paginación sin peticiones, filtros, ajuste de la última página tras una baja simulada, persistencia de la vista y lectura de una clave anterior.
-- `tests/browser-admin-review.mjs`: aprobada en Edge con API simulada. Comprobó filtros, formularios, cupos, asignaciones y permisos. Se revisaron capturas del modo conectado y la demo a 1366 y 390 px en claro y oscuro. La suite conectada también comprobó geometría a 1159 y 320 px.
+- `tests/paginacion.local-navegador.mjs`: aprobada en Edge con API simulada. Comprobó los cuatro catálogos y Bloqueos, paginación sin peticiones, filtros, ajuste de la última página tras una baja simulada, persistencia de la vista y lectura de una clave anterior.
+- `tests/administracion.revision-navegador.mjs`: aprobada en Edge con API simulada. Comprobó filtros, formularios, cupos, asignaciones y permisos. Se revisaron capturas del modo conectado y la demo a 1366 y 390 px en claro y oscuro. La suite conectada también comprobó geometría a 1159 y 320 px.
 - Suite M4 filtrada a la demo de Clientes: 4 pruebas aprobadas. Ejercitó alta con teléfono compartido y corrección en escritorio y móvil, en ambos temas.
 
 La suite general de navegador que prepara una base temporal del backend quedó fuera del alcance. Las escrituras de las pruebas de navegador fueron simuladas.

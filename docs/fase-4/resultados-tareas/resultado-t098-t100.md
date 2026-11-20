@@ -27,7 +27,7 @@ La página conserva marca Citalendar, logos por tema, tipografías y tokens exis
 | `src/connected/public/http.js` | Nuevo: cliente independiente de autenticación privada, rutas públicas permitidas, timeout de 15 segundos, errores tipados y CSRF conservado exclusivamente en memoria tras comprobar la cookie. |
 | `src/connected/public/browser-session.js` | Nuevo: valida capacidades, abre/cierra un canal de comprobación y serializa las dos inicializaciones mediante Web Locks con espera máxima de 15 segundos para adquirir el lock. |
 | `vite.config.js` | Nuevo: proxy de desarrollo `/publico` hacia la API configurada, conservando Origin y el Path de la cookie. No configura Nginx ni proxy de producción/preview. |
-| `tests/portal-publico-base.test.js` | Nuevo: ocho pruebas Node con dobles de HTTP y coordinación para cubrir las tres tareas, incluyendo errores y carreras de inicialización. No abre conexiones a la API ni modifica bases. |
+| `tests/portal-publico.base.test.js` | Nuevo: ocho pruebas Node con dobles de HTTP y coordinación para cubrir las tres tareas, incluyendo errores y carreras de inicialización. No abre conexiones a la API ni modifica bases. |
 | `README.md` | Modificado: distingue el alcance parcial del portal, describe proxy, requisitos del navegador, variables solo del servidor y límites de publicación. |
 | Este documento | Nuevo: marcas de finalización, flujo, descripción de archivos, evidencias y pendientes del lote. |
 
@@ -48,7 +48,7 @@ El cliente distingue `http` (respuesta funcional con estado/código/acción), `n
 
 ## Tests primero y resultados reales
 
-La suite inicial se escribió **antes de crear los módulos de implementación**. La primera ejecución de `node --test tests/portal-publico-base.test.js` terminó con código 1 y `ERR_MODULE_NOT_FOUND` para `src/entry-router.js`: el fallo rojo inicial fue de importación, antes de ejecutar las aserciones. Tras implementar, las seis pruebas iniciales pasaron. Se añadieron dos casos de endurecimiento: invalidación de credencial y timeout.
+La suite inicial se escribió **antes de crear los módulos de implementación**. La primera ejecución de `node --test tests/portal-publico.base.test.js` terminó con código 1 y `ERR_MODULE_NOT_FOUND` para `src/entry-router.js`: el fallo rojo inicial fue de importación, antes de ejecutar las aserciones. Tras implementar, las seis pruebas iniciales pasaron. Se añadieron dos casos de endurecimiento: invalidación de credencial y timeout.
 
 | Prueba nueva | Qué comprueba |
 | --- | --- |
@@ -64,7 +64,7 @@ La suite inicial se escribió **antes de crear los módulos de implementación**
 Ejecución final relacionada:
 
 ```text
-node --test tests/backend.test.js tests/portal-publico-base.test.js
+node --test tests/conexion.backend.test.js tests/portal-publico.base.test.js
 tests 16
 pass 16
 fail 0

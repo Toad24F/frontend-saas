@@ -7,7 +7,7 @@ import { leerConfiguracionConectada, validarConfiguracionConectada } from '../sr
 // La frontera usa el actor autenticado; nunca acepta un negocioId del navegador.
 test('T044: lee el booleano vigente y conserva el fallo de lectura', async () => {
   const llamadas = [];
-  const solicitar = async (...args) => { llamadas.push(args); return { mostrarPreciosPublicos: false }; };
+  const solicitar = async (...argumentos) => { llamadas.push(argumentos); return { mostrarPreciosPublicos: false }; };
   assert.equal((await leerPublicacionPrecios(solicitar)).mostrarPreciosPublicos, false);
   assert.deepEqual(llamadas, [['/negocios/publicacion-catalogo']]);
   await assert.rejects(leerPublicacionPrecios(async () => { throw new Error('Sin conexión'); }), /Sin conexión/);
@@ -17,7 +17,7 @@ test('T044: lee el booleano vigente y conserva el fallo de lectura', async () =>
 
 test('T045: envía solo el booleano y exige confirmación de la respuesta', async () => {
   const llamadas = [];
-  const solicitar = async (...args) => { llamadas.push(args); return { mostrarPreciosPublicos: false }; };
+  const solicitar = async (...argumentos) => { llamadas.push(argumentos); return { mostrarPreciosPublicos: false }; };
   assert.equal((await guardarPublicacionPrecios(false, solicitar)).mostrarPreciosPublicos, false);
   assert.deepEqual(llamadas, [['/negocios/publicacion-catalogo', 'PATCH', { mostrarPreciosPublicos: false }]]);
   await assert.rejects(guardarPublicacionPrecios(true, async () => ({ mostrarPreciosPublicos: false })), /confirmó/);

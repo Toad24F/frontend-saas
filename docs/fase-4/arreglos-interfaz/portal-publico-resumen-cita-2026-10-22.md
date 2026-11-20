@@ -12,7 +12,7 @@ Se añadió “Pago directamente en sucursal.” cuando ya se conoce un costo, c
 
 - `src/connected/public/booking-view.js`: estructura, iconos y mensaje de pago del resumen.
 - `src/connected/public/style.css`: degradados, hoja, disposición y temas.
-- `tests/portal-publico-resumen.test.js`: estado sin costo, servicio elegido y recuperación sin duración.
+- `tests/portal-publico.resumen.test.js`: estado sin costo, servicio elegido y recuperación sin duración.
 - Solo portal público conectado; no cambia el flujo de selección, apartado, envío, recuperación ni la demo. Aplica en escritorio y móvil, temas claro y oscuro.
 
 ## Comprobación y límites

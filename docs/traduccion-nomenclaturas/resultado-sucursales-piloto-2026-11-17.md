@@ -68,8 +68,8 @@ La revisión de navegador detectó que traducir anticipadamente `search/status` 
 - Pruebas específicas de Sucursales y carga conectada: 15 de 15 correctas.
 - `npm test`: 295 de 295 pruebas correctas.
 - `npm run build`: correcto; 190 módulos transformados.
-- `tests/browser-local-pagination.mjs`: correcto con API simulada; filtros, páginas 10/11/21, lista/tarjetas y móvil.
-- `tests/browser-admin-review.mjs`: correcto con API simulada; Sucursales conectada y demo en 1366 y 390 px, temas claro y oscuro, sin desbordamiento.
+- `tests/paginacion.local-navegador.mjs`: correcto con API simulada; filtros, páginas 10/11/21, lista/tarjetas y móvil.
+- `tests/administracion.revision-navegador.mjs`: correcto con API simulada; Sucursales conectada y demo en 1366 y 390 px, temas claro y oscuro, sin desbordamiento.
 - Búsqueda con `rg` de archivos, símbolos y selectores anteriores del conjunto: sin referencias residuales en `src/` ni `tests/`.
 - `git diff --check`: se ejecuta como comprobación final del cambio.
 

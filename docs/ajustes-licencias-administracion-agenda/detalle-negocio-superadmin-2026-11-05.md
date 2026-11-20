@@ -47,7 +47,7 @@ La paginación y los filtros operan sobre todo el historial descargado. No reduc
 - `tests/negocio.detalle.test.js`: siete pruebas nuevas de reglas y renderizado.
 - `tests/ala-usuarios.cupo.test.js`: ajuste del texto esperado de consumo.
 - `tests/negocio.detalle-navegador.mjs`: prueba de interfaz aislada con API simulada.
-- `tests/browser/licenses.spec.js`, `tests/browser/user-quotas.spec.js`: selectores y navegación actualizados para las pestañas.
+- `tests/navegador/licencia.operaciones.spec.js`, `tests/navegador/usuarios.cupo.spec.js`: selectores y navegación actualizados para las pestañas.
 
 ## Panel de negocios: indicadores y directorio
 

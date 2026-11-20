@@ -62,7 +62,7 @@ La paginación reduce el DOM y la altura visible; no reduce la descarga inicial 
 - `src/connected/public/booking.js`, `booking-view.js`, `entry.js`, `style.css`: delegación, carga inicial, skeleton del apartado, resumen y adaptación por tamaño.
 - `src/demo/screens/reservas/booking.js`, `style.css`: equivalencias visuales con las limitaciones de simulación existentes.
 - `tests/portal-publico.navegacion.test.js`, `tests/portal.navegacion-navegador.mjs`: cobertura nueva.
-- Pruebas previas de selección, apartado, envío y precios: fixtures de navegación ajustadas. Las que verifican selección manual mantienen varias opciones; las de apartado/envío admiten los saltos. `tests/browser/portal.reservas.spec.js` usa los nuevos títulos y el salto de las selecciones únicas de su fixture.
+- Pruebas previas de selección, apartado, envío y precios: fixtures de navegación ajustadas. Las que verifican selección manual mantienen varias opciones; las de apartado/envío admiten los saltos. `tests/navegador/portal.reservas.spec.js` usa los nuevos títulos y el salto de las selecciones únicas de su fixture.
 
 ## Verificación
 

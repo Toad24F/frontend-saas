@@ -15,7 +15,7 @@ No se movieron archivos en esta etapa. Se conservó la separación previa entre 
 | Modificados | `src/shared/screens/catalogos/actions.js`, `src/shared/screens/servicios/view.js` | El administrador puede capturar/editar especialidad y descripción con datos reales. El profesional puede crear servicios y editar solo los de su autoría; su botón de selección ya no se presenta como cambio de estado global. |
 | Modificados | `src/shared/actions.js`, `src/shared/screens/sucursales/view.js` | El profesional activa o pausa su atención con `PUT /profesionales/:id/sucursales/:sucursalId/atencion`, sin reescribir el horario. La tarjeta distingue atención individual de sucursal global inactiva. |
 | Modificado | `src/shared/screens/plataforma/actions.js` | El enlace a la demo desde “Mi cuenta” abre una pantalla existente de la demo. |
-| Modificado | `tests/backend.test.js` | Se actualizó el contrato esperado del payload de servicios y se verificaron páginas por rol, sucursales del profesional, descripción y autoría. |
+| Modificado | `tests/conexion.backend.test.js` | Se actualizó el contrato esperado del payload de servicios y se verificaron páginas por rol, sucursales del profesional, descripción y autoría. |
 
 ## Navegación conectada resultante
 

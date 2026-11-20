@@ -10,12 +10,12 @@
 
 - Portal conectado: `src/connected/public/booking-view.js` y `src/connected/public/style.css`.
 - Demo: `src/demo/screens/reservas/booking.js` y `src/demo/screens/reservas/style.css`.
-- Pruebas: `tests/portal-publico-apartado.test.js` y expectativas de título en `tests/browser/portal.spec.js`.
+- Pruebas: `tests/portal-publico.apartado.test.js` y expectativas de título en `tests/navegador/portal.reservas.spec.js`.
 - Los estilos usan los tokens existentes para los temas claro y oscuro. La barra ocupa el ancho disponible del contador, también en móvil. El resumen lateral sigue su posición actual en cada tamaño de pantalla.
 
 ## Comprobación
 
-- La prueba del portal se escribió y falló antes de implementar el cambio; después pasó con el resto de `tests/portal-publico-apartado.test.js` (25 pruebas).
+- La prueba del portal se escribió y falló antes de implementar el cambio; después pasó con el resto de `tests/portal-publico.apartado.test.js` (25 pruebas).
 - `npm test`: 160 pruebas aprobadas.
 - `npm run build`: compilación de Vite completada.
 - `git diff --check`: sin errores de espacios.

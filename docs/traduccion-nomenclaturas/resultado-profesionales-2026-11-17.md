@@ -77,8 +77,8 @@ El contenedor de resultados usa `profesional-results`: el dominio quedó en espa
 - `node --check`: correcto en todos los JavaScript modificados.
 - Pruebas dirigidas: 20 aprobadas, 0 fallidas.
 - `npm test`: 295 aprobadas, 0 fallidas.
-- `tests/browser-local-pagination.mjs`: aprobada con API simulada.
-- `tests/browser-admin-review.mjs`: aprobada con API simulada; conectado/demo, escritorio/móvil y ambos temas.
+- `tests/paginacion.local-navegador.mjs`: aprobada con API simulada.
+- `tests/administracion.revision-navegador.mjs`: aprobada con API simulada; conectado/demo, escritorio/móvil y ambos temas.
 - `npm run build`: correcto; Vite transformó 190 módulos.
 - Búsqueda con `rg`: sin imports, funciones, acciones ni selectores anteriores del conjunto.
 - `git diff --check`: correcto.

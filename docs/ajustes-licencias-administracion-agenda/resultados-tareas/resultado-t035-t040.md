@@ -20,8 +20,8 @@ Alcance: frontend conectado del Administrador de negocio. Los cuatro recursos se
 | `src/connected/screens/{profesionales,recepcionistas,servicios,sucursales}/view.js` | Ofrecen «Inhabilitar» y la consulta separada donde corresponde. |
 | `src/connected/screens/{profesionales,recepcionistas,servicios,sucursales}/actions.js` | Confirman el retiro, conservan errores en el diálogo y anuncian éxito solo tras respuesta correcta. |
 | `src/shared/actions.js` y `src/shared/app.js` | Despachan las nuevas acciones y cierran correctamente los menús; la demo conserva su ruta. |
-| `tests/ala-inhabilitados.test.js` y tests conectados existentes de tres recursos | Prueban tres estados, rol, rutas, cuerpo de POST, IDs inválidos y errores sin ocultar. |
-| `tests/browser/retired-resources.spec.js` y `tests/browser/global-setup.js` | Prueban los cuatro retiros y detalles reales en el negocio 2 de la base efímera, la demo y capturas visuales. |
+| `tests/recursos.inhabilitados.test.js` y tests conectados existentes de tres recursos | Prueban tres estados, rol, rutas, cuerpo de POST, IDs inválidos y errores sin ocultar. |
+| `tests/navegador/recursos.inhabilitados.spec.js` y `tests/navegador/integracion.preparacion.js` | Prueban los cuatro retiros y detalles reales en el negocio 2 de la base efímera, la demo y capturas visuales. |
 | `tareas.md` | Marca T035–T040 como terminadas. |
 
 ## Pruebas

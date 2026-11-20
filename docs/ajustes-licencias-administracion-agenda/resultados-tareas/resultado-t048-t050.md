@@ -17,9 +17,9 @@ En **Equipo → Horario semanal**, el payload conectado de `PUT /profesionales/:
 | `src/connected/screens/disponibilidad/view.js` | Presenta el estado ocupado y aplica el resultado confirmado o el borrador con errores; solo devuelve éxito real para el aviso. |
 | `src/connected/modules/disponibilidad/payload.js` | Excluye campos de descanso y ordena las franjas semanales enviadas a la API. |
 | `src/shared/screens/disponibilidad/errors.js` | Señala descansos incrustados en modo conectado; conserva la validación previa de demo. |
-| `tests/ala-agenda-semana.test.js` | Prueba PUT exacto, valores 0/5/60 e inválidos, 400/503, respuesta incongruente y dos franjas sin descansos. |
-| `tests/backend.test.js` | Actualiza la expectativa del payload semanal al contrato sin descanso. |
-| `tests/browser/agenda-configuracion.spec.js` | Prueba con API y base temporal el formulario, errores 400/503 y el horario de dos franjas; captura tamaños y temas para revisión. |
+| `tests/agenda.configuracion-semana.test.js` | Prueba PUT exacto, valores 0/5/60 e inválidos, 400/503, respuesta incongruente y dos franjas sin descansos. |
+| `tests/conexion.backend.test.js` | Actualiza la expectativa del payload semanal al contrato sin descanso. |
+| `tests/navegador/agenda-configuracion.spec.js` | Prueba con API y base temporal el formulario, errores 400/503 y el horario de dos franjas; captura tamaños y temas para revisión. |
 | `README.md` | Corrige la descripción conectada: una pausa usa dos franjas. |
 | `tareas.md` | Marca T048–T050 como terminadas. |
 

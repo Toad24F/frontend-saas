@@ -11,7 +11,7 @@ const sesion = (csrfToken = token) => ({ negocio: { slug, nombre: 'Clínica Cent
 const respuesta = (datos, estado = 200) => Response.json(datos, { status: estado });
 
 // Las entradas se prueban sin DOM: el portal conectado no debe cargar el panel o la demo.
-test('T098: reserva pública elige entrada aislada, conserva demo explícita y no exige login', async () => {
+test('T098: reserva pública elige entrada aislada, conserva demo explícita y no exige inicio de sesión', async () => {
   assert.deepEqual(resolverEntrada('/reservas/cl%C3%ADnica%20centro', ''), { modo: 'publico', slug });
   assert.equal(resolverEntrada('/reservas/centro/', '?demo=1').modo, 'demo');
   assert.equal(resolverEntrada('/admin/agenda', '').modo, 'conectado');
@@ -115,14 +115,14 @@ test('T100: dos pestañas inicializan en exclusión mutua por negocio', async ()
   } });
   const entorno = { locks: bloqueos, cookieEnabled: true, isSecureContext: true,
     BroadcastChannel: class { close() {} } };
-  const results = await Promise.all([iniciarSesionNavegador(slug, crearClientDePrueba(), entorno), iniciarSesionNavegador(slug, crearClientDePrueba(), entorno)]);
+  const resultados = await Promise.all([iniciarSesionNavegador(slug, crearClientDePrueba(), entorno), iniciarSesionNavegador(slug, crearClientDePrueba(), entorno)]);
   assert.equal(maximo, 1);
   assert.equal(nombres[0], nombres[1]);
-  assert.equal(results[0].negocio.slug, slug);
+  assert.equal(resultados[0].negocio.slug, slug);
 });
 
 test('T100: coordinación o cookies no disponibles fallan antes de iniciar sesión', async () => {
-  const valido = { locks: { request: async (_name, _options, handler) => handler() },
+  const valido = { locks: { request: async (_nombre, _opciones, handler) => handler() },
     cookieEnabled: true, isSecureContext: true, BroadcastChannel: class { close() {} } };
   for (const ajustes of [{ locks: null }, { cookieEnabled: false }, { isSecureContext: false },
     { BroadcastChannel: undefined }, { BroadcastChannel: class { constructor() { throw Error('bloqueado'); } } }]) {
@@ -138,31 +138,31 @@ test('T100: coordinación o cookies no disponibles fallan antes de iniciar sesi�
 // La credencial anterior no puede seguir autorizando escrituras tras un 401
 // o una nueva inicialización interrumpida a mitad de su comprobación.
 test('T099–T100: 401 y fallo al verificar invalidan el CSRF previo', async () => {
-  let fail = false;
+  let rechazarPromesa = false;
   let llamadas = 0;
   const client = crearPortalClient(slug, { ejecutarFetch: async () => {
     llamadas++;
-    return fail ? respuesta({ codigo: 'portal_401', mensaje: 'Reinicie', accion: 'reiniciar' }, 401) : respuesta(sesion());
+    return rechazarPromesa ? respuesta({ codigo: 'portal_401', mensaje: 'Reinicie', accion: 'reiniciar' }, 401) : respuesta(sesion());
   } });
   await client.iniciarSesionVerificada();
-  fail = true;
+  rechazarPromesa = true;
   await assert.rejects(client.solicitar('catalogo'), (error) => error.status === 401 && error.accion === 'reiniciar');
   await assert.rejects(client.solicitar('apartados', { method: 'POST' }), /sesión/i);
   assert.equal(llamadas, 3);
-  fail = false;
+  rechazarPromesa = false;
   await client.iniciarSesionVerificada();
-  fail = true;
+  rechazarPromesa = true;
   await assert.rejects(client.iniciarSesionVerificada());
   await assert.rejects(client.solicitar('apartados', { method: 'POST' }), /sesión/i);
 });
 
 test('T099: una petición agotada termina como fallo de transporte', async () => {
   const client = crearPortalClient(slug, { tiempoLimiteMs: 5, ejecutarFetch: async (_url, opciones) =>
-    new Promise((_resolve, rechazar) => {
+    new Promise((_resolver, rechazar) => {
       opciones.signal.addEventListener('abort', () => rechazar(opciones.signal.reason), { once: true });
     }) });
   // Mantiene el proceso vivo durante el timeout, igual que un socket de fetch real.
-  const keepAlive = setInterval(() => {}, 100);
+  const temporizadorActivo = setInterval(() => {}, 100);
   try { await assert.rejects(client.solicitar('catalogo'), (error) => error.tipo === 'network' && error.status === 0); }
-  finally { clearInterval(keepAlive); }
+  finally { clearInterval(temporizadorActivo); }
 });

@@ -18,9 +18,9 @@ Alcance: administración conectada de profesionales, recepción, servicios y suc
 | `src/connected/screens/recursos/retired-view.css` | Acomoda nombre, acciones y causas en escritorio/móvil sin tapar botones con la navegación móvil. |
 | `src/shared/actions.js` | Despacha los botones nuevos de restauración y afectaciones únicamente en modo conectado. |
 | `src/shared/screens/disponibilidad/operational-contract.js` | Da nombres legibles a las causas de inhabilitación devueltas por el backend. |
-| `tests/ala-inhabilitados.test.js` | Añade pruebas de los cuatro contratos de restauración, respuesta inactiva y consulta de causas de solo lectura. |
-| `tests/browser/global-setup.js` | Siembra un profesional adicional y una cita futura ficticia en el negocio 2 de la base temporal. |
-| `tests/browser/retired-resources.spec.js` | Comprueba retiro, restauración, cupo, aislamiento entre negocios y que consultar causas no cambia la cita; captura los temas/tamaños. |
+| `tests/recursos.inhabilitados.test.js` | Añade pruebas de los cuatro contratos de restauración, respuesta inactiva y consulta de causas de solo lectura. |
+| `tests/navegador/integracion.preparacion.js` | Siembra un profesional adicional y una cita futura ficticia en el negocio 2 de la base temporal. |
+| `tests/navegador/recursos.inhabilitados.spec.js` | Comprueba retiro, restauración, cupo, aislamiento entre negocios y que consultar causas no cambia la cita; captura los temas/tamaños. |
 | `tareas.md` | Marca T041–T043 como terminadas. |
 
 ## Pruebas y resultado

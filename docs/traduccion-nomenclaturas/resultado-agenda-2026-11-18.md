@@ -16,7 +16,7 @@ Se aplicó la convención `agenda.responsabilidad.extensión` a la estructura co
 | `src/connected/modules/agenda` | `manual-contract` → `contrato-manual`, `manual-operation` → `operacion-manual`, `schedule-change` → `cambio-horario`, `versioned-mutation` → `mutacion-versionada` |
 | `src/connected/screens/agenda` | `view` → `vista`, `live` → `actualizacion-viva`, `manual-view` → `vista-manual`, `presentation` → `presentacion`, `quick-state` → `estado-rapido`, `schedule-editor` → `editor-horario`, `state-editor` → `editor-estado`, `style` → `estilos` |
 | `src/demo` | `agenda-attention.js` → `agenda.atencion.js`, `agenda-quick-state.js` → `agenda.estado-rapido.js` |
-| `tests` y `tests/m4-browser` | Pruebas de Agenda con prefijo `agenda.` y respuestas simuladas compartidas en `agenda.respuestas-simuladas.js` |
+| `tests` y `tests/m4-navegador` | Pruebas de Agenda con prefijo `agenda.` y respuestas simuladas compartidas en `agenda.respuestas-simuladas.js` |
 
 ## Contratos y compatibilidad
 
@@ -30,7 +30,7 @@ Se reprodujeron fallos en cuatro archivos de pruebas en una copia del commit pre
 
 - `npm test`: 295 pruebas aprobadas.
 - `npm run build`: compilación correcta con 190 módulos transformados.
-- Playwright M4: 122 pruebas aprobadas en Edge. Cubre Día, Semana y Mes, roles, filtros, actualización en vivo, estados, alta manual, cambio de horario y diálogos. Se ejecutó la configuración de `tests/m4-playwright.config.js` con un puerto local alternativo porque el habitual estaba ocupado.
+- Playwright M4: 122 pruebas aprobadas en Edge. Cubre Día, Semana y Mes, roles, filtros, actualización en vivo, estados, alta manual, cambio de horario y diálogos. Se ejecutó la configuración de `tests/m4-navegador.config.js` con un puerto local alternativo porque el habitual estaba ocupado.
 - Revisión visual de las capturas de Agenda a 1366 y 390 px en claro y oscuro, en conectado y demo, incluida la confirmación de cancelación en móvil.
 - `git diff --check`: correcto. La búsqueda de las rutas de importación, atributos conectados y eventos anteriores en `src/` y `tests/` no encontró referencias residuales.
 - La suite M4 usa respuestas HTTP simuladas para el modo conectado y datos ficticios para la demo. El backend y su base de datos quedan fuera de la ejecución.

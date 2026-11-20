@@ -37,7 +37,11 @@ El panel conectado requiere la API del backend y una cuenta activa. La entrada p
 
 En el panel, administración dispone de **Mi cuenta → Tu portal de reservas → Abrir portal / Copiar enlace**. Requiere el backend actualizado con `identificadorPublico` en login/perfil; al recargar se obtiene el dato con la sesión vigente. Si falta un identificador válido, se informa y se deshabilitan las acciones. [Contrato, pruebas y evidencia del acceso](docs/fase-4/resultados-tareas/resultado-acceso-portal-perfil.md).
 
-T115 añade avisos accesibles en una región estable, restauración de foco visible y ajustes móviles. T116 amplía las pruebas de invalidación, respuestas fuera de orden, contacto en memoria e incertidumbre. Detalle y evidencia: [T115–T116](docs/fase-4/resultados-tareas/resultado-t115-t116.md). T117–T124 agregan pruebas Playwright del portal y API reales contra una base MariaDB temporal; ejecuta `npm run test:browser` con el backend, MariaDB y Microsoft Edge disponibles. El usuario de base de datos configurado en `../backend/.env` necesita poder crear y eliminar bases temporales. [Flujo y resultados del runner](docs/fase-4/resultados-tareas/resultado-t117-t124.md).
+T115 añade avisos accesibles en una región estable, restauración de foco visible y ajustes móviles. T116 amplía las pruebas de invalidación, respuestas fuera de orden, contacto en memoria e incertidumbre. Detalle y evidencia en [T115–T116](docs/fase-4/resultados-tareas/resultado-t115-t116.md). Las pruebas Playwright T117–T124 usan el portal, la API real y una base efímera de MariaDB. El usuario configurado para pruebas en `../backend/.env.test.local` necesita permiso para crear y eliminar esa base. [Flujo y resultados de la integración](docs/fase-4/resultados-tareas/resultado-t117-t124.md)
+
+- `npm test` ejecuta las pruebas unitarias.
+- `npm run test:browser -- --config tests/m4-navegador.config.js` ejecuta Playwright en Microsoft Edge con API simulada.
+- `npm run test:browser` ejecuta la integración real con MariaDB y Microsoft Edge. En PowerShell, establece `$env:PORTAL_TEST_BACKEND_READ_ONLY='1'` para usar el backend ya compilado y limitar las escrituras a la base efímera de la corrida.
 
 El cliente público llama exclusivamente a `/publico/negocios/:slug/...` bajo el mismo origen del frontend, con cookie HttpOnly y protección CSRF. No usa el JWT del panel ni llama directamente a `VITE_API_URL`. En desarrollo, `vite.config.js` dirige `/publico` hacia `VITE_API_URL` (por defecto `http://localhost:3000`) sin cambiar el encabezado Origin ni la ruta de la cookie.
 

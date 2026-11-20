@@ -36,4 +36,4 @@ Se sincronizaron las claves del estado volátil con los filtros de Agenda, el de
 - Los 33 casos de navegador con MariaDB pasaron entre la corrida completa y la repetición de FALA-T050. En la corrida completa pasaron 32 casos. FALA-T050 agotó el tiempo buscando los nombres antiguos de los campos de horario. Se actualizaron sus selectores a `entrada-` y `salida-` y la repetición verificó el guardado de ambas franjas en la API real.
 - La integración usó el backend ya compilado con `PORTAL_TEST_BACKEND_READ_ONLY=1` y una base efímera local por corrida. Se comprobó el aislamiento del portal conectado y la eliminación de las bases creadas para estas pruebas.
 
-Para repetir la suite de navegador con API simulada, ejecutar `npm run test:browser -- --config tests/m4-playwright.config.js`.
+Para repetir la suite de navegador con API simulada, ejecutar `npm run test:browser -- --config tests/m4-navegador.config.js`.

@@ -82,7 +82,7 @@ test('cierre o cambio de cuenta en otra pestaña invalida la UI sin borrar su nu
 test('una respuesta de perfil tardía no restaura la cuenta retirada desde otra pestaña', async () => conEntornoSesion(async ({ importarSesion }) => {
   const sesion = await importarSesion(); await sesion.iniciarSesion('qa@example.test', 'test-password');
   let resolver;
-  globalThis.fetch = () => new Promise((r) => { resolver = r; });
+  globalThis.fetch = () => new Promise((respuesta) => { resolver = respuesta; });
   const pendiente = sesion.restaurarSesion();
   localStorage.removeItem('cita-session');
   window.dispatchEvent(Object.assign(new Event('storage'), { key: 'cita-session', newValue: null, storageArea: localStorage }));
@@ -93,7 +93,7 @@ test('una respuesta de perfil tardía no restaura la cuenta retirada desde otra 
 test('un 401 de una petición antigua no borra una nueva sesión ya iniciada', async () => conEntornoSesion(async ({ importarSesion }) => {
   const sesion = await importarSesion(); await sesion.iniciarSesion('qa@example.test', 'test-password');
   let resolver;
-  globalThis.fetch = () => new Promise((r) => { resolver = r; });
+  globalThis.fetch = () => new Promise((respuesta) => { resolver = respuesta; });
   const pendiente = sesion.api('/citas');
   globalThis.fetch = async () => Response.json({ accessToken: 'new-test-access', usuario: { id: 2, rol: 'profesional', negocioId: 2 } });
   await sesion.iniciarSesion('other@example.test', 'test-password');

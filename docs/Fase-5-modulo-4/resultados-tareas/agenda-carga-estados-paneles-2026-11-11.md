@@ -27,11 +27,11 @@ Se aplicó `redesign-existing-projects` para una auditoría y evolución acotada
 | `src/connected/screens/agenda/view.js` | Sustituye el párrafo de carga por skeleton, mueve la leyenda, distingue métricas fallidas y abre detalle en panel. Pasa el alcance de sesión al borrador de estado. |
 | `src/connected/screens/agenda/manual-view.js` | Abre el alta en panel y conserva datos sin enviar al cerrar. Restaura contacto, notas y ficha elegida, pero exige volver a consultar disponibilidad. Un marcador durable pendiente tiene prioridad sobre el borrador en memoria. |
 | `src/connected/screens/agenda/state-editor.js` | Conserva estado/motivo sin guardar al cerrar; un borrador con versión distinta o conflicto pendiente exige actualizar detalle. El guardado y la actualización explícita limpian el borrador correspondiente. |
-| `tests/agenda-polish.test.js` (nuevo) | Cuatro tests Node para métricas/carga/error, leyenda y estructura de skeleton, escape de referencias y ausencia de superposición geométrica. |
-| `tests/m4-browser/agenda-fixture.js` (nuevo) | Extrae la fixture HTTP anterior para reutilizarla en la suite visual nueva, sin cambiar el backend simulado ni registrar nuevos tests por importación. |
-| `tests/m4-browser/agenda.spec.js` | Usa la fixture extraída y comprueba que los errores terminan el estado de carga de métricas. Conserva sus recorridos y comparación demo/conectado. |
-| `tests/m4-browser/polish.spec.js` (nuevo) | Seis casos de navegador: cuatro tamaños/temas con consulta retenida, citas densas y panel; borradores al cerrar; demo y preferencia de movimiento reducido. |
-| `tests/m4-agenda-presentation.test.js` | Actualiza la posición visual y skeleton esperados; cuenta botones mensuales sin confundirlos con el nuevo texto interior. Conserva las pruebas de periodo completo y citas nocturnas. |
+| `tests/agenda.refinamientos.test.js` (nuevo) | Cuatro tests Node para métricas/carga/error, leyenda y estructura de skeleton, escape de referencias y ausencia de superposición geométrica. |
+| `tests/m4-navegador/agenda.respuestas-simuladas.js` (nuevo) | Extrae la fixture HTTP anterior para reutilizarla en la suite visual nueva, sin cambiar el backend simulado ni registrar nuevos tests por importación. |
+| `tests/m4-navegador/agenda.consulta-conectada.spec.js` | Usa la fixture extraída y comprueba que los errores terminan el estado de carga de métricas. Conserva sus recorridos y comparación demo/conectado. |
+| `tests/m4-navegador/agenda.refinamientos.spec.js` (nuevo) | Seis casos de navegador: cuatro tamaños/temas con consulta retenida, citas densas y panel; borradores al cerrar; demo y preferencia de movimiento reducido. |
+| `tests/agenda.presentacion-conectada.test.js` | Actualiza la posición visual y skeleton esperados; cuenta botones mensuales sin confundirlos con el nuevo texto interior. Conserva las pruebas de periodo completo y citas nocturnas. |
 | `README.md`, `docs/Fase-5-modulo-4/tareas.md` e informes enlazados | Enlazan el estado visual vigente sin alterar el cierre funcional de T088–T096. |
 
 ## Flujo de carga y calendario
@@ -67,10 +67,10 @@ Se prueban 1366 y 390 px, claro/oscuro, demo/conectado, Escape/retorno de foco, 
 | Comando | Resultado |
 | --- | --- |
 | `npm test` | **242/242 aprobados**, sin fallos ni omitidos; 1,096 s. |
-| `npx playwright test --config tests/m4-playwright.config.js` | **26/26 aprobados**, sin fallos; 1,5 min. Incluye toda la regresión anterior y seis casos nuevos de presentación/paneles. |
+| `npx playwright test --config tests/m4-navegador.config.js` | **26/26 aprobados**, sin fallos; 1,5 min. Incluye toda la regresión anterior y seis casos nuevos de presentación/paneles. |
 | `npm run build` | Aprobado; 163 módulos, 1,01 s. |
 | `git -c core.safecrlf=false diff --check` | Sin errores de espacios; archivos nuevos y enlaces locales comprobados adicionalmente. |
 
 Capturas regenerables en `test-results/m4/skeleton-*.png`, `dense-*.png`, `panel-*.png`, además de la regresión anterior. Son salida local ignorada por Git. No se modifica el backend, Nginx, rutas HTTP, permisos, contratos o datos reales; no se crea commit.
 
-Comprobación final adicional tras reforzar el fondo opaco de los paneles de demo: `npx playwright test --config tests/m4-playwright.config.js --grep 'demo conserva las mismas'` → **1/1 aprobado**, 4,1 s, incluido movimiento reducido. Revisión de ocho archivos nuevos/documentales y enlaces locales: **0 problemas**.
+Comprobación final adicional tras reforzar el fondo opaco de los paneles de demo: `npx playwright test --config tests/m4-navegador.config.js --grep 'demo conserva las mismas'` → **1/1 aprobado**, 4,1 s, incluido movimiento reducido. Revisión de ocho archivos nuevos/documentales y enlaces locales: **0 problemas**.

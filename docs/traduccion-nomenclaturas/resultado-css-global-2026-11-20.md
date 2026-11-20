@@ -24,7 +24,7 @@ La traducción conserva colores, medidas, orden de reglas, puntos de corte y ani
 - Pasaron los seis recorridos independientes de Edge con API simulada. Se revisaron muestras de escritorio y móvil en claro y oscuro de las pantallas conectadas, la demo y el portal público.
 - Con el CSS traducido se ejecutaron los 33 casos de navegador con MariaDB. El resultado de la corrida y la repetición del caso de horario se registran en el [resultado del núcleo compartido](resultado-nucleo-compartido-2026-11-20.md).
 
-Para repetir la suite con API simulada, ejecutar `npm run test:browser -- --config tests/m4-playwright.config.js`.
+Para repetir la suite con API simulada, ejecutar `npm run test:browser -- --config tests/m4-navegador.config.js`.
 
 ## Correspondencia de nombres
 

@@ -26,9 +26,9 @@ Los cambios visuales son acotados: textos largos pueden encogerse dentro de las 
 | `src/connected/public/booking-view.js` | Modificado. Quita regiones vivas transitorias duplicadas, identifica el botón Revisar datos y utiliza el helper de foco para errores de revisión/envío. El reloj sigue actualizándose sin recrear campos ni anunciar cada tick. |
 | `src/connected/public/style.css` | Modificado. Permite texto flexible, mantiene foco visible, añade margen de desplazamiento, escritura de 16 px, acciones adaptables, resumen móvil de una columna y espacio de zona segura. |
 | `src/demo/screens/reservas/style.css` | Modificado. Refleja el foco visible y escritura móvil de 16 px sin conectar la demo al backend ni modificar su motor. |
-| `tests/portal-publico-accesibilidad.test.js` | Nuevo. Cuatro pruebas de anuncios, deduplicación/texto seguro, etiquetas/ayudas/errores y orden de restauración del foco/cursor/desplazamiento. |
-| `tests/portal-publico-seleccion.test.js` | Modificado. Dos regresiones parametrizadas: éxito/error tardíos tras cambiar fecha y limpieza de dependencias al cambiar servicio/sucursal/profesional. También comprueba que modificar un snapshot no altera el controlador. |
-| `tests/portal-publico-envio.test.js` | Modificado. Dos regresiones: incertidumbre bloquea todas las acciones de nueva reserva hasta ausencia terminal, y el contacto sobrevive al vencimiento/navegación interna sin persistirse, limpiándose al salir. |
+| `tests/portal-publico.accesibilidad.test.js` | Nuevo. Cuatro pruebas de anuncios, deduplicación/texto seguro, etiquetas/ayudas/errores y orden de restauración del foco/cursor/desplazamiento. |
+| `tests/portal-publico.seleccion.test.js` | Modificado. Dos regresiones parametrizadas: éxito/error tardíos tras cambiar fecha y limpieza de dependencias al cambiar servicio/sucursal/profesional. También comprueba que modificar un snapshot no altera el controlador. |
+| `tests/portal-publico.envio.test.js` | Modificado. Dos regresiones: incertidumbre bloquea todas las acciones de nueva reserva hasta ausencia terminal, y el contacto sobrevive al vencimiento/navegación interna sin persistirse, limpiándose al salir. |
 | `README.md` | Modificado. Enlaza alcance y evidencia T115–T116, distinguiendo el runner pendiente T117. |
 | `resultado-t110-t114.md` | Modificado. Añade referencia al lote posterior sin reescribir la evidencia histórica ni sus límites. |
 | `evidencias/t115-resultado-movil.png` | Nuevo. Captura del resumen pendiente a 390 × 844, tema oscuro, con API simulada visible y datos ficticios. |
@@ -69,7 +69,7 @@ La suite relacionada incluye también los casos previos de catálogos desordenad
 ## Resultado final de comprobaciones
 
 ```text
-node --test tests/portal-publico-accesibilidad.test.js tests/portal-publico-envio.test.js tests/portal-publico-apartado.test.js tests/portal-publico-base.test.js tests/portal-publico-seleccion.test.js tests/backend.test.js tests/availability.test.js
+node --test tests/portal-publico.accesibilidad.test.js tests/portal-publico.envio.test.js tests/portal-publico.apartado.test.js tests/portal-publico.base.test.js tests/portal-publico.seleccion.test.js tests/conexion.backend.test.js tests/disponibilidad.motor-demo.test.js
 
 tests 99
 pass 99
@@ -85,7 +85,7 @@ todo 0
 
 ## Revisión real de navegador
 
-Se utilizó `node tests/fixtures/portal-selection-server.mjs` y el portal `/reservas/qa-portal`, cuya identidad visible dice API simulada. La fixture intercepta `/publico` antes del proxy y mantiene datos ficticios en memoria. No se contactó ni modificó el backend.
+Se utilizó `node tests/datos-prueba/portal.servidor-simulado.mjs` y el portal `/reservas/qa-portal`, cuya identidad visible dice API simulada. La fixture intercepta `/publico` antes del proxy y mantiene datos ficticios en memoria. No se contactó ni modificó el backend.
 
 - Selector completo a **320 × 740**, incluido vacío del 21/10 y error del 22/10; fecha mantiene foco. Servicio seleccionado con Tab/Espacio y avance con Tab/Enter; foco en el título del siguiente paso. Radios/labels presentes en el árbol accesible.
 - Formulario: revisión inválida lleva al nombre; revisión válida mantiene su botón. Se inspeccionaron formulario y acciones en claro/oscuro, móvil y escritorio. El arreglo de desplazamiento se verificó después de implementarlo, con margen del contorno completo.

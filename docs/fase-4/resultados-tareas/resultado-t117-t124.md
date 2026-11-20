@@ -12,9 +12,9 @@ El recorrido de cada caso es **página pública → API real de NestJS → Maria
 | --- | --- |
 | `package.json` y `package-lock.json` | Incorporan Playwright como dependencia de desarrollo y el comando `npm run test:browser`. No se añade una dependencia al producto compilado. |
 | `playwright.config.js` | Configura Chromium/Edge, un trabajador, trazas de fallos y la preparación global. |
-| `tests/browser/global-setup.js` | Compila el backend, crea/migra/siembra la base temporal, inicia los servidores y limpia procesos y base al finalizar, incluso ante un error de preparación. |
-| `tests/browser/support.js` | Proporciona la URL pública local y lecturas SQL limitadas a la base temporal con nombre validado. |
-| `tests/browser/portal.spec.js` | Recorre en navegador T117–T124 y confirma citas, apartados y aislamiento con consultas a la base temporal. Los comentarios identifican la intención de los bloques menos evidentes. |
+| `tests/navegador/integracion.preparacion.js` | Compila el backend, crea/migra/siembra la base temporal, inicia los servidores y limpia procesos y base al finalizar, incluso ante un error de preparación. |
+| `tests/navegador/integracion.utilidades.js` | Proporciona la URL pública local y lecturas SQL limitadas a la base temporal con nombre validado. |
+| `tests/navegador/portal.reservas.spec.js` | Recorre en navegador T117–T124 y confirma citas, apartados y aislamiento con consultas a la base temporal. Los comentarios identifican la intención de los bloques menos evidentes. |
 | `.gitignore` | Excluye `test-results/`, que contiene trazas y capturas automáticas de fallos. |
 | `docs/fase-4/resultados-tareas/resultado-t117-t124.md` | Registra el flujo, archivos, pruebas, resultados y límites de este lote. |
 | `README.md` | Explica el comando de navegador y sus requisitos locales. |
@@ -56,7 +56,7 @@ El proceso de T124 se ejecutó por separado porque espera los cinco minutos comp
 
 ### Reejecución del 21 de octubre de 2026
 
-Se revisó el lote ya implementado, sin modificar el código del portal ni las pruebas. Las marcas **M3-T117–M3-T124** ya constan como hechas en el documento fuente de tareas. El archivo `tests/browser/global-setup.js` compila el backend y necesita conectar con MariaDB antes de crear la base temporal; por eso la prueba de navegador no puede comenzar si ese servicio no está disponible.
+Se revisó el lote ya implementado, sin modificar el código del portal ni las pruebas. Las marcas **M3-T117–M3-T124** ya constan como hechas en el documento fuente de tareas. El archivo `tests/navegador/integracion.preparacion.js` compila el backend y necesita conectar con MariaDB antes de crear la base temporal; por eso la prueba de navegador no puede comenzar si ese servicio no está disponible.
 
 | Comprobación | Resultado de esta reejecución |
 | --- | --- |

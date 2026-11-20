@@ -33,10 +33,10 @@ El flujo conserva el stack, la marca, los temas y los componentes existentes. Se
 | `src/connected/public/entry.js` | Modificado. Conecta el lock nativo, actualiza identidad/título con el negocio histórico del resultado y conserva el marcador con mensaje de recuperación pendiente si falla la inicialización. |
 | `src/connected/public/style.css` | Modificado. Añade presentación del folio, lista de resumen y estado pendiente legible en claro/oscuro, manteniendo superficies y colores semánticos. |
 | `src/demo/screens/reservas/booking.js` | Modificado. Cambia título/descripción final de confirmada a pendiente; no altera su motor, datos o controles de demostración. |
-| `tests/portal-publico-envio.test.js` | Nuevo. Veinte pruebas Node de marcador, protocolo, repetición, incertidumbre, recarga, locks, salida, respuestas atrasadas y resumen seguro. Usa exclusivamente dobles. |
-| `tests/fixtures/memory-storage.js` | Nuevo. Implementa almacenamiento efímero para las pruebas; nunca se importa desde el producto. |
-| `tests/portal-publico-apartado.test.js` | Modificado. Inyecta almacenamiento de prueba y actualiza la comprobación del botón Reservar: ahora depende de vigencia en lugar de estar siempre deshabilitado. Conserva las 24 regresiones del lote anterior. |
-| `tests/fixtures/portal-selection-server.mjs` | Modificado. Simula preparación, escritor idempotente, resolutor y resultados guardados en memoria. Permite perder respuestas antes de preparación o después del registro, y simular error de resolución. Todo /publico se intercepta antes del proxy, sin backend real. |
+| `tests/portal-publico.envio.test.js` | Nuevo. Veinte pruebas Node de marcador, protocolo, repetición, incertidumbre, recarga, locks, salida, respuestas atrasadas y resumen seguro. Usa exclusivamente dobles. |
+| `tests/datos-prueba/memoria.almacenamiento.js` | Nuevo. Implementa almacenamiento efímero para las pruebas; nunca se importa desde el producto. |
+| `tests/portal-publico.apartado.test.js` | Modificado. Inyecta almacenamiento de prueba y actualiza la comprobación del botón Reservar: ahora depende de vigencia en lugar de estar siempre deshabilitado. Conserva las 24 regresiones del lote anterior. |
+| `tests/datos-prueba/portal.servidor-simulado.mjs` | Modificado. Simula preparación, escritor idempotente, resolutor y resultados guardados en memoria. Permite perder respuestas antes de preparación o después del registro, y simular error de resolución. Todo /publico se intercepta antes del proxy, sin backend real. |
 | `README.md` | Modificado. Actualiza el alcance T098–T114, marcador, envío/recarga y límite de CSRF; distingue expresamente las reglas de la demo del producto conectado. |
 | `docs/fase-4/resultados-tareas/resultado-t104-t109.md` | Modificado. Enlaza este resultado como estado posterior sin reescribir la evidencia histórica del lote anterior. |
 | Este documento | Nuevo. Registra tareas, flujo, archivos, pruebas y límites de integración. |
@@ -88,7 +88,7 @@ Un caso de endurecimiento produjo un fallo funcional real: después de detectar 
 Ejecución final nueva/directamente relacionada:
 
 ```text
-node --test tests/portal-publico-envio.test.js tests/portal-publico-apartado.test.js tests/portal-publico-base.test.js tests/portal-publico-seleccion.test.js tests/backend.test.js tests/availability.test.js
+node --test tests/portal-publico.envio.test.js tests/portal-publico.apartado.test.js tests/portal-publico.base.test.js tests/portal-publico.seleccion.test.js tests/conexion.backend.test.js tests/disponibilidad.motor-demo.test.js
 tests 91
 pass 91
 fail 0
@@ -103,7 +103,7 @@ Desglose: **20 nuevas**, 24 de apartado/contacto, 8 de base pública, 15 de sele
 
 ## Revisión de navegador con API ficticia
 
-Ejecutar `node tests/fixtures/portal-selection-server.mjs` y abrir `http://127.0.0.1:5193/reservas/qa-portal`. La identidad visible indica **API simulada**. La fixture conserva apartados/intentos/resultados solo en memoria; valida contacto ficticio y conserva su hash para comparar reintentos, sin guardar cuerpos, teléfonos o notas en logs.
+Ejecutar `node tests/datos-prueba/portal.servidor-simulado.mjs` y abrir `http://127.0.0.1:5193/reservas/qa-portal`. La identidad visible indica **API simulada**. La fixture conserva apartados/intentos/resultados solo en memoria; valida contacto ficticio y conserva su hash para comparar reintentos, sin guardar cuerpos, teléfonos o notas en logs.
 
 Controles exclusivos de revisión, inexistentes en el producto:
 

@@ -79,7 +79,7 @@ Este es un documento nuevo para la entrega del administrador. La documentación 
 - El patrón compartido también se aplica a los catálogos y Bloqueos de la demo que existen; Recepcionistas sigue siendo una pantalla conectada.
 - Todo sucede sobre las colecciones ya cargadas. No se añaden parámetros, rutas ni contratos de paginación al backend. La descarga inicial completa y su costo permanecen; no se plantea migrar a paginación de servidor.
 
-Archivos añadidos: `src/shared/screens/local-pagination.js`, `catalog-pagination.js`, `src/shared/screens/disponibilidad/block-directory.js` y `block-filters.js`. Se adaptan las cuatro vistas de catálogo, Disponibilidad y sus estilos. Pruebas: `tests/local-pagination.test.js` y `tests/browser-local-pagination.mjs`.
+Archivos añadidos: `src/shared/screens/local-pagination.js`, `catalog-pagination.js`, `src/shared/screens/disponibilidad/block-directory.js` y `block-filters.js`. Se adaptan las cuatro vistas de catálogo, Disponibilidad y sus estilos. Pruebas: `tests/paginacion.local.test.js` y `tests/paginacion.local-navegador.mjs`.
 
 ## Archivos principales
 
@@ -89,7 +89,7 @@ Archivos añadidos: `src/shared/screens/local-pagination.js`, `catalog-paginatio
 - `src/shared/screens/{profesionales,servicios,sucursales}/view.js` y sus adaptadores conectados; `src/connected/screens/recepcionistas/view.js`: filtros, encabezados y menú de recepción.
 - `src/connected/screens/recursos/retired-view.js`, `retired-view.css` y `src/shared/actions.js`: panel, búsqueda, navegación interna y acciones de inhabilitados.
 - `src/shared/screens/disponibilidad/branch-assignments.js`, `offering.js`, `view.js`, `operational.js` y `style.css`; vistas conectada y demo de Disponibilidad: asignaciones, oferta y explicaciones.
-- `tests/admin-review.test.js`, `tests/browser-admin-review.mjs`: pruebas nuevas. `tests/browser/retired-resources.spec.js`: selectores y pasos adaptados al nuevo diálogo; `tests/browser/user-quotas.spec.js`: descarte explícito del alta rechazada al cancelar.
+- `tests/administracion.revision.test.js`, `tests/administracion.revision-navegador.mjs`: pruebas nuevas. `tests/navegador/recursos.inhabilitados.spec.js`: selectores y pasos adaptados al nuevo diálogo; `tests/navegador/usuarios.cupo.spec.js`: descarte explícito del alta rechazada al cancelar.
 
 ## Contratos consultados
 
@@ -100,8 +100,8 @@ Se leyeron el servicio de profesionales (asignación de sucursales y oferta), la
 ```sh
 npm test
 npm run build
-node tests/browser-admin-review.mjs
-node tests/browser-local-pagination.mjs
+node tests/administracion.revision-navegador.mjs
+node tests/paginacion.local-navegador.mjs
 git diff --check
 ```
 

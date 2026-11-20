@@ -8,22 +8,22 @@ const origen = process.env.BUSINESS_UI_URL || 'http://localhost:5173';
 const navegador = await chromium.launch({ channel: 'msedge', headless: true });
 const negocio = { id: 1, nombre: 'Negocio de prueba', identificadorPublico: 'negocio-prueba', creadoEn: '2026-10-01T12:00:00Z', administrador: { id: 2, email: 'admin@example.test', activadoEn: null }, licencia: { id: 1 } };
 const vigencia = { duracionTotalMs: 365 * 86400000, estado: 'vigente', condicionAcceso: true, venceEn: '2027-11-05T12:00:00Z', tiempoRestante: { dias: 365, horas: 0, minutos: 0 } };
-let envios = Array.from({ length: 23 }, (_, i) => ({ id: String(i + 1), tipo: i % 2 ? 'recuperacion' : 'activacion_admin', estado: ['enviado', 'fallido', 'pendiente', 'tomado', 'descartado'][i % 5], intentos: i % 3, confirmadoEn: i % 5 === 0 ? '2026-11-05T12:00:00Z' : null, proximoIntentoEn: '2026-11-05T13:00:00Z', ultimoError: i % 5 === 1 ? 'No se pudo entregar el correo.' : null }));
+let envios = Array.from({ length: 23 }, (_, indice) => ({ id: String(indice + 1), tipo: indice % 2 ? 'recuperacion' : 'activacion_admin', estado: ['enviado', 'fallido', 'pendiente', 'tomado', 'descartado'][indice % 5], intentos: indice % 3, confirmadoEn: indice % 5 === 0 ? '2026-11-05T12:00:00Z' : null, proximoIntentoEn: '2026-11-05T13:00:00Z', ultimoError: indice % 5 === 1 ? 'No se pudo entregar el correo.' : null }));
 const errores = [];
 await mkdir('test-results/business-detail', { recursive: true });
 try {
   const contexto = await navegador.newContext({ reducedMotion: 'reduce' });
   await contexto.addInitScript(() => sessionStorage.setItem('cita-session', 'qa-ficticio'));
-  await contexto.route((url) => url.pathname.startsWith('/auth/') || url.pathname.startsWith('/negocios') || url.pathname.startsWith('/licencias'), async (route) => {
-    const path = new URL(route.request().url()).pathname;
-    assert.equal(route.request().method(), 'GET', `Petición inesperada: ${path}`);
-    const data = path === '/auth/profile' ? { user: { sub: 1, rol: 'superadmin', nombre: 'Superadmin QA' } }
-      : path === '/negocios' ? [negocio] : path === '/negocios/1' ? negocio
-        : path === '/negocios/1/envios' ? envios : path === '/licencias/1/vigencia' ? vigencia
-          : path === '/negocios/1/cupo-sucursales' ? { sucursalesActivas: 3, limiteSucursalesActivas: 5, disponibles: 2 }
-            : path === '/negocios/1/cupo-usuarios' ? { profesionales: { activos: 4, limite: 5, disponibles: 1 }, recepcionistas: { activos: 3, limite: 3, disponibles: 0 } } : null;
-    assert.notEqual(data, null, `Ruta inesperada: ${path}`);
-    await route.fulfill({ json: data });
+  await contexto.route((url) => url.pathname.startsWith('/auth/') || url.pathname.startsWith('/negocios') || url.pathname.startsWith('/licencias'), async (rutaInterceptada) => {
+    const ruta = new URL(rutaInterceptada.request().url()).pathname;
+    assert.equal(rutaInterceptada.request().method(), 'GET', `Petición inesperada: ${ruta}`);
+    const datos = ruta === '/auth/profile' ? { user: { sub: 1, rol: 'superadmin', nombre: 'Superadmin QA' } }
+      : ruta === '/negocios' ? [negocio] : ruta === '/negocios/1' ? negocio
+        : ruta === '/negocios/1/envios' ? envios : ruta === '/licencias/1/vigencia' ? vigencia
+          : ruta === '/negocios/1/cupo-sucursales' ? { sucursalesActivas: 3, limiteSucursalesActivas: 5, disponibles: 2 }
+            : ruta === '/negocios/1/cupo-usuarios' ? { profesionales: { activos: 4, limite: 5, disponibles: 1 }, recepcionistas: { activos: 3, limite: 3, disponibles: 0 } } : null;
+    assert.notEqual(datos, null, `Ruta inesperada: ${ruta}`);
+    await rutaInterceptada.fulfill({ json: datos });
   });
   const pagina = await contexto.newPage();
   pagina.on('pageerror', (error) => { errores.push(error.message); console.error(error.message); });
@@ -36,8 +36,8 @@ try {
   assert.equal(await pagina.locator('meter:visible').count(), 3);
   for (const ancho of [1920, 1532, 1366, 390, 320]) {
     await pagina.setViewportSize({ width: ancho, height: 900 });
-    for (const theme of ['light', 'dark']) {
-      await pagina.evaluate((theme) => document.documentElement.dataset.theme = theme, theme);
+    for (const tema of ['light', 'dark']) {
+      await pagina.evaluate((tema) => document.documentElement.dataset.theme = tema, tema);
       for (const pestana of ['general', 'limites', 'correo']) {
         await pagina.locator(`[data-negocio-pestana=${pestana}]`).click();
         assert.equal(await pagina.locator('[role=tabpanel]:visible').count(), 1);
@@ -49,21 +49,21 @@ try {
           assert.equal(await pagina.locator('progress:visible').getAttribute('value'), '100');
         }
         if (pestana === 'general' || pestana === 'limites') {
-          const alineados = await pagina.locator(pestana === 'general' ? '.negocio-tiempo-licencia progress' : '.negocio-limites meter').evaluateAll((barras) => barras.every((bar) => {
-            const section = bar.closest('section').getBoundingClientRect();
-            const rect = bar.getBoundingClientRect();
-            return Math.abs(rect.left - section.left) < 2 && Math.abs(rect.right - section.right) < 2;
+          const alineados = await pagina.locator(pestana === 'general' ? '.negocio-tiempo-licencia progress' : '.negocio-limites meter').evaluateAll((barras) => barras.every((barra) => {
+            const seccion = barra.closest('section').getBoundingClientRect();
+            const rectangulo = barra.getBoundingClientRect();
+            return Math.abs(rectangulo.left - seccion.left) < 2 && Math.abs(rectangulo.right - seccion.right) < 2;
           }));
-          assert.ok(alineados, `${ancho}/${theme}/${pestana}: ancho de barra`);
+          assert.ok(alineados, `${ancho}/${tema}/${pestana}: ancho de barra`);
         }
-        assert.ok(await pagina.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), `${ancho}/${theme}/${pestana}: desbordamiento`);
-        await pagina.evaluate(async () => { await Promise.all(document.getAnimations().map((animation) => animation.finished.catch(() => {}))); await new Promise(requestAnimationFrame); });
-        await pagina.screenshot({ animations: 'disabled', path: `test-results/business-detail/${ancho}-${theme}-${pestana}.png`, fullPage: true });
+        assert.ok(await pagina.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), `${ancho}/${tema}/${pestana}: desbordamiento`);
+        await pagina.evaluate(async () => { await Promise.all(document.getAnimations().map((animacion) => animacion.finished.catch(() => {}))); await new Promise(requestAnimationFrame); });
+        await pagina.screenshot({ animations: 'disabled', path: `test-results/business-detail/${ancho}-${tema}-${pestana}.png`, fullPage: true });
         if (pestana === 'general') {
-          const rojoNormal = theme === 'light' ? 'rgb(203, 70, 70)' : 'rgb(91, 21, 27)';
-          const rojoAlPasar = theme === 'light' ? 'rgb(169, 39, 39)' : 'rgb(148, 28, 38)';
+          const rojoNormal = tema === 'light' ? 'rgb(203, 70, 70)' : 'rgb(91, 21, 27)';
+          const rojoAlPasar = tema === 'light' ? 'rgb(169, 39, 39)' : 'rgb(148, 28, 38)';
           const suspender = pagina.locator('[data-accion-negocio=suspender]');
-          const color = (destino) => destino.evaluate((el) => ({ bg: getComputedStyle(el).backgroundColor, text: getComputedStyle(el).color }));
+          const color = (destino) => destino.evaluate((elemento) => ({ bg: getComputedStyle(elemento).backgroundColor, text: getComputedStyle(elemento).color }));
           await pagina.mouse.move(0, 0);
           assert.deepEqual(await color(suspender), { bg: rojoNormal, text: 'rgb(255, 255, 255)' });
           await suspender.hover();
@@ -71,15 +71,15 @@ try {
           await suspender.click();
           const formulario = pagina.locator('#licencia-formulario-suspension');
           await formulario.waitFor();
-          assert.equal(await formulario.locator('.dialogo-pie').evaluate((el) => getComputedStyle(el).backgroundColor), 'rgba(0, 0, 0, 0)');
+          assert.equal(await formulario.locator('.dialogo-pie').evaluate((elemento) => getComputedStyle(elemento).backgroundColor), 'rgba(0, 0, 0, 0)');
           const confirmar = formulario.getByRole('button', { name: 'Programar suspensión', exact: true });
           assert.deepEqual(await color(confirmar), { bg: rojoNormal, text: 'rgb(255, 255, 255)' });
           await confirmar.hover();
           assert.deepEqual(await color(confirmar), { bg: rojoAlPasar, text: 'rgb(255, 255, 255)' });
           await pagina.keyboard.press('Tab');
           await confirmar.focus();
-          assert.equal(await confirmar.evaluate((el) => getComputedStyle(el).outlineStyle), 'solid');
-          await pagina.screenshot({ animations: 'disabled', path: `test-results/business-detail/${ancho}-${theme}-suspension.png` });
+          assert.equal(await confirmar.evaluate((elemento) => getComputedStyle(elemento).outlineStyle), 'solid');
+          await pagina.screenshot({ animations: 'disabled', path: `test-results/business-detail/${ancho}-${tema}-suspension.png` });
           await formulario.getByRole('button', { name: 'Cancelar' }).click();
         }
       }
@@ -117,7 +117,7 @@ try {
   await pagina.getByRole('heading', { name: 'No hay correos con estos filtros' }).waitFor();
   await pagina.locator('[data-correo-resultados] [data-correo-limpiar]').click();
   await pagina.locator('.correo-tabla').waitFor();
-  await pagina.route('**/negocios/1/envios', (route) => route.fulfill({ status: 503, json: { message: 'Correo temporalmente no disponible' } }));
+  await pagina.route('**/negocios/1/envios', (rutaInterceptada) => rutaInterceptada.fulfill({ status: 503, json: { message: 'Correo temporalmente no disponible' } }));
   await pagina.getByRole('button', { name: 'Actualizar', exact: true }).click();
   await pagina.getByRole('alert').waitFor();
   assert.equal(await pagina.locator('.correo-tabla').count(), 0);

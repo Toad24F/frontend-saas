@@ -1,7 +1,7 @@
 # Reglas y plan de traducción de la nomenclatura del frontend
 
 Fecha de definición: 2026-11-16  
-Estado: implementación por conjuntos. Implementados los conjuntos 0 a 15.
+Estado: implementación por conjuntos. Implementados los conjuntos 0 a 16.
 
 ## Objetivo
 
@@ -254,7 +254,7 @@ La Agenda es el conjunto más grande y actualmente tiene archivos estrechamente 
 - [x] Traducir juntos la pantalla conectada `view.js`, `live.js`, `manual-view.js`, `presentation.js`, `quick-state.js`, `schedule-editor.js`, `state-editor.js` y `style.css`.
 - [x] Traducir juntos `demo/agenda-attention.js` y `demo/agenda-quick-state.js`.
 - [x] Actualizar en el mismo proceso todas las pruebas unitarias `agenda-*`, `m4-agenda*`, `m4-manual*`, `m4-live*` y `ala-agenda*`.
-- [x] Actualizar en el mismo proceso las pruebas `tests/m4-browser/agenda-*`, `state-menu`, `live-errors` y fixtures asociados.
+- [x] Actualizar en el mismo proceso las pruebas `tests/m4-navegador/agenda-*`, `state-menu`, `live-errors` y fixtures asociados.
 - [x] Verificar vistas diaria, semanal y mensual; roles; actualización en vivo; estados; filtros; diálogos; escritorio/móvil; temas; conectado/demo.
 
 Resultado: conjunto cerrado el 2026-11-18 en [Agenda](resultado-agenda-2026-11-18.md).
@@ -343,15 +343,17 @@ Resultado del 2026-11-20 en [CSS global](resultado-css-global-2026-11-20.md).
 
 ### 16. Pruebas y fixtures finales
 
-- [ ] Traducir nombres internos y descripciones en inglés de pruebas unitarias, sin alterar datos que representen contratos.
-- [ ] Traducir nombres internos y descripciones de pruebas Playwright.
-- [ ] Traducir helpers y fixtures propios después de actualizar todos sus consumidores.
-- [ ] Conservar selectores contractuales o de accesibilidad cuando cambiarlos reduzca la estabilidad de la prueba.
-- [ ] Buscar imports rotos, rutas antiguas, funciones antiguas y selectores antiguos.
-- [ ] Ejecutar `npm test`.
-- [ ] Ejecutar `npm run build`.
-- [ ] Ejecutar `npm run test:browser` o los proyectos Playwright aplicables.
-- [ ] Ejecutar `git diff --check`.
+- [x] Traducir nombres internos y descripciones en inglés de pruebas unitarias, sin alterar datos que representen contratos.
+- [x] Traducir nombres internos y descripciones de pruebas Playwright.
+- [x] Traducir helpers y fixtures propios después de actualizar todos sus consumidores.
+- [x] Conservar selectores contractuales o de accesibilidad cuando cambiarlos reduzca la estabilidad de la prueba.
+- [x] Buscar imports rotos, rutas antiguas, funciones antiguas y selectores antiguos.
+- [x] Ejecutar `npm test`.
+- [x] Ejecutar `npm run build`.
+- [x] Ejecutar `npm run test:browser` o los proyectos Playwright aplicables.
+- [x] Ejecutar `git diff --check`.
+
+Resultado del 2026-11-20 en [Pruebas y datos de prueba](resultado-pruebas-fixtures-2026-11-20.md).
 
 ### 17. Documentación y cierre
 

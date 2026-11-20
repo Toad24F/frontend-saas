@@ -4,22 +4,22 @@ import { paginarCorreo, renderResultadosCorreo, renderHistorialCorreo } from '..
 import { renderMedidorCupo } from '../src/connected/screens/negocio/cupo.medidor.js';
 import { renderEstadoLicencia } from '../src/connected/screens/negocio/licencia.presentacion.js';
 
-const filas = (count) => Array.from({ length: count }, (_, indice) => ({ id: String(indice + 1), tipo: indice % 2 ? 'recuperacion' : 'activacion_admin', estado: indice % 3 ? 'enviado' : 'fallido', intentos: 1, confirmadoEn: '2026-11-05T12:00:00Z', proximoIntentoEn: '2026-11-06T12:00:00Z' }));
+const filas = (cantidad) => Array.from({ length: cantidad }, (_, indice) => ({ id: String(indice + 1), tipo: indice % 2 ? 'recuperacion' : 'activacion_admin', estado: indice % 3 ? 'enviado' : 'fallido', intentos: 1, confirmadoEn: '2026-11-05T12:00:00Z', proximoIntentoEn: '2026-11-06T12:00:00Z' }));
 test('historial: paginación solo después de diez resultados y límites de página', () => {
-  for (const count of [0, 1, 10]) assert.doesNotMatch(renderResultadosCorreo(filas(count)), /aria-label="Paginación/);
+  for (const cantidad of [0, 1, 10]) assert.doesNotMatch(renderResultadosCorreo(filas(cantidad)), /aria-label="Paginación/);
   assert.match(renderResultadosCorreo(filas(11)), /aria-label="Paginación/);
-  const last = paginarCorreo(filas(21), { pagina: 99 });
-  assert.equal(last.pagina, 3); assert.deepEqual(last.filas.map((elemento) => elemento.id), ['1']);
+  const ultimo = paginarCorreo(filas(21), { pagina: 99 });
+  assert.equal(ultimo.pagina, 3); assert.deepEqual(ultimo.filas.map((elemento) => elemento.id), ['1']);
   assert.equal(paginarCorreo(filas(11), { pagina: -1 }).pagina, 1);
 });
 test('historial: filtra antes de paginar, combina filtros y conserva entrada', () => {
-  const input = filas(31), before = structuredClone(input);
-  const resultado = paginarCorreo(input, { estado: 'fallido', tipo: 'activacion_admin' });
+  const campo = filas(31), anterior = structuredClone(campo);
+  const resultado = paginarCorreo(campo, { estado: 'fallido', tipo: 'activacion_admin' });
   assert.equal(resultado.total, 6);
   assert.deepEqual(resultado.filas.map((elemento) => elemento.id), ['31', '25', '19', '13', '7', '1']);
-  assert.deepEqual(input, before);
-  assert.doesNotMatch(renderResultadosCorreo(input, { estado: 'fallido', tipo: 'activacion_admin' }), /aria-label="Paginación/);
-  assert.match(renderResultadosCorreo(input, { estado: 'descartado' }), /No hay correos con estos filtros|Limpiar filtros/);
+  assert.deepEqual(campo, anterior);
+  assert.doesNotMatch(renderResultadosCorreo(campo, { estado: 'fallido', tipo: 'activacion_admin' }), /aria-label="Paginación/);
+  assert.match(renderResultadosCorreo(campo, { estado: 'descartado' }), /No hay correos con estos filtros|Limpiar filtros/);
 });
 test('historial: orden preciso para identificadores grandes', () => {
   assert.equal(paginarCorreo([{ id: '9007199254740992' }, { id: '9007199254740993' }]).filas[0].id, '9007199254740993');

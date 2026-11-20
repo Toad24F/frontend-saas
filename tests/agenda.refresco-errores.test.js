@@ -7,145 +7,145 @@ import {
 import { errorSeguro } from '../src/connected/modules/agenda/agenda.errores.js';
 import { crearAgendaStore } from '../src/connected/modules/agenda/agenda.store.js';
 
-const deferred = () => {
-  let resolve;
-  const promise = new Promise((done) => {
-    resolve = done;
+const diferido = () => {
+  let resolverPromesa;
+  const promesa = new Promise((completar) => {
+    resolverPromesa = completar;
   });
-  return { promise, resolve };
+  return { promesa, resolver: resolverPromesa };
 };
 
 test('T100/T103: coordinador sin solapamiento, tareas independientes y baja explícita', async () => {
-  const gate = deferred(),
-    calls = [],
-    refresh = crearCoordinadorRefresco();
-  const remove = refresh.add(async () => {
-    calls.push('agenda');
-    await gate.promise;
+  const lecturaDiferida = diferido(),
+    llamadas = [],
+    refrescar = crearCoordinadorRefresco();
+  const eliminar = refrescar.add(async () => {
+    llamadas.push('agenda');
+    await lecturaDiferida.promesa;
   });
-  refresh.add(async () => {
-    calls.push('error');
+  refrescar.add(async () => {
+    llamadas.push('error');
     throw new Error('Temporal');
   });
-  const first = refresh.run();
-  const second = refresh.run();
+  const primera = refrescar.run();
+  const segunda = refrescar.run();
   await Promise.resolve();
-  assert.deepEqual(calls, ['agenda', 'error']);
-  gate.resolve();
-  await Promise.all([first, second]);
-  remove();
-  await refresh.run();
-  assert.deepEqual(calls, ['agenda', 'error', 'error']);
-  refresh.clear();
-  await refresh.run();
-  assert.equal(calls.length, 3);
+  assert.deepEqual(llamadas, ['agenda', 'error']);
+  lecturaDiferida.resolver();
+  await Promise.all([primera, segunda]);
+  eliminar();
+  await refrescar.run();
+  assert.deepEqual(llamadas, ['agenda', 'error', 'error']);
+  refrescar.clear();
+  await refrescar.run();
+  assert.equal(llamadas.length, 3);
 });
 
 test('T100/T103: comprobación de versión no adopta otra versión y descarta respuesta tras cierre', async () => {
   let version = 2,
-    active = true;
-  const events = [];
-  const check = crearComprobacionVersion({
+    activo = true;
+  const eventos = [];
+  const comprobar = crearComprobacionVersion({
     version: 2,
     read: async () => ({ version }),
-    active: () => active,
-    notify: (event) => events.push(event),
+    active: () => activo,
+    notify: (evento) => eventos.push(evento),
   });
-  await check();
-  assert.deepEqual(events, []);
+  await comprobar();
+  assert.deepEqual(eventos, []);
   version = 3;
-  await check();
-  await check();
-  assert.equal(events.length, 1);
-  assert.equal(events[0].kind, 'stale');
-  const gate = deferred();
-  const closed = crearComprobacionVersion({
+  await comprobar();
+  await comprobar();
+  assert.equal(eventos.length, 1);
+  assert.equal(eventos[0].kind, 'stale');
+  const lecturaDiferida = diferido();
+  const cerrado = crearComprobacionVersion({
     version: 2,
-    read: () => gate.promise,
-    active: () => active,
-    notify: (event) => events.push(event),
+    read: () => lecturaDiferida.promesa,
+    active: () => activo,
+    notify: (evento) => eventos.push(evento),
   });
-  const pending = closed();
-  active = false;
-  gate.resolve({ version: 9 });
-  await pending;
-  assert.equal(events.length, 1);
+  const pendiente = cerrado();
+  activo = false;
+  lecturaDiferida.resolver({ version: 9 });
+  await pendiente;
+  assert.equal(eventos.length, 1);
 });
 
 test('T100/T101: fallo o versión inválida impiden presentar el formulario como vigente', async () => {
-  for (const read of [
+  for (const lectura of [
     async () => ({}),
     async () => {
       throw Object.assign(new Error('SQL privado'), { status: 503 });
     },
   ]) {
-    const events = [];
-    const check = crearComprobacionVersion({
+    const eventos = [];
+    const comprobar = crearComprobacionVersion({
       version: 1,
-      read,
+      read: lectura,
       active: () => true,
-      notify: (event) => events.push(event),
+      notify: (evento) => eventos.push(evento),
     });
-    await check();
-    assert.equal(events[0].kind, 'unverified');
+    await comprobar();
+    assert.equal(eventos[0].kind, 'unverified');
   }
 });
 
-test('T100: refresco de la misma consulta conserva último snapshot con aviso ante fallo', async () => {
-  let fail = false;
+test('T100: refresco de la misma consulta conserva los últimos datos con aviso ante fallo', async () => {
+  let rechazarPromesa = false;
   const store = crearAgendaStore(async () => {
-    if (fail) throw Object.assign(new Error('Temporal'), { status: 503 });
+    if (rechazarPromesa) throw Object.assign(new Error('Temporal'), { status: 503 });
     return { citas: [{ id: 7 }] };
   });
   await store.load({ desde: '2030-01-01' });
-  fail = true;
-  const pending = store.load({ desde: '2030-01-01' }, { background: true });
+  rechazarPromesa = true;
+  const pendiente = store.load({ desde: '2030-01-01' }, { background: true });
   assert.equal(store.state.busy, false);
   assert.equal(store.state.refreshing, true);
   assert.equal(store.state.data.citas[0].id, 7);
-  await pending;
+  await pendiente;
   assert.equal(store.state.error, null);
   assert.equal(store.state.refreshError.status, 503);
   assert.equal(store.state.data.citas.length, 1);
-  fail = false;
+  rechazarPromesa = false;
   await store.load({ desde: '2030-01-01' }, { background: true });
   assert.equal(store.state.refreshError, null);
 });
 
 test('T103: un refresco antiguo no reemplaza filtro nuevo ni revive datos tras cerrar sesión', async () => {
-  const gate = deferred();
+  const lecturaDiferida = diferido();
   let n = 0;
   const store = crearAgendaStore(async () =>
-    ++n === 2 ? gate.promise : { citas: [{ id: n }] },
+    ++n === 2 ? lecturaDiferida.promesa : { citas: [{ id: n }] },
   );
   await store.load({ busqueda: 'A' });
-  const pending = store.load({ busqueda: 'A' }, { background: true });
+  const pendiente = store.load({ busqueda: 'A' }, { background: true });
   await store.load({ busqueda: 'B' });
-  gate.resolve({ citas: [{ id: 2 }] });
-  await pending;
+  lecturaDiferida.resolver({ citas: [{ id: 2 }] });
+  await pendiente;
   assert.equal(store.state.data.citas[0].id, 3);
-  const other = deferred(),
-    session = crearAgendaStore(() => other.promise);
-  const old = session.load({});
-  session.reset();
-  other.resolve({ citas: [7] });
-  await old;
-  assert.equal(session.state.data, null);
-  assert.equal(session.state.refreshError, null);
+  const otro = diferido(),
+    sesion = crearAgendaStore(() => otro.promesa);
+  const anterior = sesion.load({});
+  sesion.reset();
+  otro.resolver({ citas: [7] });
+  await anterior;
+  assert.equal(sesion.state.data, null);
+  assert.equal(sesion.state.refreshError, null);
 });
 
-test('T101: una denegación al refrescar retira el snapshot previamente autorizado', async () => {
-  for (const status of [400, 401, 403, 404, 409]) {
-    let fail = false;
+test('T101: una denegación al refrescar retira los datos previos autorizados', async () => {
+  for (const estadoHttp of [400, 401, 403, 404, 409]) {
+    let rechazarPromesa = false;
     const store = crearAgendaStore(async () => {
-      if (fail) throw Object.assign(new Error('Denegado'), { status });
+      if (rechazarPromesa) throw Object.assign(new Error('Denegado'), { status: estadoHttp });
       return { citas: [{ id: 7 }] };
     });
     await store.load({});
-    fail = true;
+    rechazarPromesa = true;
     await store.load({}, { background: true });
     assert.equal(store.state.data, null);
-    assert.equal(store.state.error.status, status);
+    assert.equal(store.state.error.status, estadoHttp);
   }
 });
 
@@ -154,17 +154,17 @@ test('T101/T103: vacío válido y respuesta inválida no comparten estado', asyn
   await store.load({});
   assert.deepEqual(store.state.data.citas, []);
   assert.equal(store.state.error, null);
-  const invalid = crearAgendaStore(async () => {
+  const invalido = crearAgendaStore(async () => {
     throw new Error('Respuesta inválida');
   });
-  await invalid.load({});
-  assert.equal(invalid.state.data, null);
-  assert.ok(invalid.state.error);
+  await invalido.load({});
+  assert.equal(invalido.state.data, null);
+  assert.ok(invalido.state.error);
 });
 
 test('T101: 400/401/403/404/409/500/503/red/protocolo se distinguen sin exponer trazas', () => {
-  const kinds = new Set();
-  for (const [status, kind] of [
+  const clases = new Set();
+  for (const [estadoHttp, clase] of [
     [400, 'invalid'],
     [401, 'session'],
     [403, 'forbidden'],
@@ -177,12 +177,12 @@ test('T101: 400/401/403/404/409/500/503/red/protocolo se distinguen sin exponer 
   ]) {
     const error = errorSeguro(
       Object.assign(new Error('SQL SELECT contacto secreto stack trace'), {
-        status,
+        status: estadoHttp,
       }),
     );
-    assert.equal(error.kind, kind);
+    assert.equal(error.kind, clase);
     assert.doesNotMatch(error.message, /SELECT|secreto|stack/);
-    kinds.add(error.kind);
+    clases.add(error.kind);
   }
-  assert.equal(kinds.size, 7);
+  assert.equal(clases.size, 7);
 });

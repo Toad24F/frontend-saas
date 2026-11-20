@@ -24,8 +24,8 @@ Alcance: portal conectado. Se consultó el contrato del backend sin editar sus a
 - `src/connected/public/submission.js`: identifica la resolución `no_registrado` por cupo, mantiene la referencia propia y desactiva la repetición. Su comentario explica por qué no crea un intento sucesor sin el contrato pendiente.
 - `src/connected/public/booking-view.js`: muestra «No se registró la reserva» y la causa de cupo, sin controles para repetir un intento terminal ni texto de incertidumbre ya resuelta.
 - `src/connected/public/booking.js`: aclara la necesidad de consultar disponibilidad vigente tras un rechazo ordinario comprobado. Conserva el contacto en memoria.
-- `tests/ala-portal-intentos.test.js` (nuevo): prueba la frontera HTTP de cupo, el marcador y el bloqueo del reenvío, además de ausencia terminal sin folio. Los comentarios explican cada escenario.
-- `tests/browser/portal.spec.js`: añade caso de licencia bloqueada al recargar y capturas de formulario en escritorio/móvil y claro/oscuro. Actualiza tres expectativas de encabezado del primer paso para usar el título actual de la portada; sus comentarios describen el propósito.
+- `tests/ala-portal.intentos.test.js` (nuevo): prueba la frontera HTTP de cupo, el marcador y el bloqueo del reenvío, además de ausencia terminal sin folio. Los comentarios explican cada escenario.
+- `tests/navegador/portal.reservas.spec.js`: añade caso de licencia bloqueada al recargar y capturas de formulario en escritorio/móvil y claro/oscuro. Actualiza tres expectativas de encabezado del primer paso para usar el título actual de la portada; sus comentarios describen el propósito.
 - `docs/ajustes-licencias-administracion-agenda/tareas.md`: marca únicamente T013–T023 y enlaza esta evidencia.
 
 ## Flujo comprobado
@@ -39,7 +39,7 @@ Antes de registrar, `sessionStorage` recibe únicamente slug, ID de apartado y c
 | Ejecución | Resultado real |
 | --- | --- |
 | `npm test` inicial | 164/164 aprobadas. Confirmó la cobertura existente antes de cambios. |
-| `node --test tests/ala-portal-intentos.test.js` antes de implementación | Tras corregir el doble de prueba, 1/3 aprobadas y 2/3 fallidas: el código de cupo era `portal_error` y la resolución terminaba como incertidumbre genérica. Un caso adicional de texto terminal falló antes de ajustar la vista. |
+| `node --test tests/ala-portal.intentos.test.js` antes de implementación | Tras corregir el doble de prueba, 1/3 aprobadas y 2/3 fallidas: el código de cupo era `portal_error` y la resolución terminaba como incertidumbre genérica. Un caso adicional de texto terminal falló antes de ajustar la vista. |
 | Playwright focalizado T023 antes de implementación | 1/1 aprobada: el marcador pendiente ya sobrevivía al 403 de sesión tras recarga. |
 | `npm test` final | **167/167 aprobadas**, 0 fallidas, 0 omitidas, código 0. |
 | Playwright T120–T123, T023 y revisión visual | **7/7 aprobadas**, código 0, 40.2 s, con base efímera creada y eliminada por el runner. Una primera ejecución dio 3/6 por encabezados anteriores en T121–T123; corregidas las expectativas, pasó el lote. |

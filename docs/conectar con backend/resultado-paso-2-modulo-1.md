@@ -16,7 +16,7 @@ No se movieron archivos. La demo continúa en sus módulos y las pantallas nueva
 | Modificados | `src/shared/screens/plataforma/view.js`, `src/shared/screens/plataforma/actions.js` | El panel SA usa negocios, licencias e historial de envíos reales. Se conservaron las vistas de la demo. El alta de negocio identifica el correo como el del administrador. |
 | Modificados | `src/connected/modules/datos/load.js`, `src/connected/modules/permisos/pages.js`, `src/connected/modules/auth/session.js`, `src/connected/backend.js` | Carga de recepcionistas y métricas operativas SA, permisos de nuevas rutas, cierre local de sesión tras cambio de contraseña y manejo de errores de las rutas públicas. |
 | Modificados | `src/shared/app.js`, `src/shared/actions.js` | Ruta con ID `/admin/negocio/:id`, retorno al panel, navegación de recepcionistas y acciones de cuenta. Se retiraron los formularios de autenticación simulados del archivo compartido. |
-| Modificado | `tests/backend.test.js` | Verificación del listado de recepcionistas, resumen SA y política de contraseña. |
+| Modificado | `tests/conexion.backend.test.js` | Verificación del listado de recepcionistas, resumen SA y política de contraseña. |
 
 ## Comportamiento conectado
 

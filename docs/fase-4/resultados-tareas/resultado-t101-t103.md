@@ -30,8 +30,8 @@ La demo ya tenía el mismo orden de selección. Se conserva su recorrido complet
 | `src/connected/public/entry.js` | Modificado. Monta el controlador y su vista después de comprobar la sesión anónima de T098–T100. Sustituye el aviso anterior de selección no disponible por el flujo implementado. |
 | `src/connected/public/style.css` | Modificado. Añade estilos acotados de pasos, opciones, fecha, horarios y acciones, con ajustes móviles y foco visible, reutilizando los tokens existentes. |
 | `src/demo/screens/reservas/booking.js` | Modificado. Aclara que los horarios de demostración son simulados; conserva su cálculo y comportamiento. |
-| `tests/portal-publico-seleccion.test.js` | Nuevo. Quince pruebas Node del estado, contratos de consulta, invalidación, respuestas desordenadas, fechas, errores y salida HTML. Usa dobles y no contacta una base de datos. |
-| `tests/fixtures/portal-selection-server.mjs` | Nuevo. Servidor Vite exclusivamente de revisión con API ficticia aislada. Intercepta **todas** las rutas `/publico` antes del proxy, sin contactar al backend. Permite reproducir horarios, vacío, 503 y 404. No se importa desde `src/` ni se incluye como fallback del producto. |
+| `tests/portal-publico.seleccion.test.js` | Nuevo. Quince pruebas Node del estado, contratos de consulta, invalidación, respuestas desordenadas, fechas, errores y salida HTML. Usa dobles y no contacta una base de datos. |
+| `tests/datos-prueba/portal.servidor-simulado.mjs` | Nuevo. Servidor Vite exclusivamente de revisión con API ficticia aislada. Intercepta **todas** las rutas `/publico` antes del proxy, sin contactar al backend. Permite reproducir horarios, vacío, 503 y 404. No se importa desde `src/` ni se incluye como fallback del producto. |
 | `README.md` | Modificado. Actualiza el alcance T098–T103, explica las consultas y corrige el enlace al resultado anterior, ahora ubicado en `docs/fase-4/resultados-tareas`. |
 | Este documento | Nuevo. Registra finalización, flujo, archivos, pruebas y límites del lote. |
 
@@ -87,7 +87,7 @@ Se añadieron tres casos de endurecimiento. Uno detectó un fallo concreto: un e
 Ejecución final de las suites nuevas/directamente relacionadas:
 
 ```text
-node --test tests/portal-publico-base.test.js tests/portal-publico-seleccion.test.js tests/backend.test.js tests/availability.test.js
+node --test tests/portal-publico.base.test.js tests/portal-publico.seleccion.test.js tests/conexion.backend.test.js tests/disponibilidad.motor-demo.test.js
 tests 47
 pass 47
 fail 0
@@ -105,7 +105,7 @@ Desglose: **15 nuevas**, 8 de la base pública T098–T100, 8 de regresión del 
 Para revisar sin modificar datos reales:
 
 ```sh
-node tests/fixtures/portal-selection-server.mjs
+node tests/datos-prueba/portal.servidor-simulado.mjs
 ```
 
 Abrir `http://127.0.0.1:5193/reservas/qa-portal`. La identidad visible dice **«Consultorio de prueba · API simulada»**. La fixture solo simula sesión/catálogos/disponibilidad; las demás rutas públicas reciben 404. Puede usarse `?demo=1` para revisar la demo independiente.

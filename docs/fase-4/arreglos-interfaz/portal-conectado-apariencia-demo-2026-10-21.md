@@ -17,7 +17,7 @@ El cambio visual afecta solo a `/reservas/:slug` conectado. La demo y las pantal
 - `src/connected/public/selection-view.js`: tarjetas, campos opcionales y tira de fechas; conserva radios nativos, etiquetas, foco y estados de consulta.
 - `src/connected/public/booking-view.js`: seis pasos y resumen común para selección, apartado, formulario, envío incierto y resultado.
 - `src/connected/public/style.css`: composición adaptable y estilos de ambos temas.
-- `tests/portal-publico-seleccion.test.js`: comprueba la presentación y el escape de datos públicos opcionales.
+- `tests/portal-publico.seleccion.test.js`: comprueba la presentación y el escape de datos públicos opcionales.
 
 El backend hermano se consultó en modo de lectura; sus cambios existentes no se editaron. La proyección de `catalogo` todavía depende de que la migración y la configuración de publicación del backend se apliquen en el entorno donde se despliegue.
 
@@ -28,4 +28,4 @@ El backend hermano se consultó en modo de lectura; sus cambios existentes no se
 - `npm run build`: compilación correcta.
 - La fixture local anunció Vite en `127.0.0.1:5193`, pero el navegador integrado terminó en `ERR_CONNECTION_TIMED_OUT` y la terminal rechazó el acceso al socket local por permisos. Por ello **no se completó la inspección visual** de escritorio/móvil ni de los temas en esta sesión. Tampoco se probó contra una base real ni se ejecutaron pruebas del backend, en cumplimiento de su restricción de solo lectura.
 
-Pendiente de inspección visual: comprobar `/reservas/qa-portal` en escritorio y móvil, temas claro y oscuro, y recorrer los estados de selección, vacío, error, apartado, envío incierto y resultado. La fixture disponible en `tests/fixtures/portal-selection-server.mjs` permite esa revisión sin tocar la base real.
+Pendiente de inspección visual: comprobar `/reservas/qa-portal` en escritorio y móvil, temas claro y oscuro, y recorrer los estados de selección, vacío, error, apartado, envío incierto y resultado. La fixture disponible en `tests/datos-prueba/portal.servidor-simulado.mjs` permite esa revisión sin tocar la base real.

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { crearIntentoStore } from '../src/connected/portal-publico/intento.store.js';
 import { crearReservaPortal } from '../src/connected/portal-publico/reserva.flujo.js';
 import { renderReserva } from '../src/connected/portal-publico/reserva.vista.js';
-import { memoryStorage } from './fixtures/memory-storage.js';
+import { crearAlmacenamientoEnMemoria } from './datos-prueba/memoria.almacenamiento.js';
 import { adquirirMutacionPublica } from '../src/connected/portal-publico/portal.sesion-navegador.js';
 
 const marcador = { negocio: 'centro', apartadoId: 8, clave: 'attempt_test_000001' };
@@ -47,9 +47,9 @@ test('T116: contacto sobrevive vencimiento y navegación interna sin persistirse
 const resultado = { folio: 'P-123456789012345678', estado: 'pendiente', inicioUtc: '2026-10-20T17:00:00.000Z',
   finUtc: '2026-10-20T17:30:00.000Z', zonaHoraria: 'America/Mazatlan', costo: '450.00',
   nombreNegocio: 'Negocio histórico', nombreServicio: 'Servicio guardado', nombreSucursal: 'Sucursal histórica', nombreProfesional: 'Profesional histórico' };
-const crearPromesaControlada = () => { let resolver, rechazar; const promise = new Promise((yes, no) => { resolver = yes; rechazar = no; }); return { promise, resolver, reject: rechazar }; };
-function prepararPrueba(handler, extra = {}) {
-  const almacenamiento = extra.almacenamiento || memoryStorage();
+const crearPromesaControlada = () => { let resolver, rechazar; const promesa = new Promise((afirmativo, negativo) => { resolver = afirmativo; rechazar = negativo; }); return { promise: promesa, resolver, reject: rechazar }; };
+function prepararPrueba(handler, adicional = {}) {
+  const almacenamiento = adicional.almacenamiento || crearAlmacenamientoEnMemoria();
   const store = crearIntentoStore('centro', () => almacenamiento);
   const llamadas = [], mensajes = [];
   const client = { async solicitar(ruta, opciones = {}) {
@@ -58,7 +58,7 @@ function prepararPrueba(handler, extra = {}) {
       sucursales: opciones.consulta.servicioId ? [{ id: 2, nombre: 'Centro', direccion: 'Calle 1', zonaHoraria: 'America/Mazatlan' }] : [], profesionales: opciones.consulta.sucursalId ? [{ id: 3, nombre: 'Ana' }] : [] };
     if (ruta === 'disponibilidad') return { ...opciones.consulta, modalidad: 'publica', zonaHoraria: 'America/Mazatlan', ranuras: [{ inicioUtc: resultado.inicioUtc, finUtc: resultado.finUtc }] };
     if (ruta === 'apartados') return { estado: 'concedida', apartadoId: 8, generacion: '1', costo: '450.00', zonaHoraria: 'America/Mazatlan', expiraEn: '2026-10-20T16:05:00Z', servidorAhora: '2026-10-20T16:00:00Z' };
-    if (ruta === 'apartados/8') return extra.ownResponse ? extra.ownResponse() : { apartadoId: 8, generacion: '1', estado: 'vigente', costo: '450.00', expiraEn: '2026-10-20T16:05:00Z', servidorAhora: '2026-10-20T16:00:00Z' };
+    if (ruta === 'apartados/8') return adicional.ownResponse ? adicional.ownResponse() : { apartadoId: 8, generacion: '1', estado: 'vigente', costo: '450.00', expiraEn: '2026-10-20T16:05:00Z', servidorAhora: '2026-10-20T16:00:00Z' };
     if (handler) return handler(ruta, opciones, store);
     if (ruta === 'intentos') return { id: marcador.clave, apartadoId: 8, estado: 'preparado' };
     if (ruta.endsWith('/reservar')) return resultado;
@@ -67,7 +67,7 @@ function prepararPrueba(handler, extra = {}) {
   } };
   const flujo = crearReservaPortal(client, { slug: 'centro', almacenamiento, generarClaveIntento: () => marcador.clave,
     generarClaveOperacion: () => 'operation_test_000001', ahoraMonotono: () => 0, ahora: () => new Date('2026-10-20T16:00:00Z'),
-    channel: { postMessage: (datos) => mensajes.push(datos), close() {} }, ...extra });
+    channel: { postMessage: (datos) => mensajes.push(datos), close() {} }, ...adicional });
   return { flow: flujo, calls: llamadas, store, almacenamiento, messages: mensajes };
 }
 async function formulario(flujo) {
@@ -77,7 +77,7 @@ async function formulario(flujo) {
 }
 
 test('T110: almacena exactamente negocio, apartado y clave; lectura aislada por negocio', () => {
-  const almacenamiento = memoryStorage(), store = crearIntentoStore('centro', () => almacenamiento);
+  const almacenamiento = crearAlmacenamientoEnMemoria(), store = crearIntentoStore('centro', () => almacenamiento);
   assert.equal(store.leer().estado, 'ausente'); store.guardar(marcador);
   assert.deepEqual(store.leer().marcador, marcador);
   assert.deepEqual(JSON.parse(almacenamiento.getItem(store.clave)), marcador);
@@ -99,7 +99,7 @@ test('T110: marcador confirmado antes de preparar y enviar; contenido normalizad
 });
 
 test('T110: fallo de persistencia impide toda preparación y envío', async () => {
-  const almacenamiento = memoryStorage(); almacenamiento.setItem = () => { throw Error('bloqueado'); };
+  const almacenamiento = crearAlmacenamientoEnMemoria(); almacenamiento.setItem = () => { throw Error('bloqueado'); };
   const { flow: flujo, calls: llamadas } = prepararPrueba(null, { almacenamiento }); await formulario(flujo); await flujo.enviarReserva();
   assert.equal(flujo.obtenerEstado().fase, 'formulario'); assert.ok(!llamadas.some((llamada) => llamada.path.startsWith('intentos')));
   assert.match(flujo.obtenerEstado().aviso, /guardar|almacenamiento/i);
@@ -115,8 +115,8 @@ test('T111: doble clic excluido y reintento usa el mismo contenido aunque se int
   let primera = true; const pendiente = crearPromesaControlada();
   const { flow: flujo, calls: llamadas, store } = prepararPrueba((ruta) => ruta === 'intentos' ? { id: marcador.clave, apartadoId: 8, estado: 'preparado' }
     : ruta.endsWith('/reservar') ? primera ? (primera = false, pendiente.promise) : resultado : { estado: 'registrado', resultado: resultado });
-  await formulario(flujo); const sending = flujo.enviarReserva(); await flujo.enviarReserva();
-  pendiente.reject(Error('red')); await sending;
+  await formulario(flujo); const enviando = flujo.enviarReserva(); await flujo.enviarReserva();
+  pendiente.reject(Error('red')); await enviando;
   assert.equal(flujo.obtenerEstado().fase, 'incierto'); assert.deepEqual(store.leer().marcador, marcador);
   flujo.actualizarContacto('nombre', 'Otro'); await flujo.repetirEnvio();
   const escrituras = llamadas.filter((llamada) => llamada.path.endsWith('/reservar'));
@@ -138,7 +138,7 @@ test('T111–T112: 400/409 conservan datos y no reinician sin ausencia terminal'
 });
 
 test('T112: recarga con marcador resuelve antes de catálogo y sin contacto', async () => {
-  const almacenamiento = memoryStorage(); crearIntentoStore('centro', () => almacenamiento).guardar(marcador);
+  const almacenamiento = crearAlmacenamientoEnMemoria(); crearIntentoStore('centro', () => almacenamiento).guardar(marcador);
   const { flow: flujo, calls: llamadas } = prepararPrueba(null, { almacenamiento }); await flujo.iniciar();
   assert.equal(llamadas.length, 1); assert.equal(llamadas[0].path, `intentos/${marcador.clave}/resolver`);
   assert.deepEqual(llamadas[0].body, { apartadoId: 8 }); assert.equal(flujo.obtenerEstado().fase, 'resultado');
@@ -146,7 +146,7 @@ test('T112: recarga con marcador resuelve antes de catálogo y sin contacto', as
 });
 
 test('T112: solo no_registrado comprobado elimina marcador y reinicia selección', async () => {
-  const almacenamiento = memoryStorage(); crearIntentoStore('centro', () => almacenamiento).guardar(marcador);
+  const almacenamiento = crearAlmacenamientoEnMemoria(); crearIntentoStore('centro', () => almacenamiento).guardar(marcador);
   const { flow: flujo, calls: llamadas, store } = prepararPrueba(() => ({ estado: 'no_registrado' }), { almacenamiento }); await flujo.iniciar();
   assert.equal(flujo.obtenerEstado().fase, 'seleccion'); assert.equal(flujo.obtenerEstado().paso, 0); assert.equal(store.leer().estado, 'ausente');
   assert.equal(llamadas[0].path, `intentos/${marcador.clave}/resolver`); assert.equal(llamadas[1].path, 'catalogo');
@@ -154,7 +154,7 @@ test('T112: solo no_registrado comprobado elimina marcador y reinicia selección
 
 test('T112: 401/404/503, red y respuesta inválida nunca se interpretan como ausencia', async () => {
   for (const modo of [401, 404, 503, 'network', 'invalida']) {
-    const almacenamiento = memoryStorage(); crearIntentoStore('centro', () => almacenamiento).guardar(marcador);
+    const almacenamiento = crearAlmacenamientoEnMemoria(); crearIntentoStore('centro', () => almacenamiento).guardar(marcador);
     const { flow: flujo, calls: llamadas, store } = prepararPrueba(() => {
       if (modo === 'invalida') return { estado: 'desconocido' };
       throw Object.assign(Error('fallo'), typeof modo === 'number' ? { status: modo } : {});
@@ -165,7 +165,7 @@ test('T112: 401/404/503, red y respuesta inválida nunca se interpretan como aus
 });
 
 test('T112: marcador corrupto o almacenamiento inaccesible bloquean sin borrar evidencia', async () => {
-  const almacenamiento = memoryStorage(), store = crearIntentoStore('centro', () => almacenamiento);
+  const almacenamiento = crearAlmacenamientoEnMemoria(), store = crearIntentoStore('centro', () => almacenamiento);
   almacenamiento.setItem(store.clave, '{incorrecto');
   const { flow: flujo, calls: llamadas } = prepararPrueba(null, { almacenamiento }); await flujo.iniciar();
   assert.equal(flujo.obtenerEstado().fase, 'incierto'); assert.equal(llamadas.length, 0);
@@ -174,14 +174,14 @@ test('T112: marcador corrupto o almacenamiento inaccesible bloquean sin borrar e
 });
 
 test('T112: limpieza fallida tras ausencia terminal no habilita otra reserva', async () => {
-  const almacenamiento = memoryStorage(); crearIntentoStore('centro', () => almacenamiento).guardar(marcador);
+  const almacenamiento = crearAlmacenamientoEnMemoria(); crearIntentoStore('centro', () => almacenamiento).guardar(marcador);
   almacenamiento.removeItem = () => { throw Error('bloqueado'); };
   const { flow: flujo } = prepararPrueba(() => ({ estado: 'no_registrado' }), { almacenamiento }); await flujo.iniciar();
   assert.equal(flujo.obtenerEstado().fase, 'incierto');
 });
 
 test('T112: desaparecer un marcador corrupto no equivale a ausencia terminal del servidor', async () => {
-  const almacenamiento = memoryStorage(), store = crearIntentoStore('centro', () => almacenamiento);
+  const almacenamiento = crearAlmacenamientoEnMemoria(), store = crearIntentoStore('centro', () => almacenamiento);
   almacenamiento.setItem(store.clave, '{corrupto');
   const { flow: flujo, calls: llamadas } = prepararPrueba(null, { almacenamiento }); await flujo.iniciar();
   almacenamiento.removeItem(store.clave); await flujo.resolverEnvio();
@@ -189,17 +189,17 @@ test('T112: desaparecer un marcador corrupto no equivale a ausencia terminal del
 });
 
 test('T113: salida mientras prepara/envía o resultado incierto no libera el apartado', async () => {
-  for (const stage of ['prepare', 'write']) {
+  for (const etapa of ['prepare', 'write']) {
     const pendiente = crearPromesaControlada();
     const { flow: flujo, calls: llamadas, store } = prepararPrueba((ruta) => ruta === 'intentos'
-      ? stage === 'prepare' ? pendiente.promise : { id: marcador.clave, apartadoId: 8, estado: 'preparado' }
+      ? etapa === 'prepare' ? pendiente.promise : { id: marcador.clave, apartadoId: 8, estado: 'preparado' }
       : ruta.endsWith('/reservar') ? pendiente.promise : null);
-    await formulario(flujo); const sending = flujo.enviarReserva();
+    await formulario(flujo); const enviando = flujo.enviarReserva();
     await new Promise((resolver) => setImmediate(resolver));
-    flujo.salir(); pendiente.reject(Error('red')); await sending;
+    flujo.salir(); pendiente.reject(Error('red')); await enviando;
     assert.equal(llamadas.filter((llamada) => llamada.path.endsWith('/liberar')).length, 0);
     assert.deepEqual(store.leer().marcador, marcador);
-    if (stage === 'prepare') assert.ok(!llamadas.some((llamada) => llamada.path.endsWith('/reservar')));
+    if (etapa === 'prepare') assert.ok(!llamadas.some((llamada) => llamada.path.endsWith('/reservar')));
   }
 });
 
@@ -231,7 +231,7 @@ test('T113: consulta y avisos atrasados no borran el resumen ni liberan otro apa
 
 test('T111–T113: un envío incierto conserva el lock para bloquear apartados de otra pestaña', async () => {
   let activo = false;
-  const bloqueos = { async request(_name, opciones, handler) {
+  const bloqueos = { async request(_nombre, opciones, handler) {
     assert.equal(opciones.ifAvailable, true);
     if (activo) return handler(null);
     activo = true;
@@ -259,18 +259,18 @@ test('T114: resumen histórico pendiente, escapado y sin enlaces de gestión ni 
 });
 
 test('T114: resultado incompleto nunca muestra éxito ni borra marcador', async () => {
-  for (const bad of [{ estado: 'confirmada' }, { zonaHoraria: 'ZonaInexistente' }, { costo: null }, { inicioUtc: '2026-10-20T17:00:00' }, { finUtc: '2026-10-20T16:00:00Z' }]) {
-    const { flow: flujo, store } = prepararPrueba((ruta) => ruta === 'intentos' ? { id: marcador.clave, apartadoId: 8, estado: 'preparado' } : { ...resultado, ...bad });
+  for (const erroneo of [{ estado: 'confirmada' }, { zonaHoraria: 'ZonaInexistente' }, { costo: null }, { inicioUtc: '2026-10-20T17:00:00' }, { finUtc: '2026-10-20T16:00:00Z' }]) {
+    const { flow: flujo, store } = prepararPrueba((ruta) => ruta === 'intentos' ? { id: marcador.clave, apartadoId: 8, estado: 'preparado' } : { ...resultado, ...erroneo });
     await formulario(flujo); await flujo.enviarReserva();
     assert.equal(flujo.obtenerEstado().fase, 'incierto'); assert.deepEqual(store.leer().marcador, marcador);
   }
 });
 
 test('T113: una lectura de apartado iniciada antes del envío no invalida el resultado posterior', async () => {
-  const consultaApartadoDiferida = crearPromesaControlada(), respuestaPendiente = crearPromesaControlada(); let diferido = false, sending = false;
+  const consultaApartadoDiferida = crearPromesaControlada(), respuestaPendiente = crearPromesaControlada(); let diferido = false, enviando = false;
   const rutaBase = prepararPrueba(null, { ownResponse: () => diferido ? consultaApartadoDiferida.promise : { apartadoId: 8, generacion: '1', estado: 'vigente', expiraEn: '2026-10-20T16:05:00Z', servidorAhora: '2026-10-20T16:00:00Z' },
-    adquirirMutacion: async () => sending ? respuestaPendiente.promise : { liberar() {} } });
-  await formulario(rutaBase.flow); sending = true;
+    adquirirMutacion: async () => enviando ? respuestaPendiente.promise : { liberar() {} } });
+  await formulario(rutaBase.flow); enviando = true;
   const enviar = rutaBase.flow.enviarReserva(); diferido = true;
   const verificacion = rutaBase.flow.verificarVigencia();
   respuestaPendiente.resolver({ liberar() {} }); await enviar;
