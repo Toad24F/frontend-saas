@@ -18,6 +18,21 @@ async function abrir(pagina) {
   return dialogo;
 }
 
+// Suelta fuera del botón para comprobar la pulsación sin avanzar el formulario.
+async function comprobarPulsacionDeMarca(portal, boton) {
+  await boton.hover();
+  await expect(boton).toHaveCSS('background-color', 'rgb(165, 63, 40)');
+  await portal.mouse.down();
+  try {
+    await expect(boton).toHaveCSS('background-color', 'rgb(154, 58, 38)');
+    await expect(boton).toHaveCSS('transform', 'matrix(0.91, 0, 0, 0.91, 0, 2)');
+  } finally {
+    await portal.mouse.move(0, 0);
+    await portal.mouse.up();
+  }
+  await expect(boton).toHaveCSS('background-color', 'rgb(179, 68, 44)');
+}
+
 // La base y el portal deben conservar la publicación hasta confirmar la escritura.
 test('M5-T051–T053 · móvil, validación, descarte, publicación y restauración por negocio', async ({ page: pagina, browser: navegador }) => {
   await pagina.setViewportSize({ width: 390, height: 844 });
@@ -174,4 +189,30 @@ test('Selector de marca · paleta y pegado hexadecimal sincronizados en móvil',
   await expect(selector).toHaveValue('#884bad');
   await expect(dialogo.locator('.personalizacion-muestra-boton')).toHaveCSS('background-color', 'rgb(136, 75, 173)');
   expect(await dialogo.evaluate((elemento) => elemento.scrollWidth)).toBe(await dialogo.evaluate((elemento) => elemento.clientWidth));
+});
+
+test('Acento en hover y pulsación en ambos temas del portal', async ({ page: portal }) => {
+  await portal.emulateMedia({ colorScheme: 'dark' });
+  // El catálogo real proporciona servicios; solo fijamos el acento de esta prueba visual.
+  await portal.route('**/publico/negocios/portal-qa-1/catalogo', async (ruta) => {
+    const respuesta = await ruta.fetch();
+    const catalogo = await respuesta.json();
+    await ruta.fulfill({ response: respuesta, json: { ...catalogo, marca: { acento: '#b3442c' } } });
+  });
+  await portal.goto(urlPortal(1));
+  const continuar = portal.getByRole('button', { name: 'Continuar' });
+  await continuar.hover({ force: true });
+  await expect(continuar).toBeDisabled();
+  await expect(continuar).toHaveCSS('background-color', 'rgb(179, 68, 44)');
+  await expect(continuar).toHaveCSS('transform', 'none');
+
+  await portal.getByRole('radio', { name: /Corte QA/ }).press('Space');
+  await expect(continuar).toBeEnabled();
+  await comprobarPulsacionDeMarca(portal, continuar);
+  await portal.getByRole('button', { name: 'Activar modo claro' }).click();
+  await comprobarPulsacionDeMarca(portal, continuar);
+  await portal.emulateMedia({ reducedMotion: 'reduce' });
+  await continuar.hover();
+  await expect(continuar).toHaveCSS('background-color', 'rgb(165, 63, 40)');
+  await expect(continuar).toHaveCSS('transform', 'none');
 });

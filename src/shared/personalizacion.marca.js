@@ -28,13 +28,21 @@ export function esColorHexadecimalPortal(valor) {
   return typeof valor === 'string' && valor.length === 7 && /^#[0-9a-f]{6}$/i.test(valor);
 }
 
+function mezclarCanales(rgb, destino, porcentaje) {
+  return '#' + rgb.map((canal) => Math.round(canal + (destino - canal) * porcentaje / 100)
+    .toString(16).padStart(2, '0')).join('');
+}
+
+function textoSobreRelleno(relleno) {
+  return contrastePortal(relleno, negro) >= contrastePortal(relleno, blanco) ? negro : blanco;
+}
+
 function tonoLegible(acento, superficies, destino) {
   const rgb = canalesHex(acento);
   // Conserva el tono exacto cuando ya cumple. En otro caso acerca sus canales
   // paso a paso al extremo con contraste para ese tema.
   for (let porcentaje = 0; porcentaje < 100; porcentaje++) {
-    const tono = '#' + rgb.map((canal) => Math.round(canal + (destino - canal) * porcentaje / 100)
-      .toString(16).padStart(2, '0')).join('');
+    const tono = mezclarCanales(rgb, destino, porcentaje);
     if (superficies.every((fondo) => contrastePortal(tono, fondo) >= 4.5)) return tono;
   }
   return destino === 0 ? negro : blanco;
@@ -43,9 +51,17 @@ function tonoLegible(acento, superficies, destino) {
 export function tonosAcentoPortal(acento) {
   if (!esColorHexadecimalPortal(acento)) return null;
   const relleno = acento.toLowerCase();
+  const rgb = canalesHex(relleno);
+  // Hover y pulsación mantienen el acento y recalculan el texto para cada relleno.
+  const resaltado = mezclarCanales(rgb, 0, 8);
+  const pulsado = mezclarCanales(rgb, 0, 14);
   return {
     relleno,
-    sobreRelleno: contrastePortal(relleno, negro) >= contrastePortal(relleno, blanco) ? negro : blanco,
+    sobreRelleno: textoSobreRelleno(relleno),
+    resaltado,
+    sobreResaltado: textoSobreRelleno(resaltado),
+    pulsado,
+    sobrePulsado: textoSobreRelleno(pulsado),
     claro: tonoLegible(relleno, superficiesClaras, 0),
     oscuro: tonoLegible(relleno, superficiesOscuras, 255),
   };
@@ -63,6 +79,10 @@ export function aplicarAcentoPortal(elemento, acento, predeterminado = acentoPre
   const propiedades = {
     '--marca-relleno': tonos?.relleno,
     '--marca-sobre-relleno': tonos?.sobreRelleno,
+    '--marca-relleno-resaltado': tonos?.resaltado,
+    '--marca-sobre-resaltado': tonos?.sobreResaltado,
+    '--marca-relleno-pulsado': tonos?.pulsado,
+    '--marca-sobre-pulsado': tonos?.sobrePulsado,
     '--marca-tono-claro': tonos?.claro,
     '--marca-tono-oscuro': tonos?.oscuro,
   };

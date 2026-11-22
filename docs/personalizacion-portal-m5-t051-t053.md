@@ -57,3 +57,9 @@ El despliegue del frontend y backend debe hacerse en conjunto por el cambio del 
 El encabezado del portal conectado reserva `5.5rem` cuadrados para el logo publicado en escritorio y `4rem` en móvil. `portal.entrada.js` declara las dimensiones de la imagen y `portal.estilos.css` ajusta su tamaño por pantalla con `object-fit: contain` para conservar la proporción. `personalizacion.estilos.css` conserva el estilo de la imagen de la vista previa del editor.
 
 Se comprobó el encabezado de Union Salud a 1195 y 390 px en claro y oscuro. El logo cargó con su proporción original, el título mantuvo su separación y la página quedó dentro del ancho disponible.
+
+## Interacción de los botones de acento
+
+`personalizacion.marca.js` calcula un relleno ligeramente más oscuro al pasar el cursor y otro al pulsar el botón. Cada relleno elige texto blanco o negro para mantener el contraste. `personalizacion.estilos.css` usa esas variantes en los botones primarios del portal conectado en claro y oscuro. `portal.entrada.js` carga la misma hoja de movimiento que usa el panel para elevar y comprimir el botón. `portal.estilos.css` respeta la preferencia de movimiento reducido y conserva el cambio de color.
+
+La prueba unitaria nueva comprueba que los tonos se oscurecen y mantienen al menos 4.5:1 con su texto. En Edge, el caso nuevo pasó con el acento fijado en el catálogo de prueba y verificó hover, pulsación, botón deshabilitado y movimiento reducido. La suite de personalización pasó **3/5**. Dos casos se detuvieron al abrir **Mi cuenta** por el error `bloqueos.map is not a function`. `npm test` pasó **307/307** y `npm run build` completó con código 0.

@@ -1,6 +1,7 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '../../shared/global.estilos.css';
 import '../../shared/tema.estilos.css';
+import '../../shared/movimiento.estilos.css';
 import './portal.estilos.css';
 import '../../shared/portal-publico/portal.opciones.css';
 import { renderEsqueletoPortal } from '../../shared/portal-publico/portal.opciones.js';

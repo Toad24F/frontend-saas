@@ -19,3 +19,15 @@ test('la ruta de logo queda ligada al slug y a un UUID', () => {
   assert.equal(rutaLogoPortal('../ajeno', id), null);
   assert.equal(rutaLogoPortal('negocio-propio', 'https://ajeno.test/logo.png'), null);
 });
+
+test('oscurece el acento al acercar el puntero y pulsar con texto legible en ambos estados', () => {
+  for (const acento of ['#000000', '#ffffff', '#777777', '#b3442c']) {
+    const tonos = tonosAcentoPortal(acento);
+    const brillo = (color) => contrastePortal(color, '#000000');
+    assert.ok(brillo(tonos.relleno) >= brillo(tonos.resaltado));
+    assert.ok(brillo(tonos.resaltado) >= brillo(tonos.pulsado));
+    assert.ok(contrastePortal(tonos.resaltado, tonos.sobreResaltado) >= 4.5);
+    assert.ok(contrastePortal(tonos.pulsado, tonos.sobrePulsado) >= 4.5);
+  }
+  assert.equal(tonosAcentoPortal('#b3442c').pulsado, '#9a3a26');
+});

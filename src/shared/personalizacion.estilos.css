@@ -96,16 +96,37 @@ html[data-theme='dark'] [data-marca-personalizada] {
   --acento-oscuro: var(--marca-tono-oscuro);
   --marca-sobre-tono: #000;
 }
-[data-marca-personalizada] .personalizacion-muestra-boton,
-.portal-publico [data-marca-personalizada] .btn-primary {
+[data-marca-personalizada] .personalizacion-muestra-boton {
   background: var(--marca-relleno);
   color: var(--marca-sobre-relleno);
   border: 1px solid var(--acento);
 }
-.portal-publico [data-marca-personalizada] .btn-primary:is(:hover, :active):not(:disabled) { text-decoration: underline; }
+.portal-publico [data-marca-personalizada] .btn-primary {
+  --marca-fondo-boton: var(--marca-relleno);
+  --marca-texto-boton: var(--marca-sobre-relleno);
+  background-color: var(--marca-fondo-boton);
+  color: var(--marca-texto-boton);
+  border-color: var(--acento);
+}
+/* La interacción oscurece el acento del negocio en ambos temas. */
+@media (hover: hover) {
+  .portal-publico [data-marca-personalizada] .btn-primary:not(:disabled):hover {
+    --marca-fondo-boton: var(--marca-relleno-resaltado);
+    --marca-texto-boton: var(--marca-sobre-resaltado);
+  }
+}
+.portal-publico [data-marca-personalizada] .btn-primary:not(:disabled):active {
+  --marca-fondo-boton: var(--marca-relleno-pulsado);
+  --marca-texto-boton: var(--marca-sobre-pulsado);
+}
+.portal-publico [data-marca-personalizada] .btn-primary:not(:disabled):is(:hover, :active, :focus-visible) {
+  background-color: var(--marca-fondo-boton);
+  color: var(--marca-texto-boton);
+  border-color: var(--acento);
+}
 .portal-publico [data-marca-personalizada] .btn-primary:focus-visible {
   outline-color: var(--acento);
-  box-shadow: inset 0 0 0 2px var(--marca-sobre-relleno);
+  box-shadow: inset 0 0 0 2px var(--marca-texto-boton);
 }
 .portal-publico [data-marca-personalizada] :is(.portal-pasos [aria-current] > span, .portal-opcion:has(:checked) .portal-opcion-marca) {
   color: var(--marca-sobre-tono);

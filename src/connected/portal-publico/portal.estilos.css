@@ -228,6 +228,9 @@ html[data-theme='dark'] .portal-opcion:has(:checked) { border-color: var(--acent
 
 .portal-resumen-desplegable > summary { padding: 14px; font-weight: 600; cursor: pointer; min-height: 44px; }
 .portal-publico .btn-primary:disabled { --bs-btn-disabled-bg: var(--acento); --bs-btn-disabled-border-color: var(--acento); opacity: .45; box-shadow: none; }
+@media (prefers-reduced-motion: reduce) {
+  .portal-publico .btn:is(:hover, :active) { transform: none; }
+}
 .portal-resumen-desplegable > summary:focus-visible { outline: 3px solid var(--acento); }
 @media (min-width: 901px) { .portal-reserva-lateral { position: sticky; top: 24px; } .portal-resumen-desplegable > summary { display: none; } }
 @media (max-width: 575px) {
