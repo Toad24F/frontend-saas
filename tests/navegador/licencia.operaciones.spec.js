@@ -73,7 +73,8 @@ test('FALA-T030: respuesta perdida mantiene clave y bloquea nueva renovación', 
 
 test('FALA-T029–T030: avisos se muestran por estado y otro rol carece de acciones', async ({ page: pagina, browser: navegador }) => {
   await iniciarSesion(pagina); await detalle(pagina);
-  await pagina.route('**/negocios/1/envios', (rutaInterceptada) => rutaInterceptada.fulfill({ status: 200, contentType: 'application/json',
+  // La ruta conserva el recurso aunque el cliente solicite páginas de 100 filas.
+  await pagina.route((url) => url.pathname === '/negocios/1/envios', (rutaInterceptada) => rutaInterceptada.fulfill({ status: 200, contentType: 'application/json',
     body: JSON.stringify(['pendiente', 'fallido', 'enviado'].map((estado, indice) => ({ id: indice + 1,
       tipo: 'aviso_licencia', estado, intentos: indice, confirmadoEn: null, proximoIntentoEn: null }))) }));
   await pagina.reload(); await detalle(pagina);

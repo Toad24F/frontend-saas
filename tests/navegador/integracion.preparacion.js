@@ -6,7 +6,8 @@ import { createServer } from 'node:net';
 import { resolve } from 'node:path';
 
 const carpetaFrontend = process.cwd();
-const carpetaBackend = resolve(carpetaFrontend, '../backend');
+// La integración local usa el repositorio hermano real y una base efímera confirmada.
+const carpetaBackend = resolve(carpetaFrontend, '../SaaS-backend');
 const requerirBackend = createRequire(resolve(carpetaBackend, 'package.json'));
 const { createConnection } = requerirBackend('mysql2/promise');
 const dotenv = requerirBackend('dotenv');
@@ -117,8 +118,9 @@ async function sembrarDatos(baseDatos) {
     if (indice === 2) {
       // Una cita futura ficticia permite comprobar causas reales antes y
       // después del retiro sin modificarla ni usar la base habitual.
-      const client = await baseDatos.query(`INSERT INTO clientes (negocio_id,nombre_completo,telefono)
-        VALUES (?,'Cliente Retiro QA','6145550199')`, [negocioId]);
+      // La clave normalizada mantiene válida la fixture tras la unicidad de clientes de fase 6.
+      const client = await baseDatos.query(`INSERT INTO clientes (negocio_id,nombre_completo,nombre_normalizado,telefono)
+        VALUES (?,'Cliente Retiro QA','cliente retiro qa','6145550199')`, [negocioId]);
       const inicio = new Date(Date.UTC(ahora.getUTCFullYear(), ahora.getUTCMonth(), ahora.getUTCDate() + 2, 16));
       await baseDatos.query(`INSERT INTO citas (negocio_id,sucursal_id,personal_id,servicio_id,cliente_id,
         inicio_utc,fin_utc,zona_horaria_reserva,folio,estado,origen)

@@ -10,6 +10,7 @@ import '../../../shared/screens/disponibilidad/disponibilidad.estilos.css';
 import { renderMedidorCupo } from './cupo.medidor.js';
 import { renderHistorialCorreo } from './correo.historial.js';
 import { vincularEspacioNegocio, estadoEspacioNegocio } from './negocio.espacio-trabajo.js';
+import { consultarEnviosCompletos } from '../../modules/correos/correos.historial-client.js';
 
 let idActual = null;
 let detalle = null;
@@ -25,7 +26,7 @@ async function cargarNegocio(id) {
   const [cupoSucursales, cupoUsuarios, envios, vigencia] = await Promise.all([
     api(`/negocios/${id}/cupo-sucursales`),
     leerCupoUsuarios(id, api),
-    api(`/negocios/${id}/envios`),
+    consultarEnviosCompletos(api, id),
     negocio.licencia ? api(`/licencias/${negocio.licencia.id}/vigencia`) : null,
   ]);
   return { negocio, cupoSucursales, cupoUsuarios, envios, vigencia };

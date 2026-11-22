@@ -2,6 +2,7 @@ import { reemplazarDatos, minutosAHora } from '../../../shared/aplicacion.datos.
 import { api, usuarioActual } from '../autenticacion/sesion.estado.js';
 import { cargarCuposPorRol, limpiarCuposPorRol } from '../catalogos/catalogos.cupo.js';
 import { establecerCupoSucursales } from '../sucursales/sucursales.cupo.js';
+import { consultarEnviosCompletos } from '../correos/correos.historial-client.js';
 
 const iniciales = (nombre) => nombre.split(/\s+/).slice(0, 2).map((parte) => parte[0]).join('');
 const formatearMinutos = (valor) => valor == null ? '' : minutosAHora(valor % 1440);
@@ -21,7 +22,7 @@ export async function cargarDatosBackend() {
     datos.tenants = await Promise.all(negocios.map(async (registro) => {
       const [vigencia, envios] = await Promise.all([
         registro.licencia ? api(`/licencias/${registro.licencia.id}/vigencia`) : null,
-        api(`/negocios/${registro.id}/envios`),
+        consultarEnviosCompletos(api, registro.id),
       ]);
       return { id: registro.id, name: registro.nombre, slug: registro.identificadorPublico, initials: iniciales(registro.nombre), email: registro.administrador?.email || registro.emailContacto || '', phone: registro.telefonoContacto || '', category: registro.administrador?.activadoEn ? 'Activado' : 'Pendiente de activación', suspended: ['suspendida', 'suspension_pendiente'].includes(vigencia?.estado), licenseId: registro.licencia?.id, license: vigencia?.estado || 'pendiente', validity: vigencia, failedDeliveries: envios.filter((envio) => envio.estado === 'fallido').length };
     }));
