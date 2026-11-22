@@ -19,13 +19,15 @@ export let usuarioActual = null;
 export const etiquetaRol = (rol) => ({ admin_negocio: 'Administración', superadmin: 'Superadministración', profesional: 'Profesional', recepcionista: 'Recepción' })[rol] || '';
 export async function api(ruta, method = 'GET', cuerpo, opciones = {}) {
   const tokenPeticion = token;
+  // El navegador genera el límite de cada parte para las cargas multipart.
+  const esMultipart = cuerpo instanceof FormData;
   let respuesta;
   try {
     respuesta = await fetch(`${baseApi}${ruta}`, {
       // Cabeceras adicionales solo se pasan cuando la llamada las solicita;
       // los demás consumidores conservan exactamente sus cabeceras previas.
-      method, headers: { ...(cuerpo === undefined ? {} : { 'Content-Type': 'application/json' }), ...(tokenPeticion ? { Authorization: `Bearer ${tokenPeticion}` } : {}), ...opciones.headers },
-      ...(cuerpo === undefined ? {} : { body: JSON.stringify(cuerpo) }),
+      method, headers: { ...(cuerpo === undefined || esMultipart ? {} : { 'Content-Type': 'application/json' }), ...(tokenPeticion ? { Authorization: `Bearer ${tokenPeticion}` } : {}), ...opciones.headers },
+      ...(cuerpo === undefined ? {} : { body: esMultipart ? cuerpo : JSON.stringify(cuerpo) }),
     });
   } catch {
     const error = new Error('No se pudo conectar con el backend. Comprueba que esté iniciado y revisa VITE_API_URL.');

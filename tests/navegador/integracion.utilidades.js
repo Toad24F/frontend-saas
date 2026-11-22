@@ -3,7 +3,7 @@ import { createRequire } from 'node:module';
 import { resolve } from 'node:path';
 
 // Las utilidades comparten las dependencias del backend hermano usado por la fixture.
-const requerirBackend = createRequire(resolve(process.cwd(), '../SaaS-backend/package.json'));
+const requerirBackend = createRequire(resolve(process.cwd(), '../backend/package.json'));
 const { createConnection } = requerirBackend('mysql2/promise');
 
 export const urlPortal = (negocio = 1) => `${process.env.PORTAL_TEST_ORIGIN}/reservas/portal-qa-${negocio}`;

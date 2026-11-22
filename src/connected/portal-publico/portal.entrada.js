@@ -13,6 +13,8 @@ import { vincularCicloReserva } from './reserva.ciclo-vida.js';
 import { relojCabeceraPortal } from './portal.fechas.js';
 import { renderIcono } from '../../shared/iconos.catalogo.js';
 import { inicialesNegocio } from './negocio.identidad.js';
+import { aplicarAcentoPortal, rutaLogoPortal } from '../../shared/personalizacion.marca.js';
+import '../../shared/personalizacion.estilos.css';
 
 // La recuperación con marcador precede a cualquier catálogo o nueva selección.
 // Toda escritura conserva la sesión pública; nunca usa autenticación del panel.
@@ -26,7 +28,7 @@ export async function iniciarPortalPublico(slug) {
     <header class="portal-cabecera"><img width="176" height="42" alt="Citalendar" id="portal-logo"><span class="portal-reloj-cabecera">${renderIcono('calendar')}<span class="visually-hidden">Fecha y hora local: </span><time id="portal-reloj"></time></span>
       <button type="button" class="selector-tema boton-icono" id="portal-tema"></button></header>
     <main id="portal-principal" class="portal-contenido" aria-labelledby="portal-titulo">
-      <div class="portal-encabezado-negocio"><span class="portal-iniciales-negocio" id="portal-iniciales-negocio" aria-hidden="true"></span><div><p class="portal-antetitulo">PORTAL DE RESERVAS</p><h1 id="portal-titulo">Portal de reservas</h1><p id="portal-categoria" hidden></p></div><span class="portal-etiqueta-en-linea">Reservas en línea</span></div>
+      <div class="portal-encabezado-negocio"><span class="portal-iniciales-negocio" id="portal-iniciales-negocio" aria-hidden="true"></span><img class="portal-logo-negocio" id="portal-logo-negocio" width="88" height="88" alt="" hidden><div><p class="portal-antetitulo">PORTAL DE RESERVAS</p><h1 id="portal-titulo">Portal de reservas</h1><p id="portal-categoria" hidden></p></div><span class="portal-etiqueta-en-linea">Reservas en línea</span></div>
       <div id="portal-estado" role="status" aria-live="polite" aria-atomic="true"></div>
       <div id="portal-esqueleto-inicial" aria-hidden="true">${renderEsqueletoPortal()}</div>
       <button type="button" class="btn btn-primary mt-3" id="portal-reintentar" hidden>Reintentar conexión</button>
@@ -36,6 +38,28 @@ export async function iniciarPortalPublico(slug) {
   const reintentar = raiz.querySelector('#portal-reintentar');
   const botonTema = raiz.querySelector('#portal-tema');
   const reloj = raiz.querySelector('#portal-reloj');
+  const principal = raiz.querySelector('#portal-principal');
+  const logoNegocio = raiz.querySelector('#portal-logo-negocio');
+  const iniciales = raiz.querySelector('#portal-iniciales-negocio');
+  let marcaAnterior = '';
+  logoNegocio.onerror = () => { logoNegocio.hidden = true; iniciales.hidden = false; };
+
+  // Solo se aplican colores válidos y el recurso publicado bajo el slug actual.
+  function actualizarMarca(marca, nombre) {
+    const firma = JSON.stringify(marca);
+    if (firma === marcaAnterior) return;
+    marcaAnterior = firma;
+    aplicarAcentoPortal(principal, marca?.acento);
+    const recibida = marca?.logoUrl;
+    const ruta = typeof recibida === 'string' ? rutaLogoPortal(slug, recibida.split('/').at(-1)) : null;
+    logoNegocio.hidden = !ruta || ruta !== recibida;
+    iniciales.hidden = !logoNegocio.hidden;
+    if (!logoNegocio.hidden) {
+      logoNegocio.alt = `Logo de ${nombre}`;
+      logoNegocio.src = ruta;
+    } else logoNegocio.removeAttribute('src');
+  }
+
   function actualizarIdentidadNegocio(nombre) {
     raiz.querySelector('#portal-titulo').textContent = nombre;
     raiz.querySelector('#portal-iniciales-negocio').textContent = inicialesNegocio(nombre);
@@ -94,6 +118,7 @@ export async function iniciarPortalPublico(slug) {
         alCambiar: (estado, tipo) => {
           if (estado.negocio?.nombre) {
             actualizarIdentidadNegocio(estado.negocio.nombre);
+            actualizarMarca(estado.marca, estado.negocio.nombre);
             const categoria = raiz.querySelector('#portal-categoria');
             categoria.textContent = estado.negocio.categoria || '';
             categoria.hidden = !estado.negocio.categoria;

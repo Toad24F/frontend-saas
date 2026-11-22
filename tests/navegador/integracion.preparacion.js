@@ -7,7 +7,7 @@ import { resolve } from 'node:path';
 
 const carpetaFrontend = process.cwd();
 // La integración local usa el repositorio hermano real y una base efímera confirmada.
-const carpetaBackend = resolve(carpetaFrontend, '../SaaS-backend');
+const carpetaBackend = resolve(carpetaFrontend, '../backend');
 const requerirBackend = createRequire(resolve(carpetaBackend, 'package.json'));
 const { createConnection } = requerirBackend('mysql2/promise');
 const dotenv = requerirBackend('dotenv');
@@ -17,6 +17,8 @@ const entornoPruebas = dotenv.parse(readFileSync(resolve(carpetaBackend, '.env.t
 // El runner usa solo las credenciales de test; DB_NAME cotidiano queda como
 // barrera adicional para impedir que la base temporal reutilice ese nombre.
 for (const clave of ['TEST_DB_HOST', 'TEST_DB_PORT', 'TEST_DB_USER', 'TEST_DB_PASS', 'TEST_DB_NAME', 'TEST_DB_CONFIRMED']) {
+  // Permite una instancia desechable dedicada sin cambiar archivos privados del backend.
+  if (process.env[clave] !== undefined) entornoPruebas[clave] = process.env[clave];
   if (!entornoPruebas[clave]) throw new Error(`Falta ${clave} en .env.test.local.`);
 }
 if (entornoPruebas.TEST_DB_NAME !== entornoPruebas.TEST_DB_CONFIRMED || entornoPruebas.TEST_DB_NAME === entornoHabitual.DB_NAME) {
