@@ -40,6 +40,12 @@ export async function api(ruta, method = 'GET', cuerpo, opciones = {}) {
     }
     const error = new Error(Array.isArray(datos?.message) ? datos.message.join(' · ') : datos?.message || `Error del servidor (${respuesta.status}).`);
     error.status = respuesta.status;
+    // Conservar únicamente la proyección tipada para que el editor pueda ofrecer
+    // una unión explícita sin mostrar el cuerpo libre de cualquier error HTTP.
+    if (respuesta.status === 409 && datos?.codigo === 'cliente_coincidente') {
+      error.codigo = datos.codigo;
+      error.destino = datos.destino;
+    }
     throw error;
   }
   return datos;

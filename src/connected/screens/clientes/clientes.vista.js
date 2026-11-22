@@ -8,18 +8,21 @@ import { crearAgendaStore } from '../../modules/agenda/agenda.store.js';
 import { abrirFichaCliente, abrirEditorCliente } from './clientes.paneles.js';
 import '../../../shared/screens/clientes/clientes.estilos.css';
 import { errorSeguro } from '../../modules/agenda/agenda.errores.js';
+import { leerUnionPendiente, validarResultadoUnion } from '../../modules/clientes/clientes.union.js';
 
 const clientesClient = crearClientesClient(api),
   directorioStore = crearAgendaStore(clientesClient.listar);
 let identidad = '',
   filtros = { busqueda: '', pagina: 1 };
 let direccionFocoPendiente = null;
+let unionEnCurso = false, errorUnion = '';
 const identidadSesion = () =>
   usuarioActual ? `${usuarioActual.negocioId}:${usuarioActual.id}:${usuarioActual.sesionId || ''}` : '';
 function reiniciar() {
   directorioStore.reset();
   identidad = '';
   filtros = { busqueda: '', pagina: 1 };
+  unionEnCurso = false; errorUnion = '';
 }
 window.addEventListener('cita-sesion-expirada', reiniciar);
 
@@ -67,6 +70,7 @@ export function clientes() {
   }
   void cargarDirectorio();
   const modelo = directorioStore.state;
+  const unionPendiente = leerUnionPendiente(identidad);
   let contenido = '';
   if (modelo.busy)
     contenido =
@@ -87,7 +91,11 @@ export function clientes() {
         );
     contenido += renderPaginador(modelo.data);
   }
-  return `${renderEncabezadoPagina('Clientes', 'Conoce a las personas que confían en tu negocio.', '<button class="btn btn-primary" data-directorio-nuevo>Nuevo cliente</button>')}<section class="superficie directorio-clientes" aria-label="Directorio de clientes"><div class="encabezado-seccion"><h2>Tu directorio</h2><form id="filtros-directorio-conectado"><label class="campo-busqueda">${renderIcono('search')}<input id="busqueda-directorio-conectado" name="busqueda" aria-label="Buscar clientes" placeholder="Nombre o teléfono…" type="search" maxlength="150" value="${esc(filtros.busqueda)}"></label><button type="submit" class="btn btn-light">Buscar</button></form></div><div aria-busy="${modelo.busy}" aria-live="polite">${contenido}</div></section>`;
+  // El aviso pertenece al directorio, porque una unión confirmada puede ocultar ya el origen.
+  const avisoUnion = unionPendiente
+    ? `<section class="superficie directorio-clientes" role="status"><p>Hay una unión pendiente de comprobar. Antes de crear o corregir otra ficha, recupera la misma operación.</p>${errorUnion ? `<p role="alert">${esc(errorUnion)}</p>` : ''}<button class="btn btn-primary" data-directorio-recuperar-union ${unionEnCurso ? 'disabled' : ''}>Recuperar unión pendiente</button></section>`
+    : '';
+  return `${renderEncabezadoPagina('Clientes', 'Conoce a las personas que confían en tu negocio.', `<button class="btn btn-primary" data-directorio-nuevo ${unionPendiente ? 'disabled' : ''}>Nuevo cliente</button>`)}${avisoUnion}<section class="superficie directorio-clientes" aria-label="Directorio de clientes"><div class="encabezado-seccion"><h2>Tu directorio</h2><form id="filtros-directorio-conectado"><label class="campo-busqueda">${renderIcono('search')}<input id="busqueda-directorio-conectado" name="busqueda" aria-label="Buscar clientes" placeholder="Nombre o teléfono…" type="search" maxlength="150" value="${esc(filtros.busqueda)}"></label><button type="submit" class="btn btn-light">Buscar</button></form></div><div aria-busy="${modelo.busy}" aria-live="polite">${contenido}</div></section>`;
 }
 const recargarDirectorio = async () => {
   await cargarDirectorio(true);
@@ -111,7 +119,7 @@ document.addEventListener('submit', (evento) => {
 });
 document.addEventListener('click', (evento) => {
   const control = evento.target.closest(
-    '[data-directorio-nuevo],[data-directorio-abrir],[data-directorio-pagina],[data-directorio-reintentar]',
+    '[data-directorio-nuevo],[data-directorio-abrir],[data-directorio-pagina],[data-directorio-reintentar],[data-directorio-recuperar-union]',
   );
   if (
     !control ||
@@ -120,6 +128,32 @@ document.addEventListener('click', (evento) => {
     control.disabled
   )
     return;
+  if (control.hasAttribute('data-directorio-recuperar-union')) {
+    // Recuperar usa la misma entrada persistida; el directorio no crea una clave nueva.
+    const pendiente = leerUnionPendiente(identidadSesion());
+    if (!pendiente || unionEnCurso) return;
+    unionEnCurso = true; errorUnion = ''; render();
+    void (async () => {
+      try {
+        const resultado = validarResultadoUnion(await clientesClient.unir(pendiente.origenId, pendiente.intento), pendiente.intento);
+        if (identidad !== identidadSesion()) return;
+        sessionStorage.removeItem(pendiente.clave);
+        await recargarDirectorio();
+        render();
+        await abrirFichaCliente(resultado.destinoId, recargarDirectorio);
+      } catch (error) {
+        if (identidad !== identidadSesion()) return;
+        if ([400, 409].includes(error.status)) sessionStorage.removeItem(pendiente.clave);
+        errorUnion = [400, 409].includes(error.status)
+          ? 'La unión fue rechazada. Revisa las fichas vigentes antes de otro intento.'
+          : 'No se pudo confirmar la unión. Reintenta la misma operación.';
+      } finally {
+        unionEnCurso = false;
+        if (identidad === identidadSesion()) render();
+      }
+    })();
+    return;
+  }
   if (control.hasAttribute('data-directorio-nuevo')) {
     abrirEditorCliente(null, recargarDirectorio);
     return;

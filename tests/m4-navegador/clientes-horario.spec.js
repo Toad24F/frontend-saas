@@ -13,18 +13,22 @@ async function prepararEscenario(pagina, rol = 'recepcionista', tema = 'light') 
     nombreFicha: 'Ana actual',
     directorioVacio: false,
     esperaEscritura: null,
+    coincidencia: false,
+    respuestaUnionPerdida: false,
+    nombreDestino: 'Otra persona',
+    origenAbsorbido: false,
   };
   const ficha = (id = 1) => ({
     id,
     negocioId: 1,
     version: control.version,
-    nombreCompleto: id === 1 ? control.nombreFicha : 'Otra persona',
+    nombreCompleto: id === 1 ? control.nombreFicha : control.nombreDestino,
     telefono: '6145550101',
     creadoEn: '2026-11-12T12:00:00Z',
   });
   await pagina.route(
     (url) =>
-      /^\/clientes(?:\/\d+(?:\/citas)?)?$/.test(url.pathname) ||
+      /^\/clientes(?:\/\d+(?:\/citas|\/uniones)?)?$/.test(url.pathname) ||
       url.pathname === '/citas/7/horario' ||
       url.pathname === '/citas/7',
     async (rutaInterceptada) => {
@@ -38,6 +42,26 @@ async function prepararEscenario(pagina, rol = 'recepcionista', tema = 'light') 
           body: solicitud.postDataJSON(),
         });
         if (control.esperaEscritura) await control.esperaEscritura;
+        if (ruta.endsWith('/uniones')) {
+          if (control.respuestaUnionPerdida) {
+            control.respuestaUnionPerdida = false;
+            control.origenAbsorbido = true;
+            await rutaInterceptada.abort('failed');
+            return;
+          }
+          await rutaInterceptada.fulfill({ json: {
+            id: '41', origenId: 1, destinoId: 2, versionOrigen: 3,
+            versionDestino: 3, ocurridoEn: '2026-11-22T12:00:00Z',
+          } });
+          return;
+        }
+        if (ruta === '/clientes/1' && control.coincidencia) {
+          await rutaInterceptada.fulfill({ status: 409, json: {
+            message: 'Coincide', codigo: 'cliente_coincidente',
+            destino: { id: 2, nombreCompleto: 'Otra persona', version: 2 },
+          } });
+          return;
+        }
         if (control.estadoHttp) {
           await rutaInterceptada.fulfill({
             status: control.estadoHttp,
@@ -78,7 +102,7 @@ async function prepararEscenario(pagina, rol = 'recepcionista', tema = 'light') 
           citas: [
             {
               id: 7,
-              clienteId: 1,
+              clienteId: Number(ruta.match(/^\/clientes\/(\d+)/)?.[1]),
               folio: 'M4-0007',
               nombreContacto: 'Contacto histórico',
               telefonoContacto: '6145550199',
@@ -93,17 +117,17 @@ async function prepararEscenario(pagina, rol = 'recepcionista', tema = 'light') 
             },
           ],
           pagina: Number(url.searchParams.get('pagina')),
-          limite: 50,
+          limite: Number(url.searchParams.get('limite')),
           hayMas: url.searchParams.get('pagina') === '1',
         };
       } else if (ruta === '/clientes' && solicitud.method() === 'GET')
         datos = {
-          clientes: control.directorioVacio ? [] : [ficha(), ficha(2)],
+          clientes: control.directorioVacio ? [] : control.origenAbsorbido ? [ficha(2)] : [ficha(), ficha(2)],
           pagina: Number(url.searchParams.get('pagina')),
-          limite: 50,
+          limite: Number(url.searchParams.get('limite')),
           hayMas: url.searchParams.get('pagina') === '1',
         };
-      else datos = ficha();
+      else datos = ficha(Number(ruta.match(/^\/clientes\/(\d+)/)?.[1]) || 1);
       await rutaInterceptada.fulfill({ json: datos });
     },
   );
@@ -219,6 +243,125 @@ test('T098/T099: fichas distintas con teléfono compartido, historial separado, 
   expect(control.escrituras[2].body.version).toBeUndefined();
   expect(errores).toEqual([]);
 });
+
+test('M5-T024/T025/T029: advertencia, aceptación y recuperación usan una sola clave', async ({ page: pagina }) => {
+  const { control, errores } = await prepararEscenario(pagina);
+  control.coincidencia = true;
+  await pagina.goto('/admin/clientes');
+  await pagina.locator('[data-directorio-abrir="1"]:visible').click();
+  const panel = pagina.getByRole('dialog');
+  await panel.getByRole('button', { name: 'Corregir ficha' }).click();
+  await panel.getByLabel('Nombre completo').fill('Otra persona');
+  await panel.getByRole('button', { name: 'Guardar ficha' }).click();
+  await expect(panel).toContainText('Otra persona');
+  await expect(panel.getByRole('button', { name: 'Aceptar unión' })).toBeVisible();
+  control.respuestaUnionPerdida = true;
+  await panel.getByRole('button', { name: 'Aceptar unión' }).click();
+  expect(errores).toEqual([]);
+  await expect(panel.getByRole('button', { name: 'Reintentar unión' })).toBeVisible();
+  await panel.getByRole('button', { name: 'Reintentar unión' }).click();
+  await expect(panel).toContainText('Historial de citas');
+  const uniones = control.escrituras.filter((escritura) => escritura.path.endsWith('/uniones'));
+  expect(uniones).toHaveLength(2);
+  expect(uniones[0]).toEqual(uniones[1]);
+});
+
+test('M5-T026: grupo heredado exige elegir destino antes de unir', async ({ page: pagina }) => {
+  const { control } = await prepararEscenario(pagina);
+  control.nombreDestino = 'ANA ACTUAL';
+  await pagina.goto('/admin/clientes');
+  await pagina.locator('[data-directorio-abrir="1"]:visible').click();
+  const panel = pagina.getByRole('dialog');
+  await panel.getByRole('button', { name: 'Revisar coincidencias' }).click();
+  await expect(panel.getByRole('button', { name: /Elegir ficha #2/ })).toBeVisible();
+  expect(control.escrituras.filter((fila) => fila.path.endsWith('/uniones'))).toHaveLength(0);
+  await panel.getByRole('button', { name: /Elegir ficha #2/ }).click();
+  await expect(panel.getByRole('button', { name: 'Aceptar unión' })).toBeVisible();
+  await panel.getByRole('button', { name: 'Aceptar unión' }).click();
+  await expect(panel).toContainText('Historial de citas');
+  const [union] = control.escrituras.filter((fila) => fila.path.endsWith('/uniones'));
+  expect(union.body.destinoId).toBe(2);
+  expect(union.body).not.toHaveProperty('datosPropuestos');
+});
+
+test('M5-T025: recarga recupera la misma unión aunque el origen ya no aparezca en el directorio', async ({ page: pagina }) => {
+  const { control } = await prepararEscenario(pagina);
+  control.coincidencia = true;
+  await pagina.goto('/admin/clientes');
+  await pagina.locator('[data-directorio-abrir="1"]:visible').click();
+  const panel = pagina.getByRole('dialog');
+  await panel.getByRole('button', { name: 'Corregir ficha' }).click();
+  await panel.getByLabel('Nombre completo').fill('Otra persona');
+  await panel.getByRole('button', { name: 'Guardar ficha' }).click();
+  control.respuestaUnionPerdida = true;
+  await panel.getByRole('button', { name: 'Aceptar unión' }).click();
+  await expect(panel.getByRole('button', { name: 'Reintentar unión' })).toBeVisible();
+  await panel.getByRole('button', { name: 'Cerrar', exact: true }).last().click();
+  await pagina.getByRole('button', { name: 'Nuevo cliente' }).click();
+  await expect(pagina.getByRole('dialog')).toContainText('Recupera la unión pendiente');
+  await pagina.reload();
+  await expect(pagina.locator('[data-directorio-abrir="1"]')).toHaveCount(0);
+  await pagina.getByRole('button', { name: 'Recuperar unión pendiente' }).click();
+  await expect(pagina.getByRole('dialog')).toContainText('Historial de citas');
+  const uniones = control.escrituras.filter((fila) => fila.path.endsWith('/uniones'));
+  expect(uniones).toHaveLength(2);
+  expect(uniones[0]).toEqual(uniones[1]);
+});
+
+for (const rol of ['admin_negocio', 'recepcionista'])
+  test(`M5-T029: ${rol} acepta con teclado y conserva snapshot histórico`, async ({ page: pagina }) => {
+    const { control } = await prepararEscenario(pagina, rol);
+    control.coincidencia = true;
+    await pagina.goto('/admin/clientes');
+    await pagina.locator('[data-directorio-abrir="1"]:visible').focus();
+    await pagina.keyboard.press('Enter');
+    const panel = pagina.getByRole('dialog');
+    await panel.getByRole('button', { name: 'Corregir ficha' }).focus();
+    await pagina.keyboard.press('Enter');
+    await panel.getByLabel('Nombre completo').fill('Otra persona');
+    await panel.getByRole('button', { name: 'Guardar ficha' }).focus();
+    await pagina.keyboard.press('Enter');
+    await expect(panel.getByRole('button', { name: 'Aceptar unión' })).toBeFocused();
+    await pagina.keyboard.press('Tab');
+    await expect(panel.getByRole('button', { name: 'Volver a editar' })).toBeFocused();
+    await pagina.keyboard.press('Enter');
+    expect(control.escrituras.filter((fila) => fila.path.endsWith('/uniones'))).toHaveLength(0);
+    await panel.getByRole('button', { name: 'Guardar ficha' }).focus();
+    await pagina.keyboard.press('Enter');
+    await expect(panel.getByRole('button', { name: 'Aceptar unión' })).toBeFocused();
+    await pagina.keyboard.press('Enter');
+    await expect(panel).toContainText('Contacto histórico');
+    await expect(panel).toContainText('6145550199');
+    expect(control.escrituras.filter((fila) => fila.path.endsWith('/uniones'))).toHaveLength(1);
+  });
+
+test('M5-T029: Profesional no accede al directorio ni al editor de unión', async ({ page: pagina }) => {
+  const { control } = await prepararEscenario(pagina, 'profesional');
+  await pagina.goto('/admin/clientes');
+  await expect(pagina.getByRole('button', { name: 'Nuevo cliente' })).toHaveCount(0);
+  expect(control.escrituras.filter((fila) => fila.path.endsWith('/uniones'))).toHaveLength(0);
+});
+
+for (const ancho of [1366, 390])
+  for (const tema of ['light', 'dark'])
+    test(`M5-T024: aviso de unión ${ancho}px ${tema}`, async ({ page: pagina }) => {
+      await pagina.setViewportSize({ width: ancho, height: 900 });
+      const { control } = await prepararEscenario(pagina, 'recepcionista', tema);
+      control.coincidencia = true;
+      await pagina.goto('/admin/clientes');
+      await pagina.locator('[data-directorio-abrir="1"]:visible').click();
+      const panel = pagina.getByRole('dialog');
+      await panel.getByRole('button', { name: 'Corregir ficha' }).click();
+      await panel.getByLabel('Nombre completo').fill('Otra persona');
+      await panel.getByRole('button', { name: 'Guardar ficha' }).click();
+      await expect(panel.getByRole('button', { name: 'Aceptar unión' })).toBeVisible();
+      await expect(panel.getByRole('button', { name: 'Volver a editar' })).toBeVisible();
+      expect(await pagina.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+      await pagina.screenshot({ path: `test-results/m4/union-${ancho}-${tema}.png` });
+      await panel.getByRole('button', { name: 'Volver a editar' }).click();
+      await expect(panel.getByLabel('Nombre completo')).toBeEnabled();
+      expect(control.escrituras.filter((fila) => fila.path.endsWith('/uniones'))).toHaveLength(0);
+    });
 
 for (const ancho of [1366, 390])
   for (const tema of ['light', 'dark'])

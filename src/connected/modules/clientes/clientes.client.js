@@ -124,5 +124,10 @@ export function crearClientesClient(solicitar) {
         id,
       );
     },
+    async unir(id, intento) {
+      idPositivo(id);
+      // El intento ya contiene las versiones y la clave fijadas antes del primer POST.
+      return solicitar(`/clientes/${id}/uniones`, 'POST', intento);
+    },
   };
 }

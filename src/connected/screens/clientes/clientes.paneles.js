@@ -15,6 +15,7 @@ import { crearMutacionVersionada } from '../../modules/agenda/agenda.mutacion-ve
 import { puedeGestionarCitas } from '../../modules/agenda/agenda.contrato-manual.js';
 import { observarRegistro } from '../agenda/agenda.actualizacion-viva.js';
 import { errorSeguro } from '../../modules/agenda/agenda.errores.js';
+import { crearIntentoUnion, leerUnionPendiente, reconocerCoincidencia, validarResultadoUnion } from '../../modules/clientes/clientes.union.js';
 import '../../../shared/screens/agenda/agenda.refinamientos.css';
 import '../agenda/agenda.estilos.css';
 
@@ -25,6 +26,7 @@ const identidadSesion = () =>
   usuarioActual ? `${usuarioActual.negocioId}:${usuarioActual.id}:${usuarioActual.sesionId || ''}` : '';
 const valorHistorico = (valor) =>
   valor == null ? 'Sin registro histórico' : String(valor);
+const nombreComparable = (valor) => valor.normalize('NFC').toLowerCase().normalize('NFC').replace(/[\p{White_Space}\uFEFF]+/gu, ' ').trim();
 window.addEventListener('cita-sesion-expirada', () => {
   generacion++;
   destinoFoco = null;
@@ -69,9 +71,35 @@ export async function abrirFichaCliente(id, alCambiar) {
     const ficha = await clientesClient.consultar(id);
     if (!vigente()) return;
     dialogo.querySelector('.dialogo-cuerpo').innerHTML =
-      `<dl class="agenda-campos-detalle"><div><dt>Nombre completo</dt><dd>${esc(ficha.nombreCompleto)}</dd></div><div><dt>Teléfono</dt><dd>${esc(ficha.telefono)}</dd></div><div><dt>Cliente</dt><dd>#${ficha.id}</dd></div><div><dt>Versión</dt><dd>${ficha.version}</dd></div></dl><button class="btn btn-primary" data-ficha-corregir>Corregir ficha</button><section class="historial-cliente" aria-label="Historial del cliente"><h3>Historial de citas</h3><p class="ayuda-campo">Los contactos y costos de cada cita conservan su registro histórico, aunque se corrija esta ficha.</p><div data-ficha-historial></div></section>`;
+      `<dl class="agenda-campos-detalle"><div><dt>Nombre completo</dt><dd>${esc(ficha.nombreCompleto)}</dd></div><div><dt>Teléfono</dt><dd>${esc(ficha.telefono)}</dd></div><div><dt>Cliente</dt><dd>#${ficha.id}</dd></div><div><dt>Versión</dt><dd>${ficha.version}</dd></div></dl><button class="btn btn-primary" data-ficha-corregir>Corregir ficha</button> <button class="btn btn-light" data-ficha-coincidencias>Revisar coincidencias</button><div data-ficha-coincidencias-resultado aria-live="polite"></div><section class="historial-cliente" aria-label="Historial del cliente"><h3>Historial de citas</h3><p class="ayuda-campo">Los contactos y costos de cada cita conservan su registro histórico, aunque se corrija esta ficha.</p><div data-ficha-historial></div></section>`;
     dialogo.querySelector('[data-ficha-corregir]').onclick = () =>
       abrirEditorCliente(ficha, alCambiar);
+    dialogo.querySelector('[data-ficha-coincidencias]').onclick = async () => {
+      const contenedor = dialogo.querySelector('[data-ficha-coincidencias-resultado]');
+      contenedor.innerHTML = '<p role="status">Revisando fichas activas…</p>';
+      try {
+        // El directorio paginado ya aplica permiso y negocio; se recorren todas las páginas
+        // porque una búsqueda textual podría omitir espacios distintos en grupos heredados.
+        const candidatas = new Map();
+        for (let pagina = 1; ; pagina++) {
+          const resultado = await clientesClient.listar({ pagina, limite: 100 });
+          if (!vigente()) return;
+          for (const candidata of resultado.clientes)
+            if (candidata.id !== ficha.id && candidata.telefono === ficha.telefono &&
+              nombreComparable(candidata.nombreCompleto) === nombreComparable(ficha.nombreCompleto))
+              candidatas.set(candidata.id, candidata);
+          if (!resultado.hayMas) break;
+        }
+        contenedor.innerHTML = candidatas.size
+          ? `<p>Elige expresamente la ficha que conservará sus datos. Las citas de esta ficha pasarán a ella sin cambiar sus contactos históricos.</p>${[...candidatas.values()].map((candidata) => `<button type="button" class="btn btn-light" data-elegir-coincidencia="${candidata.id}">Elegir ficha #${candidata.id}: ${esc(candidata.nombreCompleto)}</button>`).join(' ')}`
+          : '<p>No hay otras fichas activas con el mismo nombre y teléfono normalizados.</p>';
+        for (const candidata of candidatas.values())
+          contenedor.querySelector(`[data-elegir-coincidencia="${candidata.id}"]`).onclick = () =>
+            abrirEditorCliente(ficha, alCambiar, candidata);
+      } catch (error) {
+        if (vigente()) contenedor.innerHTML = renderError(error);
+      }
+    };
     let generacionHistorial = 0;
     async function cargarHistorial(pagina = 1) {
       const consulta = ++generacionHistorial,
@@ -124,20 +152,87 @@ export async function abrirFichaCliente(id, alCambiar) {
     dialogo.querySelector('[data-ficha-reintentar]')?.addEventListener('click', () => void abrirFichaCliente(id, alCambiar));
   }
 }
-export function abrirEditorCliente(ficha, alCambiar) {
+export function abrirEditorCliente(ficha, alCambiar, destinoHeredado = null) {
   if (!puedeGestionarCitas(usuarioActual?.rol)) return;
+  // Una respuesta incierta de otra ficha debe resolverse antes de iniciar otra mutación.
+  const pendienteAjena = leerUnionPendiente(identidadSesion());
+  if (pendienteAjena && pendienteAjena.origenId !== ficha?.id) {
+    const aviso = abrirPanelCliente('Unión pendiente', '<div class="dialogo-cuerpo"><p>Recupera la unión pendiente desde el directorio antes de crear o corregir otra ficha.</p><button type="button" class="btn btn-light" data-union-cerrar>Cerrar</button></div>');
+    aviso.querySelector('[data-union-cerrar]').onclick = () => aviso.close();
+    return;
+  }
   const revisionPanel = ++generacion,
     identidad = identidadSesion(),
     clave = `cliente:${identidad}:${ficha?.id ?? 'nuevo'}`,
     borrador = borradorAgenda(clave);
   const dialogo = abrirPanelCliente(
     ficha ? 'Corregir ficha' : 'Nuevo cliente',
-    `<form><div class="dialogo-cuerpo"><p class="introduccion-formulario">${ficha ? 'Corrige los datos actuales de esta persona. Las citas anteriores no se modifican.' : 'Crea una ficha independiente. Dos personas pueden compartir el mismo teléfono.'}</p>${renderCampo('Nombre completo', 'nombreCompleto', borrador?.nombreCompleto ?? ficha?.nombreCompleto ?? '', 'text', 'required autocomplete="off"')}${renderCampo('Teléfono', 'telefono', borrador?.telefono ?? ficha?.telefono ?? '', 'tel', 'required autocomplete="off" inputmode="tel"')}<p class="ayuda-campo">Nombre: hasta 150 caracteres. Teléfono: diez dígitos; puedes incluir +52, espacios o guiones.</p><p class="error-formulario" data-ficha-error role="alert" tabindex="-1" hidden></p><p class="ayuda-campo aviso-cliente" data-ficha-alta-incierta hidden>El alta puede haberse guardado aunque no se reciba confirmación. Revisa elemento directorio antes de descartar este borrador y crear otra ficha.</p><button type="button" class="btn btn-light" data-ficha-releer hidden>${ficha ? 'Releer ficha' : 'Revisar directorio'}</button>${!ficha ? '<button type="button" class="btn btn-light" data-ficha-descartar hidden>Descartar borrador</button>' : ''}</div><div class="dialogo-pie"><button type="button" class="btn btn-light" data-ficha-cerrar>Cerrar</button><button type="submit" class="btn btn-primary">Guardar ficha</button></div></form>`,
+    `<form><div class="dialogo-cuerpo"><p class="introduccion-formulario">${ficha ? 'Corrige los datos actuales de esta persona. Las citas anteriores no se modifican.' : 'Crea una ficha independiente. Dos personas pueden compartir el mismo teléfono.'}</p>${renderCampo('Nombre completo', 'nombreCompleto', borrador?.nombreCompleto ?? ficha?.nombreCompleto ?? '', 'text', 'required autocomplete="off"')}${renderCampo('Teléfono', 'telefono', borrador?.telefono ?? ficha?.telefono ?? '', 'tel', 'required autocomplete="off" inputmode="tel"')}<p class="ayuda-campo">Nombre: hasta 150 caracteres. Teléfono: diez dígitos; puedes incluir +52, espacios o guiones.</p><p class="error-formulario" data-ficha-error role="alert" tabindex="-1" hidden></p><section data-ficha-coincidencia role="status" hidden></section><p class="ayuda-campo aviso-cliente" data-ficha-alta-incierta hidden>El alta puede haberse guardado aunque no se reciba confirmación. Revisa elemento directorio antes de descartar este borrador y crear otra ficha.</p><button type="button" class="btn btn-light" data-ficha-releer hidden>${ficha ? 'Releer ficha' : 'Revisar directorio'}</button>${!ficha ? '<button type="button" class="btn btn-light" data-ficha-descartar hidden>Descartar borrador</button>' : ''}</div><div class="dialogo-pie"><button type="button" class="btn btn-light" data-ficha-cerrar>Cerrar</button><button type="submit" class="btn btn-primary">Guardar ficha</button></div></form>`,
   );
   const formulario = dialogo.querySelector('form'),
     guardar = formulario.querySelector('[type="submit"]'),
     avisoError = formulario.querySelector('[data-ficha-error]'),
-    releer = formulario.querySelector('[data-ficha-releer]');
+    releer = formulario.querySelector('[data-ficha-releer]'),
+    avisoCoincidencia = formulario.querySelector('[data-ficha-coincidencia]');
+  let coincidencia = destinoHeredado, intentoUnion = null, unionEnCurso = false;
+  let propuestaDeEdicion = !destinoHeredado;
+  let valoresUnion = null;
+  const claveUnion = ficha ? `union-cliente:${identidad}:${ficha.id}` : '';
+  // El intento se conserva antes del POST para repetir su mismo cuerpo si la respuesta se pierde.
+  if (claveUnion) {
+    try { intentoUnion = JSON.parse(sessionStorage.getItem(claveUnion) || 'null'); }
+    catch { intentoUnion = null; }
+  }
+  function mostrarUnion(mensaje = '') {
+    if (!ficha || (!coincidencia && !intentoUnion)) { avisoCoincidencia.hidden = true; return; }
+    avisoCoincidencia.hidden = false;
+    avisoCoincidencia.innerHTML = intentoUnion
+      ? `<p>${esc(mensaje || 'Hay una unión pendiente de comprobar. Reintenta con la misma clave antes de modificar otra ficha.')}</p><button type="button" class="btn btn-primary" data-union-reintentar ${unionEnCurso ? 'disabled' : ''}>Reintentar unión</button>`
+      : `<p>Los datos propuestos coinciden con la ficha #${coincidencia.id}: <strong>${esc(coincidencia.nombreCompleto)}</strong>. Si aceptas, sus citas e historial pasarán a esa ficha; los datos históricos de cada cita se conservan. No se cambió ninguna ficha todavía.</p><button type="button" class="btn btn-primary" data-union-aceptar>Aceptar unión</button> <button type="button" class="btn btn-light" data-union-volver>Volver a editar</button>`;
+    avisoCoincidencia.querySelector('[data-union-aceptar]')?.addEventListener('click', () => {
+      const valores = propuestaDeEdicion ? valoresUnion : null;
+      intentoUnion = crearIntentoUnion(ficha, coincidencia, valores
+        ? { nombreCompleto: valores.nombreCompleto, telefono: valores.telefono } : null);
+      try { sessionStorage.setItem(claveUnion, JSON.stringify(intentoUnion)); }
+      catch { /* La repetición sigue disponible mientras esta pestaña permanezca abierta. */ }
+      coincidencia = null;
+      sincronizar();
+      void enviarUnion();
+    });
+    avisoCoincidencia.querySelector('[data-union-volver]')?.addEventListener('click', () => {
+      coincidencia = null;
+      mutacion.state.stale = false;
+      mostrarUnion(); sincronizar();
+      formulario.elements.nombreCompleto.focus();
+    });
+    avisoCoincidencia.querySelector('[data-union-reintentar]')?.addEventListener('click', () => void enviarUnion());
+  }
+  async function enviarUnion() {
+    if (!vigente() || !intentoUnion || unionEnCurso) return;
+    unionEnCurso = true;
+    mostrarUnion('Comprobando la unión con la misma clave…');
+    try {
+      const resultado = validarResultadoUnion(await clientesClient.unir(ficha.id, intentoUnion), intentoUnion);
+      if (!vigente()) return;
+      sessionStorage.removeItem(claveUnion);
+      intentoUnion = null;
+      borrarBorradorAgenda(clave);
+      await alCambiar();
+      if (vigente()) await abrirFichaCliente(resultado.destinoId, alCambiar);
+    } catch (error) {
+      if (!vigente()) return;
+      // Red/503 son inciertos; 400/409 confirmados exigen relectura antes de un intento nuevo.
+      if ([400, 409].includes(error.status)) {
+        sessionStorage.removeItem(claveUnion);
+        intentoUnion = null;
+        mutacion.state.stale = true;
+        sincronizar('La unión fue rechazada. Conservamos el borrador; relee ambas fichas antes de volver a intentar.');
+      } else mostrarUnion('No se pudo confirmar la unión. Reintenta la misma operación.');
+    } finally {
+      unionEnCurso = false;
+      if (vigente()) mostrarUnion();
+    }
+  }
   const vigente = () =>
     dialogo.open && revisionPanel === generacion && identidad === identidadSesion();
   const mutacion = crearMutacionVersionada(
@@ -163,7 +258,7 @@ export function abrirEditorCliente(ficha, alCambiar) {
   function sincronizar(mensaje) {
     guardar.disabled = mutacion.state.busy || mutacion.state.stale;
     formulario.querySelectorAll('input').forEach((entrada) => {
-      entrada.disabled = mutacion.state.busy;
+      entrada.disabled = mutacion.state.busy || Boolean(coincidencia) || Boolean(intentoUnion);
     });
     releer.hidden = !mutacion.state.stale;
     if (!ficha) {
@@ -182,6 +277,8 @@ export function abrirEditorCliente(ficha, alCambiar) {
       ? 'Hay un conflicto o un resultado sin confirmar. Revisa los datos antes de volver a guardar.'
       : '',
   );
+  if (intentoUnion) { mutacion.state.stale = true; sincronizar(); mostrarUnion(); }
+  else if (coincidencia) { mutacion.state.stale = true; sincronizar(); releer.hidden = true; mostrarUnion(); }
   formulario.elements.nombreCompleto.focus();
   formulario.oninput = recordarBorrador;
   // Una ficha abierta no cambia de versión silenciosamente: preserva lo escrito y exige relectura explícita.
@@ -220,7 +317,7 @@ export function abrirEditorCliente(ficha, alCambiar) {
     if (!vigente() || mutacion.state.busy || mutacion.state.stale) return;
     const valores = Object.fromEntries(new FormData(formulario));
     try {
-      crearPayloadCliente({ ...valores, version: ficha?.version }, Boolean(ficha));
+      valoresUnion = crearPayloadCliente({ ...valores, version: ficha?.version }, Boolean(ficha));
     } catch (error) {
       sincronizar(error.message);
       avisoError.focus();
@@ -237,6 +334,16 @@ export function abrirEditorCliente(ficha, alCambiar) {
       // Primero confirmar con la respuesta validada; después releer directorio, ficha e historial por ID.
       await alCambiar();
       if (vigente()) await abrirFichaCliente(mutacion.state.result.id, alCambiar);
+      return;
+    }
+    coincidencia = ficha ? reconocerCoincidencia(mutacion.state.error) : null;
+    propuestaDeEdicion = true;
+    if (coincidencia) {
+      sincronizar();
+      avisoError.hidden = true;
+      releer.hidden = true;
+      mostrarUnion();
+      avisoCoincidencia.querySelector('[data-union-aceptar]').focus();
       return;
     }
     recordarBorrador();
