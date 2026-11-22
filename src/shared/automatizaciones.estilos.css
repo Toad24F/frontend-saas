@@ -1,0 +1,14 @@
+/* El botón conserva el acento del panel cuando recibe foco o espera al servidor. */
+#automatizaciones-formulario .btn-primary {
+  background-color: var(--acento);
+  border-color: var(--acento);
+  color: #fff;
+}
+#automatizaciones-formulario .btn-primary:is(:hover, :active):not(:disabled) {
+  background-color: color-mix(in srgb, var(--acento) 86%, #000);
+}
+#automatizaciones-formulario :is(.btn, .form-control):focus-visible {
+  outline: 2px solid var(--texto);
+  outline-offset: 2px;
+  box-shadow: none;
+}

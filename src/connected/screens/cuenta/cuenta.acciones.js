@@ -6,6 +6,7 @@ import { consultarPublicacionPrecios, actualizarPublicacionPrecios } from './cue
 import { datosAplicacion } from '../../../shared/aplicacion.datos.js';
 import { abrirEditorMarca } from '../../../shared/personalizacion.editor.js';
 import { rutaBaseMarca } from '../../../shared/personalizacion.marca.js';
+import { abrirEditorAutomatizaciones } from '../../../shared/automatizaciones.editor.js';
 
 // Usa la misma sesión autenticada del panel. El servidor resuelve el negocio desde el actor.
 const marcaClient = {
@@ -20,9 +21,19 @@ const marcaClient = {
   restaurar: (version) => api(`${rutaBaseMarca}/restaurar`, 'POST', { version }),
 };
 
+// La API deduce el negocio de la sesión. Solo se envían la versión y los dos plazos del editor.
+const rutaAutomatizaciones = '/negocio/automatizaciones';
+const automatizacionesClient = {
+  consultar: () => api(rutaAutomatizaciones),
+  guardar: (payload) => api(rutaAutomatizaciones, 'PUT', payload),
+};
+
 // Eventos delegados sobreviven a los renderizados de Mi cuenta.
 document.addEventListener('click', (evento) => {
   if (evento.target.closest('[data-precios-reintentar]')) void consultarPublicacionPrecios();
+  if (evento.target.closest('[data-configurar-plazos]') && usuarioActual?.rol === 'admin_negocio') {
+    abrirEditorAutomatizaciones({ client: automatizacionesClient });
+  }
   if (evento.target.closest('[data-cuenta-marca]') && usuarioActual?.rol === 'admin_negocio') {
     const negocio = datosAplicacion.tenants.find(({ id }) => id === usuarioActual.negocioId);
     abrirEditorMarca({ client: marcaClient, slug: negocio?.slug, nombre: negocio?.name ?? usuarioActual.nombreNegocio });

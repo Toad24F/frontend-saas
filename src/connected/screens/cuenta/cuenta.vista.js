@@ -9,6 +9,7 @@ import { renderPortalCuenta, vincularPortalCuenta } from '../../../shared/cuenta
 import '../../../shared/cuenta.portal.css';
 import { leerPublicacionPrecios, guardarPublicacionPrecios } from '../../modules/publicacion/publicacion.precios.js';
 import { renderPublicacionPrecios } from './cuenta.publicacion-precios.js';
+import { renderAccesoAutomatizaciones } from '../../../shared/automatizaciones.editor.js';
 
 let usuarioIdLicencia = null;
 let licencia = null;
@@ -135,7 +136,7 @@ export function cuenta() {
     renderIcono('lock') + 'Cambiar contraseña</button>' +
     '<button type="button" class="btn btn-light" data-action="cerrar-sesion-cuenta">Cerrar sesión</button></div></section></div>' +
     renderPortalCuenta({ usuario: usuario, negocio: datosAplicacion.tenants.find((tenant) => tenant.id === usuario.negocioId), origen: location.origin, editorMarca: true }) +
-    (usuario.rol === 'admin_negocio' ? renderPublicacionPrecios(publicacion) : '') +
+    (usuario.rol === 'admin_negocio' ? renderPublicacionPrecios(publicacion) + renderAccesoAutomatizaciones() : '') +
     (usuario.rol === 'superadmin' ? '' :
       '<section class="superficie cuenta-seccion cuenta-licencia"><div class="cuenta-encabezado-seccion">' +
       '<span class="cuenta-icono-seccion" aria-hidden="true">' + renderIcono('calendar') + '</span>' +
