@@ -21,6 +21,7 @@ export function renderPortalCuenta(contexto) {
       <div class="cuenta-portal-acciones"><a class="btn btn-primary" href="${escaparHtml(enlace)}" target="_blank" rel="noopener noreferrer">${renderIcono('external')}Abrir portal<span class="visually-hidden"> (nueva pestaña)</span></a>
       <button class="btn btn-light" type="button" data-cuenta-portal-copiar>${renderIcono('link')}Copiar enlace</button></div>` :
     '<p class="cuenta-portal-no-disponible">El enlace del negocio todavía no está disponible en tu perfil.</p><div class="cuenta-portal-acciones"><button class="btn btn-primary" type="button" disabled>Abrir portal</button><button class="btn btn-light" type="button" disabled>Copiar enlace</button></div>'}
+    ${contexto.editorMarca ? '<button class="btn btn-light mt-3" type="button" data-cuenta-marca>Personalizar portal</button>' : ''}
     <p class="cuenta-portal-estado" data-cuenta-portal-estado role="status" aria-live="polite"></p></section>`;
 }
 

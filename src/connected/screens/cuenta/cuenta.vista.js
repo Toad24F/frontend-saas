@@ -134,7 +134,7 @@ export function cuenta() {
     '<div class="cuenta-acciones-seguridad"><button type="button" class="btn btn-primary" data-action="cambiar-contrasena-cuenta">' +
     renderIcono('lock') + 'Cambiar contraseña</button>' +
     '<button type="button" class="btn btn-light" data-action="cerrar-sesion-cuenta">Cerrar sesión</button></div></section></div>' +
-    renderPortalCuenta({ usuario: usuario, negocio: datosAplicacion.tenants.find((tenant) => tenant.id === usuario.negocioId), origen: location.origin }) +
+    renderPortalCuenta({ usuario: usuario, negocio: datosAplicacion.tenants.find((tenant) => tenant.id === usuario.negocioId), origen: location.origin, editorMarca: true }) +
     (usuario.rol === 'admin_negocio' ? renderPublicacionPrecios(publicacion) : '') +
     (usuario.rol === 'superadmin' ? '' :
       '<section class="superficie cuenta-seccion cuenta-licencia"><div class="cuenta-encabezado-seccion">' +

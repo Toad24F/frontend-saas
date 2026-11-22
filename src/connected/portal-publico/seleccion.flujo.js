@@ -65,6 +65,8 @@ export function crearSeleccionPortal(client, { slug, alCambiar = () => {}, ahora
     // Solo se conservan catálogos de etapas alcanzadas; nunca listas posteriores
     // procedentes de una selección anterior o de una respuesta inesperada.
     estado.negocio = datos.negocio;
+    // Un catálogo nuevo puede retirar la proyección. Disponibilidad conserva la última marca conocida.
+    if (datos.marca || estado.marca) estado.marca = datos.marca;
     estado.opciones.servicios = datos.servicios;
     estado.opciones.sucursales = estado.paso >= 1 ? datos.sucursales : [];
     estado.opciones.profesionales = estado.paso >= 2 ? datos.profesionales : [];

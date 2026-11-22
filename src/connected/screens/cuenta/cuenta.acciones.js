@@ -1,12 +1,32 @@
-import { api, olvidarSesion, cerrarSesion } from '../../backend.js';
+import { api, olvidarSesion, cerrarSesion, usuarioActual } from '../../backend.js';
 import { validarContrasenaNueva } from '../../modules/autenticacion/contrasena.politica.js';
 import { renderCampo as campo, espacioErrorFormulario } from '../../../shared/formularios.componentes.js';
 import { abrirDialogo, mostrarAviso } from '../../../shared/interfaz.componentes.js';
 import { consultarPublicacionPrecios, actualizarPublicacionPrecios } from './cuenta.vista.js';
+import { datosAplicacion } from '../../../shared/aplicacion.datos.js';
+import { abrirEditorMarca } from '../../../shared/personalizacion.editor.js';
+import { rutaBaseMarca } from '../../../shared/personalizacion.marca.js';
+
+// Usa la misma sesión autenticada del panel. El servidor resuelve el negocio desde el actor.
+const marcaClient = {
+  consultar: () => api(rutaBaseMarca),
+  cargar(version, archivo) {
+    const cuerpo = new FormData();
+    cuerpo.append('version', String(version));
+    cuerpo.append('archivo', archivo);
+    return api(`${rutaBaseMarca}/logos`, 'POST', cuerpo);
+  },
+  publicar: (payload) => api(rutaBaseMarca, 'PUT', payload),
+  restaurar: (version) => api(`${rutaBaseMarca}/restaurar`, 'POST', { version }),
+};
 
 // Eventos delegados sobreviven a los renderizados de Mi cuenta.
 document.addEventListener('click', (evento) => {
   if (evento.target.closest('[data-precios-reintentar]')) void consultarPublicacionPrecios();
+  if (evento.target.closest('[data-cuenta-marca]') && usuarioActual?.rol === 'admin_negocio') {
+    const negocio = datosAplicacion.tenants.find(({ id }) => id === usuarioActual.negocioId);
+    abrirEditorMarca({ client: marcaClient, slug: negocio?.slug, nombre: negocio?.name ?? usuarioActual.nombreNegocio });
+  }
 });
 document.addEventListener('submit', (evento) => {
   if (evento.target.id !== 'publicacion-precios-formulario') return;
