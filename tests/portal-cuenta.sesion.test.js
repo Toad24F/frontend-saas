@@ -19,7 +19,7 @@ async function conSesion(ejecutar) {
     if (ruta === '/auth/profile') return Response.json({ user: cuenta });
     if (ruta === '/sucursales/cupo') return Response.json({ negocioId: 7, disponibles: 1 });
     assert.ok(['/servicios', '/sucursales', '/profesionales', '/recepcionistas', '/bloqueos'].includes(ruta), `Petición inesperada: ${ruta}`);
-    return Response.json([]);
+    return Response.json(ruta === '/bloqueos' ? { bloqueos: [], pagina: 1, limite: 25, total: 0 } : []);
   };
   try { await ejecutar({ calls: llamadas, setIdentifier(valor) { identificador = valor; } }); }
   finally { olvidarSesion(); global.fetch = fetchOriginal; global.sessionStorage = almacenamientoOriginal; }

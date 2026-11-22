@@ -74,7 +74,7 @@ test('carga datos reales aislados del negocio, sin inventar citas, y envía auto
     '/sucursales/cupo': { negocioId: 7, limiteSucursalesActivas: 3, sucursalesActivas: 1, disponibles: 2 },
     '/profesionales': [{ id: 30, nombre: 'Profesional', correo: 'test@example.com', activo: false }],
     '/recepcionistas': [{ id: 31, nombre: 'Recepción', email: 'recepcion@example.com', activo: true, activadoEn: '2026-10-10T12:00:00.000Z' }],
-    '/bloqueos': [{ id: 40, personalId: 30, sucursalId: 20, tipo: 'vacaciones', motivo: 'Vacaciones', fechaInicio: '2026-10-10', fechaFin: '2026-10-11', inicioMinutos: null, finMinutos: null }],
+    '/bloqueos': { bloqueos: [{ id: 40, personalId: 30, sucursalId: 20, tipo: 'vacaciones', motivo: 'Vacaciones', fechaInicio: '2026-10-10', fechaFin: '2026-10-11', inicioMinutos: null, finMinutos: null, vigencia: 'proximo' }], pagina: 1, limite: 25, total: 1 },
     '/profesionales/30/sucursales': [20],
     '/profesionales/30/servicios': [{ id: 10, seleccionado: true }],
     '/profesionales/30/horario': [{ id: 50, diaSemana: 6, sucursalId: 20, inicioMinutos: 720, finMinutos: 1440, descansoInicioMinutos: null, descansoFinMinutos: null, activo: true }],
@@ -121,7 +121,7 @@ test('el profesional ve sus sucursales asignadas y la autoría real de servicios
       { id: 20, nombre: 'Centro', direccion: 'Av. Principal 10', telefono: '6141234567', zonaHoraria: 'America/Chihuahua', urlGoogleMaps: 'https://www.google.com/maps?q=Centro', notasLlegada: 'Entrada norte', activo: true },
       { id: 21, nombre: 'Otra sede', direccion: 'Av. Sur 20', activo: true },
     ],
-    '/bloqueos': [],
+    '/bloqueos': { bloqueos: [], pagina: 1, limite: 25, total: 0 },
   };
   try {
     global.fetch = async (url) => Response.json(respuestas[new URL(url).pathname]);

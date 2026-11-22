@@ -1,8 +1,9 @@
-import { renderResultadosCorreo } from './correo.historial.js';
+import { renderResultadosCorreoServidor } from './correo.historial.js';
 
-export const estadoEspacioNegocio = { pestana: 'general', correo: { estado: '', tipo: '', pagina: 1 } };
+export const estadoEspacioNegocio = { pestana: 'general', correo: { estado: '', tipo: '', desde: '', hasta: '', pagina: 1 } };
 
-export function vincularEspacioNegocio(obtenerDetalle, actualizar) {
+export function vincularEspacioNegocio(obtenerDetalle, actualizar, consultarCorreo) {
+  let solicitudActual = 0;
   function seleccionarPestana(raiz, id, enfocar = false) {
     estadoEspacioNegocio.pestana = id;
     raiz.querySelectorAll('[data-negocio-pestana]').forEach((pestana) => {
@@ -14,9 +15,18 @@ export function vincularEspacioNegocio(obtenerDetalle, actualizar) {
     });
     raiz.querySelectorAll('[role="tabpanel"]').forEach((panel) => { panel.hidden = panel.id !== `negocio-panel-${id}`; });
   }
-  function actualizarResultados(raiz, enfocar = false) {
+  async function actualizarResultados(raiz, enfocar = false) {
     const resultados = raiz.querySelector('[data-correo-resultados]');
-    resultados.innerHTML = renderResultadosCorreo(obtenerDetalle().envios, estadoEspacioNegocio.correo);
+    const solicitud = ++solicitudActual;
+    resultados.innerHTML = '<p role="status">Consultando correos…</p>';
+    try {
+      const respuesta = await consultarCorreo();
+      if (solicitud !== solicitudActual || !resultados.isConnected) return;
+      resultados.innerHTML = renderResultadosCorreoServidor(respuesta, estadoEspacioNegocio.correo);
+    } catch (error) {
+      if (solicitud !== solicitudActual || !resultados.isConnected) return;
+      resultados.innerHTML = `<p role="alert">${error.status === 403 || error.status === 404 ? 'Historial no disponible.' : 'No pudimos cargar el historial.'}</p><button type="button" class="btn btn-light" data-correo-actualizar>Reintentar</button>`;
+    }
     if (enfocar) { resultados.tabIndex = -1; resultados.focus({ preventScroll: true }); }
   }
   document.addEventListener('click', async (evento) => {
@@ -25,19 +35,20 @@ export function vincularEspacioNegocio(obtenerDetalle, actualizar) {
     const pestana = evento.target.closest('[data-negocio-pestana]');
     if (pestana) return seleccionarPestana(raiz, pestana.dataset.negocioPestana);
     const pagina = evento.target.closest('[data-correo-pagina]');
-    if (pagina) { estadoEspacioNegocio.correo.pagina = Number(pagina.dataset.correoPagina); actualizarResultados(raiz, true); }
+    if (pagina) { estadoEspacioNegocio.correo.pagina = Number(pagina.dataset.correoPagina); void actualizarResultados(raiz, true); }
     if (evento.target.closest('[data-correo-limpiar]')) {
-      estadoEspacioNegocio.correo = { estado: '', tipo: '', pagina: 1 };
+      estadoEspacioNegocio.correo = { estado: '', tipo: '', desde: '', hasta: '', pagina: 1 };
       raiz.querySelectorAll('[data-correo-filtro]').forEach((selector) => { selector.value = ''; });
-      actualizarResultados(raiz);
+      void actualizarResultados(raiz);
       raiz.querySelector('[data-correo-filtro]').focus();
     }
     const botonActualizar = evento.target.closest('[data-correo-actualizar]');
     if (botonActualizar) {
       botonActualizar.disabled = true;
       botonActualizar.textContent = 'Actualizando…';
-      await actualizar();
-      document.querySelector('.negocio-espacio-trabajo [data-correo-actualizar], [data-action="consultar-detalle-negocio"]')?.focus({ preventScroll: true });
+      await actualizarResultados(raiz, true);
+      botonActualizar.disabled = false;
+      botonActualizar.textContent = 'Actualizar';
     }
   });
   document.addEventListener('change', (evento) => {
@@ -46,7 +57,7 @@ export function vincularEspacioNegocio(obtenerDetalle, actualizar) {
     if (!raiz || !filtro || !obtenerDetalle()) return;
     estadoEspacioNegocio.correo[filtro.dataset.correoFiltro] = filtro.value;
     estadoEspacioNegocio.correo.pagina = 1;
-    actualizarResultados(raiz);
+    void actualizarResultados(raiz);
   });
   document.addEventListener('keydown', (evento) => {
     const pestana = evento.target.closest('[data-negocio-pestana]');

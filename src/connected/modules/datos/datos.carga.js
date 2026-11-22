@@ -1,8 +1,10 @@
-import { reemplazarDatos, minutosAHora } from '../../../shared/aplicacion.datos.js';
+import { datosAplicacion, reemplazarDatos, minutosAHora } from '../../../shared/aplicacion.datos.js';
 import { api, usuarioActual } from '../autenticacion/sesion.estado.js';
 import { cargarCuposPorRol, limpiarCuposPorRol } from '../catalogos/catalogos.cupo.js';
 import { establecerCupoSucursales } from '../sucursales/sucursales.cupo.js';
 import { consultarEnviosCompletos } from '../correos/correos.historial-client.js';
+import { consultarPaginaBloqueos } from '../bloqueos/bloqueos.lista-client.js';
+import { configurarConsultaBloqueos } from '../../../shared/screens/disponibilidad/disponibilidad.directorio-bloqueos.js';
 
 const iniciales = (nombre) => nombre.split(/\s+/).slice(0, 2).map((parte) => parte[0]).join('');
 const formatearMinutos = (valor) => valor == null ? '' : minutosAHora(valor % 1440);
@@ -31,7 +33,7 @@ export async function cargarDatosBackend() {
     const [servicios, horarios, bloqueos, oferta, catalogoSucursales] = await Promise.all([
       api(`/profesionales/${usuarioActual.id}/servicios`),
       api(`/profesionales/${usuarioActual.id}/horario`),
-      api('/bloqueos'),
+      consultarPaginaBloqueos(api, negocioId, { personalId: usuarioActual.id }),
       api(`/profesionales/${usuarioActual.id}/oferta`),
       api('/sucursales').catch(() => null),
     ]);
@@ -49,10 +51,12 @@ export async function cargarDatosBackend() {
     });
     // La semana conectada lee solo franjas completas; los descansos históricos no son editables.
     datos.schedules = horarios.map((registro) => ({ id: registro.id, tenantId: negocioId, professionalId: usuarioActual.id, day: registro.diaSemana, branchId: registro.sucursalId, start: formatearMinutos(registro.inicioMinutos), end: formatearMinutos(registro.finMinutos), enabled: registro.activo }));
-    datos.blocks = bloqueos.map((registro) => ({ id: registro.id, tenantId: negocioId, professionalId: registro.personalId, branchId: registro.sucursalId, date: registro.fechaInicio.slice(0, 10), endDate: registro.fechaFin.slice(0, 10), start: formatearMinutos(registro.inicioMinutos), end: formatearMinutos(registro.finMinutos), type: registro.tipo, reason: registro.motivo }));
+    datos.blocks = bloqueos.bloqueos;
+    configurarConsultaBloqueos(filtros => consultarPaginaBloqueos(api, negocioId, { ...filtros, personalId: usuarioActual.id }),
+      bloqueos, false, respuesta => { datosAplicacion.blocks = respuesta.bloqueos; });
   } else if (usuarioActual.rol === 'admin_negocio') {
     await cargarCuposPorRol(api);
-    const [servicios, sucursales, cupo, profesionales, recepcionistas, bloqueos] = await Promise.all([api('/servicios'), api('/sucursales'), api('/sucursales/cupo'), api('/profesionales'), api('/recepcionistas'), api('/bloqueos')]);
+    const [servicios, sucursales, cupo, profesionales, recepcionistas, bloqueos] = await Promise.all([api('/servicios'), api('/sucursales'), api('/sucursales/cupo'), api('/profesionales'), api('/recepcionistas'), consultarPaginaBloqueos(api, negocioId)]);
     establecerCupoSucursales(cupo);
     datos.receptionists = recepcionistas.map((registro) => ({ id: registro.id, tenantId: negocioId, name: registro.nombre, email: registro.email, active: registro.activo, activatedAt: registro.activadoEn, initials: iniciales(registro.nombre) }));
     datos.services = servicios.map((registro) => ({ id: registro.id, tenantId: negocioId, name: registro.nombre, duration: registro.duracionMinutos, price: Number(registro.costo), active: registro.activo, description: registro.descripcion || '', creatorId: registro.creadorPersonalId, icon: 'briefcase', color: 'azul' }));
@@ -63,7 +67,10 @@ export async function cargarDatosBackend() {
       datos.schedules.push(...horarios.map((registro) => ({ id: registro.id, tenantId: negocioId, professionalId: profesional.id, day: registro.diaSemana, branchId: registro.sucursalId, start: formatearMinutos(registro.inicioMinutos), end: formatearMinutos(registro.finMinutos), enabled: registro.activo })));
     }));
     datos.professionals.sort((primero, registro) => primero.id - registro.id);
-    datos.blocks = bloqueos.map((registro) => ({ id: registro.id, tenantId: negocioId, professionalId: registro.personalId, branchId: registro.sucursalId, date: registro.fechaInicio.slice(0, 10), endDate: registro.fechaFin.slice(0, 10), start: formatearMinutos(registro.inicioMinutos), end: formatearMinutos(registro.finMinutos), type: registro.tipo, reason: registro.motivo }));
+    datos.blocks = bloqueos.bloqueos;
+    // Edición y baja resuelven la fila desde el almacén visual de la página aceptada.
+    configurarConsultaBloqueos(filtros => consultarPaginaBloqueos(api, negocioId, filtros),
+      bloqueos, true, respuesta => { datosAplicacion.blocks = respuesta.bloqueos; });
   }
   reemplazarDatos(datos);
   return datos.tenants[0].id;

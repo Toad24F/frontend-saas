@@ -100,3 +100,17 @@ export function renderHistorialCorreo(envios, opciones = {}) {
   );
   return `<div class="correo-filtros">${selector('estado', 'Estado', estadosCorreo)}${selector('tipo', 'Tipo de correo', tipos)}<button type="button" class="btn btn-light" data-correo-limpiar>Limpiar filtros</button><button type="button" class="btn btn-light" data-correo-actualizar>Actualizar</button></div><div data-correo-resultados>${renderResultadosCorreo(envios, opciones)}</div>`;
 }
+
+// La respuesta ya está filtrada y paginada: el total nunca se deriva de las filas visibles.
+export function renderResultadosCorreoServidor(respuesta, opciones = {}) {
+  const { envios, pagina, limite, total } = respuesta;
+  if (!total) return `<div class="correo-vacio"><h3>${Object.values(opciones).some(Boolean) ? 'No hay correos con estos filtros' : 'Sin correos registrados'}</h3><p>Prueba otros filtros o actualiza el historial.</p></div>`;
+  const paginas = Math.ceil(total / limite);
+  return `<table class="table tabla-app align-middle correo-tabla"><caption class="visually-hidden">Historial de correos del negocio</caption><thead><tr><th scope="col">Correo</th><th scope="col">Estado</th><th scope="col">Intentos</th><th scope="col">Seguimiento</th></tr></thead><tbody>${envios.map(elemento => `<tr><td data-label="Correo"><strong>${escapar(tiposCorreo[elemento.tipo] || elemento.tipo)}</strong></td><td data-label="Estado"><span class="etiqueta-suave correo-estado correo-estado-${Object.hasOwn(estadosCorreo, elemento.estado) ? elemento.estado : 'desconocido'}">${escapar(estadosCorreo[elemento.estado] || elemento.estado)}</span></td><td data-label="Intentos">${escapar(elemento.intentos)}</td><td data-label="Seguimiento"><div class="correo-seguimiento">${renderSeguimiento(elemento)}</div></td></tr>`).join('')}</tbody></table>
+    <div class="correo-pie"><p role="status">Mostrando ${(pagina - 1) * limite + 1}–${Math.min(pagina * limite, total)} de ${total} correos</p>${paginas > 1 ? `<nav aria-label="Paginación de correos"><button type="button" class="btn btn-light" data-correo-pagina="${pagina - 1}" ${pagina === 1 ? 'disabled' : ''}>Anterior</button><span>Página ${pagina} de ${paginas}</span><button type="button" class="btn btn-light" data-correo-pagina="${pagina + 1}" ${pagina === paginas ? 'disabled' : ''}>Siguiente</button></nav>` : ''}</div>`;
+}
+
+export function renderHistorialCorreoServidor(respuesta, opciones = {}) {
+  const selector = (nombre, etiqueta, valores) => `<label>${etiqueta}<select class="form-select" data-correo-filtro="${nombre}"><option value="">Todos</option>${Object.entries(valores).map(([valor, texto]) => `<option value="${escapar(valor)}" ${opciones[nombre] === valor ? 'selected' : ''}>${escapar(texto)}</option>`).join('')}</select></label>`;
+  return `<div class="correo-filtros">${selector('estado', 'Estado', estadosCorreo)}${selector('tipo', 'Tipo de correo', tiposCorreo)}<label>Desde<input class="form-control" type="date" data-correo-filtro="desde" value="${escapar(opciones.desde || '')}"></label><label>Hasta<input class="form-control" type="date" data-correo-filtro="hasta" value="${escapar(opciones.hasta || '')}"></label><button type="button" class="btn btn-light" data-correo-limpiar>Limpiar filtros</button><button type="button" class="btn btn-light" data-correo-actualizar>Actualizar</button></div><div data-correo-resultados>${renderResultadosCorreoServidor(respuesta, opciones)}</div>`;
+}
