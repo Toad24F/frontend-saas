@@ -1,6 +1,8 @@
 import { partesEnZonaHoraria } from '../../../shared/screens/disponibilidad/disponibilidad.contrato-operativo.js';
 
 export const puedeGestionarCitas = (rol) => ['admin_negocio', 'recepcionista'].includes(rol);
+// Gestionar la agenda propia no concede consultar o modificar el directorio de clientes.
+export const puedeGestionarAgenda = (rol) => puedeGestionarCitas(rol) || rol === 'profesional';
 const idPositivo = (valor) => {
   const numero = Number(valor);
   if (!/^[1-9]\d*$/.test(String(valor)) || !Number.isSafeInteger(numero) || numero > 4294967295) throw new Error('Selecciona un identificador válido.');
@@ -17,9 +19,10 @@ const textoOpcional = (valor) => {
   return texto || null;
 };
 // Solo se prepara la selección admitida: precio, fin, zona y negocio nunca son autoridad del navegador.
-export function seleccionManual(valores) {
+export function seleccionManual(valores, actor = null) {
   const existente = valores.clienteId != null && valores.clienteId !== '';
   if (existente === (valores.clienteNuevo != null)) throw new Error('Elige un cliente existente o introduce uno nuevo.');
+  if (actor?.rol === 'profesional' && existente) throw new Error('Captura el contacto del cliente sin elegir una ficha del directorio.');
   let cliente;
   if (existente) cliente = { clienteId: idPositivo(valores.clienteId) };
   else {
@@ -30,7 +33,8 @@ export function seleccionManual(valores) {
     cliente = { clienteNuevo: { nombreCompleto, telefono } };
   }
   if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(valores.horaInicio || '')) throw new Error('Selecciona un horario devuelto por el servidor.');
-  return { sucursalId: idPositivo(valores.sucursalId), personalId: idPositivo(valores.personalId), servicioId: idPositivo(valores.servicioId),
+  // El perfil visible procede de la sesión; el backend lo resuelve otra vez como autoridad.
+  return { sucursalId: idPositivo(valores.sucursalId), personalId: idPositivo(actor?.rol === 'profesional' ? actor.id : valores.personalId), servicioId: idPositivo(valores.servicioId),
     fechaLocal: fechaCivil(valores.fechaLocal), horaInicio: valores.horaInicio, ...cliente, notas: textoOpcional(valores.notas) };
 }
 export function crearPayloadCambioEstado(valores) {

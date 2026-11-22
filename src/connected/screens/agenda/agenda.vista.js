@@ -13,7 +13,7 @@ import { crearAgendaClient } from '../../modules/agenda/agenda.client.js';
 import { crearAgendaStore } from '../../modules/agenda/agenda.store.js';
 import { periodoCalendario, sumarDiasCiviles, moverFechaCalendario, hoyCivil } from '../../modules/agenda/agenda.calendario.js';
 import { tituloCalendario, renderLineaTiempo, renderMes } from './agenda.presentacion.js';
-import { puedeGestionarCitas } from '../../modules/agenda/agenda.contrato-manual.js';
+import { puedeGestionarAgenda } from '../../modules/agenda/agenda.contrato-manual.js';
 import { hayAltaManualPendiente, abrirAltaManual } from './agenda.vista-manual.js';
 import { montarEditorEstado } from './agenda.editor-estado.js';
 import { montarEditorHorario } from './agenda.editor-horario.js';
@@ -165,7 +165,8 @@ function calendario(datos) {
   const periodo = periodoCalendario(estado.vistaCalendario, estado.fecha);
   const dias = Array.from({ length: estado.vistaCalendario === 'day' ? 1 : 7 }, (_, indice) => sumarDiasCiviles(periodo.desde, indice));
   const equipo = estado.vistaCalendario === 'week' && estado.profesional === 'all' && usuarioActual?.rol !== 'profesional' ? atencionEquipo(modelosAtencionColumnas(), usuarioActual?.rol !== 'recepcionista') : undefined;
-  const opciones = { atencionEquipo: equipo, atencionPorProfesional: modelosAtencionColumnas(), profesional: usuarioActual.rol === 'profesional' ? String(usuarioActual.id) : estado.profesional, profesionales: listarRegistros('professionals', estado.negocioId), permitirCambiosEstado: puedeGestionarCitas(usuarioActual?.rol), atencion: atencion.state.key === JSON.stringify(consultaAtencion()) ? atencion.state.data : null, sucursal: estado.sucursal, anchoColumna: Math.max(160, ((document.querySelector('.agenda-calendario')?.clientWidth || window.innerWidth - 300) - 58) / 7) };
+  // Las acciones se ofrecen en la agenda propia; el servidor decide de nuevo la pertenencia al escribir.
+  const opciones = { atencionEquipo: equipo, atencionPorProfesional: modelosAtencionColumnas(), profesional: usuarioActual.rol === 'profesional' ? String(usuarioActual.id) : estado.profesional, profesionales: listarRegistros('professionals', estado.negocioId), permitirCambiosEstado: puedeGestionarAgenda(usuarioActual?.rol), atencion: atencion.state.key === JSON.stringify(consultaAtencion()) ? atencion.state.data : null, sucursal: estado.sucursal, anchoColumna: Math.max(160, ((document.querySelector('.agenda-calendario')?.clientWidth || window.innerWidth - 300) - 58) / 7) };
   const contenido = estado.vistaCalendario === 'month' ? renderMes(estado.fecha, datos.citas, hoyCivil(), opciones) : renderLineaTiempo(dias, datos.citas, hoyCivil(), opciones);
   // Incluso un periodo vacío mantiene la cuadrícula para conservar la referencia temporal de la demo.
   return `${!datos.citas.length ? '<p class="agenda-resumen-vacio" role="status">Sin citas en este periodo</p>' : ''}${contenido}`;
@@ -197,7 +198,7 @@ export function agenda() {
   const modelo = store.state;
   const negocio = obtenerNegocio(estado.negocioId);
   const portal = (negocio?.slug ? `<a class="btn btn-light" href="/reservas/${esc(negocio.slug)}" target="_blank" rel="noopener">${renderIcono('external')}Portal de reservas</a>` : '') +
-    (puedeGestionarCitas(usuarioActual?.rol) ? `<button type="button" class="btn btn-primary" data-agenda-nueva>${renderIcono('plus')}${hayAltaManualPendiente(usuarioActual) ? 'Comprobar envío pendiente' : 'Nueva cita'}</button>` : '');
+    (puedeGestionarAgenda(usuarioActual?.rol) ? `<button type="button" class="btn btn-primary" data-agenda-nueva>${renderIcono('plus')}${hayAltaManualPendiente(usuarioActual) ? 'Comprobar envío pendiente' : 'Nueva cita'}</button>` : '');
   const zonas = [...new Set((modelo.data?.citas || []).map((elemento) => elemento.zonaHoraria))];
   void cargarAtencion(); aplicarEfectosAgenda();
   const modeloAtencion = consultaAtencion() ? atencion.state : null;

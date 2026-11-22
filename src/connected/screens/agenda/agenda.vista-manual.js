@@ -4,7 +4,7 @@ import { panelAgenda as modal, borradorAgenda, guardarBorradorAgenda, borrarBorr
 import { renderIcono } from '../../../shared/iconos.catalogo.js';
 import { formatearEnZonaHoraria } from '../../../shared/screens/disponibilidad/disponibilidad.contrato-operativo.js';
 import { crearAgendaClient } from '../../modules/agenda/agenda.client.js';
-import { puedeGestionarCitas, crearClientCitaManual, seleccionManual, horariosManuales } from '../../modules/agenda/agenda.contrato-manual.js';
+import { puedeGestionarAgenda, crearClientCitaManual, seleccionManual, horariosManuales } from '../../modules/agenda/agenda.contrato-manual.js';
 import { crearOperacionManual } from '../../modules/agenda/agenda.operacion-manual.js';
 import { errorSeguro } from '../../modules/agenda/agenda.errores.js';
 
@@ -12,7 +12,7 @@ const client = crearClientCitaManual(api), directorio = crearAgendaClient(api);
 const almacenamiento = () => { try { return sessionStorage; } catch { return { getItem() { throw new Error('Almacenamiento no disponible.'); } }; } };
 const operacionPara = (usuarioAgenda) => crearOperacionManual({ scope: { actorId: usuarioAgenda.id, negocioId: usuarioAgenda.negocioId }, storage: almacenamiento(), client });
 export function hayAltaManualPendiente(usuarioAgenda) {
-  return puedeGestionarCitas(usuarioAgenda?.rol) && operacionPara(usuarioAgenda).state.status !== 'idle';
+  return puedeGestionarAgenda(usuarioAgenda?.rol) && operacionPara(usuarioAgenda).state.status !== 'idle';
 }
 const campo = (etiqueta, nombre, valor = '', tipo = 'text', extra = '') => `<div class="campo-formulario"><label class="form-label" for="manual-${nombre}">${etiqueta}</label><input class="form-control" id="manual-${nombre}" name="${nombre}" type="${tipo}" value="${esc(valor)}" ${extra}></div>`;
 function campoRecurso(etiqueta, nombre, elementos, rol) {
@@ -24,11 +24,19 @@ function campoRecurso(etiqueta, nombre, elementos, rol) {
 
 // El formulario mantiene la composición de la demo; todo cálculo de oferta/fin/costo queda en servidor.
 export async function abrirAltaManual({ day: dia, catalogs: catalogos, onSaved: alGuardar, onCleared: alLimpiar }) {
-  if (!puedeGestionarCitas(usuarioActual?.rol)) return;
+  if (!puedeGestionarAgenda(usuarioActual?.rol)) return;
   const usuarioAgenda = { ...usuarioActual }, operacion = operacionPara(usuarioAgenda);
   const claveBorrador = `manual:${usuarioAgenda.negocioId}:${usuarioAgenda.id}:${usuarioAgenda.sesionId || ''}`;
   const borrador = operacion.state.marker ? null : borradorAgenda(claveBorrador);
-  const dialogo = modal('Nueva cita', `<form id="connected-manual-form" novalidate><div class="dialogo-cuerpo"><fieldset data-manual-campos><p class="introduccion-formulario">Agenda una atención para tu paciente.</p>${usuarioAgenda.rol === 'recepcionista' ? '<p class="ayuda-campo">Introduce los identificadores de servicio, sucursal y profesional proporcionados por tu negocio.</p>' : ''}<div class="formulario-dos-columnas">${campoRecurso('Servicio', 'servicioId', catalogos.services, usuarioAgenda.rol)}${campoRecurso('Sucursal', 'sucursalId', catalogos.branches, usuarioAgenda.rol)}</div><div class="formulario-dos-columnas">${campoRecurso('Profesional', 'personalId', catalogos.people, usuarioAgenda.rol)}${campo('Fecha', 'fechaLocal', dia, 'date', 'required')}</div><button type="button" class="btn btn-light" data-manual-consulta>${renderIcono('search')}Consultar horarios</button><div class="campo-formulario"><label class="form-label" for="manual-horario">Horario disponible</label><select id="manual-horario" name="horario" class="form-select" disabled><option value="">Consulta primero los horarios</option></select><p class="ayuda-campo" data-manual-disponibilidad role="status"></p></div><div class="separador-formulario"><span>DATOS DEL PACIENTE</span></div><div class="agenda-modo-cliente" role="group" aria-label="Tipo de cliente"><label><input type="radio" name="clienteModo" value="nuevo" checked> Cliente nuevo</label><label><input type="radio" name="clienteModo" value="existente"> Cliente existente</label></div><div data-cliente-nuevo><div class="formulario-dos-columnas">${campo('Nombre completo', 'nombreCompleto', '', 'text', 'maxlength="150" autocomplete="off"')}${campo('Teléfono', 'telefono', '', 'tel', 'maxlength="30" autocomplete="off"')}</div></div><div data-cliente-existente hidden>${campo('Buscar cliente', 'busquedaCliente', '', 'search', 'maxlength="150" autocomplete="off"')}<button type="button" class="btn btn-light" data-cliente-busqueda>Buscar clientes</button><div data-cliente-resultados aria-live="polite"></div></div><div class="campo-formulario"><label class="form-label" for="manual-notas">Notas de consulta <span class="opcional">(opcional)</span></label><textarea class="form-control" name="notas" id="manual-notas" rows="2" maxlength="2000"></textarea></div><p class="ayuda-campo">Consultar horarios no los aparta. El servidor vuelve a comprobar la disponibilidad al confirmar.</p></fieldset><p class="error-formulario" data-manual-error role="alert" tabindex="-1" hidden></p><div data-manual-operacion aria-live="polite"></div></div><div class="dialogo-pie"><button class="btn btn-light" type="button" data-manual-cerrar>Cerrar</button><button class="btn btn-primary" type="submit" data-manual-guardar disabled>${renderIcono('check')}Confirmar cita</button></div></form>`, true);
+  // El Profesional ve su perfil fijo y captura contacto; no recibe buscador ni ID de ficha.
+  const campoProfesional = usuarioAgenda.rol === 'profesional'
+    ? `<div class="campo-formulario"><span class="form-label">Profesional</span><p>${esc(usuarioAgenda.nombre)}</p><input type="hidden" name="personalId" value="${esc(usuarioAgenda.id)}"></div>`
+    : campoRecurso('Profesional', 'personalId', catalogos.people, usuarioAgenda.rol);
+  const modoCliente = usuarioAgenda.rol === 'profesional'
+    ? '<p class="ayuda-campo">Captura el contacto para esta cita. La ficha se resuelve en el servidor sin consultar el directorio.</p>'
+    : '<div class="agenda-modo-cliente" role="group" aria-label="Tipo de cliente"><label><input type="radio" name="clienteModo" value="nuevo" checked> Cliente nuevo</label><label><input type="radio" name="clienteModo" value="existente"> Cliente existente</label></div>';
+  const campoClienteExistente = usuarioAgenda.rol === 'profesional' ? '' : `<div data-cliente-existente hidden>${campo('Buscar cliente', 'busquedaCliente', '', 'search', 'maxlength="150" autocomplete="off"')}<button type="button" class="btn btn-light" data-cliente-busqueda>Buscar clientes</button><div data-cliente-resultados aria-live="polite"></div></div>`;
+  const dialogo = modal('Nueva cita', `<form id="connected-manual-form" novalidate><div class="dialogo-cuerpo"><fieldset data-manual-campos><p class="introduccion-formulario">Agenda una atención para tu paciente.</p>${usuarioAgenda.rol === 'recepcionista' ? '<p class="ayuda-campo">Introduce los identificadores de servicio, sucursal y profesional proporcionados por tu negocio.</p>' : ''}<div class="formulario-dos-columnas">${campoRecurso('Servicio', 'servicioId', catalogos.services, usuarioAgenda.rol)}${campoRecurso('Sucursal', 'sucursalId', catalogos.branches, usuarioAgenda.rol)}</div><div class="formulario-dos-columnas">${campoProfesional}${campo('Fecha', 'fechaLocal', dia, 'date', 'required')}</div><button type="button" class="btn btn-light" data-manual-consulta>${renderIcono('search')}Consultar horarios</button><div class="campo-formulario"><label class="form-label" for="manual-horario">Horario disponible</label><select id="manual-horario" name="horario" class="form-select" disabled><option value="">Consulta primero los horarios</option></select><p class="ayuda-campo" data-manual-disponibilidad role="status"></p></div><div class="separador-formulario"><span>DATOS DEL PACIENTE</span></div>${modoCliente}<div data-cliente-nuevo><div class="formulario-dos-columnas">${campo('Nombre completo', 'nombreCompleto', '', 'text', 'maxlength="150" autocomplete="off"')}${campo('Teléfono', 'telefono', '', 'tel', 'maxlength="30" autocomplete="off"')}</div></div>${campoClienteExistente}<div class="campo-formulario"><label class="form-label" for="manual-notas">Notas de consulta <span class="opcional">(opcional)</span></label><textarea class="form-control" name="notas" id="manual-notas" rows="2" maxlength="2000"></textarea></div><p class="ayuda-campo">Consultar horarios no los aparta. El servidor vuelve a comprobar la disponibilidad al confirmar.</p></fieldset><p class="error-formulario" data-manual-error role="alert" tabindex="-1" hidden></p><div data-manual-operacion aria-live="polite"></div></div><div class="dialogo-pie"><button class="btn btn-light" type="button" data-manual-cerrar>Cerrar</button><button class="btn btn-primary" type="submit" data-manual-guardar disabled>${renderIcono('check')}Confirmar cita</button></div></form>`, true);
   dialogo.classList.add('agenda-dialogo-cita');
   const formulario = dialogo.querySelector('form'), campos = formulario.querySelector('[data-manual-campos]');
   const selectorHorarios = formulario.elements.horario, enviar = formulario.querySelector('[data-manual-guardar]');
@@ -127,7 +135,7 @@ export async function abrirAltaManual({ day: dia, catalogs: catalogos, onSaved: 
       objetivo.querySelector('[data-cliente-siguiente]').onclick = () => void buscarClientes(paginaBusqueda + 1);
     } catch (error) { if (activo() && version === generacionClientes) { objetivo.innerHTML = ''; fallar(error); } }
   }
-  formulario.querySelector('[data-cliente-busqueda]').onclick = () => { limpiarError(); void buscarClientes(); };
+  formulario.querySelector('[data-cliente-busqueda]')?.addEventListener('click', () => { limpiarError(); void buscarClientes(); });
   formulario.addEventListener('input', (evento) => { if (['servicioId', 'sucursalId', 'personalId', 'fechaLocal'].includes(evento.target.name)) invalidarHorarios(); });
   formulario.addEventListener('change', (evento) => {
     if (['servicioId', 'sucursalId', 'personalId', 'fechaLocal'].includes(evento.target.name)) invalidarHorarios();
@@ -142,7 +150,7 @@ export async function abrirAltaManual({ day: dia, catalogs: catalogos, onSaved: 
       if (!horario || selectorHorarios.value === '' || !disponibilidad || JSON.stringify(valoresConsulta()) !== identidadConsulta) throw new Error('Consulta y selecciona un horario vigente antes de confirmar.');
       const valores = new FormData(formulario), existente = valores.get('clienteModo') === 'existente';
       const seleccion = seleccionManual({ ...valoresConsulta(), fechaLocal: horario.fechaLocal, horaInicio: horario.horaInicio, notas: valores.get('notas'),
-        ...(existente ? { clienteId: valores.get('clienteId') } : { clienteNuevo: { nombreCompleto: valores.get('nombreCompleto'), telefono: valores.get('telefono') } }) });
+        ...(existente ? { clienteId: valores.get('clienteId') } : { clienteNuevo: { nombreCompleto: valores.get('nombreCompleto'), telefono: valores.get('telefono') } }) }, usuarioAgenda);
       void ejecutar(() => operacion.submit(seleccion));
     } catch (error) { fallar(error); }
   };
@@ -151,15 +159,17 @@ export async function abrirAltaManual({ day: dia, catalogs: catalogos, onSaved: 
   if (pendiente) {
     for (const nombre of ['servicioId', 'sucursalId', 'personalId', 'fechaLocal', 'notas']) formulario.elements[nombre].value = pendiente[nombre] ?? '';
     if (pendiente.clienteNuevo) { formulario.elements.nombreCompleto.value = pendiente.clienteNuevo.nombreCompleto; formulario.elements.telefono.value = pendiente.clienteNuevo.telefono; }
-    else { formulario.elements.clienteModo.value = 'existente'; formulario.querySelector('[data-cliente-nuevo]').hidden = true; formulario.querySelector('[data-cliente-existente]').hidden = false; formulario.querySelector('[data-cliente-resultados]').innerHTML = `<p>Cliente seleccionado: ficha #${esc(pendiente.clienteId)}.</p>`; }
+    else if (usuarioAgenda.rol !== 'profesional') { formulario.elements.clienteModo.value = 'existente'; formulario.querySelector('[data-cliente-nuevo]').hidden = true; formulario.querySelector('[data-cliente-existente]').hidden = false; formulario.querySelector('[data-cliente-resultados]').innerHTML = `<p>Cliente seleccionado: ficha #${esc(pendiente.clienteId)}.</p>`; }
   }
   if (!pendiente && borrador) {
     for (const [nombre, valor] of Object.entries(borrador.values)) if (formulario.elements[nombre] && nombre !== 'clienteId') formulario.elements[nombre].value = valor;
     opcionesClientes = borrador.customers || [];
     const elegido = opcionesClientes.find((elemento) => String(elemento.id) === borrador.values.clienteId);
-    if (elegido) formulario.querySelector('[data-cliente-resultados]').innerHTML = `<label class="agenda-opcion-cliente"><input type="radio" name="clienteId" value="${esc(elegido.id)}" checked><span><strong>${esc(elegido.nombreCompleto)}</strong><small>${esc(elegido.telefono)} · Ficha #${esc(elegido.id)}</small></span></label>`;
-    const existente = formulario.elements.clienteModo.value === 'existente';
-    formulario.querySelector('[data-cliente-nuevo]').hidden = existente; formulario.querySelector('[data-cliente-existente]').hidden = !existente;
+    if (elegido && usuarioAgenda.rol !== 'profesional') formulario.querySelector('[data-cliente-resultados]').innerHTML = `<label class="agenda-opcion-cliente"><input type="radio" name="clienteId" value="${esc(elegido.id)}" checked><span><strong>${esc(elegido.nombreCompleto)}</strong><small>${esc(elegido.telefono)} · Ficha #${esc(elegido.id)}</small></span></label>`;
+    const existente = formulario.elements.clienteModo?.value === 'existente';
+    formulario.querySelector('[data-cliente-nuevo]').hidden = existente;
+    if (formulario.querySelector('[data-cliente-existente]')) formulario.querySelector('[data-cliente-existente]').hidden = !existente;
+    if (usuarioAgenda.rol === 'profesional') formulario.elements.personalId.value = String(usuarioAgenda.id);
     // Las ranuras anteriores nunca se reutilizan: al reabrir se exige otra consulta al motor.
     invalidarHorarios();
   }

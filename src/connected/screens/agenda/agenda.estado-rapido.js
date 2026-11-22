@@ -1,5 +1,5 @@
 import { instalarMenuEstado } from '../../../shared/screens/agenda/agenda.menu-estado.js';
-import { crearClientCitaManual, puedeGestionarCitas } from '../../modules/agenda/agenda.contrato-manual.js';
+import { crearClientCitaManual, puedeGestionarAgenda } from '../../modules/agenda/agenda.contrato-manual.js';
 import { errorSeguro } from '../../modules/agenda/agenda.errores.js';
 import { api, usuarioActual } from '../../backend.js';
 import { estadoAplicacion as estado } from '../../../shared/aplicacion.nucleo.js';
@@ -8,8 +8,9 @@ import { etiquetasEstadoCita } from '../../../shared/aplicacion.datos.js';
 
 export function instalarEstadoRapido({ client, openDetail: abrirDetalle, refresh: refrescar }) {
   const escritor = crearClientCitaManual(api);
+  // El menú usa el mismo permiso de agenda; la ruta HTTP vuelve a verificar perfil y versión.
   instalarMenuEstado({
-    active: () => document.documentElement.dataset.appMode === 'connected' && estado.pagina === 'agenda' && puedeGestionarCitas(usuarioActual?.rol) ? `${usuarioActual.id}:${usuarioActual.negocioId}:${usuarioActual.sesionId}` : null,
+    active: () => document.documentElement.dataset.appMode === 'connected' && estado.pagina === 'agenda' && puedeGestionarAgenda(usuarioActual?.rol) ? `${usuarioActual.id}:${usuarioActual.negocioId}:${usuarioActual.sesionId}` : null,
     read: (id) => client.consultarDetalle(id),
     openDetail: abrirDetalle,
     errorText: (error) => { const info = errorSeguro(error); return `${info.title}. ${info.message} Actualiza la cita antes de volver a guardar.`; },

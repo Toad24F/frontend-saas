@@ -130,12 +130,13 @@ test('T096: motivo y versión observada; 409 conserva borrador sin sobrescribir'
   await expect(dialogo.getByLabel('Estado de la cita')).toHaveValue('cancelada');
   await expect.poll(() => api.version).toBe(2);
 });
-test('T093/T096: Profesional conserva consulta y no recibe formularios de escritura', async ({ page: pagina }) => {
+test('T033: Profesional conserva consulta y recibe acciones de agenda propia', async ({ page: pagina }) => {
   const api = await datosPrueba(pagina, 'profesional'); await pagina.goto('/admin/agenda');
-  await expect(pagina.getByRole('button', { name: 'Nueva cita', exact: true })).toHaveCount(0);
+  await expect(pagina.getByRole('button', { name: 'Nueva cita', exact: true })).toBeVisible();
   await pagina.locator('[data-agenda-cita="7"]').click();
   await expect(pagina.getByRole('dialog')).toContainText('M-MANUAL-QA');
-  await expect(pagina.getByLabel('Estado de la cita')).toHaveCount(0);
+  await expect(pagina.getByLabel('Estado de la cita')).toBeVisible();
+  await expect(pagina.getByRole('heading', { name: 'Cambiar horario' })).toBeVisible();
   expect(api.escrituras).toEqual([]);
 });
 test('T093: demo refleja la selección de ficha y conserva la simulación explícita', async ({ page: pagina }) => {

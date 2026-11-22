@@ -160,13 +160,14 @@ test('cita cancelada pasada bloquea reactivación; cita terminada permite estado
   await expect(menu(pagina).getByRole('menuitemradio', { name: 'Completada', exact: true })).toBeEnabled();
 });
 
-test('Profesional conserva consulta sin menú de gestión en las tres vistas', async ({ page: pagina }) => {
+test('T033: Profesional consulta y abre su menú de gestión en las tres vistas', async ({ page: pagina }) => {
   const { escrituras } = await preparar(pagina, 'profesional');
   for(const vista of ['day','week','month']) {
     await pagina.locator(`[data-agenda-vista="${vista}"]`).click();
-    await expect(pagina.locator('[data-agenda-menu-estado]')).toHaveCount(0);
+    await expect(pagina.locator('[data-agenda-menu-estado]')).not.toHaveCount(0);
     await pagina.locator('[data-agenda-cita="7"]').click({ button: 'right' });
-    await expect(menu(pagina)).toHaveCount(0);
+    await expect(menu(pagina)).toBeVisible();
+    await pagina.keyboard.press('Escape');
   }
   expect(escrituras).toEqual([]);
 });

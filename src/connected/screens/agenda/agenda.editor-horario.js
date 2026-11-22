@@ -4,7 +4,7 @@ import {
   guardarBorradorAgenda,
   borrarBorradorAgenda,
 } from '../../../shared/screens/agenda/agenda.paneles.js';
-import { puedeGestionarCitas } from '../../modules/agenda/agenda.contrato-manual.js';
+import { puedeGestionarAgenda } from '../../modules/agenda/agenda.contrato-manual.js';
 import {
   crearClientCambioHorario,
   crearPayloadCambioHorario,
@@ -18,7 +18,7 @@ export function montarEditorHorario(
   detalle,
   { role: rol, scope: ambito, request: solicitar, onChanged: alCambiar, onReload: alRecargar, isCurrent: esVigente },
 ) {
-  if (!puedeGestionarCitas(rol)) return;
+  if (!puedeGestionarAgenda(rol)) return;
   const bloqueado =
     detalle.estado === 'cancelada' ||
     (detalle.inicioUtc && Date.parse(detalle.inicioUtc) <= Date.now());
@@ -43,7 +43,8 @@ export function montarEditorHorario(
     (resultado) =>
       resultado?.id === detalle.id &&
       resultado.folio === detalle.folio &&
-      resultado.estado === detalle.estado &&
+      // El backend confirma una cita pendiente cuando el cambio de horario es efectivo.
+      (resultado.estado === detalle.estado || (detalle.estado === 'pendiente' && resultado.estado === 'confirmada')) &&
       Number.isInteger(resultado.version) &&
       resultado.version >= detalle.version &&
       [resultado.inicioUtc, resultado.finUtc, resultado.finOcupacionUtc].every((valor) =>

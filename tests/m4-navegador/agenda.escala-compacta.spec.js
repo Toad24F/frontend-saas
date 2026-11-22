@@ -13,10 +13,11 @@ for (const ancho of [1366, 390]) for (const tema of ['light', 'dark']) {
       expect(await pagina.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     }
     const tarjeta = pagina.locator('.calendario-evento');
-    await expect(tarjeta.locator('.evento-hora')).toHaveCSS('justify-content', 'flex-end');
+    // Chromium puede normalizar el valor lógico de flex-end como flow-end.
+    await expect(tarjeta.locator('.evento-hora')).toHaveCSS('justify-content', /^(flex-end|flow-end)$/);
     await expect(tarjeta.locator('.evento-sucursal')).toHaveCSS('text-align', 'right');
     await pagina.getByLabel('Sucursal', { exact: true }).selectOption('1');
-    await expect(tarjeta.locator('.evento-hora')).toHaveCSS('justify-content', 'flex-end');
+    await expect(tarjeta.locator('.evento-hora')).toHaveCSS('justify-content', /^(flex-end|flow-end)$/);
     await expect(tarjeta.locator('.evento-sucursal')).toHaveCount(0);
     await pagina.getByLabel('Sucursal', { exact: true }).selectOption('all');
     await expect.poll(() => tarjeta.evaluate((elemento) => Math.abs(elemento.querySelector("strong").getBoundingClientRect().y - elemento.querySelector(".evento-hora").getBoundingClientRect().y))).toBeLessThan(1);

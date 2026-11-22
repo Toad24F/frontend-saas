@@ -1,13 +1,13 @@
 import { confirmarCancelacion } from '../../../shared/screens/agenda/agenda.menu-estado.js';
 import { etiquetasEstadoCita } from '../../../shared/aplicacion.datos.js';
 import { escaparHtml as esc } from '../../../shared/interfaz.componentes.js';
-import { puedeGestionarCitas, crearClientCitaManual } from '../../modules/agenda/agenda.contrato-manual.js';
+import { puedeGestionarAgenda, crearClientCitaManual } from '../../modules/agenda/agenda.contrato-manual.js';
 import { borradorAgenda, guardarBorradorAgenda, borrarBorradorAgenda } from '../../../shared/screens/agenda/agenda.paneles.js';
 import { errorSeguro } from '../../modules/agenda/agenda.errores.js';
 
 // La versión procede del detalle observado. Un conflicto exige releer y nunca se reenvía con una versión nueva automáticamente.
 export function montarEditorEstado(dialogo, detalle, { role: rol, scope: ambito, request: solicitar, onChanged: alCambiar, onReload: alRecargar, isCurrent: esVigente = () => true }) {
-  if (!puedeGestionarCitas(rol)) return;
+  if (!puedeGestionarAgenda(rol)) return;
   dialogo.querySelector('.agenda-historial').insertAdjacentHTML('beforebegin', `<form class="agenda-editor-estado"><h3>Gestionar estado</h3><label class="form-label" for="cita-estado">Estado de la cita</label><select class="form-select" id="cita-estado" name="estado">${Object.entries(etiquetasEstadoCita).map(([valor, etiqueta]) => `<option value="${valor}" ${valor === detalle.estado ? 'selected' : ''}>${etiqueta}</option>`).join('')}</select><label class="form-label" for="cita-motivo">Motivo del cambio <span class="opcional">(opcional)</span></label><textarea class="form-control" id="cita-motivo" name="motivo" rows="2" maxlength="2000"></textarea><p class="ayuda-campo">Solo Cancelada libera el horario. No asistió lo conserva. Los estados finales y la reactivación se comprueban en el servidor.</p><p class="error-formulario" data-estado-error role="alert" tabindex="-1" hidden></p><div class="agenda-paginas-historial"><button type="submit" class="btn btn-primary">Guardar estado</button><button type="button" class="btn btn-light" data-estado-recargar hidden>Actualizar detalle</button></div></form>`);
   const formulario = dialogo.querySelector('.agenda-editor-estado'), guardar = formulario.querySelector('[type="submit"]'), recargar = formulario.querySelector('[data-estado-recargar]'), contenedorError = formulario.querySelector('[data-estado-error]');
   const client = crearClientCitaManual(solicitar); let ocupado = false, desactualizado = false;
