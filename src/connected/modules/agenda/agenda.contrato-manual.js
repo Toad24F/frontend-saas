@@ -35,7 +35,8 @@ export function seleccionManual(valores, actor = null) {
   if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(valores.horaInicio || '')) throw new Error('Selecciona un horario devuelto por el servidor.');
   // El perfil visible procede de la sesión; el backend lo resuelve otra vez como autoridad.
   return { sucursalId: idPositivo(valores.sucursalId), personalId: idPositivo(actor?.rol === 'profesional' ? actor.id : valores.personalId), servicioId: idPositivo(valores.servicioId),
-    fechaLocal: fechaCivil(valores.fechaLocal), horaInicio: valores.horaInicio, ...cliente, notas: textoOpcional(valores.notas) };
+    fechaLocal: fechaCivil(valores.fechaLocal), horaInicio: valores.horaInicio, ...cliente,
+    notas: textoOpcional(valores.notas), autorizaWhatsapp: valores.autorizaWhatsapp === true };
 }
 export function crearPayloadCambioEstado(valores) {
   if (!['pendiente', 'confirmada', 'completada', 'cancelada', 'no_asistio'].includes(valores.estado)) throw new Error('Selecciona un estado válido.');

@@ -10,10 +10,17 @@ export function leerResultadoReserva(datos) {
     !Number.isFinite(Date.parse(datos.inicioUtc)) || !Number.isFinite(Date.parse(datos.finUtc)) || Date.parse(datos.finUtc) <= Date.parse(datos.inicioUtc) ||
     (datos.costo !== undefined && (typeof datos.costo !== 'string' || !/^\d+(?:\.\d{1,2})?$/.test(datos.costo))) || !datos.zonaHoraria) throw new Error('Resultado no válido.');
   fechaLocal(datos.inicioUtc, datos.zonaHoraria);
+  // Un plazo se conserva en UTC; su presentación usa la zona histórica de la cita.
+  const hayCondicion = Object.hasOwn(datos, 'vencimientoConfirmacionUtc') || Object.hasOwn(datos, 'seguimientoManual');
+  if (hayCondicion && (typeof datos.seguimientoManual !== 'boolean' ||
+    !(datos.vencimientoConfirmacionUtc === null ||
+      (typeof datos.vencimientoConfirmacionUtc === 'string' && datos.vencimientoConfirmacionUtc.endsWith('Z') && Number.isFinite(Date.parse(datos.vencimientoConfirmacionUtc)))) ||
+    datos.seguimientoManual !== (datos.vencimientoConfirmacionUtc === null))) throw new Error('Condición de confirmación no válida.');
   // El resumen HTTP ya proyectó la visibilidad actual; no se rellena desde
   // catálogo ni se interpreta la omisión como costo cero.
   return Object.fromEntries([...nombres, 'estado', 'inicioUtc', 'finUtc', 'zonaHoraria',
-    ...(datos.costo === undefined ? [] : ['costo'])].map((clave) => [clave, datos[clave]]));
+    ...(datos.costo === undefined ? [] : ['costo']),
+    ...(hayCondicion ? ['vencimientoConfirmacionUtc', 'seguimientoManual'] : [])].map((clave) => [clave, datos[clave]]));
 }
 
 // El contacto normalizado se congela solo en memoria. El marcador se confirma

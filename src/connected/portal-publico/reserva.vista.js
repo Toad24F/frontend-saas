@@ -35,7 +35,10 @@ function renderContenido(estado) {
       <dt>Profesional</dt><dd>${escaparTextoPortal(resultado.nombreProfesional)}</dd>
       <dt>Fecha</dt><dd>${escaparTextoPortal(etiquetaFecha(fechaLocal(resultado.inicioUtc, resultado.zonaHoraria)))}</dd>
       <dt>Horario</dt><dd>${escaparTextoPortal(horaLocal(resultado.inicioUtc, resultado.zonaHoraria))}–${escaparTextoPortal(horaLocal(resultado.finUtc, resultado.zonaHoraria))}</dd>
-      <dt>Zona horaria</dt><dd>${escaparTextoPortal(resultado.zonaHoraria)}</dd>${resultado.costo === undefined ? '' : `<dt>Costo</dt><dd>${escaparTextoPortal(resultado.costo)} MXN</dd>`}</dl>`;
+      <dt>Zona horaria</dt><dd>${escaparTextoPortal(resultado.zonaHoraria)}</dd>${resultado.costo === undefined ? '' : `<dt>Costo</dt><dd>${escaparTextoPortal(resultado.costo)} MXN</dd>`}
+      ${resultado.seguimientoManual === undefined ? '' : resultado.seguimientoManual
+    ? '<dt>Confirmación</dt><dd>Seguimiento manual; sin cancelación automática por plazo.</dd>'
+    : `<dt>Plazo de confirmación</dt><dd>${escaparTextoPortal(etiquetaFecha(fechaLocal(resultado.vencimientoConfirmacionUtc, resultado.zonaHoraria)))} · ${escaparTextoPortal(horaLocal(resultado.vencimientoConfirmacionUtc, resultado.zonaHoraria))} · ${escaparTextoPortal(resultado.zonaHoraria)}</dd>`}</dl>`;
   }
   const { contacto, erroresContacto: errores } = estado;
   const activo = estado.estadoApartado === 'vigente' && estado.milisegundosRestantes > 0;
@@ -53,6 +56,7 @@ function renderContenido(estado) {
       <div class="portal-campo-contacto"><label for="portal-contacto-notas">Notas o motivo de consulta (opcional)</label>
         <textarea class="form-control" id="portal-contacto-notas" name="notas" rows="4" data-campo-contacto="notas" autocomplete="off" aria-invalid="${Boolean(errores.notas)}" aria-describedby="portal-contacto-notas-ayuda portal-contacto-notas-error">${escaparTextoPortal(contacto.notas)}</textarea>
         <small id="portal-contacto-notas-ayuda">Hasta 2000 caracteres. Se conservan solo mientras permanezcas en este flujo.</small><p class="portal-error-campo" id="portal-contacto-notas-error">${escaparTextoPortal(errores.notas || '')}</p></div>
+      <div class="portal-campo-contacto"><label for="portal-contacto-whatsapp"><input id="portal-contacto-whatsapp" type="checkbox" data-campo-contacto="autorizaWhatsapp" ${contacto.autorizaWhatsapp ? 'checked' : ''}> Autorizo recibir por WhatsApp mensajes sobre esta cita.</label><small>Opcional. Puedes reservar sin autorizar; el negocio hará seguimiento manual.</small></div>
       ${errores.formulario ? `<p class="portal-error-campo">${escaparTextoPortal(errores.formulario)}</p>` : ''}
       ${estado.contactoValidado ? '<p id="portal-contacto-validado">Los datos tienen un formato válido. Aún no se ha enviado una reserva.</p>' : ''}
       <p class="portal-limite">La reserva se registrará como pendiente. El apartado no se amplía al escribir, revisar los datos o reintentar.</p>
@@ -104,10 +108,11 @@ export function montarReserva(contenedor, flujo) {
   contenedor.addEventListener('input', (evento) => {
     const campo = evento.target.dataset.campoContacto;
     if (campo) {
-      flujo.actualizarContacto(campo, evento.target.value);
+      flujo.actualizarContacto(campo, campo === 'autorizaWhatsapp' ? evento.target.checked : evento.target.value);
       // Edición sin render: no interrumpe el cursor, IME o un click en otro campo.
       evento.target.setAttribute('aria-invalid', 'false');
-      contenedor.querySelector(`#portal-contacto-${campo}-error`).textContent = '';
+      const error = contenedor.querySelector(`#portal-contacto-${campo}-error`);
+      if (error) error.textContent = '';
       const validado = contenedor.querySelector('#portal-contacto-validado');
       if (validado) validado.hidden = true;
     }

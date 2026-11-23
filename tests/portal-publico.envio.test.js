@@ -42,7 +42,7 @@ test('T116: contacto sobrevive vencimiento y navegación interna sin persistirse
   assert.equal(rutaBase.store.leer().estado, 'ausente');
   await rutaBase.flow.volver(); await rutaBase.flow.continuar();
   assert.deepEqual(rutaBase.flow.obtenerEstado().contacto, contacto);
-  rutaBase.flow.salir(); assert.deepEqual(rutaBase.flow.obtenerEstado().contacto, { nombre: '', telefono: '', notas: '' });
+  rutaBase.flow.salir(); assert.deepEqual(rutaBase.flow.obtenerEstado().contacto, { nombre: '', telefono: '', notas: '', autorizaWhatsapp: false });
 });
 const resultado = { folio: 'P-123456789012345678', estado: 'pendiente', inicioUtc: '2026-10-20T17:00:00.000Z',
   finUtc: '2026-10-20T17:30:00.000Z', zonaHoraria: 'America/Mazatlan', costo: '450.00',
@@ -93,7 +93,7 @@ test('T110: marcador confirmado antes de preparar y enviar; contenido normalizad
   });
   await formulario(flujo); await flujo.enviarReserva();
   assert.deepEqual(llamadas.find((llamada) => llamada.path === 'intentos').body, { clave: marcador.clave, apartadoId: 8 });
-  assert.deepEqual(llamadas.find((llamada) => llamada.path.endsWith('/reservar')).body, { nombre: 'Ana', telefono: '6141234567', notas: 'Nota privada' });
+  assert.deepEqual(llamadas.find((llamada) => llamada.path.endsWith('/reservar')).body, { nombre: 'Ana', telefono: '6141234567', notas: 'Nota privada', autorizaWhatsapp: false });
   assert.equal(store.leer().estado, 'ausente'); assert.equal(flujo.obtenerEstado().fase, 'resultado');
   assert.ok(!JSON.stringify(mensajes).includes('Nota privada'));
 });

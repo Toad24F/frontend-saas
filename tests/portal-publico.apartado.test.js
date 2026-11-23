@@ -89,7 +89,7 @@ test('T104: concesión repetida ya vencida o sustituida no abre formulario', asy
 });
 
 test('T105: normaliza como el servidor sin buscar teléfono ni truncar Unicode', () => {
-  assert.deepEqual(validarContacto(contacto).valor, { nombre: 'María José', telefono: '6141234567', notas: 'Consulta' });
+  assert.deepEqual(validarContacto(contacto).valor, { nombre: 'María José', telefono: '6141234567', notas: 'Consulta', autorizaWhatsapp: false });
   assert.equal(validarContacto({ nombre: '😀'.repeat(150), telefono: '614 123 4567', notas: 'x'.repeat(2000) }).valido, true);
   assert.equal(validarContacto({ nombre: ' Ana ', telefono: '6141234567', notas: ' ' }).valor.notas, null);
   for (const [campo, valor] of [['nombre', ' '], ['nombre', '😀'.repeat(151)], ['telefono', '+1 6141234567'],
@@ -105,7 +105,7 @@ test('T105–T106: errores por campo y contacto solo en memoria, conservado al v
   assert.equal(flujo.validarContacto().valido, false); assert.ok(flujo.obtenerEstado().erroresContacto.telefono);
   flujo.actualizarContacto('telefono', '+52 614-123-4567'); assert.equal(flujo.validarContacto().valido, true);
   await flujo.volverADisponibilidad();
-  assert.deepEqual(flujo.obtenerEstado().contacto, { nombre: '<b>Ana</b>', telefono: '+52 614-123-4567', notas: 'Privado' });
+  assert.deepEqual(flujo.obtenerEstado().contacto, { nombre: '<b>Ana</b>', telefono: '+52 614-123-4567', notas: 'Privado', autorizaWhatsapp: false });
   assert.ok(llamadas.every((llamada) => !JSON.stringify(llamada).includes('Privado')));
   assert.equal(prepararPrueba().flow.obtenerEstado().contacto.nombre, '');
 });

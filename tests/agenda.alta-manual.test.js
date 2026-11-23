@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { seleccionManual, horariosManuales, crearClientCitaManual, puedeGestionarCitas, crearPayloadCambioEstado } from '../src/connected/modules/agenda/agenda.contrato-manual.js';
 import { crearOperacionManual } from '../src/connected/modules/agenda/agenda.operacion-manual.js';
 
-const seleccion = { sucursalId: 2, personalId: 3, servicioId: 4, fechaLocal: '2026-11-20', horaInicio: '09:17', clienteNuevo: { nombreCompleto: 'Ana', telefono: '6145550101' }, notas: null };
+const seleccion = { sucursalId: 2, personalId: 3, servicioId: 4, fechaLocal: '2026-11-20', horaInicio: '09:17', clienteNuevo: { nombreCompleto: 'Ana', telefono: '6145550101' }, notas: null, autorizaWhatsapp: false };
 const resultado = { id: 7, folio: 'M-7', estado: 'confirmada', origen: 'manual', version: 1, ...seleccion, clienteId: 8, inicioUtc: '2026-11-20T15:17:00Z', finUtc: '2026-11-20T15:47:00Z', finOcupacionUtc: '2026-11-20T15:52:00Z', zonaHoraria: 'America/Chihuahua', costoAceptado: '200.00' };
 const horario = { inicioUtc: resultado.inicioUtc, finUtc: resultado.finUtc };
 const almacenamiento = () => { const valores = new Map(); return { getItem: (clave) => valores.get(clave) ?? null, setItem: (clave, valor) => valores.set(clave, valor), removeItem: (clave) => valores.delete(clave) }; };

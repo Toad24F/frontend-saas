@@ -39,6 +39,9 @@ export async function abrirAltaManual({ day: dia, catalogs: catalogos, onSaved: 
   const dialogo = modal('Nueva cita', `<form id="connected-manual-form" novalidate><div class="dialogo-cuerpo"><fieldset data-manual-campos><p class="introduccion-formulario">Agenda una atención para tu paciente.</p>${usuarioAgenda.rol === 'recepcionista' ? '<p class="ayuda-campo">Introduce los identificadores de servicio, sucursal y profesional proporcionados por tu negocio.</p>' : ''}<div class="formulario-dos-columnas">${campoRecurso('Servicio', 'servicioId', catalogos.services, usuarioAgenda.rol)}${campoRecurso('Sucursal', 'sucursalId', catalogos.branches, usuarioAgenda.rol)}</div><div class="formulario-dos-columnas">${campoProfesional}${campo('Fecha', 'fechaLocal', dia, 'date', 'required')}</div><button type="button" class="btn btn-light" data-manual-consulta>${renderIcono('search')}Consultar horarios</button><div class="campo-formulario"><label class="form-label" for="manual-horario">Horario disponible</label><select id="manual-horario" name="horario" class="form-select" disabled><option value="">Consulta primero los horarios</option></select><p class="ayuda-campo" data-manual-disponibilidad role="status"></p></div><div class="separador-formulario"><span>DATOS DEL PACIENTE</span></div>${modoCliente}<div data-cliente-nuevo><div class="formulario-dos-columnas">${campo('Nombre completo', 'nombreCompleto', '', 'text', 'maxlength="150" autocomplete="off"')}${campo('Teléfono', 'telefono', '', 'tel', 'maxlength="30" autocomplete="off"')}</div></div>${campoClienteExistente}<div class="campo-formulario"><label class="form-label" for="manual-notas">Notas de consulta <span class="opcional">(opcional)</span></label><textarea class="form-control" name="notas" id="manual-notas" rows="2" maxlength="2000"></textarea></div><p class="ayuda-campo">Consultar horarios no los aparta. El servidor vuelve a comprobar la disponibilidad al confirmar.</p></fieldset><p class="error-formulario" data-manual-error role="alert" tabindex="-1" hidden></p><div data-manual-operacion aria-live="polite"></div></div><div class="dialogo-pie"><button class="btn btn-light" type="button" data-manual-cerrar>Cerrar</button><button class="btn btn-primary" type="submit" data-manual-guardar disabled>${renderIcono('check')}Confirmar cita</button></div></form>`, true);
   dialogo.classList.add('agenda-dialogo-cita');
   const formulario = dialogo.querySelector('form'), campos = formulario.querySelector('[data-manual-campos]');
+  // El personal registra la respuesta comunicada por el paciente; desmarcado no bloquea el alta.
+  formulario.querySelector('#manual-notas').closest('.campo-formulario').insertAdjacentHTML('afterend',
+    '<div class="form-check campo-formulario"><input class="form-check-input" type="checkbox" id="manual-autoriza-whatsapp" name="autorizaWhatsapp"><label class="form-check-label" for="manual-autoriza-whatsapp">El paciente autorizó recibir mensajes de esta cita por WhatsApp</label><p class="ayuda-campo">Opcional; sin autorización se hará seguimiento manual.</p></div>');
   const selectorHorarios = formulario.elements.horario, enviar = formulario.querySelector('[data-manual-guardar]');
   const contenedorError = formulario.querySelector('[data-manual-error]'), panel = formulario.querySelector('[data-manual-operacion]');
   let generacion = 0, generacionClientes = 0, horarios = [], disponibilidad = null, identidadConsulta = '', paginaBusqueda = 1, terminoBusqueda = '', guardadoNotificado = false, opcionesClientes = [];
@@ -149,7 +152,7 @@ export async function abrirAltaManual({ day: dia, catalogs: catalogos, onSaved: 
       const horario = horarios[Number(selectorHorarios.value)];
       if (!horario || selectorHorarios.value === '' || !disponibilidad || JSON.stringify(valoresConsulta()) !== identidadConsulta) throw new Error('Consulta y selecciona un horario vigente antes de confirmar.');
       const valores = new FormData(formulario), existente = valores.get('clienteModo') === 'existente';
-      const seleccion = seleccionManual({ ...valoresConsulta(), fechaLocal: horario.fechaLocal, horaInicio: horario.horaInicio, notas: valores.get('notas'),
+      const seleccion = seleccionManual({ ...valoresConsulta(), fechaLocal: horario.fechaLocal, horaInicio: horario.horaInicio, notas: valores.get('notas'), autorizaWhatsapp: valores.has('autorizaWhatsapp'),
         ...(existente ? { clienteId: valores.get('clienteId') } : { clienteNuevo: { nombreCompleto: valores.get('nombreCompleto'), telefono: valores.get('telefono') } }) }, usuarioAgenda);
       void ejecutar(() => operacion.submit(seleccion));
     } catch (error) { fallar(error); }
@@ -158,11 +161,14 @@ export async function abrirAltaManual({ day: dia, catalogs: catalogos, onSaved: 
   const pendiente = operacion.state.marker?.seleccion;
   if (pendiente) {
     for (const nombre of ['servicioId', 'sucursalId', 'personalId', 'fechaLocal', 'notas']) formulario.elements[nombre].value = pendiente[nombre] ?? '';
+    formulario.elements.autorizaWhatsapp.checked = pendiente.autorizaWhatsapp === true;
     if (pendiente.clienteNuevo) { formulario.elements.nombreCompleto.value = pendiente.clienteNuevo.nombreCompleto; formulario.elements.telefono.value = pendiente.clienteNuevo.telefono; }
     else if (usuarioAgenda.rol !== 'profesional') { formulario.elements.clienteModo.value = 'existente'; formulario.querySelector('[data-cliente-nuevo]').hidden = true; formulario.querySelector('[data-cliente-existente]').hidden = false; formulario.querySelector('[data-cliente-resultados]').innerHTML = `<p>Cliente seleccionado: ficha #${esc(pendiente.clienteId)}.</p>`; }
   }
   if (!pendiente && borrador) {
-    for (const [nombre, valor] of Object.entries(borrador.values)) if (formulario.elements[nombre] && nombre !== 'clienteId') formulario.elements[nombre].value = valor;
+    for (const [nombre, valor] of Object.entries(borrador.values)) if (formulario.elements[nombre] && !['clienteId', 'autorizaWhatsapp'].includes(nombre)) formulario.elements[nombre].value = valor;
+    // FormData omite los checkbox desmarcados; su borrador restaura checked, no value.
+    formulario.elements.autorizaWhatsapp.checked = borrador.values.autorizaWhatsapp === 'on';
     opcionesClientes = borrador.customers || [];
     const elegido = opcionesClientes.find((elemento) => String(elemento.id) === borrador.values.clienteId);
     if (elegido && usuarioAgenda.rol !== 'profesional') formulario.querySelector('[data-cliente-resultados]').innerHTML = `<label class="agenda-opcion-cliente"><input type="radio" name="clienteId" value="${esc(elegido.id)}" checked><span><strong>${esc(elegido.nombreCompleto)}</strong><small>${esc(elegido.telefono)} · Ficha #${esc(elegido.id)}</small></span></label>`;
