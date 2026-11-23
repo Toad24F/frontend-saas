@@ -1,3 +1,4 @@
+import { renderSeguimientoCita, textoActorCita } from './agenda.seguimiento.js';
 import { atencionEquipo } from '../../../shared/screens/agenda/agenda.utilidades.js';
 import { resolverSucursalesAgenda } from '../../../shared/screens/agenda/agenda.filtros.js';
 import { instalarEstadoRapido } from './agenda.estado-rapido.js';
@@ -233,7 +234,9 @@ export async function abrirCita(id) {
     const detalle = await client.consultarDetalle(id);
     if (!activo()) return;
     if (!detalle || detalle.id !== id || !detalle.zonaHoraria) throw new Error('El detalle recibido no es válido.');
-    dialogo.querySelector('.dialogo-cuerpo').innerHTML = `${htmlDetalle(detalle)}<section class="agenda-historial" aria-label="Historial de la cita"><h3>Historial de la cita</h3><div data-agenda-historial></div></section>`;
+    const cuerpoDetalle = dialogo.querySelector('.dialogo-cuerpo');
+    let seguimientoMostrado = renderSeguimientoCita(detalle.seguimiento, detalle.zonaHoraria);
+    cuerpoDetalle.innerHTML = `${htmlDetalle(detalle)}<div data-agenda-seguimiento aria-live="polite">${seguimientoMostrado}</div><section class="agenda-historial" aria-label="Historial de la cita"><h3>Historial de la cita</h3><div data-agenda-historial></div></section>`;
     // Estado e historial conservan su autoridad de servidor; solo los roles de gestión reciben editor.
     montarEditorEstado(dialogo, detalle, { role: usuarioActual.rol, scope: ambitoAbierto, request: api, isCurrent: esVigente,
       onReload: () => abrirCita(id),
@@ -249,7 +252,18 @@ export async function abrirCita(id) {
         await cargar(true); if (activo()) await abrirCita(id);
       },
     });
-    observarRegistro(dialogo.querySelector('.dialogo-cuerpo'), { version: detalle.version, read: () => client.consultarDetalle(id), active: activo });
+    observarRegistro(cuerpoDetalle, { version: detalle.version, active: activo, read: async () => {
+      const vigente = await client.consultarDetalle(id);
+      // Los acuses no cambian la versión de la cita. Se actualiza solo su región de lectura.
+      if (activo() && vigente?.id === id && vigente.version === detalle.version) {
+        const siguiente = renderSeguimientoCita(vigente.seguimiento, vigente.zonaHoraria);
+        if (siguiente !== seguimientoMostrado) {
+          cuerpoDetalle.querySelector('[data-agenda-seguimiento]').innerHTML = siguiente;
+          seguimientoMostrado = siguiente;
+        }
+      }
+      return vigente;
+    } });
     let generacionHistorial = 0;
     async function mostrarHistorial(paginaActual = 1) {
       const revision = ++generacionHistorial, objetivo = dialogo.querySelector('[data-agenda-historial]');
@@ -258,7 +272,7 @@ export async function abrirCita(id) {
         const historial = await client.consultarHistorial(id, paginaActual);
         if (!activo() || revision !== generacionHistorial) return;
         if (!historial || !Array.isArray(historial.eventos) || historial.pagina !== paginaActual || typeof historial.hayMas !== 'boolean') throw new Error('El historial recibido no es válido.');
-        objetivo.innerHTML = historial.eventos.length ? `<ol>${historial.eventos.map((evento) => `<li><strong>${esc(etiquetasAcciones[evento.accion] || evento.accion)}</strong><p>${esc(new Intl.DateTimeFormat('es-MX', { timeZone: detalle.zonaHoraria, dateStyle: 'medium', timeStyle: 'short' }).format(new Date(evento.ocurridoEn)))} · ${esc(detalle.zonaHoraria)}</p><p>${evento.origenActor === 'portal_publico' ? 'Portal público' : `Personal #${esc(evento.actorUsuarioId)}`} · Versión ${esc(evento.versionResultante)} · Evento ${esc(evento.id)}</p>${evento.motivo != null ? `<p>Motivo: ${esc(evento.motivo)}</p>` : ''}<details><summary>Valores anteriores y nuevos</summary><h4>Antes</h4>${htmlValores(evento.valoresAntes)}<h4>Después</h4>${htmlValores(evento.valoresDespues)}</details></li>`).join('')}</ol>` : '<p>Sin eventos registrados.</p>';
+        objetivo.innerHTML = historial.eventos.length ? `<ol>${historial.eventos.map((evento) => `<li><strong>${esc(etiquetasAcciones[evento.accion] || evento.accion)}</strong><p>${esc(new Intl.DateTimeFormat('es-MX', { timeZone: detalle.zonaHoraria, dateStyle: 'medium', timeStyle: 'short' }).format(new Date(evento.ocurridoEn)))} · ${esc(detalle.zonaHoraria)}</p><p>${esc(textoActorCita(evento))} · Versión ${esc(evento.versionResultante)} · Evento ${esc(evento.id)}</p>${evento.motivo != null ? `<p>Motivo: ${esc(evento.motivo)}</p>` : ''}<details><summary>Valores anteriores y nuevos</summary><h4>Antes</h4>${htmlValores(evento.valoresAntes)}<h4>Después</h4>${htmlValores(evento.valoresDespues)}</details></li>`).join('')}</ol>` : '<p>Sin eventos registrados.</p>';
         objetivo.insertAdjacentHTML('beforeend', `<div class="agenda-paginas-historial"><button class="btn btn-light" data-historial-anterior ${paginaActual === 1 ? 'disabled' : ''}>Página anterior</button><span>Página ${paginaActual}</span><button class="btn btn-light" data-historial-siguiente ${!historial.hayMas ? 'disabled' : ''}>Siguiente página</button></div>`);
         objetivo.querySelector('[data-historial-anterior]').onclick = () => void mostrarHistorial(paginaActual - 1);
         objetivo.querySelector('[data-historial-siguiente]').onclick = () => void mostrarHistorial(paginaActual + 1);
