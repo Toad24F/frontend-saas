@@ -23,6 +23,7 @@ El panel conectado requiere la API del backend y una cuenta activa. La entrada p
 
 - La ruta sin parámetros abre la versión conectada. Inicia sesión con una cuenta del backend.
 - Configura `VITE_API_URL` en `.env` si la API no está en `http://localhost:3000`. No agregues `/api`: el backend actual no utiliza ese prefijo. Reinicia Vite al cambiar esta variable.
+- Para usar un túnel `https://*.ngrok-free.dev`, pon su URL en `VITE_API_URL`. El panel y el proxy público de Vite envían la cabecera que omite el aviso de ngrok. [Conexión y verificación con ngrok](docs/conexion.ngrok.md).
 - Para comparar, usa **Ver demo** en el encabezado o agrega `?demo=1` a cualquier ruta. El enlace **Prototipo** vuelve a la versión conectada. El modo se conserva al navegar y recargar.
 - Administración: profesionales (identidad, contraseña y asignaciones), servicios, sucursales, semana completa con múltiples franjas donde una pausa se representa con dos franjas separadas, y creación/eliminación de bloqueos.
 - Profesional: sus servicios, horarios y bloqueos. La API restringe el catálogo de sucursales a administración; en este rol se muestran los IDs de las sucursales presentes en su horario.

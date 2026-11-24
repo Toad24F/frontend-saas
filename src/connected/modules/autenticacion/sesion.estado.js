@@ -1,6 +1,8 @@
+import { cabecerasNgrok, esTunelNgrok } from '../../../shared/api.ngrok.js';
 import { reemplazarDatos } from '../../../shared/aplicacion.datos.js';
 
 const baseApi = (import.meta.env?.VITE_API_URL || 'http://localhost:3000').replace(/\/$/, '');
+const cabecerasApi = esTunelNgrok(baseApi) ? cabecerasNgrok : {};
 const claveSesion = 'cita-session';
 const leerToken = (tipoAlmacenamiento) => {
   try { return globalThis[tipoAlmacenamiento]?.getItem(claveSesion) || null; }
@@ -24,9 +26,13 @@ export async function api(ruta, method = 'GET', cuerpo, opciones = {}) {
   let respuesta;
   try {
     respuesta = await fetch(`${baseApi}${ruta}`, {
-      // Cabeceras adicionales solo se pasan cuando la llamada las solicita;
-      // los demás consumidores conservan exactamente sus cabeceras previas.
-      method, headers: { ...(cuerpo === undefined || esMultipart ? {} : { 'Content-Type': 'application/json' }), ...(tokenPeticion ? { Authorization: `Bearer ${tokenPeticion}` } : {}), ...opciones.headers },
+      method,
+      headers: {
+        ...cabecerasApi,
+        ...(cuerpo === undefined || esMultipart ? {} : { 'Content-Type': 'application/json' }),
+        ...(tokenPeticion ? { Authorization: `Bearer ${tokenPeticion}` } : {}),
+        ...opciones.headers,
+      },
       ...(cuerpo === undefined ? {} : { body: esMultipart ? cuerpo : JSON.stringify(cuerpo) }),
     });
   } catch {
