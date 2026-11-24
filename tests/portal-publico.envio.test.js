@@ -142,7 +142,7 @@ test('T112: recarga con marcador resuelve antes de catálogo y sin contacto', as
   const { flow: flujo, calls: llamadas } = prepararPrueba(null, { almacenamiento }); await flujo.iniciar();
   assert.equal(llamadas.length, 1); assert.equal(llamadas[0].path, `intentos/${marcador.clave}/resolver`);
   assert.deepEqual(llamadas[0].body, { apartadoId: 8 }); assert.equal(flujo.obtenerEstado().fase, 'resultado');
-  assert.equal(flujo.obtenerEstado().resultado.folio, resultado.folio);
+  assert.equal(flujo.obtenerEstado().resultado.nombreNegocio, resultado.nombreNegocio);
 });
 
 test('T112: solo no_registrado comprobado elimina marcador y reinicia selección', async () => {
@@ -225,7 +225,7 @@ test('T113: consulta y avisos atrasados no borran el resumen ni liberan otro apa
   // Un aviso posterior al resultado no reactiva la gestión del apartado consumido.
   await rutaBase.flow.enviarReserva(); await rutaBase.flow.handleMensaje({ type: 'refresh', slug: 'centro' });
   await rutaBase.flow.volverADisponibilidad(); rutaBase.flow.salir();
-  assert.equal(rutaBase.flow.obtenerEstado().resultado.folio, resultado.folio);
+  assert.equal(rutaBase.flow.obtenerEstado().resultado.nombreNegocio, resultado.nombreNegocio);
   assert.ok(!rutaBase.calls.some((llamada) => llamada.path.endsWith('/liberar')));
 });
 
@@ -253,7 +253,7 @@ test('T111–T113: un envío incierto conserva el lock para bloquear apartados d
 test('T114: resumen histórico pendiente, escapado y sin enlaces de gestión ni promesa de WhatsApp', async () => {
   const { flow: flujo } = prepararPrueba((ruta) => ruta === 'intentos' ? { id: marcador.clave, apartadoId: 8, estado: 'preparado' } : { ...resultado, nombreServicio: '<script>histórico</script>' });
   await formulario(flujo); await flujo.enviarReserva(); const html = renderReserva(flujo.obtenerEstado());
-  assert.match(html, /Pendiente/); assert.match(html, /P-123456789012345678/); assert.match(html, /450.00/);
+  assert.match(html, /Pendiente/); assert.doesNotMatch(html, /P-123456789012345678|folio/i); assert.match(html, /450.00/);
   assert.match(html, /America\/Mazatlan/); assert.match(html, /10:00/); assert.match(html, /&lt;script&gt;/);
   assert.doesNotMatch(html, /<script>|href=|WhatsApp|999.00|confirmada/i);
 });
@@ -275,5 +275,5 @@ test('T113: una lectura de apartado iniciada antes del envío no invalida el res
   const verificacion = rutaBase.flow.verificarVigencia();
   respuestaPendiente.resolver({ liberar() {} }); await enviar;
   consultaApartadoDiferida.resolver({ apartadoId: 8, generacion: '1', estado: 'sustituido', expiraEn: '2026-10-20T16:05:00Z', servidorAhora: '2026-10-20T16:00:00Z' }); await verificacion;
-  assert.equal(rutaBase.flow.obtenerEstado().fase, 'resultado'); assert.equal(rutaBase.flow.obtenerEstado().resultado.folio, resultado.folio);
+  assert.equal(rutaBase.flow.obtenerEstado().fase, 'resultado'); assert.equal(rutaBase.flow.obtenerEstado().resultado.nombreNegocio, resultado.nombreNegocio);
 });

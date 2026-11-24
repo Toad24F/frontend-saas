@@ -23,9 +23,6 @@ export function esqueletoCalendario(vista) {
   // Ningún placeholder tiene estado, paciente ni acción de cita; solo comunica carga sin datos ficticios.
   return `<div data-agenda-esqueleto class="agenda-skeleton" aria-busy="true"><span class="visually-hidden" role="status">Cargando citas…</span><div class="${mes ? 'mes-desplazamiento' : 'calendario-desplazamiento'}" aria-hidden="true">${contenido}</div></div>`;
 }
-export function referenciaEvento(folio, id) {
-  return `<span class="evento-folio" aria-hidden="true">#${esc(folio ? String(folio).slice(-5) : id)}</span>`;
-}
 const horaAMinutos = (valor) => Number(valor.slice(0, 2)) * 60 + Number(valor.slice(3, 5)) + Number(valor.slice(6, 8) || 0) / 60;
 const reloj = (valor) => {
   const segundos = Math.round(valor * 60);

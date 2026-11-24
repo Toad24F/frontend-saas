@@ -28,7 +28,7 @@ export function montarEditorHorario(
     .querySelector('.agenda-historial')
     .insertAdjacentHTML(
       'beforebegin',
-      `<form class="agenda-editor-estado agenda-editor-horario"><h3>Cambiar horario</h3><p class="ayuda-campo">Se conserva el folio, servicio, profesional, sucursal y costo histórico. La propuesta se interpreta en la zona vigente de la sucursal; la zona guardada de esta cita es ${esc(detalle.zonaHoraria)}. El servidor comprueba disponibilidad y duración.</p>${bloqueado ? '<p role="status">Solo puedes mover citas futuras que no estén canceladas.</p>' : ''}<div class="formulario-dos-columnas"><label class="form-label">Nueva fecha<input class="form-control" type="date" name="fechaLocal" required></label><label class="form-label">Nueva hora<input class="form-control" type="time" name="horaInicio" required></label></div><p class="error-formulario" data-horario-error role="alert" tabindex="-1" hidden></p><div class="agenda-paginas-historial"><button type="submit" class="btn btn-primary">Guardar horario</button><button type="button" class="btn btn-light" data-horario-recargar hidden>Releer horario</button></div></form>`,
+      `<form class="agenda-editor-estado agenda-editor-horario"><h3>Cambiar horario</h3><p class="ayuda-campo">Se conservan servicio, profesional, sucursal y costo histórico. La propuesta se interpreta en la zona vigente de la sucursal; la zona guardada de esta cita es ${esc(detalle.zonaHoraria)}. El servidor comprueba disponibilidad y duración.</p>${bloqueado ? '<p role="status">Solo puedes mover citas futuras que no estén canceladas.</p>' : ''}<div class="formulario-dos-columnas"><label class="form-label">Nueva fecha<input class="form-control" type="date" name="fechaLocal" required></label><label class="form-label">Nueva hora<input class="form-control" type="time" name="horaInicio" required></label></div><p class="error-formulario" data-horario-error role="alert" tabindex="-1" hidden></p><div class="agenda-paginas-historial"><button type="submit" class="btn btn-primary">Guardar horario</button><button type="button" class="btn btn-light" data-horario-recargar hidden>Releer horario</button></div></form>`,
     );
   const formulario = dialogo.querySelector('.agenda-editor-horario'),
     guardar = formulario.querySelector('[type="submit"]'),
@@ -42,7 +42,6 @@ export function montarEditorHorario(
     (valores) => crearClientCambioHorario(solicitar).cambiarHorario(detalle.id, valores),
     (resultado) =>
       resultado?.id === detalle.id &&
-      resultado.folio === detalle.folio &&
       // El backend confirma una cita pendiente cuando el cambio de horario es efectivo.
       (resultado.estado === detalle.estado || (detalle.estado === 'pendiente' && resultado.estado === 'confirmada')) &&
       Number.isInteger(resultado.version) &&

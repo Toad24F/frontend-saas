@@ -27,10 +27,8 @@
 .agenda-calendario .calendario-evento .evento-hora { font-size: 11px; line-height: 13px; margin-bottom: 1px; gap: 4px; }
 .agenda-calendario .calendario-evento .evento-hora > span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .agenda-calendario .calendario-evento strong { font-size: 13px; line-height: 16px; }
-.agenda-calendario .calendario-evento .evento-folio, .agenda-calendario .mes-evento .evento-folio { flex: 0 0 auto; padding: 1px 3px; border-radius: 3px; background: rgba(255,255,255,.45); font-size: 9px; line-height: 12px; font-variant-numeric: tabular-nums; letter-spacing: .1px; }
 .agenda-calendario .mes-evento { display: flex; align-items: center; gap: 4px; margin-block: 4px; border-radius: 4px; }
 .agenda-calendario .mes-evento > .mes-etiqueta-evento { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
-html[data-theme='dark'] .agenda-calendario .evento-folio { background: rgba(0,0,0,.18); }
 .agenda-calendario .calendario-evento.evento-corto :is(.evento-servicio, .evento-profesional) { display: none; }
 .agenda-calendario .calendario-evento:focus-visible { z-index: 5; outline: 3px solid var(--acento); outline-offset: 1px; }
 

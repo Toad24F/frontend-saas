@@ -1,9 +1,13 @@
 import { test as base, expect } from '@playwright/test';
 import { createRequire } from 'node:module';
 import { resolve } from 'node:path';
+import { existsSync } from 'node:fs';
 
 // Las utilidades comparten las dependencias del backend hermano usado por la fixture.
-const requerirBackend = createRequire(resolve(process.cwd(), '../backend/package.json'));
+const rutaBackend = ['../SaaS-backend/package.json', '../backend/package.json']
+  .map((ruta) => resolve(process.cwd(), ruta)).find(existsSync);
+if (!rutaBackend) throw new Error('No se encontró el backend hermano para las consultas de prueba.');
+const requerirBackend = createRequire(rutaBackend);
 const { createConnection } = requerirBackend('mysql2/promise');
 
 export const urlPortal = (negocio = 1) => `${process.env.PORTAL_TEST_ORIGIN}/reservas/portal-qa-${negocio}`;

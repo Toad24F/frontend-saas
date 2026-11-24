@@ -60,7 +60,6 @@
 .agenda-calendario .calendario-evento { z-index: 2; }
 .agenda-calendario .calendario-evento:hover { filter: brightness(1.04); }
 .agenda-calendario .calendario-evento:focus-visible { z-index: 7; }
-.agenda-calendario .evento-folio { margin-left: auto; }
 .agenda-calendario .evento-causa { font-size: 10px; line-height: 13px; font-weight: 600; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .agenda-advertencia { display: inline-flex; flex: 0 0 auto; align-items: center; justify-content: center; width: 16px; height: 16px; border-radius: 50%; background: var(--superficie); color: var(--acento); }
 .agenda-advertencia .icono { width: 14px; height: 14px; }
@@ -158,7 +157,7 @@
 .agenda-calendario .agenda-resaltado { outline: 2px solid var(--acento); outline-offset: 1px; box-shadow: 0 0 0 4px color-mix(in srgb, var(--acento) 25%, transparent); animation: agenda-arrive 2.2s ease-out both; z-index: 5; }
 @keyframes agenda-arrive { 0%, 30% { box-shadow: 0 0 0 5px color-mix(in srgb, var(--acento) 35%, transparent); } 100% { box-shadow: 0 0 0 2px color-mix(in srgb, var(--acento) 10%, transparent); } }
 @keyframes agenda-refresh-turn { to { transform: rotate(360deg); } }
-@container (max-width: 140px) { .evento-folio, .evento-causa { display: none; } }
+@container (max-width: 140px) { .evento-causa { display: none; } }
 @media (max-width: 1450px) {
   .agenda-calendario > .agenda-barra { grid-template-columns: minmax(0, 1fr) auto; }
   .agenda-barra > .calendario-fecha { grid-column: 1; grid-row: 1; }

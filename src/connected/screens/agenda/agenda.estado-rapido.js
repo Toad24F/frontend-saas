@@ -16,7 +16,8 @@ export function instalarEstadoRapido({ client, openDetail: abrirDetalle, refresh
     errorText: (error) => { const info = errorSeguro(error); return `${info.title}. ${info.message} Actualiza la cita antes de volver a guardar.`; },
     change: async (detalle, estado, motivo) => {
       const resultado = await escritor.cambiarEstado(detalle.id, { estado, motivo, version: detalle.version });
-      if (resultado?.id !== detalle.id || resultado.folio !== detalle.folio || resultado.estado !== estado || !Number.isInteger(resultado.version) || resultado.version <= detalle.version) throw new Error('No se pudo comprobar el cambio.');
+      // El cambio rápido se concilia por cita y versión, sin identificador de presentación.
+      if (resultado?.id !== detalle.id || resultado.estado !== estado || !Number.isInteger(resultado.version) || resultado.version <= detalle.version) throw new Error('No se pudo comprobar el cambio.');
       return resultado;
     },
     changed: async (resultado, { restoreFocus: restaurarFoco }) => {

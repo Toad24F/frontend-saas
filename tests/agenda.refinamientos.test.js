@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { leyendaAgenda, metricasAgenda, esqueletoCalendario, referenciaEvento, distribuirEventos } from '../src/shared/screens/agenda/agenda.presentacion.js';
+import { leyendaAgenda, metricasAgenda, esqueletoCalendario, distribuirEventos } from '../src/shared/screens/agenda/agenda.presentacion.js';
 
 // Regresión de las mejoras acordadas: datos reales separados de placeholders y geometría de tarjetas.
 test('métricas compactas sin frases auxiliares y skeleton sin números ficticios', () => {
@@ -24,11 +24,6 @@ test('leyenda accesible conserva los cinco estados y skeleton respeta día, sema
     assert.doesNotMatch(html, /data-agenda-cita|calendario-evento/);
     if (vista === 'month') assert.equal((html.match(/esqueleto-celda-mes/g) || []).length, 42);
   }
-});
-test('referencia usa folio real abreviado o ID sin inventar identificadores ni insertar HTML', () => {
-  assert.match(referenciaEvento('M-ABC123456', 7), /#23456/);
-  assert.match(referenciaEvento(null, 7), /#7/);
-  assert.doesNotMatch(referenciaEvento('<script>', 7), /<script>/);
 });
 test('citas consecutivas y cortas tienen separación y no se superponen visualmente', () => {
   const elementos = Array.from({ length: 8 }, (_, indice) => ({ id: indice + 1, start: `09:${String(indice * 5).padStart(2, '0')}`, end: `09:${String(indice * 5 + 5).padStart(2, '0')}` }));

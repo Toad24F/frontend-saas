@@ -50,7 +50,8 @@ export function montarEditorEstado(dialogo, detalle, { role: rol, scope: ambito,
       formulario.querySelectorAll('select,textarea').forEach((control) => { control.disabled = true; });
       const resultado = await client.cambiarEstado(detalle.id, { estado: valores.get('estado'), motivo: valores.get('motivo'), version: detalle.version });
       if (!formulario.isConnected || !dialogo.open || !esVigente()) return;
-      if (resultado?.id !== detalle.id || resultado.folio !== detalle.folio || resultado.estado !== valores.get('estado') || !Number.isInteger(resultado.version) || resultado.version < detalle.version) throw new Error('No se pudo comprobar el cambio.');
+      // ID y versión identifican la cita y permiten detectar una respuesta ajena u obsoleta.
+      if (resultado?.id !== detalle.id || resultado.estado !== valores.get('estado') || !Number.isInteger(resultado.version) || resultado.version < detalle.version) throw new Error('No se pudo comprobar el cambio.');
       desactualizado = true;
       borrarBorradorAgenda(claveBorrador);
       await alCambiar();

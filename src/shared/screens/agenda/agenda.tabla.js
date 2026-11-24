@@ -19,7 +19,7 @@ export function tablaCitas(citas) {
           .slice(0, 2)
           .join(''),
         'menta',
-      )}<span><strong>${esc(e.client.name)}</strong><small>${a.folio}</small></span></div></td><td><strong>${esc(e.service.name)}</strong><small>${esc(e.professional.name)}</small></td><td><strong>${formatearFecha(a.date, { day: 'numeric', month: 'short' })}</strong><small>${a.start} – ${a.end}</small></td><td>${esc(e.branch.name)}</td><td>${renderEtiquetaEstado(a.status)}</td><td><button class="boton-icono" data-cita="${a.id}" aria-label="Ver cita de ${esc(e.client.name)}">${renderIcono('chevron')}</button></td></tr>`;
+      )}<span><strong>${esc(e.client.name)}</strong></span></div></td><td><strong>${esc(e.service.name)}</strong><small>${esc(e.professional.name)}</small></td><td><strong>${formatearFecha(a.date, { day: 'numeric', month: 'short' })}</strong><small>${a.start} – ${a.end}</small></td><td>${esc(e.branch.name)}</td><td>${renderEtiquetaEstado(a.status)}</td><td><button class="boton-icono" data-cita="${a.id}" aria-label="Ver cita de ${esc(e.client.name)}">${renderIcono('chevron')}</button></td></tr>`;
     })
     .join('')}</tbody></table></div>`;
 }

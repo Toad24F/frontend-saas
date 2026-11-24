@@ -8,7 +8,7 @@ async function preparar(pagina, tema = 'light') {
     const url = new URL(rutaInterceptada.request().url()); llamadas.push(url.search);
     const desde = url.searchParams.get('desde'), hasta = url.searchParams.get('hasta');
     await rutaInterceptada.fulfill({ json: { desde, hasta, citas: Array.from({ length: 12 }, (_, indice) => ({
-      id: indice + 1, version: 1, folio: `QA-${indice + 1}`, estado: 'confirmada', nombreContacto: `Paciente ${indice + 1}`,
+      id: indice + 1, version: 1, estado: 'confirmada', nombreContacto: `Paciente ${indice + 1}`,
       nombreServicio: 'Consulta', nombreProfesional: 'Profesional QA', nombreSucursal: 'Sede QA',
       personalId: 1, sucursalId: 1, fechaLocal: desde, fechaFinLocal: desde,
       horaInicio: '12:00:00', horaFin: '12:45:00', zonaHoraria: 'America/Chihuahua',

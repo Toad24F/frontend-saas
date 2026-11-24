@@ -4,7 +4,8 @@ import { fechaLocal } from './portal.fechas.js';
 
 // El resumen procede exclusivamente del escritor/resolutor, nunca del catálogo vivo.
 export function leerResultadoReserva(datos) {
-  const nombres = ['folio', 'nombreNegocio', 'nombreServicio', 'nombreSucursal', 'nombreProfesional'];
+  // El intento conserva la identidad durable en el servidor; el resumen no exige código visible.
+  const nombres = ['nombreNegocio', 'nombreServicio', 'nombreSucursal', 'nombreProfesional'];
   if (!datos || datos.estado !== 'pendiente' || nombres.some((clave) => typeof datos[clave] !== 'string' || !datos[clave].trim()) ||
     !['inicioUtc', 'finUtc'].every((clave) => typeof datos[clave] === 'string' && datos[clave].endsWith('Z')) ||
     !Number.isFinite(Date.parse(datos.inicioUtc)) || !Number.isFinite(Date.parse(datos.finUtc)) || Date.parse(datos.finUtc) <= Date.parse(datos.inicioUtc) ||

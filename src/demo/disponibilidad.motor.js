@@ -196,7 +196,6 @@ export function crearCitaDemo(opciones, contacto, apartadoId = null) {
     start: opciones.start,
     end: minutosAHora(horaAMinutos(opciones.start) + servicio.duration),
     status: 'confirmada',
-    folio: `${obtenerNegocio(opciones.tenantId).initials}-${opciones.day.replaceAll('-', '').slice(2)}-${String(id).padStart(4, '0')}`,
     reason: contacto.reason || '',
     origin: opciones.origin || 'portal_publico',
   };

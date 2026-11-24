@@ -34,7 +34,6 @@ test('demo: corregir ficha conserva contactos previos y mover conserva identidad
     serviceId: 1,
     branchId: 1,
     professionalId: 1,
-    folio: 'DEMO-7',
     status: 'confirmada',
     date: '2030-12-20',
     start: '09:00',
@@ -68,7 +67,7 @@ test('demo: corregir ficha conserva contactos previos y mover conserva identidad
   moverCitaDemo(7, 1, { fechaLocal: '2030-12-20', horaInicio: '10:00' });
   assert.equal(cita.start, '10:00');
   assert.equal(cita.end, '10:30');
-  assert.equal(cita.folio, 'DEMO-7');
+  assert.equal(cita.id, 7);
   assert.throws(() =>
     moverCitaDemo(7, 1, {
       fechaLocal: '2030-12-20',

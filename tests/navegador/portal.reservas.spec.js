@@ -55,7 +55,8 @@ async function reservar(pagina, notas = '') {
   await pagina.getByRole('button', { name: 'Reservar' }).click();
   await expect(pagina.getByRole('heading', { name: 'Reserva registrada' })).toBeVisible();
   await expect(pagina.getByText('Pendiente', { exact: true })).toBeVisible();
-  return pagina.locator('.portal-resultado-folio').innerText();
+  // El ID solo se consulta en la base efímera de prueba; no se muestra al visitante.
+  return (await consultarFilas("SELECT id FROM citas WHERE origen='portal_publico' ORDER BY id DESC LIMIT 1"))[0].id;
 }
 
 // FALA-T003 comprueba desde el navegador y una lectura SQL que el runner
@@ -126,8 +127,8 @@ test('FALA-T044–T046: publicación global cambia el portal y conserva el impor
   try {
     await elegirHorario(portal, 15);
     await completarContacto(portal);
-    const folio = await reservar(portal);
-    const anterior = await consultarFilas('SELECT costo_aceptado FROM citas WHERE folio=?', [folio]);
+    const citaId = await reservar(portal);
+    const anterior = await consultarFilas('SELECT costo_aceptado FROM citas WHERE id=?', [citaId]);
     expect(Number(anterior[0].costo_aceptado)).toBe(100);
 
     await pagina.getByLabel('Publicar precios').selectOption('false');
@@ -138,7 +139,7 @@ test('FALA-T044–T046: publicación global cambia el portal y conserva el impor
     expect((await (await respuestaOculta).json()).servicios[0]).not.toHaveProperty('costo');
     await expect(portal.getByRole('radio', { name: /Corte QA/ })).toBeVisible();
     await expect(portal.locator('#portal-seleccion')).not.toContainText('$100');
-    expect(Number((await consultarFilas('SELECT costo_aceptado FROM citas WHERE folio=?', [folio]))[0].costo_aceptado)).toBe(100);
+    expect(Number((await consultarFilas('SELECT costo_aceptado FROM citas WHERE id=?', [citaId]))[0].costo_aceptado)).toBe(100);
 
     await pagina.getByLabel('Publicar precios').selectOption('true');
     await pagina.getByRole('button', { name: 'Guardar publicación' }).click();
@@ -169,10 +170,10 @@ test('T118: móvil corrige contacto y confirma exactamente una cita pendiente', 
     await completarContacto(pagina);
     await pagina.getByRole('button', { name: 'Revisar datos' }).click();
     await expect(pagina.locator('#portal-contacto-validado')).toBeVisible();
-    const folio = await reservar(pagina);
-    expect(folio).toMatch(/^P-[A-F0-9]{18}$/);
-    const citas = await consultarFilas('SELECT folio,estado,origen FROM citas WHERE folio=?', [folio]);
-    expect(citas).toEqual([{ folio, estado: 'pendiente', origen: 'portal_publico' }]);
+    const citaId = await reservar(pagina);
+    const citas = await consultarFilas('SELECT id,estado,origen FROM citas WHERE id=?', [citaId]);
+    expect(citas).toEqual([{ id: citaId, estado: 'pendiente', origen: 'portal_publico' }]);
+    await expect(pagina.locator('#portal-seleccion')).not.toContainText(/folio/i);
     expect(await pagina.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   } finally { await contexto.close(); }
 });
@@ -209,8 +210,8 @@ test('T119: teclado, foco y notas HTML se mantienen como texto seguro', async ({
   await expect(pagina.getByRole('heading', { name: 'Reserva registrada' })).toBeVisible();
   expect(await pagina.evaluate(() => window.__portalInjected ?? 0)).toBe(0);
   expect(await pagina.locator('img[src="x"]').count()).toBe(0);
-  const folio = await pagina.locator('.portal-resultado-folio').innerText();
-  expect((await consultarFilas('SELECT motivo_consulta FROM citas WHERE folio=?', [folio]))[0].motivo_consulta).toBe(nota);
+  const [{ motivo_consulta: motivo }] = await consultarFilas("SELECT motivo_consulta FROM citas WHERE origen='portal_publico' ORDER BY id DESC LIMIT 1");
+  expect(motivo).toBe(nota);
 });
 
 test('T120: pestañas hermanas comparten sesión y avisan al sustituir el apartado', async ({ context: contexto, page: pagina }) => {
@@ -272,9 +273,9 @@ test('T121: navegadores aislados disputan un horario sin doble ocupación', asyn
     const coincidente = await consultarFilas(`SELECT COUNT(*) n FROM bloqueos_temporales b JOIN negocios n ON n.id=b.negocio_id
       WHERE n.slug='portal-qa-1' AND b.liberado_en IS NULL AND b.expira_en > UTC_TIMESTAMP()`);
     expect(Number(coincidente[0].n)).toBe(1);
-    const folio = await reservar(a);
+    const citaId = await reservar(a);
     const intento = (await consultarFilas(`SELECT i.clave,i.apartado_id AS apartadoId FROM intentos_reserva_publica i
-      JOIN citas c ON c.id=i.cita_id WHERE c.folio=?`, [folio]))[0];
+      JOIN citas c ON c.id=i.cita_id WHERE c.id=?`, [citaId]))[0];
     const resultadoAjeno = await b.evaluate(async ({ clave, apartadoId }) => {
       const base = '/publico/negocios/portal-qa-1';
       const sesion = await fetch(`${base}/sesion`, { method: 'POST', credentials: 'same-origin',
@@ -312,7 +313,7 @@ test('T122: recarga limpia contacto, salida libera y cookies ausentes bloquean',
   } finally { await contexto.close(); }
 });
 
-test('T123: respuesta perdida tras commit recupera el mismo folio', async ({ page: pagina }) => {
+test('T123: respuesta perdida tras commit recupera la misma cita', async ({ page: pagina }) => {
   await elegirHorario(pagina, 8);
   await completarContacto(pagina);
   await pagina.route('**/intentos/*/reservar', async (rutaInterceptada) => {
@@ -321,10 +322,10 @@ test('T123: respuesta perdida tras commit recupera el mismo folio', async ({ pag
   });
   await pagina.getByRole('button', { name: 'Reservar' }).click();
   await expect(pagina.getByRole('heading', { name: 'Comprueba tu envío' })).toBeVisible();
-  const anterior = await consultarFilas("SELECT folio FROM citas WHERE origen='portal_publico' ORDER BY id DESC LIMIT 1");
+  const anterior = await consultarFilas("SELECT id FROM citas WHERE origen='portal_publico' ORDER BY id DESC LIMIT 1");
   await pagina.reload();
   await expect(pagina.getByRole('heading', { name: 'Reserva registrada' })).toBeVisible();
-  expect(await pagina.locator('.portal-resultado-folio').innerText()).toBe(anterior[0].folio);
+  expect(await consultarFilas("SELECT id FROM citas WHERE origen='portal_publico' ORDER BY id DESC LIMIT 1")).toEqual(anterior);
 });
 
 test('T123: pérdida anterior al escritor termina sin cita tardía', async ({ page: pagina }) => {

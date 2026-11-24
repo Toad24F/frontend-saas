@@ -77,7 +77,6 @@ async function prepararEscenario(pagina, rol = 'recepcionista', tema = 'light') 
       if (ruta === '/citas/7' || ruta.endsWith('/horario'))
         datos = {
           id: 7,
-          folio: 'M4-0007',
           version: control.version,
           estado: 'confirmada',
           inicioUtc: control.citaMovida
@@ -103,7 +102,6 @@ async function prepararEscenario(pagina, rol = 'recepcionista', tema = 'light') 
             {
               id: 7,
               clienteId: Number(ruta.match(/^\/clientes\/(\d+)/)?.[1]),
-              folio: 'M4-0007',
               nombreContacto: 'Contacto histórico',
               telefonoContacto: '6145550199',
               nombreServicio: null,
@@ -134,7 +132,7 @@ async function prepararEscenario(pagina, rol = 'recepcionista', tema = 'light') 
   return { control, errores };
 }
 
-test('T097: rechazo conserva horario y borrador; relectura explícita permite mover el mismo folio', async ({
+test('T097: rechazo conserva horario y borrador; relectura explícita permite mover la misma cita', async ({
   page: pagina,
 }) => {
   const { control } = await prepararEscenario(pagina);
@@ -173,7 +171,7 @@ test('T097: rechazo conserva horario y borrador; relectura explícita permite mo
     method: 'PATCH',
     body: { fechaLocal: '2030-12-21', horaInicio: '10:00', version: 2 },
   });
-  await expect(panel).toContainText('M4-0007');
+  await expect(panel).toContainText('Paciente');
 });
 
 test('T098/T099: fichas distintas con teléfono compartido, historial separado, alta y corrección versionada', async ({
@@ -536,7 +534,6 @@ test('T097: borrador de otra versión exige relectura; una cita cancelada no se 
         json: {
           id: 7,
           version: 4,
-          folio: 'M4-0007',
           estado: 'cancelada',
           inicioUtc: '2030-12-20T15:00:00Z',
           fechaLocal: '2030-12-20',

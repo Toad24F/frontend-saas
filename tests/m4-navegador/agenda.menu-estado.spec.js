@@ -4,7 +4,7 @@ import { prepararSesion } from './agenda.respuestas-simuladas.js';
 async function preparar(pagina, rol = 'recepcionista', tema = 'light', ajustes = {}) {
   const datosPrueba = await prepararSesion(pagina, rol, tema);
   await pagina.clock.setFixedTime(new Date('2026-11-12T18:00:00Z'));
-  let detalle = { id: 7, version: 2, folio: 'M4-0007', estado: 'confirmada', origen: 'manual',
+  let detalle = { id: 7, version: 2, estado: 'confirmada', origen: 'manual',
     nombreContacto: 'Paciente <QA>', telefonoContacto: '6145550101', motivoConsulta: 'Nota', nombreServicio: 'Consulta',
     nombreSucursal: 'Sucursal QA', nombreProfesional: 'Profesional QA', costoAceptado: '200.00',
     fechaLocal: '2026-11-13', fechaFinLocal: '2026-11-13', horaInicio: '10:00:00', horaFin: '10:30:00',
@@ -14,7 +14,7 @@ async function preparar(pagina, rol = 'recepcionista', tema = 'light', ajustes =
   await pagina.route((url) => url.pathname === '/citas/7/estado', async (rutaInterceptada) => {
     const cuerpo = rutaInterceptada.request().postDataJSON(); escrituras.push(cuerpo);
     detalle = { ...detalle, estado: cuerpo.estado, version: detalle.version + 1 };
-    await rutaInterceptada.fulfill({ json: { id: 7, folio: detalle.folio, estado: detalle.estado, version: detalle.version } });
+    await rutaInterceptada.fulfill({ json: { id: 7, estado: detalle.estado, version: detalle.version } });
   });
   await pagina.goto('/admin/agenda');
   await expect(pagina.locator('[data-agenda-cita="7"]')).toBeVisible();
@@ -155,7 +155,7 @@ test('cita cancelada pasada bloquea reactivación; cita terminada permite estado
   await disparador(pagina).click({ button: 'right' });
   for(const siguiente of ['Pendiente', 'Confirmada', 'Completada', 'No asistió']) await expect(menu(pagina).getByRole('menuitemradio', { name: new RegExp(siguiente) })).toBeDisabled();
   await pagina.keyboard.press('Escape');
-  await pagina.route((url) => url.pathname === '/citas/7', (rutaInterceptada) => rutaInterceptada.fulfill({ json: { id: 7, version: 2, folio:'M4-0007', estado:'confirmada', nombreContacto:'Paciente QA', fechaLocal:'2026-11-11', fechaFinLocal:'2026-11-11', horaInicio:'10:00:00', horaFin:'10:30:00', zonaHoraria:'America/Mazatlan' } }));
+  await pagina.route((url) => url.pathname === '/citas/7', (rutaInterceptada) => rutaInterceptada.fulfill({ json: { id: 7, version: 2, estado:'confirmada', nombreContacto:'Paciente QA', fechaLocal:'2026-11-11', fechaFinLocal:'2026-11-11', horaInicio:'10:00:00', horaFin:'10:30:00', zonaHoraria:'America/Mazatlan' } }));
   await disparador(pagina).click({ button: 'right' });
   await expect(menu(pagina).getByRole('menuitemradio', { name: 'Completada', exact: true })).toBeEnabled();
 });
