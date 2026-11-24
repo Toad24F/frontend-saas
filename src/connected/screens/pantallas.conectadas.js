@@ -9,12 +9,14 @@ import { recepcionistas } from './recepcionistas/recepcionistas.vista.js';
 import { renderEstadoVacio } from '../../shared/interfaz.componentes.js';
 import { agenda } from './agenda/agenda.vista.js';
 import { clientes } from './clientes/clientes.vista.js';
+import { renderReportesConectados } from './reportes/reportes.vista.js';
 import './disponibilidad/disponibilidad.acciones.js';
 import './cuenta/cuenta.acciones.js';
 
 const pantallas = {
   agenda,
   clientes,
+  reportes: renderReportesConectados,
   profesionales,
   servicios,
   sucursales,

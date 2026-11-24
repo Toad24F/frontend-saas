@@ -1,0 +1,261 @@
+/* Los filtros comparten el ancho del panel y las tablas desplazan su contenido dentro de su propia superficie. */
+.reportes-conectados .reportes-filtros {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: end;
+  gap: 1rem;
+  padding: 1.25rem;
+  margin-block-end: 1rem;
+}
+
+.reportes-conectados .reportes-filtros :is(input, select) {
+  margin-block-start: .375rem;
+  min-width: 0;
+}
+
+.reportes-conectados .reportes-filtros label {
+  min-width: 0;
+  color: var(--texto-secundario);
+}
+
+html[data-theme='dark'] .reportes-conectados .reportes-filtros select {
+  appearance: auto;
+  background-image: none;
+  padding-inline-end: .75rem;
+}
+
+.reportes-conectados .reportes-filtros button {
+  justify-self: start;
+}
+
+.reportes-conectados :is(.reportes-barra, .reportes-acciones, .reportes-paginacion) {
+  display: flex;
+  gap: .75rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.reportes-barra {
+  justify-content: space-between;
+  margin-block-end: 1rem;
+}
+
+.reportes-acciones .btn:disabled {
+  --bs-btn-disabled-bg: var(--superficie-suave);
+  --bs-btn-disabled-border-color: var(--borde);
+  --bs-btn-disabled-color: var(--texto-secundario);
+  box-shadow: none;
+}
+
+.reportes-paginacion {
+  justify-content: flex-end;
+  margin-block: .75rem;
+}
+
+.reportes-conectados :is(.reportes-corte, .reportes-error, .reportes-tabla) {
+  margin-block-end: 1rem;
+}
+
+.reportes-error {
+  font-weight: 650;
+}
+
+.reportes-etiqueta {
+  font-size: .95rem;
+  margin: 0;
+}
+
+.reportes-indicadores, .reportes-tabla {
+  font-variant-numeric: tabular-nums;
+}
+
+.reportes-indicadores .tarjeta-indicador {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.reportes-indicadores .tarjeta-indicador small {
+  display: block;
+  margin-block-start: .25rem;
+  color: var(--texto-secundario);
+}
+
+.reportes-desgloses {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 1rem;
+}
+
+.reportes-tabla {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.reportes-tabla .tabla-app {
+  width: 100%;
+}
+
+.reportes-tabla :is(th, td) {
+  min-width: 6rem;
+}
+
+.reportes-tabla-vacia {
+  padding: 0 1.25rem;
+}
+
+.reportes-cabecera-impresion,
+.reportes-aviso-impresion,
+.reportes-impresion {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .reportes-conectados .reportes-filtros {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .reportes-desgloses {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* El menú nativo y el botón imprimen la misma vista. Sin colección verificada solo sale el aviso. */
+@media print {
+  body:has(.reportes-conectados) :is(.estructura-admin, .estructura-principal, .contenido-principal) {
+    display: block;
+    min-height: 0;
+    overflow: visible;
+    animation: none;
+  }
+
+  .reportes-conectados {
+    color: #202020;
+    font: 10pt/1.35 Arial, sans-serif;
+  }
+
+  .reportes-conectados:not(.reporte-listo) .reportes-resultado,
+  .reportes-conectados :is(.reportes-filtros, .reportes-corte, .reportes-barra, .reportes-error, .reportes-pagina) {
+    display: none !important;
+  }
+
+  .reportes-conectados:not(.reporte-listo) .reportes-aviso-impresion,
+  .reportes-conectados.reporte-listo :is(.reportes-cabecera-impresion, .reportes-impresion) {
+    display: block;
+  }
+
+  .reportes-cabecera-impresion {
+    margin-block-end: 4mm;
+    padding-block-end: 3mm;
+    border-block-end: 1px solid #777;
+    break-inside: avoid;
+  }
+
+  .reportes-conectados h1 {
+    margin: 0 0 2mm;
+    font-size: 18pt;
+  }
+
+  .reportes-cabecera-impresion p {
+    color: #202020;
+    margin-block-end: 2mm;
+    font-size: 12pt;
+  }
+
+  .reportes-cabecera-impresion dl {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1mm 5mm;
+    margin: 0;
+  }
+
+  .reportes-cabecera-impresion dt,
+  .reportes-cabecera-impresion dd {
+    display: inline;
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .reportes-cabecera-impresion dt::after {
+    content: ': ';
+  }
+
+  .reportes-conectados :is(.superficie, .tarjeta-indicador, .nota-informativa) {
+    background: #fff !important;
+    color: #202020 !important;
+    box-shadow: none;
+    border-color: #aaa;
+  }
+
+  .reportes-conectados .reportes-indicadores {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 2mm;
+    break-inside: avoid;
+  }
+
+  .reportes-conectados .tarjeta-indicador {
+    /* La animación escalonada del panel puede ocultar indicadores en la captura del navegador. */
+    animation: none !important;
+    padding: 2mm;
+  }
+
+  .reportes-conectados .reportes-indicadores :is(.indicador-valor, small) {
+    color: #202020;
+    font-size: 10pt;
+  }
+
+  .reportes-conectados .reportes-desgloses {
+    display: block;
+  }
+
+  /* Permitir que la tabla se divida, repetir columnas y mantener cada fila en una hoja. */
+  .reportes-conectados :is(.reportes-tabla, .reportes-tabla .table-responsive) {
+    overflow: visible;
+  }
+
+  .reportes-conectados .reportes-tabla .encabezado-seccion {
+    break-after: avoid;
+    padding: 2mm 0;
+  }
+
+  .reportes-conectados .reportes-tabla .encabezado-seccion h2 {
+    font-size: 11pt;
+    color: #202020;
+  }
+
+  .reportes-conectados .reportes-tabla .tabla-app {
+    min-width: 0;
+    table-layout: fixed;
+  }
+
+  .reportes-conectados .reportes-tabla .tabla-app :is(th, td) {
+    min-width: 0;
+    padding: 1.2mm;
+    border-bottom: 1px solid #ccc;
+    background: #fff !important;
+    color: #202020 !important;
+    font-size: 8.5pt;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .reportes-conectados .reportes-tabla thead {
+    display: table-header-group;
+  }
+
+  .reportes-conectados .reportes-tabla tr {
+    break-inside: avoid;
+  }
+
+  .reportes-coleccion-impresion thead th:nth-child(2),
+  .reportes-coleccion-impresion thead th:nth-child(3) {
+    width: 16%;
+  }
+
+  .reportes-coleccion-impresion thead th:nth-child(4) {
+    width: 24%;
+  }
+
+  .reportes-coleccion-impresion tfoot {
+    display: table-row-group;
+  }
+}

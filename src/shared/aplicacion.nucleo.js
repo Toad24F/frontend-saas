@@ -203,9 +203,9 @@ export function renderEstructuraAplicacion(contenido) {
   const navegacionVisible = esDemo ? navegacion : [
     ['connected', usuarioActual.rol === 'superadmin' ? 'PLATAFORMA' : usuarioActual.rol === 'recepcionista' ? 'MI CUENTA' : 'MI NEGOCIO'],
     ...(usuarioActual.rol === 'superadmin' ? [['plataforma', 'grid', 'Negocios']] : [
-      // La administración usa un menú propio; incluir aquí las nuevas lecturas M4.
+      // Administración conserva su menú propio y expone Reportes en escritorio y en el menú móvil.
       ...(usuarioActual.rol === 'admin_negocio' ? [['agenda', 'calendar', 'Agenda'], ['clientes', 'users', 'Clientes']] : []),
-      ...(usuarioActual.rol === 'admin_negocio' ? [['servicios', 'briefcase', 'Servicios'], ['sucursales', 'pin', 'Sucursales'], ['usuarios', 'users', 'Usuarios'], ['disponibilidad', 'clock', 'Disponibilidad']] : [...navegacion.filter((elemento) => elemento.length === 3 && elemento[0] !== 'usuarios' && paginaPermitida(elemento[0])), ...(paginaPermitida('profesionales') ? [['profesionales', 'stethoscope', 'Profesionales']] : [])]),
+      ...(usuarioActual.rol === 'admin_negocio' ? [['servicios', 'briefcase', 'Servicios'], ['sucursales', 'pin', 'Sucursales'], ['usuarios', 'users', 'Usuarios'], ['disponibilidad', 'clock', 'Disponibilidad'], ['reportes', 'chart', 'Reportes']] : [...navegacion.filter((elemento) => elemento.length === 3 && elemento[0] !== 'usuarios' && paginaPermitida(elemento[0])), ...(paginaPermitida('profesionales') ? [['profesionales', 'stethoscope', 'Profesionales']] : [])]),
     ]),
   ];
   const nombreEspacio = !esDemo && usuarioActual.rol === 'superadmin' ? 'Plataforma' : negocio.name;
