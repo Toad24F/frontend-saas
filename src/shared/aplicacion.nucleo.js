@@ -88,22 +88,25 @@ matchMedia('(max-width: 767px)').addEventListener('change', ({ matches }) => {
     resultados.classList.add(`profesionales-vista--${matches ? 'tarjetas' : resultados.dataset.vistaEscritorio}`);
   });
 });
-const navegacion = [
-  ['general', 'PRINCIPAL'],
-  ['resumen', 'grid', 'Resumen'],
-  ['agenda', 'calendar', 'Agenda'],
-  ['clientes', 'users', 'Clientes'],
-  ['business', 'MI NEGOCIO'],
-  ['profesionales', 'stethoscope', 'Profesionales'],
-  ['servicios', 'briefcase', 'Servicios'],
-  ['sucursales', 'pin', 'Sucursales'],
-  ['disponibilidad', 'clock', 'Disponibilidad'],
-  ['analytics', 'ANÁLISIS'],
-  ['reportes', 'chart', 'Reportes'],
-  ['notificaciones', 'message', 'Notificaciones'],
+const seccionesNavegacion = [
+  { nombre: 'PRINCIPAL', enlaces: [
+    ['resumen', 'grid', 'Resumen'],
+    ['agenda', 'calendar', 'Agenda'],
+    ['clientes', 'users', 'Clientes'],
+  ] },
+  { nombre: 'MI NEGOCIO', enlaces: [
+    ['profesionales', 'stethoscope', 'Profesionales'],
+    ['servicios', 'briefcase', 'Servicios'],
+    ['sucursales', 'pin', 'Sucursales'],
+    ['disponibilidad', 'clock', 'Disponibilidad'],
+  ] },
+  { nombre: 'ANÁLISIS', enlaces: [
+    ['reportes', 'chart', 'Reportes'],
+    ['notificaciones', 'message', 'Notificaciones'],
+  ] },
 ];
 const etiquetas = Object.fromEntries(
-  navegacion.filter((elemento) => elemento.length === 3).map((elemento) => [elemento[0], elemento[2]]),
+  seccionesNavegacion.flatMap(({ enlaces }) => enlaces.map(([pagina, , etiqueta]) => [pagina, etiqueta])),
 );
 etiquetas.configuracion = 'Configuración';
 etiquetas.plataforma = 'Negocios';
@@ -116,8 +119,20 @@ let menuDisponibilidadAbierto = null;
 let menuUsuariosAbierto = null;
 const rutaDisponibilidad = (grupo) => `/admin/disponibilidad/${grupo}`;
 const grupoDisponibilidadSeleccionado = () => resolverGrupoDisponibilidad(estadoAplicacion.grupoDisponibilidad, esDemo, usuarioActual?.rol);
+function renderNavegacionPrincipal() {
+  const secciones = !esDemo && usuarioActual.rol === 'superadmin'
+    ? [{ nombre: 'PLATAFORMA', enlaces: [['plataforma', 'grid', 'Negocios']] }]
+    : seccionesNavegacion;
+  return secciones.map(({ nombre, enlaces }) => {
+    const visibles = esDemo ? enlaces : enlaces.filter(([pagina]) => paginaPermitida(pagina));
+    if (!visibles.length) return '';
+    const contenido = visibles.map((enlace) => renderElementoNavegacion(
+      !esDemo && enlace[0] === 'profesionales' && paginaPermitida('recepcionistas') ? ['usuarios', 'users', 'Usuarios'] : enlace,
+    )).join('');
+    return `<div class="navegacion-seccion">${nombre}</div>${contenido}`;
+  }).join('');
+}
 function renderElementoNavegacion(elemento) {
-  if (elemento.length === 2) return `<div class="navegacion-seccion">${elemento[1]}</div>`;
   if (elemento[0] === 'usuarios') {
     const seleccionado = ['profesionales', 'recepcionistas'].includes(estadoAplicacion.pagina);
     const abierto = menuUsuariosAbierto ?? seleccionado;
@@ -201,21 +216,13 @@ export function renderEstructuraAplicacion(contenido) {
   const negocio = obtenerNegocio(estadoAplicacion.negocioId);
   const desplazamientoLateral = document.querySelector('.barra-lateral')?.scrollTop ?? 0;
   const inicio = esDemo ? 'agenda' : paginaInicial();
-  const navegacionVisible = esDemo ? navegacion : [
-    ['connected', usuarioActual.rol === 'superadmin' ? 'PLATAFORMA' : usuarioActual.rol === 'recepcionista' ? 'MI CUENTA' : 'MI NEGOCIO'],
-    ...(usuarioActual.rol === 'superadmin' ? [['plataforma', 'grid', 'Negocios']] : [
-      // Administración conserva su menú propio y expone Reportes en escritorio y en el menú móvil.
-      ...(usuarioActual.rol === 'admin_negocio' ? [['resumen', 'grid', 'Resumen'], ['agenda', 'calendar', 'Agenda'], ['clientes', 'users', 'Clientes']] : []),
-      ...(usuarioActual.rol === 'admin_negocio' ? [['servicios', 'briefcase', 'Servicios'], ['sucursales', 'pin', 'Sucursales'], ['usuarios', 'users', 'Usuarios'], ['disponibilidad', 'clock', 'Disponibilidad'], ['reportes', 'chart', 'Reportes']] : [...navegacion.filter((elemento) => elemento.length === 3 && elemento[0] !== 'usuarios' && paginaPermitida(elemento[0])), ...(paginaPermitida('profesionales') ? [['profesionales', 'stethoscope', 'Profesionales']] : [])]),
-    ]),
-  ];
   const nombreEspacio = !esDemo && usuarioActual.rol === 'superadmin' ? 'Plataforma' : negocio.name;
   const inicialesEspacio = !esDemo && usuarioActual.rol === 'superadmin' ? 'PL' : negocio.initials;
   const marcaCatalogoMovil = ['profesionales', 'recepcionistas', 'servicios', 'sucursales'].includes(estadoAplicacion.pagina)
     ? `<a class="marca-catalogo-movil" href="/admin/${estadoAplicacion.pagina}" data-nav="${estadoAplicacion.pagina}" aria-label="Citalendar, ${etiquetas[estadoAplicacion.pagina].toLowerCase()}"><img class="logo-marca-claro" src="/brand/citalendar-logo.svg" alt=""><img class="logo-marca-oscuro" src="/brand/citalendar-logo-light.svg" alt=""></a>`
     : '';
   document.querySelector('#app').innerHTML =
-    `<div class="estructura-admin"><div class="fondo-barra-lateral" data-action="menu"></div><aside class="barra-lateral"><a class="marca" aria-label="Citalendar: inicio" href="/admin/agenda" data-nav="agenda"><img class="logo-marca-claro" src="/brand/citalendar-logo.svg" alt=""/><img class="logo-marca-oscuro" src="/brand/citalendar-logo-light.svg" alt=""/></a><div class="identidad-espacio efecto-cristal efecto-cristal--oscuro">${avatar(inicialesEspacio, 'avatar-espacio')}<span><strong>${escaparHtml(nombreEspacio)}</strong></span></div><nav aria-label="Navegación principal">${navegacionVisible.map(renderElementoNavegacion).join('')}</nav><div class="seccion-inferior-lateral"><a href="/admin/configuracion" data-nav="configuracion" class="navegacion-enlace ${estadoAplicacion.pagina === 'configuracion' ? 'active' : ''}">${renderIcono('settings')}<span>Configuración</span></a><div class="tarjeta-portal"><div class="icono-portal">${renderIcono('link')}</div><strong>Tu agenda, a un enlace</strong><p>Comparte tu portal y recibe reservas en línea.</p><a href="/reservas/${negocio.slug}" data-portal>Ver portal de reservas ${renderIcono('external')}</a></div><div class="pie-lateral"><span class="punto-verde"></span> Entorno de demostración <span>v1.0</span></div></div></aside><div class="estructura-principal"><header class="barra-superior"><div class="migas-navegacion">${marcaCatalogoMovil}<button class="boton-icono menu-movil" data-action="menu" aria-label="Abrir menú">${renderIcono('menu')}</button><span>${escaparHtml(nombreEspacio)}</span>${renderIcono('chevron')}<strong>${etiquetas[estadoAplicacion.pagina] || 'Agenda'}</strong></div><div class="barra-superior-derecha"><span class="indicador-demo">Prototipo</span><span class="barra-superior-fecha">${renderIcono('calendar')} ${formatearFecha(HOY, { day: 'numeric', month: 'short', year: 'numeric' })}</span><button class="boton-notificaciones boton-icono" data-nav="notificaciones" aria-label="Ver notificaciones">${renderIcono('bell')}<i></i></button><span class="barra-superior-separador"></span><button class="boton-perfil" data-nav="configuracion">${avatar('AV', 'durazno')}<span><strong>Adriana Vega</strong><small>Administradora</small></span>${renderIcono('down')}</button></div></header><main id="contenido-principal" class="contenido-principal${animarSiguienteRuta ? ' animar-entrada' : ''}">${contenido}</main><footer class="pie-app"><span class="logo-pie">Citalendar</span></footer></div></div>`;
+    `<div class="estructura-admin"><div class="fondo-barra-lateral" data-action="menu"></div><aside class="barra-lateral"><a class="marca" aria-label="Citalendar: inicio" href="/admin/agenda" data-nav="agenda"><img class="logo-marca-claro" src="/brand/citalendar-logo.svg" alt=""/><img class="logo-marca-oscuro" src="/brand/citalendar-logo-light.svg" alt=""/></a><div class="identidad-espacio efecto-cristal efecto-cristal--oscuro">${avatar(inicialesEspacio, 'avatar-espacio')}<span><strong>${escaparHtml(nombreEspacio)}</strong></span></div><nav aria-label="Navegación principal">${renderNavegacionPrincipal()}</nav><div class="seccion-inferior-lateral"><a href="/admin/configuracion" data-nav="configuracion" class="navegacion-enlace ${estadoAplicacion.pagina === 'configuracion' ? 'active' : ''}">${renderIcono('settings')}<span>Configuración</span></a><div class="tarjeta-portal"><div class="icono-portal">${renderIcono('link')}</div><strong>Tu agenda, a un enlace</strong><p>Comparte tu portal y recibe reservas en línea.</p><a href="/reservas/${negocio.slug}" data-portal>Ver portal de reservas ${renderIcono('external')}</a></div><div class="pie-lateral"><span class="punto-verde"></span> Entorno de demostración <span>v1.0</span></div></div></aside><div class="estructura-principal"><header class="barra-superior"><div class="migas-navegacion">${marcaCatalogoMovil}<button class="boton-icono menu-movil" data-action="menu" aria-label="Abrir menú">${renderIcono('menu')}</button><span>${escaparHtml(nombreEspacio)}</span>${renderIcono('chevron')}<strong>${etiquetas[estadoAplicacion.pagina] || 'Agenda'}</strong></div><div class="barra-superior-derecha"><span class="indicador-demo">Prototipo</span><span class="barra-superior-fecha">${renderIcono('calendar')} ${formatearFecha(HOY, { day: 'numeric', month: 'short', year: 'numeric' })}</span><button class="boton-notificaciones boton-icono" data-nav="notificaciones" aria-label="Ver notificaciones">${renderIcono('bell')}<i></i></button><span class="barra-superior-separador"></span><button class="boton-perfil" data-nav="configuracion">${avatar('AV', 'durazno')}<span><strong>Adriana Vega</strong><small>Administradora</small></span>${renderIcono('down')}</button></div></header><main id="contenido-principal" class="contenido-principal${animarSiguienteRuta ? ' animar-entrada' : ''}">${contenido}</main><footer class="pie-app"><span class="logo-pie">Citalendar</span></footer></div></div>`;
   const pestanasDemo = [
     ['resumen', 'grid', 'Inicio'],
     ['agenda', 'calendar', 'Agenda'],
