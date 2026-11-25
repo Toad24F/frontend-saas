@@ -21,13 +21,17 @@ import { leerFranjasHorario, cambiarEstadoFranja } from './screens/disponibilida
 import { citaCubiertaPorHorarioDemo } from '../demo/demo.horario.js';
 import { limpiarErroresDisponibilidad, limpiarCampoDisponibilidad, mostrarErroresDisponibilidad, mostrarErrorGeneralDisponibilidad, validarFranjasHorario, interpretarErroresHorario } from './screens/disponibilidad/disponibilidad.errores.js';
 import { validarConfiguracionDemo, validarRangoInclusivo } from './screens/disponibilidad/disponibilidad.contrato-operativo.js';
+import { handleFiltrosResumen } from './screens/resumen/resumen.filtros.js';
 let idBorradorFranja = -1;
 
 export async function handleClicAplicacion(evento) {
   try {
+    if (estadoAplicacion.pagina === 'resumen' && handleFiltrosResumen(evento, render)) return;
     // La agenda real usa sus propias lecturas; nunca abre diálogos de escritura de la demo.
     if (!esDemo && estadoAplicacion.pagina === 'agenda' &&
       (await import('../connected/screens/agenda/agenda.vista.js')).handleClicAgenda(evento)) return;
+    if (!esDemo && estadoAplicacion.pagina === 'resumen' &&
+      (await import('../connected/screens/resumen/resumen.vista.js')).handleClicResumen(evento)) return;
     // Solo los controles de la sección de inhabilitados cargan ese módulo;
     // navegación y acciones ordinarias conservan su flujo habitual.
     if (!esDemo && evento.target.closest('[data-inhabilitados-abrir], [data-inhabilitados-lista], [data-inhabilitados-detalle], [data-inhabilitados-restaurar], [data-inhabilitados-afectaciones]') &&

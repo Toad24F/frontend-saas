@@ -219,13 +219,13 @@ function htmlDetalle(elemento) {
 const etiquetasAcciones = { alta: 'Alta', cambio_estado: 'Cambio de estado', cancelacion: 'Cancelación', reactivacion: 'Reactivación', cambio_horario: 'Cambio de horario' };
 const etiquetasValores = { estado: 'Estado', version: 'Versión', origen: 'Origen', clienteId: 'Cliente', sucursalId: 'Sucursal', servicioId: 'Servicio', personalId: 'Profesional', inicioUtc: 'Inicio UTC', finUtc: 'Fin UTC', separacionMinutos: 'Separación (minutos)', finOcupacionUtc: 'Fin de ocupación UTC', zonaHoraria: 'Zona horaria', costoAceptado: 'Costo histórico' };
 const htmlValores = (valores) => valores == null ? '<p>Sin valores registrados.</p>' : `<dl>${Object.entries(valores).filter(([claveInterna]) => etiquetasValores[claveInterna]).map(([claveInterna, valor]) => `<div><dt>${etiquetasValores[claveInterna]}</dt><dd>${esc(valorHistorico(valor))}</dd></div>`).join('')}</dl>`;
-export async function abrirCita(id) {
+export async function abrirCita(id, actualizarResumen) {
   const generacion = ++generacionDetalle;
   const ambitoAbierto = `${usuarioActual?.negocioId}:${usuarioActual?.id}:${usuarioActual?.sesionId || ''}`;
   if (!document.querySelector('#dialogo-app')?.open) focoRetornoCita = document.activeElement;
   const dialogo = modal('Detalle de la cita', '<div class="dialogo-cuerpo"><p role="status">Consultando detalle…</p></div>', true);
   // Una relectura reemplaza controles del panel; devolver el foco a la cita vigente al cerrar.
-  dialogo.onclose = () => (focoRetornoCita?.isConnected ? focoRetornoCita : document.querySelector(`[data-agenda-cita="${id}"]`) || document.querySelector('[data-agenda-hoy]'))?.focus();
+  dialogo.onclose = () => (focoRetornoCita?.isConnected ? focoRetornoCita : document.querySelector(`[data-agenda-cita="${id}"], [data-resumen-cita="${id}"]`) || document.querySelector('[data-agenda-hoy], [data-resumen-nueva]'))?.focus();
   // Un historial largo necesita una superficie opaca para mantener legible el texto al desplazarlo.
   dialogo.classList.add('agenda-dialogo-cita');
   dialogo.addEventListener('close', () => { if (generacion === generacionDetalle) generacionDetalle++; }, { once: true });
@@ -240,17 +240,24 @@ export async function abrirCita(id) {
     cuerpoDetalle.innerHTML = `${htmlDetalle(detalle)}<div data-agenda-seguimiento aria-live="polite">${seguimientoMostrado}</div><section class="agenda-historial" aria-label="Historial de la cita"><h3>Historial de la cita</h3><div data-agenda-historial></div></section>`;
     // Estado e historial conservan su autoridad de servidor; solo los roles de gestión reciben editor.
     montarEditorEstado(dialogo, detalle, { role: usuarioActual.rol, scope: ambitoAbierto, request: api, isCurrent: esVigente,
-      onReload: () => abrirCita(id),
-      onChanged: async () => { await cargar(true); if (activo()) await abrirCita(id); },
+      onReload: () => abrirCita(id, actualizarResumen),
+      onChanged: async () => {
+        await (actualizarResumen ? actualizarResumen() : cargar(true));
+        if (activo()) await abrirCita(id, actualizarResumen);
+      },
     });
     const ambitoSesion = `${usuarioActual.negocioId}:${usuarioActual.id}:${usuarioActual.sesionId || ''}`;
     montarEditorHorario(dialogo, detalle, { role: usuarioActual.rol, scope: ambitoSesion, request: api,
       isCurrent: () => Boolean(usuarioActual) && ambitoSesion === `${usuarioActual.negocioId}:${usuarioActual.id}:${usuarioActual.sesionId || ''}`,
-      onReload: () => abrirCita(id),
+      onReload: () => abrirCita(id, actualizarResumen),
       onChanged: async (resultado) => {
-        estado.fecha = partesEnZonaHoraria(resultado.inicioUtc, resultado.zonaHoraria).date;
-        estado.busqueda = ''; estado.sucursal = estado.profesional = estado.estadoCita = 'all';
-        await cargar(true); if (activo()) await abrirCita(id);
+        if (actualizarResumen) await actualizarResumen();
+        else {
+          estado.fecha = partesEnZonaHoraria(resultado.inicioUtc, resultado.zonaHoraria).date;
+          estado.busqueda = ''; estado.sucursal = estado.profesional = estado.estadoCita = 'all';
+          await cargar(true);
+        }
+        if (activo()) await abrirCita(id, actualizarResumen);
       },
     });
     observarRegistro(cuerpoDetalle, { version: detalle.version, active: activo, read: async () => {

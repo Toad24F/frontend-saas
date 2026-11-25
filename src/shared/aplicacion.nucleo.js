@@ -205,7 +205,7 @@ export function renderEstructuraAplicacion(contenido) {
     ['connected', usuarioActual.rol === 'superadmin' ? 'PLATAFORMA' : usuarioActual.rol === 'recepcionista' ? 'MI CUENTA' : 'MI NEGOCIO'],
     ...(usuarioActual.rol === 'superadmin' ? [['plataforma', 'grid', 'Negocios']] : [
       // Administración conserva su menú propio y expone Reportes en escritorio y en el menú móvil.
-      ...(usuarioActual.rol === 'admin_negocio' ? [['agenda', 'calendar', 'Agenda'], ['clientes', 'users', 'Clientes']] : []),
+      ...(usuarioActual.rol === 'admin_negocio' ? [['resumen', 'grid', 'Resumen'], ['agenda', 'calendar', 'Agenda'], ['clientes', 'users', 'Clientes']] : []),
       ...(usuarioActual.rol === 'admin_negocio' ? [['servicios', 'briefcase', 'Servicios'], ['sucursales', 'pin', 'Sucursales'], ['usuarios', 'users', 'Usuarios'], ['disponibilidad', 'clock', 'Disponibilidad'], ['reportes', 'chart', 'Reportes']] : [...navegacion.filter((elemento) => elemento.length === 3 && elemento[0] !== 'usuarios' && paginaPermitida(elemento[0])), ...(paginaPermitida('profesionales') ? [['profesionales', 'stethoscope', 'Profesionales']] : [])]),
     ]),
   ];
@@ -223,9 +223,9 @@ export function renderEstructuraAplicacion(contenido) {
   ];
   const pestanasPorRol = {
     superadmin: [['plataforma', 'grid', 'Negocios']],
-    admin_negocio: [['agenda', 'calendar', 'Agenda'], ['clientes', 'users', 'Clientes'], ['profesionales', 'stethoscope', 'Equipo']],
-    profesional: [['agenda', 'calendar', 'Agenda'], ['servicios', 'briefcase', 'Servicios'], ['disponibilidad', 'clock', 'Horario']],
-    recepcionista: [['agenda', 'calendar', 'Agenda'], ['clientes', 'users', 'Clientes'], ['disponibilidad', 'clock', 'Disponibilidad'], ['cuenta', 'user', 'Mi cuenta']],
+    admin_negocio: [['agenda', 'calendar', 'Agenda'], ['resumen', 'grid', 'Resumen'], ['clientes', 'users', 'Clientes'], ['profesionales', 'stethoscope', 'Equipo']],
+    profesional: [['agenda', 'calendar', 'Agenda'], ['resumen', 'grid', 'Resumen'], ['servicios', 'briefcase', 'Servicios'], ['disponibilidad', 'clock', 'Horario']],
+    recepcionista: [['agenda', 'calendar', 'Agenda'], ['resumen', 'grid', 'Resumen'], ['clientes', 'users', 'Clientes'], ['disponibilidad', 'clock', 'Disponibilidad'], ['cuenta', 'user', 'Mi cuenta']],
   };
   const pestanasPrincipales = esDemo ? pestanasDemo : pestanasPorRol[usuarioActual.rol] || [['cuenta', 'user', 'Mi cuenta']];
   const masEstaActivo = !pestanasPrincipales.some(([pagina]) => pagina === estadoAplicacion.pagina);

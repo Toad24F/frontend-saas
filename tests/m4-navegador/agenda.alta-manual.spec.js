@@ -36,6 +36,7 @@ async function datosPrueba(pagina, rol = 'recepcionista', tema = 'light') {
     else if (ruta.endsWith('/sucursales')) datos = [1];
     else if (ruta.endsWith('/oferta')) datos = { cuentaActiva: true, sucursales: [{ id: 1, nombre: 'Sucursal QA', atencionActiva: true, sucursalActiva: true }] };
     else if (ruta.endsWith('/cupo')) datos = { limite: 5, activos: 1, disponibles: 4, limiteSucursalesActivas: 5, sucursalesActivas: 1 };
+    else if (ruta === '/bloqueos') datos = { pagina: 1, limite: 25, total: 0, bloqueos: [] };
     else datos = [];
     await rutaInterceptada.fulfill({ json: datos });
   });

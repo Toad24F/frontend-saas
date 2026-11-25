@@ -1622,15 +1622,6 @@ html[data-theme='dark'] .barra-lateral .marca .logo-marca-claro { display: none;
   .notificaciones-cuadricula .notificaciones-vista-previa {
     max-width: 600px;
   }
-  .resumen-cuadricula {
-    grid-template-columns: 1.3fr 1fr;
-  }
-  .resumen-destacado {
-    padding: 25px;
-  }
-  .resumen-destacado h2 {
-    font-size: 21px;
-  }
   .configuracion-cuadricula {
     grid-template-columns: 1fr 1fr;
   }
@@ -1643,18 +1634,8 @@ html[data-theme='dark'] .barra-lateral .marca .logo-marca-claro { display: none;
   }
 }
 @media (max-width: 1000px) {
-  .resumen-cuadricula,
   .configuracion-cuadricula {
     grid-template-columns: 1fr;
-  }
-  .resumen-destacado {
-    padding: 25px 30px;
-  }
-  .resumen-destacado h2 br {
-    display: none;
-  }
-  .resumen-destacado p {
-    max-width: 100%;
   }
   .opcion-modo-agenda {
     padding: 15px;
@@ -1708,7 +1689,6 @@ html[data-theme='dark'] .barra-lateral .marca .logo-marca-claro { display: none;
 @media (max-width: 767px) {
   .cuadricula-entidades,
   .cuadricula-sucursales,
-  .resumen-cuadricula,
   .configuracion-cuadricula,
   .notificaciones-cuadricula,
   .reportes-tablas,

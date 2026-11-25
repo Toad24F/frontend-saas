@@ -48,6 +48,9 @@ export async function api(ruta, method = 'GET', cuerpo, opciones = {}) {
       error.codigo = datos.codigo;
       error.destino = datos.destino;
     }
+    if (respuesta.status === 400 && ruta.startsWith('/citas?') && datos?.codigo === 'agenda_demasiado_amplia') {
+      error.codigo = datos.codigo;
+    }
     throw error;
   }
   return datos;

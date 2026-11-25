@@ -145,9 +145,6 @@ html[data-theme='dark'] .horario-tabla .horario-franja-inactiva td:last-child {
   color: var(--texto-secundario) !important;
 }
 
-html[data-theme='dark'] .resumen-destacado { background: radial-gradient(circle at 85% 18%, #49414a, transparent 42%), radial-gradient(circle at 12% 88%, #5a3d39, transparent 46%), #2a272d; border-color: #51434a; }
-html[data-theme='dark'] .resumen-destacado::before { background: rgba(26, 24, 29, .52); border-color: rgba(241, 219, 209, .14); }
-html[data-theme='dark'] .resumen-destacado :is(h2, p) { color: var(--texto); }
 html[data-theme='dark'] .reserva-demo { background: var(--fondo); }
 html[data-theme='dark'] .portal-demo-marca { color: var(--texto); }
 html[data-theme='dark'] .reserva-demo :is(h1, h2, h3, h4, .reserva-demo-opcion-texto > strong, .reserva-demo-resumen-encabezado h3, .reserva-demo-encabezado-fecha h3) { color: var(--texto); }
@@ -342,7 +339,7 @@ html[data-theme='light'] :is(.encabezado-pagina h1, .encabezado-seccion h2,
   .reserva-demo-titulo h2, .reserva-demo-opcion-texto > strong, .reserva-demo-resumen-encabezado h3,
   .reserva-demo-resumen-precio > strong, .lista-detalle strong, .tabla-app td strong) { color: var(--texto); }
 html[data-theme='light'] :is(.encabezado-seccion p, .texto-discreto, .ayuda-campo,
-  .opcional, .form-label, .sobretitulo, .logo-pie, .resumen-columna,
+  .opcional, .form-label, .sobretitulo, .logo-pie,
   .tabla-app td small, .busqueda-tabla-clientes, .campo-busqueda, .selector-filtro > .icono,
   .boton-perfil small, .boton-perfil > .icono, .encabezado-dia,
   .encabezado-hora, .dia-sin-atencion, .reserva-demo-encabezado-fecha > span) { color: var(--texto-secundario); }
@@ -396,15 +393,6 @@ html[data-theme='light'] .tabla-app td { color: var(--texto); }
 html[data-theme='light'] .tabla-app tbody tr:hover { background: var(--superficie-suave); }
 html[data-theme='light'] .dialogo-app :is(.dialogo-cabecera, .dialogo-pie) { background: var(--superficie-suave); }
 html[data-theme='light'] .dialogo-app::backdrop { background: rgba(37, 42, 46, 0.42); }
-html[data-theme='light'] .resumen-destacado {
-  background: var(--acento-suave);
-  border-color: #ecd5ca;
-}
-html[data-theme='light'] .resumen-destacado::before { content: none; }
-html[data-theme='light'] .resumen-destacado :is(h2, p) { color: var(--texto); }
-html[data-theme='light'] .resumen-destacado :is(.sobretitulo, .resumen-icono-destacado) { color: var(--acento-oscuro); }
-html[data-theme='light'] .resumen-destacado .btn { background: var(--superficie); border-color: #ecd5ca; }
-html[data-theme='light'] .resumen-barra:not(.resumen-barra-hoy) { background: #c5cbd0; }
 html[data-theme='light'] .reserva-demo-lateral { background: var(--superficie-suave); }
 html[data-theme='light'] .reserva-demo-opcion-marca { border-color: var(--borde-fuerte); }
 html[data-theme='light'] .seleccionado > .reserva-demo-opcion-marca { border-color: var(--acento); }

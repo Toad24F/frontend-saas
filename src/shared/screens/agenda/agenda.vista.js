@@ -7,7 +7,6 @@ import { atencionEquipo } from './agenda.utilidades.js';
 import { resolverSucursalesAgenda } from './agenda.filtros.js';
 import { estadoAplicacion as estado, render } from '../../aplicacion.nucleo.js';
 import { renderIcono } from '../../iconos.catalogo.js';
-import { metricasAgenda } from './agenda.presentacion.js';
 import { estructuraAgenda } from './agenda.estructura.js';
 import { renderLineaTiempo } from './agenda.linea-tiempo.js';
 import { tituloCalendario, renderMes } from './agenda.mes.js';
@@ -33,8 +32,6 @@ export function citasFiltradas() {
     (estado.estadoCita === 'all' || a.status === estado.estadoCita) &&
     (!estado.busqueda || normalizarBusqueda(ampliarDatosCita(a).client.name).includes(normalizarBusqueda(estado.busqueda.trim()))));
 }
-// Resumen conserva sus tarjetas; únicamente la pantalla Agenda usa el resumen lineal.
-export function resumenAgendaDemo() { return metricasAgenda(listarRegistros('appointments', estado.negocioId), estado.fecha); }
 export function vistaAgenda() {
   const modeloSucursales = sincronizarFiltrosAgendaDemo();
   const periodo = periodoCalendario(estado.vistaCalendario, estado.fecha);

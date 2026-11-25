@@ -1,23 +1,29 @@
 import { estadoAplicacion } from '../../../shared/aplicacion.nucleo.js';
-import { listarRegistros, HOY, sumarDias, formatearFecha } from '../../../shared/aplicacion.datos.js';
-import { renderIcono } from '../../../shared/iconos.catalogo.js';
-import { renderEncabezadoPagina, renderBoton } from '../../../shared/interfaz.componentes.js';
-import './resumen.estilos.css';
-import { resumenAgendaDemo } from '../../../shared/screens/agenda/agenda.vista.js';
-import { tablaCitas } from '../../../shared/screens/agenda/agenda.tabla.js';
+import { ampliarDatosCita, HOY, listarRegistros } from '../../../shared/aplicacion.datos.js';
+import { renderBoton } from '../../../shared/interfaz.componentes.js';
+import { renderResumen } from '../../../shared/screens/resumen/resumen.vista.js';
+import { filtrosResumen } from '../../../shared/screens/resumen/resumen.filtros.js';
+import { causasCitaDemo } from '../../agenda.atencion.js';
+
 export function renderResumenDemo() {
-  const citasHoy = listarRegistros('appointments', estadoAplicacion.negocioId).filter(
-      (cita) => cita.date === HOY,
-    ),
-    citasNegocio = listarRegistros('appointments', estadoAplicacion.negocioId);
-  return `${renderEncabezadoPagina('Buenos días, Adriana', 'Un nuevo día para hacer sentir bien a tus pacientes.', renderBoton('Nueva cita', 'nueva-cita'))}${resumenAgendaDemo()}<div class="resumen-cuadricula"><section class="superficie"><div class="encabezado-seccion"><div><h2>Tu semana en perspectiva</h2><p>Citas por día · septiembre de 2026</p></div><span class="etiqueta-suave">Esta semana</span></div><div class="resumen-grafica">${Array.from(
-    { length: 7 },
-    (_, indice) => {
-      const dia = sumarDias(HOY, indice - 1),
-        cantidad = citasNegocio.filter((cita) => cita.date === dia).length;
-      return `<div class="resumen-columna"><strong>${cantidad}</strong><div class="resumen-carril"><div class="resumen-barra ${dia === HOY ? 'resumen-barra-hoy' : ''}" style="height:${Math.max(cantidad * 14, 3)}%"></div></div><span>${formatearFecha(dia, { weekday: 'short' })}</span></div>`;
-    },
-  ).join(
-    '',
-  )}</div></section><section class="resumen-destacado"><span class="resumen-icono-destacado">${renderIcono('heart')}</span><span class="sobretitulo">CADA ENCUENTRO CUENTA</span><h2>El cuidado empieza<br>con una buena agenda.</h2><p>Tienes ${citasHoy.filter((cita) => cita.status === 'confirmada').length} citas confirmadas para hoy. Prepara tu jornada y dedica tiempo a lo que más importa.</p><a href="/admin/agenda" class="btn btn-light" data-nav="agenda">Ver mi agenda ${renderIcono('arrow')}</a></section></div><section class="superficie resumen-citas-hoy"><div class="encabezado-seccion"><div><h2>Citas de hoy</h2><p>${formatearFecha(HOY, { weekday: 'long', day: 'numeric', month: 'long' })}</p></div><span class="etiqueta-suave">${citasHoy.length} citas</span></div>${tablaCitas(citasHoy)}</section>`;
+  const { negocioId } = estadoAplicacion;
+  const { fecha, estado } = filtrosResumen(HOY, negocioId);
+  const citas = listarRegistros('appointments', negocioId);
+  const horarios = listarRegistros('schedules', negocioId);
+  const bloqueos = listarRegistros('blocks', negocioId);
+  const citasDia = citas.filter((cita) => cita.date === fecha).map((cita) => {
+    const datos = ampliarDatosCita(cita);
+    return {
+      id: cita.id, estado: cita.status, horaInicio: cita.start, horaFin: cita.end,
+      inicioUtc: `${cita.date}T${cita.start}:00Z`, nombreContacto: datos.client.name,
+      nombreServicio: datos.service.name, nombreProfesional: datos.professional.name,
+      nombreSucursal: datos.branch.name, causas: causasCitaDemo(cita, horarios, bloqueos),
+    };
+  });
+  // La hora ficticia coincide con la referencia visual de Agenda en la demo.
+  return renderResumen({ hoy: HOY, fecha, estado, ahora: Date.parse(`${HOY}T11:20:00Z`), titulo: 'Buenos días, Adriana',
+    descripcion: 'Un nuevo día para hacer sentir bien a tus pacientes.',
+    demo: true, acciones: renderBoton('Nueva cita', 'nueva-cita'), citasDia,
+    citasSemana: citas.map((cita) => ({ fechaLocal: cita.date })),
+  });
 }

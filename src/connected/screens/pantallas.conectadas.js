@@ -10,11 +10,13 @@ import { renderEstadoVacio } from '../../shared/interfaz.componentes.js';
 import { agenda } from './agenda/agenda.vista.js';
 import { clientes } from './clientes/clientes.vista.js';
 import { renderReportesConectados } from './reportes/reportes.vista.js';
+import { renderResumenConectado, reiniciarResumen } from './resumen/resumen.vista.js';
 import './disponibilidad/disponibilidad.acciones.js';
 import './cuenta/cuenta.acciones.js';
 
 const pantallas = {
   agenda,
+  resumen: renderResumenConectado,
   clientes,
   reportes: renderReportesConectados,
   profesionales,
@@ -28,5 +30,6 @@ const pantallas = {
 };
 
 export function renderPantalla(pagina) {
+  if (pagina !== 'resumen') reiniciarResumen();
   return pantallas[pagina]?.() ?? renderEstadoVacio('Esta página no existe', 'Vuelve a tu agenda para continuar.');
 }

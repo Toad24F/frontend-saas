@@ -24,16 +24,27 @@ async function vigilarDemo(pagina) {
   return { solicitudes, errores };
 }
 
-test('Resumen muestra las citas de hoy y abre Agenda en la demo', async ({ page: pagina }) => {
+test('Resumen muestra los estados, la semana y el detalle de las citas de hoy en la demo', async ({ page: pagina }) => {
   const actividad = await vigilarDemo(pagina);
   await pagina.goto('/admin/resumen?demo=1');
   await expect(pagina.getByRole('heading', { name: 'Citas de hoy' })).toBeVisible();
   await expect(pagina.locator('.resumen-columna')).toHaveCount(7);
-  await expect(pagina.locator('.resumen-barra-hoy')).toHaveCount(1);
+  await expect(pagina.locator('.resumen-dia[aria-current="date"]')).toHaveCount(1);
+  await expect(pagina.locator('.resumen-grafica .resumen-barra-mayor')).toHaveCount(1);
+  await expect(pagina.locator('.resumen-grafica .resumen-barra-menor')).toHaveCount(3);
   await expect(pagina.locator('.resumen-citas-hoy tbody tr').first()).toBeVisible();
-  await pagina.getByRole('link', { name: 'Ver mi agenda' }).click();
-  await expect(pagina).toHaveURL(/\/admin\/agenda\?demo=1$/);
-  await expect(pagina.getByRole('heading', { name: 'Agenda', exact: true })).toBeVisible();
+  await expect(pagina.getByRole('heading', { name: 'Estados de hoy' })).toBeVisible();
+  await expect(pagina.getByRole('link', { name: 'Ver mi agenda' })).toHaveCount(0);
+  await expect(pagina.locator('.tarjeta-indicador')).toHaveCount(0);
+  await pagina.locator('[data-resumen-fecha="2026-09-09"]').click();
+  await expect(pagina.getByRole('heading', { name: 'Estados del miércoles' })).toBeVisible();
+  await expect(pagina.getByRole('heading', { name: 'Citas del miércoles' })).toBeVisible();
+  await pagina.locator('[data-resumen-estado="cancelada"]').click();
+  await expect(pagina.getByRole('heading', { name: 'Citas del miércoles · Canceladas' })).toBeVisible();
+  await pagina.getByRole('button', { name: 'Quitar filtro de estado' }).click();
+  await pagina.locator('[data-resumen-fecha="2026-09-08"]').click();
+  await pagina.locator('[data-cita]').first().click();
+  await expect(pagina.getByRole('dialog')).toBeVisible();
   expect(actividad).toEqual({ solicitudes: [], errores: [] });
 });
 
@@ -121,7 +132,7 @@ test('El panel conectado redirige rutas de demo y nunca solicita el archivo de e
     if (new URL(solicitud.url()).pathname === '/data/demo.json') archivosDemo.push(solicitud.url());
   });
   const { solicitudesObservadas: solicitudes, errores } = await prepararSesion(pagina, 'recepcionista');
-  for (const [ruta, titulo] of pantallas) {
+  for (const [ruta, titulo] of pantallas.filter(([ruta]) => ruta !== 'resumen')) {
     await pagina.goto(`/admin/${ruta}`);
     await expect(pagina.getByRole('heading', { name: 'Agenda', exact: true })).toBeVisible();
     await expect(pagina).toHaveURL(/\/admin\/agenda$/);
