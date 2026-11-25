@@ -28,6 +28,9 @@ test('Resumen muestra los estados, la semana y el detalle de las citas de hoy en
   const actividad = await vigilarDemo(pagina);
   await pagina.goto('/admin/resumen?demo=1');
   await expect(pagina.getByRole('heading', { name: 'Citas de hoy' })).toBeVisible();
+  const proxima = pagina.getByRole('region', { name: 'Próxima cita', exact: true });
+  await expect(proxima.locator('time')).toHaveText('14:00');
+  await expect(proxima.getByRole('button', { name: 'Ver cita de Fernanda Castro' })).toBeVisible();
   await expect(pagina.locator('.resumen-columna')).toHaveCount(7);
   await expect(pagina.locator('.resumen-dia[aria-current="date"]')).toHaveCount(1);
   await expect(pagina.locator('.resumen-grafica .resumen-barra-mayor')).toHaveCount(1);

@@ -34,9 +34,24 @@
 .resumen-cabecera-citas { flex-wrap: wrap; }
 .resumen-controles-citas { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 14px; }
 .resumen-controles-citas .btn { min-height: 44px; }
-.resumen-proxima, .resumen-afectadas { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 10px; font-size: 13px; }
-.resumen-proxima { margin: 0 20px 12px; padding: 10px 12px; background: var(--superficie-suave); border-radius: 8px; }
-.resumen-afectadas { color: var(--acento-oscuro); font-weight: 650; }
+.resumen-proximas { margin-bottom: 20px; }
+.resumen-proximas-contenido { display: grid; grid-template-columns: minmax(128px, 16%) minmax(0, 1fr); padding: 0 20px 20px; }
+.resumen-proximas-horario { display: flex; flex-direction: column; justify-content: center; gap: 6px; padding: 10px 12px 10px 0; color: var(--texto-secundario); font-size: 13px; }
+.resumen-proximas-horario time { color: var(--acento-oscuro); font-size: clamp(26px, 3vw, 42px); font-weight: 750; line-height: 1; font-variant-numeric: tabular-nums; }
+.resumen-proximas-lista { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 185px), 1fr)); list-style: none; margin: 0; padding: 0; }
+.resumen-proximas-lista li { min-width: 0; border-inline-start: 1px solid var(--borde); }
+.resumen-proxima-cita { display: grid; width: 100%; height: 100%; min-height: 44px; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: 'datos datos' 'estado flecha'; align-content: start; align-items: center; gap: 8px; border: 0; padding: 8px 12px; background: transparent; color: var(--texto); text-align: start; }
+.resumen-proxima-cita:hover { background: var(--superficie-suave); }
+.resumen-proxima-cita:focus-visible { outline: 2px solid var(--acento-oscuro); outline-offset: -2px; }
+.resumen-proxima-datos { grid-area: datos; display: grid; gap: 1px; font-size: 13px; overflow-wrap: anywhere; }
+.resumen-proxima-datos strong { font-size: 15px; }
+.resumen-proxima-datos small { color: var(--texto-secundario); font-size: 12px; }
+.resumen-proxima-cita .distintivo-estado { grid-area: estado; justify-self: start; }
+.resumen-proxima-flecha { grid-area: flecha; color: var(--texto-secundario); }
+.resumen-proximas-carga { display: grid; gap: 12px; padding: 20px; }
+.resumen-proximas-carga .esqueleto-relleno:first-child { max-width: 135px; }
+.resumen-proximas-carga .esqueleto-relleno + .esqueleto-relleno { height: 68px; }
+.resumen-afectadas { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 10px; color: var(--acento-oscuro); font-size: 13px; font-weight: 650; }
 .resumen-afectadas svg { width: 16px; height: 16px; }
 .resumen-sin-datos, .resumen-error { padding: 12px 22px 24px; margin: 0; color: var(--texto-secundario); }
 .resumen-lista-esqueleto, .resumen-leyenda-esqueleto { display: grid; gap: 10px; }
@@ -53,5 +68,12 @@
 .resumen-citas-hoy .tabla-app td { overflow-wrap: anywhere; }
 
 @media (max-width: 1050px) { .resumen-cuadricula { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 850px) {
+  .resumen-proximas-contenido { grid-template-columns: minmax(0, 1fr); padding: 0 16px 10px; }
+  .resumen-proximas-horario { flex-direction: row; flex-wrap: wrap; align-items: center; justify-content: flex-start; gap: 8px 14px; padding: 0 0 10px; }
+  .resumen-proximas-lista { grid-template-columns: minmax(0, 1fr); }
+  .resumen-proximas-lista li { border-inline-start: 0; border-top: 1px solid var(--borde); }
+  .resumen-proxima-cita { grid-template-columns: minmax(0, 1fr) auto auto; grid-template-areas: 'datos estado flecha'; padding: 10px 2px; }
+}
 @media (max-width: 480px) { .resumen-estados, .resumen-grafica, .resumen-leyenda-semana { padding-inline: 16px; } }
 @media (pointer: coarse) { .resumen-estado { min-height: 44px; } }

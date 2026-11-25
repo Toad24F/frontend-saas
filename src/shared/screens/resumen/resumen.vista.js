@@ -14,6 +14,8 @@ const estados = {
 const fechaCorta = (dia) => formatearFecha(dia, { day: 'numeric', month: 'short' });
 const horaCorta = (hora) => hora.slice(0, 5);
 const citaActiva = (cita) => cita.estado === 'pendiente' || cita.estado === 'confirmada';
+const textoHistorico = (valor) => esc(valor || 'Sin registro histórico');
+const compararCitas = (primera, segunda) => Date.parse(primera.inicioUtc) - Date.parse(segunda.inicioUtc) || primera.id - segunda.id;
 const relleno = '<span class="esqueleto-relleno" aria-hidden="true"></span>';
 
 function renderDona(citas, seleccionado, mensajeVacio) {
@@ -67,19 +69,48 @@ function renderSemana(citas, hoy, fecha, desde) {
   return `<ul class="resumen-grafica" aria-label="Citas por día de lunes a domingo">${columnas}</ul>${leyenda}`;
 }
 
-function renderCitas(citas, demo, ahora, mensajeVacio, estado) {
+function renderProximas(citas, ahora, demo) {
+  const futuras = citas.filter((cita) => citaActiva(cita) && Date.parse(cita.inicioUtc) >= ahora).sort(compararCitas);
+  if (!futuras.length) return '';
+
+  const primera = futuras[0];
+  const inicio = Date.parse(primera.inicioUtc);
+  const grupo = futuras.filter((cita) => Date.parse(cita.inicioUtc) === inicio);
+  const hora = horaCorta(primera.horaInicio);
+  const variasHorasLocales = grupo.some((cita) => horaCorta(cita.horaInicio) !== hora);
+  const lista = grupo.map((cita) => `<li>
+    <button type="button" class="resumen-proxima-cita" ${demo ? 'data-cita' : 'data-resumen-cita'}="${cita.id}"
+      aria-label="Ver cita de ${esc(cita.nombreContacto || 'paciente')}">
+      <span class="resumen-proxima-datos">
+        <strong>${textoHistorico(cita.nombreContacto)}</strong>
+        <span>${textoHistorico(cita.nombreServicio)}</span>
+        <small>${textoHistorico(cita.nombreProfesional)}</small>
+        <small>${textoHistorico(cita.nombreSucursal)}${variasHorasLocales && horaCorta(cita.horaInicio) !== hora ? ` · ${horaCorta(cita.horaInicio)} hora local` : ''}</small>
+      </span>
+      ${renderEtiquetaEstado(cita.estado)}
+      <span class="resumen-proxima-flecha" aria-hidden="true">${renderIcono('chevron')}</span>
+    </button>
+  </li>`).join('');
+  return `<section class="superficie resumen-proximas" aria-labelledby="resumen-proximas-titulo">
+    <div class="encabezado-seccion"><h2 id="resumen-proximas-titulo">${grupo.length === 1 ? 'Próxima cita' : 'Próximas citas'}</h2></div>
+    <div class="resumen-proximas-contenido">
+      <div class="resumen-proximas-horario">
+        <time datetime="${hora}">${hora}</time>
+        ${variasHorasLocales ? `<span>Hora de ${esc(primera.nombreSucursal || primera.zonaHoraria)}</span>` : ''}
+        ${grupo.length > 1 ? `<span>${grupo.length} citas a la misma hora</span>` : ''}
+      </div>
+      <ul class="resumen-proximas-lista" role="list">${lista}</ul>
+    </div>
+  </section>`;
+}
+
+function renderCitas(citas, demo, mensajeVacio, estado) {
   if (!citas.length) return estado
     ? renderEstadoVacio('Sin citas para este estado', 'Elige otro estado o quita el filtro para ver las citas del día.')
     : renderEstadoVacio(mensajeVacio, 'Las citas de esta fecha aparecerán aquí.');
-  const ordenadas = [...citas].sort((primera, segunda) => Date.parse(primera.inicioUtc) - Date.parse(segunda.inicioUtc) || primera.id - segunda.id);
-  const proxima = ordenadas.find((cita) => citaActiva(cita) && Date.parse(cita.inicioUtc) >= ahora);
+  const ordenadas = [...citas].sort(compararCitas);
   const zonas = new Set(citas.map((cita) => cita.zonaHoraria));
   const variasZonas = zonas.size > 1;
-  const avisoProxima = proxima ? `<p class="resumen-proxima"><strong>Próxima cita</strong>
-    <span>${horaCorta(proxima.horaInicio)}${variasZonas ? ` · ${esc(proxima.nombreSucursal || proxima.zonaHoraria)}` : ''}</span>
-    ${renderEtiquetaEstado(proxima.estado)}
-  </p>` : '';
-  const textoHistorico = (valor) => esc(valor || 'Sin registro histórico');
   const filas = ordenadas.map((cita) => `<tr>
     <td><strong>${textoHistorico(cita.nombreContacto)}</strong></td>
     <td><strong>${textoHistorico(cita.nombreServicio)}</strong><small>${textoHistorico(cita.nombreProfesional)}</small></td>
@@ -87,7 +118,7 @@ function renderCitas(citas, demo, ahora, mensajeVacio, estado) {
     <td>${textoHistorico(cita.nombreSucursal)}</td><td>${renderEtiquetaEstado(cita.estado)}</td>
     <td><button type="button" class="boton-icono" ${demo ? 'data-cita' : 'data-resumen-cita'}="${cita.id}" aria-label="Ver cita de ${esc(cita.nombreContacto || 'paciente')}">${renderIcono('chevron')}</button></td>
   </tr>`).join('');
-  return `${avisoProxima}<div class="table-responsive"><table class="table tabla-app align-middle">
+  return `<div class="table-responsive"><table class="table tabla-app align-middle">
     <thead><tr><th scope="col">Paciente</th><th scope="col">Servicio y profesional</th><th scope="col">Horario</th><th scope="col">Sucursal</th><th scope="col">Estado</th><th scope="col"><span class="visually-hidden">Acciones</span></th></tr></thead>
     <tbody>${filas}</tbody>
   </table></div>`;
@@ -98,6 +129,9 @@ export function renderResumen({ hoy, fecha = hoy, estado = '', ahora, titulo, de
   const cargandoDia = !citasDia && !errorDia;
   const cargandoSemana = !citasSemana && !errorSemana;
   const citasVisibles = estado ? citasDia?.filter((cita) => cita.estado === estado) : citasDia;
+  const proximas = cargandoDia ? `<div class="superficie resumen-proximas resumen-esqueleto" aria-hidden="true">
+    <div class="resumen-proximas-carga">${relleno.repeat(2)}</div>
+  </div>` : citasVisibles ? renderProximas(citasVisibles, ahora, demo) : '';
   const afectadas = citasVisibles?.filter((cita) => citaActiva(cita) && cita.causas.length).length;
   const referenciaDia = fecha === hoy ? 'de hoy' : `del ${formatearFecha(fecha, { weekday: 'long' })}`;
   const mensajeVacio = fecha === hoy ? 'Sin citas hoy' : 'Sin citas en este día';
@@ -107,10 +141,11 @@ export function renderResumen({ hoy, fecha = hoy, estado = '', ahora, titulo, de
   const graficaSemana = cargandoSemana ? `<div class="resumen-grafica resumen-esqueleto" aria-hidden="true">${relleno.repeat(7)}</div>`
     : errorSemana && errorSemana === errorDia ? '<p class="resumen-sin-datos">Semana no disponible.</p>'
     : errorSemana ? error(errorSemana) : renderSemana(citasSemana, hoy, fecha, desde);
-  const lista = cargandoDia ? `<div class="resumen-lista-esqueleto resumen-esqueleto" aria-hidden="true">${relleno.repeat(3)}</div>` : errorDia ? error(errorDia) : renderCitas(citasVisibles, demo, ahora, mensajeVacio, citasDia.length > 0 && estado);
+  const lista = cargandoDia ? `<div class="resumen-lista-esqueleto resumen-esqueleto" aria-hidden="true">${relleno.repeat(3)}</div>` : errorDia ? error(errorDia) : renderCitas(citasVisibles, demo, mensajeVacio, citasDia.length > 0 && estado);
   const avisoAfectadas = afectadas ? `<span class="resumen-afectadas">${renderIcono('info')} ${afectadas} ${afectadas === 1 ? 'cita afectada' : 'citas afectadas'}</span>` : '';
   const quitarFiltro = estadoSeleccionado ? '<button class="btn btn-light" type="button" data-resumen-limpiar>Quitar filtro de estado</button>' : '';
   return `${renderEncabezadoPagina(titulo, descripcion, acciones)}
+  ${proximas}
   <div class="resumen-cuadricula">
     <section class="superficie" aria-labelledby="resumen-estados-titulo" aria-busy="${cargandoDia}">
       <div class="encabezado-seccion"><div><h2 id="resumen-estados-titulo">Estados ${referenciaDia}</h2><p>${fechaCorta(fecha)}</p></div></div>

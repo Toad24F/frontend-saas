@@ -37,7 +37,7 @@ for (const [rol, titulo, tema, ancho] of [
     });
     await pagina.goto('/admin/resumen');
     await expect(pagina.getByRole('heading', { name: titulo, exact: true })).toBeVisible();
-    await expect(pagina.locator('.resumen-esqueleto')).toHaveCount(3);
+    await expect(pagina.locator('.resumen-esqueleto')).toHaveCount(4);
     await expect(pagina.getByRole('status').filter({ hasText: 'Cargando resumen de citas' })).toHaveCount(1);
     if (ancho === 390 && tema === 'dark') await pagina.screenshot({ path: prueba.outputPath('resumen-cargando.png') });
     liberar();
@@ -61,7 +61,9 @@ for (const [rol, titulo, tema, ancho] of [
     await expect(leyendaSemana.locator('.resumen-barra-mayor')).toHaveCSS('background-color', colorMayor);
     await expect(leyendaSemana.locator('.resumen-barra-menor')).toHaveCSS('background-color', 'rgb(96, 134, 165)');
     await expect(lista.locator('tbody tr')).toHaveCount(5);
-    await expect(lista.locator('.resumen-proxima')).toHaveText(/Próxima cita\s+15:30\s+Pendiente/);
+    const proxima = pagina.getByRole('region', { name: 'Próxima cita', exact: true });
+    await expect(proxima.locator('time')).toHaveText('15:30');
+    await expect(proxima.getByRole('button', { name: 'Ver cita de Paciente 7' })).toHaveText(/Paciente 7[\s\S]*Pendiente/);
     await expect(lista.getByText('1 cita afectada')).toBeVisible();
     await expect(pagina.locator('.resumen-esqueleto')).toHaveCount(0);
     expect(consultas).toEqual([{ desde: '2026-11-23', hasta: '2026-11-29' }]);
@@ -111,6 +113,7 @@ for (const [rol, titulo, tema, ancho] of [
     await canceladas.focus();
     await pagina.keyboard.press('Space');
     await expect(pagina.getByRole('region', { name: 'Citas de hoy · Canceladas' }).locator('tbody')).toContainText('Paciente 2');
+    await expect(proxima).toHaveCount(0);
     await pagina.keyboard.press('Space');
     await expect(lista.locator('tbody tr')).toHaveCount(5);
     expect(consultas).toHaveLength(1);
@@ -124,6 +127,45 @@ for (const [rol, titulo, tema, ancho] of [
     await expect(pagina.getByRole('dialog', { name: 'Nueva cita' })).toBeVisible();
   });
 }
+
+test('la tarjeta reúne todos los inicios simultáneos y permite abrir el detalle', async ({ page: pagina }, prueba) => {
+  await pagina.emulateMedia({ reducedMotion: 'reduce' });
+  await prepararResumen(pagina, 'recepcionista');
+  await pagina.route((url) => url.pathname === '/citas', (ruta) => {
+    const consulta = new URL(ruta.request().url()).searchParams;
+    const otraZona = { ...cita(9, 'confirmada', '15:30'), zonaHoraria: 'America/Chihuahua', horaInicio: '09:30:00', nombreSucursal: 'Norte' };
+    const mismoRelojOtroInstante = { ...cita(10, 'pendiente', '15:30'), zonaHoraria: 'America/Chihuahua', inicioUtc: '2026-11-25T21:30:00Z' };
+    return ruta.fulfill({ json: { desde: consulta.get('desde'), hasta: consulta.get('hasta'), citas: [
+      cita(1, 'confirmada', '07:15'), cita(2, 'cancelada', '15:30'), cita(7, 'pendiente', '15:30'),
+      cita(8, 'confirmada', '15:30'), otraZona, mismoRelojOtroInstante,
+    ] } });
+  });
+  await pagina.goto('/admin/resumen');
+  const tarjeta = pagina.getByRole('region', { name: 'Próximas citas', exact: true });
+  const opciones = tarjeta.getByRole('button');
+  await expect(tarjeta.locator('time')).toHaveText('15:30');
+  await expect(tarjeta.getByText('3 citas a la misma hora')).toBeVisible();
+  await expect(tarjeta.getByText('Hora de Centro')).toBeVisible();
+  await expect(opciones).toHaveCount(3);
+  await expect(tarjeta.getByRole('button', { name: 'Ver cita de Paciente 9' })).toContainText('09:30 hora local');
+  await expect(pagina.getByRole('region', { name: 'Citas de hoy' }).locator('tbody tr')).toHaveCount(6);
+
+  await pagina.setViewportSize({ width: 1366, height: 900 });
+  const primera = await opciones.first().boundingBox();
+  const segunda = await opciones.nth(1).boundingBox();
+  expect(primera.x).toBeLessThan(segunda.x);
+  await pagina.screenshot({ path: prueba.outputPath('proximas-escritorio.png'), fullPage: true, animations: 'disabled' });
+  await pagina.setViewportSize({ width: 390, height: 844 });
+  const primeraMovil = await opciones.first().boundingBox();
+  const segundaMovil = await opciones.nth(1).boundingBox();
+  expect(primeraMovil.y).toBeLessThan(segundaMovil.y);
+  expect(await pagina.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+  await pagina.screenshot({ path: prueba.outputPath('proximas-movil.png'), fullPage: true, animations: 'disabled' });
+  await opciones.first().click();
+  await expect(pagina.getByRole('dialog', { name: 'Detalle de la cita' })).toBeVisible();
+  await pagina.keyboard.press('Escape');
+  await expect(opciones.first()).toBeFocused();
+});
 
 test('un exceso de citas semanal conserva el día y distingue fallo de vacío', async ({ page: pagina }) => {
   await prepararResumen(pagina, 'recepcionista');
