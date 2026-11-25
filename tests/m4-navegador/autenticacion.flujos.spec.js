@@ -58,7 +58,8 @@ test('reintenta el ingreso tras un 401 y cierra la sesión en ambas pestañas', 
   await expect(aviso).toBeFocused();
   await expect(pagina.getByRole('button', { name: 'Entrar' })).toBeEnabled();
   await pagina.getByRole('button', { name: 'Entrar' }).click();
-  await expect(pagina.locator('[data-agenda-cita="7"]')).toBeVisible();
+  await expect(pagina).toHaveURL(/\/admin\/resumen$/);
+  await expect(pagina.getByRole('region', { name: 'Citas de hoy' })).toBeVisible();
   expect(ingresos).toEqual([credenciales, credenciales]);
 
   const otraPagina = await contexto.newPage();
@@ -78,6 +79,27 @@ test('reintenta el ingreso tras un 401 y cierra la sesión en ambas pestañas', 
     await otraPagina.close();
   }
 });
+
+for (const rol of ['admin_negocio', 'profesional', 'superadmin']) {
+  test(`abre la pantalla de inicio después del ingreso de ${rol}`, async ({ page: pagina }) => {
+    await prepararSesion(pagina, rol, 'light', false);
+    await pagina.route(rutaAutenticacion('login'), (ruta) => ruta.fulfill({ json: { accessToken: 'sesion-ficticia', usuario: { ...usuario, rol } } }));
+    await pagina.route((url) => url.pathname === '/bloqueos', (ruta) => ruta.fulfill({ json: { pagina: 1, limite: 25, total: 0, bloqueos: [] } }));
+    await pagina.goto('/');
+    await pagina.getByLabel('Correo electrónico').fill(credenciales.email);
+    await pagina.getByLabel('Contraseña', { exact: true }).fill(credenciales.password);
+    await pagina.getByRole('button', { name: 'Entrar' }).click();
+    if (rol === 'superadmin') {
+      await expect(pagina.getByRole('heading', { name: 'Panel de superadministración' })).toBeVisible();
+    } else {
+      await expect(pagina).toHaveURL(/\/admin\/resumen$/);
+      await expect(pagina.getByRole('region', { name: 'Citas de hoy' })).toBeVisible();
+      await pagina.goto('/admin/agenda');
+      await expect(pagina.getByRole('heading', { name: 'Agenda', exact: true })).toBeVisible();
+      await expect(pagina).toHaveURL(/\/admin\/agenda$/);
+    }
+  });
+}
 
 test('activa y recupera por código, validando el formulario y los cuerpos HTTP', async ({ page: pagina }) => {
   const activaciones = [];

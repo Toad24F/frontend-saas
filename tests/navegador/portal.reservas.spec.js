@@ -119,6 +119,8 @@ test('FALA-T044–T046: publicación global cambia el portal y conserva el impor
   await pagina.getByLabel('Correo electrónico').fill('admin-qa-1@example.test');
   await pagina.locator('#ingreso-contrasena').fill('PruebaLicencia2026!');
   await pagina.getByRole('button', { name: 'Entrar' }).click();
+  await expect(pagina).toHaveURL(/\/admin\/resumen$/);
+  await pagina.goto(`${process.env.PORTAL_TEST_ORIGIN}/admin/cuenta`);
   await expect(pagina.getByRole('heading', { name: 'Precios en el portal público' })).toBeVisible();
   await expect(pagina.getByText('Precios visibles')).toBeVisible();
 

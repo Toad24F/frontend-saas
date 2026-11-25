@@ -494,16 +494,17 @@ document.addEventListener('focusin', (evento) => {
   if (!evento.target.closest?.('.menu-cuenta')) establecerMenuCuenta(false);
 });
 function mostrarIngresoConectado(mensaje = '') {
-  renderAutenticacion(mensaje, iniciarAplicacion);
+  renderAutenticacion(mensaje, () => iniciarAplicacion({ desdeIngreso: true }));
 }
 window.addEventListener('cita-sesion-expirada', () => { document.querySelector('#dialogo-app')?.close(); mostrarIngresoConectado(mensajeSesionVencida); });
-export async function iniciarAplicacion() {
+export async function iniciarAplicacion({ desdeIngreso = false } = {}) {
   try {
     document.documentElement.dataset.appMode = esDemo ? 'demo' : 'connected';
     if (esDemo) await (await import('../demo/demo.datos.js')).cargarDatosDemo();
     else {
       if (!await restaurarSesion()) { mostrarIngresoConectado(); return; }
       estadoAplicacion.negocioId = await cargarDatosBackend();
+      if (desdeIngreso && paginaPermitida('resumen')) history.replaceState({}, '', urlSegunModo('/admin/resumen'));
     }
     estadoAplicacion.pagina = location.pathname.startsWith('/admin/')
       ? location.pathname.split('/')[2]

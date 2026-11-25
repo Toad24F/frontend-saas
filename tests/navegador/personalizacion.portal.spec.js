@@ -8,6 +8,8 @@ async function entrar(pagina, correo) {
   await pagina.getByLabel('Correo electrónico').fill(correo);
   await pagina.locator('#ingreso-contrasena').fill('PruebaLicencia2026!');
   await pagina.getByRole('button', { name: 'Entrar' }).click();
+  await expect(pagina).toHaveURL(/\/admin\/resumen$/);
+  await pagina.goto(`${process.env.PORTAL_TEST_ORIGIN}/admin/cuenta`);
   await expect(pagina.getByRole('heading', { name: 'Mi cuenta' })).toBeVisible();
 }
 
