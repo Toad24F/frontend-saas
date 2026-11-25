@@ -166,8 +166,6 @@ html[data-theme='dark'] .autenticacion-marca .autenticacion-logo-oscuro { displa
 .autenticacion-alternativa { margin: 22px 0 0; color: var(--texto-secundario); font-size: 13px; }
 .autenticacion-alternativa button { margin-left: 3px; }
 .autenticacion-volver { display: inline-block; margin-top: 22px; }
-.autenticacion-pie { color: var(--texto-secundario); font-size: 12px; }
-
 .autenticacion-visual {
   grid-column: 1;
   grid-row: 1;
@@ -201,9 +199,7 @@ html[data-theme='dark'] .autenticacion-marca .autenticacion-logo-oscuro { displa
   max-width: 390px;
   color: #fff;
 }
-.autenticacion-texto-visual span { font-size: 13px; font-weight: 750; letter-spacing: .02em; }
 .autenticacion-texto-visual p {
-  margin-top: 12px;
   color: #fff;
   font-family: 'Manrope', 'DM Sans', sans-serif;
   font-size: clamp(24px, 2.5vw, 38px);
@@ -231,7 +227,6 @@ html[data-theme='dark'] .autenticacion-visual::after { background: linear-gradie
   .autenticacion-contenido-interior { padding: 48px 0; }
   .autenticacion-introduccion { margin-bottom: 28px; }
   .autenticacion-introduccion h1 { font-size: 34px; }
-  .autenticacion-pie { line-height: 1.4; }
 }
 @media (max-width: 360px) {
   .autenticacion-cabecera { gap: 8px; }

@@ -1,4 +1,5 @@
 import { api, iniciarSesion, urlSegunModo } from '../../backend.js';
+import { mensajeErrorIngreso } from '../../modules/autenticacion/autenticacion.errores.js';
 import { validarContrasenaNueva } from '../../modules/autenticacion/contrasena.politica.js';
 import { renderIcono } from '../../../shared/iconos.catalogo.js';
 import { escaparHtml as escapar } from '../../../shared/interfaz.componentes.js';
@@ -16,9 +17,9 @@ const campoContrasena = (etiqueta, id, autocomplete, extra = '') =>
   ' required><button type="button" data-autenticacion-alternar="' + id +
   '" aria-label="Mostrar ' + etiqueta.toLowerCase() + '">Mostrar</button></div></div>';
 
-function mostrarError(raiz, error) {
+function mostrarError(raiz, mensaje) {
   const destino = raiz.querySelector('#autenticacion-error');
-  destino.textContent = error.message;
+  destino.textContent = mensaje;
   destino.hidden = false;
   destino.focus();
 }
@@ -39,11 +40,9 @@ export function renderAutenticacion(mensaje = '', alIngresar) {
       'aria-label="Activar modo ' + (oscuro ? 'claro' : 'oscuro') + '" aria-pressed="' + oscuro +
       '" title="Modo ' + (oscuro ? 'claro' : 'oscuro') + '">' + renderIcono(oscuro ? 'sun' : 'moon') +
       '</button></div></header>' +
-      '<div class="autenticacion-contenido-interior">' + contenido + '</div>' +
-      '<footer class="autenticacion-pie">Un poco más de orden. Más tiempo para cuidar.</footer></section>' +
+      '<div class="autenticacion-contenido-interior">' + contenido + '</div></section>' +
       '<aside class="autenticacion-visual"><img src="/brand/login-workspace.png" alt="Agenda abierta sobre un escritorio iluminado por el sol">' +
-      '<div class="autenticacion-texto-visual"><span>Tu negocio, a tu ritmo</span>' +
-      '<p>La agenda lista para el día que tienes por delante.</p></div></aside></main>';
+      '<div class="autenticacion-texto-visual"><p>Citalendar, la agenda de tu negocio</p></div></aside></main>';
 
     const raiz = aplicacion.querySelector('.autenticacion-pagina');
     raiz.querySelector('input')?.focus();
@@ -66,13 +65,14 @@ export function renderAutenticacion(mensaje = '', alIngresar) {
     };
     raiz.querySelector('form').onsubmit = async (evento) => {
       evento.preventDefault();
-      const envio = evento.currentTarget.querySelector('[type="submit"]');
+      const formulario = evento.currentTarget;
+      const envio = formulario.querySelector('[type="submit"]');
       envio.disabled = true;
       envio.textContent = 'Espera un momento…';
       try {
-        await alEnviar(new FormData(evento.currentTarget));
+        await alEnviar(new FormData(formulario));
       } catch (error) {
-        mostrarError(raiz, error);
+        mostrarError(raiz, formulario.id === 'ingreso-formulario' ? mensajeErrorIngreso(error) : error.message);
         envio.disabled = false;
         envio.textContent = envio.dataset.etiquetaEnvio;
       }

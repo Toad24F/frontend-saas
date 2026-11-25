@@ -1,4 +1,5 @@
 import { esDemo, mensajePendiente, urlSegunModo, usuarioActual, etiquetaRol, paginaPermitida, paginaInicial, restaurarSesion, cargarDatosBackend } from '../connected/backend.js';
+import { mensajeErrorIngreso, mensajeSesionVencida } from '../connected/modules/autenticacion/autenticacion.errores.js';
 import { renderAutenticacion } from '../connected/screens/autenticacion/autenticacion.vista.js';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './global.estilos.css';
@@ -495,7 +496,7 @@ document.addEventListener('focusin', (evento) => {
 function mostrarIngresoConectado(mensaje = '') {
   renderAutenticacion(mensaje, iniciarAplicacion);
 }
-window.addEventListener('cita-sesion-expirada', () => { document.querySelector('#dialogo-app')?.close(); mostrarIngresoConectado('Tu sesión expiró. Inicia sesión nuevamente.'); });
+window.addEventListener('cita-sesion-expirada', () => { document.querySelector('#dialogo-app')?.close(); mostrarIngresoConectado(mensajeSesionVencida); });
 export async function iniciarAplicacion() {
   try {
     document.documentElement.dataset.appMode = esDemo ? 'demo' : 'connected';
@@ -517,7 +518,10 @@ export async function iniciarAplicacion() {
     render();
     registrarHerramientaCalendario();
   } catch (error) {
-    if (!esDemo && !usuarioActual) { mostrarIngresoConectado(error.message); return; }
+    if (!esDemo && !usuarioActual) {
+      mostrarIngresoConectado(error.status === 401 ? mensajeSesionVencida : mensajeErrorIngreso(error));
+      return;
+    }
     document.querySelector('#app').innerHTML =
       `<div class="arranque-error"><img src="/brand/citalendar-icon.svg" alt=""/><h1>No pudimos abrir tu agenda</h1><p>${escaparHtml(error.message)}</p><div class="arranque-acciones"><button class="btn btn-primary" onclick="location.reload()">Volver a intentar</button><a class="btn btn-light" href="${urlSegunModo(location.pathname, true)}">Ver demo</a></div></div>`;
   }

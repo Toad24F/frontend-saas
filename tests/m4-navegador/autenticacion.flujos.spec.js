@@ -5,6 +5,28 @@ const credenciales = { email: 'personal@example.test', password: 'Clave-ficticia
 const usuario = { id: 1, nombre: 'Personal QA', rol: 'recepcionista', negocioId: 1 };
 const rutaAutenticacion = (segmento) => (url) => url.pathname === '/auth/' + segmento;
 
+for (const [estado, mensaje] of [
+  [0, 'No pudimos conectar con Citalendar. Revisa tu conexión e inténtalo de nuevo.'],
+  [500, 'Error del servidor.'],
+  [503, 'Error del servidor.'],
+]) {
+  test('muestra el mensaje de ingreso para el estado ' + estado, async ({ page: pagina }) => {
+    await pagina.route(rutaAutenticacion('login'), (ruta) => {
+      if (estado === 0) return ruta.abort('failed');
+      if (estado === 503) return ruta.fulfill({ status: estado, body: 'Servicio no disponible' });
+      return ruta.fulfill({ status: estado, json: { message: 'Detalle interno del servidor' } });
+    });
+    await pagina.goto('/admin/agenda');
+    await pagina.getByLabel('Correo electrónico').fill(credenciales.email);
+    await pagina.getByLabel('Contraseña', { exact: true }).fill(credenciales.password);
+    const entrar = pagina.getByRole('button', { name: 'Entrar' });
+    await entrar.click();
+    await expect(pagina.getByRole('alert')).toHaveText(mensaje);
+    await expect(pagina.getByRole('alert')).toBeFocused();
+    await expect(entrar).toBeEnabled();
+  });
+}
+
 test('reintenta el ingreso tras un 401 y cierra la sesión en ambas pestañas', async ({ page: pagina, context: contexto }) => {
   const { errores } = await prepararSesion(pagina, 'recepcionista', 'light', false);
   const ingresos = [];
@@ -104,6 +126,13 @@ for (const [ancho, alto] of [[1366, 900], [390, 844]]) {
     for (const tema of ['light', 'dark']) {
       const capturar = async (pantalla) => {
         await expect(pagina.locator('html')).toHaveAttribute('data-theme', tema);
+        await expect(pagina.getByText('Un poco más de orden. Más tiempo para cuidar.', { exact: true })).toHaveCount(0);
+        await expect(pagina.getByText('Tu negocio, a tu ritmo', { exact: true })).toHaveCount(0);
+        await expect(pagina.getByText('La agenda lista para el día que tienes por delante.', { exact: true })).toHaveCount(0);
+        const frase = pagina.getByText('Citalendar, la agenda de tu negocio', { exact: true });
+        await expect(frase).toHaveCount(1);
+        if (ancho > 900) await expect(frase).toBeVisible();
+        else await expect(frase).toBeHidden();
         expect(await pagina.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(ancho);
         await pagina.screenshot({ path: prueba.outputPath(pantalla + '-' + tema + '.png'), fullPage: true });
       };

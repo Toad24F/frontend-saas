@@ -276,7 +276,7 @@ test('T101: 401 vuelve al acceso; un fallo de red no parece directorio vacío', 
   control.estadoHttp = 401;
   await pagina.goto('/admin/clientes');
   await expect(
-    pagina.getByText('Tu sesión expiró. Inicia sesión nuevamente.'),
+    pagina.getByText('Tu sesión venció. Por favor, inicia sesión de nuevo.'),
   ).toBeVisible();
   await expect(pagina.locator('[data-directorio-abrir]')).toHaveCount(0);
   control.estadoHttp = 0;

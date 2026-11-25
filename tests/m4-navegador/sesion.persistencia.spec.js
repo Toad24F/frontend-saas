@@ -25,9 +25,11 @@ test('nuevo contexto de navegador restaura el acceso persistente y valida perfil
 test('acceso persistido vencido exige iniciar sesión y limpia el almacenamiento', async ({ page: pagina }) => {
   const { solicitudesObservadas: observado } = await prepararSesion(pagina);
   await pagina.addInitScript(() => { sessionStorage.removeItem('cita-session'); localStorage.setItem('cita-session', 'expired-test'); });
-  await pagina.route((url) => url.pathname === '/auth/profile', (rutaInterceptada) => rutaInterceptada.fulfill({ status: 401, json: { message: 'Sesión no válida.' } }));
+  await pagina.route((url) => url.pathname === '/auth/profile', (rutaInterceptada) => rutaInterceptada.fulfill({ status: 401, json: { message: 'Unauthorized' } }));
   await pagina.goto('/admin/agenda');
   await expect(pagina.locator('input[type="password"]').first()).toBeVisible();
+  await expect(pagina.getByText('Tu sesión venció. Por favor, inicia sesión de nuevo.', { exact: true })).toBeVisible();
+  await expect(pagina.getByText('Unauthorized', { exact: true })).toHaveCount(0);
   expect(await pagina.evaluate(() => localStorage.getItem('cita-session'))).toBeNull();
   expect(await pagina.evaluate(() => sessionStorage.getItem('cita-session'))).toBeNull();
   expect(observado).not.toContain('GET /citas');
