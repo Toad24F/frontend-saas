@@ -1,6 +1,8 @@
 import { test, expect } from '@playwright/test';
 import { prepararSesion } from './agenda.respuestas-simuladas.js';
 
+test.use({ timezoneId: 'UTC' });
+
 const prepararResumen = async (pagina, rol, tema = 'light') => {
   await prepararSesion(pagina, rol, tema);
   await pagina.route((url) => url.pathname === '/bloqueos', (ruta) => ruta.fulfill({ json: { pagina: 1, limite: 25, total: 0, bloqueos: [] } }));
@@ -12,11 +14,11 @@ const cita = (id, estado, hora, causas = [], fechaLocal = '2026-11-25') => ({
   nombreServicio: 'Consulta', nombreProfesional: 'Personal QA', personalId: 1, sucursalId: 1, causas,
 });
 
-for (const [rol, titulo, tema, ancho] of [
-  ['admin_negocio', 'Resumen', 'light', 1366],
-  ['recepcionista', 'Resumen', 'dark', 390],
-  ['profesional', 'Resumen de mis citas', 'light', 390],
-  ['recepcionista', 'Resumen', 'dark', 1366],
+for (const [rol, tema, ancho] of [
+  ['admin_negocio', 'light', 1366],
+  ['recepcionista', 'dark', 390],
+  ['profesional', 'light', 390],
+  ['recepcionista', 'dark', 1366],
 ]) {
   test(`Resumen de ${rol} a ${ancho}px en tema ${tema}`, async ({ page: pagina }, prueba) => {
     await pagina.setViewportSize({ width: ancho, height: 900 });
@@ -36,7 +38,7 @@ for (const [rol, titulo, tema, ancho] of [
       ] } });
     });
     await pagina.goto('/admin/resumen');
-    await expect(pagina.getByRole('heading', { name: titulo, exact: true })).toBeVisible();
+    await expect(pagina.getByRole('heading', { name: 'Buenos días, Personal', exact: true })).toBeVisible();
     await expect(pagina.locator('.resumen-esqueleto')).toHaveCount(4);
     await expect(pagina.getByRole('status').filter({ hasText: 'Cargando resumen de citas' })).toHaveCount(1);
     if (ancho === 390 && tema === 'dark') await pagina.screenshot({ path: prueba.outputPath('resumen-cargando.png') });
@@ -127,6 +129,17 @@ for (const [rol, titulo, tema, ancho] of [
     await expect(pagina.getByRole('dialog', { name: 'Nueva cita' })).toBeVisible();
   });
 }
+
+test('el saludo usa la hora local en el panel conectado y en la demo', async ({ page: pagina }) => {
+  await prepararSesion(pagina);
+  for (const [hora, saludo] of [['08:00', 'Buenos días'], ['12:00', 'Buenas tardes'], ['19:00', 'Buenas noches']]) {
+    await pagina.clock.setFixedTime(new Date(`2026-11-25T${hora}:00Z`));
+    await pagina.goto('/admin/resumen');
+    await expect(pagina.getByRole('heading', { name: `${saludo}, Personal`, exact: true })).toBeVisible();
+    await pagina.goto('/admin/resumen?demo=1');
+    await expect(pagina.getByRole('heading', { name: `${saludo}, Adriana`, exact: true })).toBeVisible();
+  }
+});
 
 test('la tarjeta reúne todos los inicios simultáneos y permite abrir el detalle', async ({ page: pagina }, prueba) => {
   await pagina.emulateMedia({ reducedMotion: 'reduce' });

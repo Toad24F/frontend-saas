@@ -21,7 +21,7 @@ export function renderResumenDemo() {
     };
   });
   // La hora ficticia coincide con la referencia visual de Agenda en la demo.
-  return renderResumen({ hoy: HOY, fecha, estado, ahora: Date.parse(`${HOY}T11:20:00Z`), titulo: 'Buenos días, Adriana',
+  return renderResumen({ hoy: HOY, fecha, estado, ahora: Date.parse(`${HOY}T11:20:00Z`), nombre: 'Adriana',
     descripcion: 'Un nuevo día para hacer sentir bien a tus pacientes.',
     demo: true, acciones: renderBoton('Nueva cita', 'nueva-cita'), citasDia,
     citasSemana: citas.map((cita) => ({ fechaLocal: cita.date })),

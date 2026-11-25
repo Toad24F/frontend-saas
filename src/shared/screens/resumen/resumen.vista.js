@@ -18,6 +18,13 @@ const textoHistorico = (valor) => esc(valor || 'Sin registro histórico');
 const compararCitas = (primera, segunda) => Date.parse(primera.inicioUtc) - Date.parse(segunda.inicioUtc) || primera.id - segunda.id;
 const relleno = '<span class="esqueleto-relleno" aria-hidden="true"></span>';
 
+function saludoResumen(nombre) {
+  const hora = new Date().getHours();
+  const saludo = hora < 5 || hora >= 19 ? 'Buenas noches' : hora < 12 ? 'Buenos días' : 'Buenas tardes';
+  const primerNombre = nombre?.trim().split(/\s+/, 1)[0];
+  return primerNombre ? `${saludo}, ${esc(primerNombre)}` : saludo;
+}
+
 function renderDona(citas, seleccionado, mensajeVacio) {
   if (!citas.length) return `<p class="resumen-sin-datos">${mensajeVacio}</p>`;
   let acumulo = 0;
@@ -124,7 +131,7 @@ function renderCitas(citas, demo, mensajeVacio, estado) {
   </table></div>`;
 }
 
-export function renderResumen({ hoy, fecha = hoy, estado = '', ahora, titulo, descripcion = '', acciones, demo = false, citasDia, citasSemana, errorDia, errorSemana }) {
+export function renderResumen({ hoy, fecha = hoy, estado = '', ahora, nombre, descripcion = '', acciones, demo = false, citasDia, citasSemana, errorDia, errorSemana }) {
   const { desde, hasta } = periodoCalendario('week', hoy);
   const cargandoDia = !citasDia && !errorDia;
   const cargandoSemana = !citasSemana && !errorSemana;
@@ -144,7 +151,7 @@ export function renderResumen({ hoy, fecha = hoy, estado = '', ahora, titulo, de
   const lista = cargandoDia ? `<div class="resumen-lista-esqueleto resumen-esqueleto" aria-hidden="true">${relleno.repeat(3)}</div>` : errorDia ? error(errorDia) : renderCitas(citasVisibles, demo, mensajeVacio, citasDia.length > 0 && estado);
   const avisoAfectadas = afectadas ? `<span class="resumen-afectadas">${renderIcono('info')} ${afectadas} ${afectadas === 1 ? 'cita afectada' : 'citas afectadas'}</span>` : '';
   const quitarFiltro = estadoSeleccionado ? '<button class="btn btn-light" type="button" data-resumen-limpiar>Quitar filtro de estado</button>' : '';
-  return `${renderEncabezadoPagina(titulo, descripcion, acciones)}
+  return `${renderEncabezadoPagina(saludoResumen(nombre), descripcion, acciones)}
   ${proximas}
   <div class="resumen-cuadricula">
     <section class="superficie" aria-labelledby="resumen-estados-titulo" aria-busy="${cargandoDia}">

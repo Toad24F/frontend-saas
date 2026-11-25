@@ -17,7 +17,7 @@ for (const ancho of [1366, 390]) {
       });
       await pagina.emulateMedia({ reducedMotion: 'no-preference' });
       await pagina.goto('/admin/resumen?demo=1');
-      await expect(pagina.getByRole('heading', { name: 'Buenos días, Adriana' })).toBeVisible();
+      await expect(pagina.getByRole('heading', { name: /^(Buenos días|Buenas tardes|Buenas noches), Adriana$/ })).toBeVisible();
       await expect(pagina.locator('html')).toHaveAttribute('data-theme', tema.nombre);
       await expect(pagina.locator('body')).toHaveCSS('background-color', tema.fondo);
       await expect.poll(() => pagina.locator('html').evaluate((raiz) => getComputedStyle(raiz).getPropertyValue('--acento').trim())).toBe(tema.acento);

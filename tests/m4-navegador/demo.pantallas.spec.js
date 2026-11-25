@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import { prepararSesion } from './agenda.respuestas-simuladas.js';
 
 const pantallas = [
-  ['resumen', 'Buenos días, Adriana'],
+  ['resumen', /^(Buenos días|Buenas tardes|Buenas noches), Adriana$/],
   ['reportes', 'Reportes'],
   ['configuracion', 'Configuración'],
   ['notificaciones', 'Notificaciones'],

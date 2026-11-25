@@ -45,8 +45,7 @@ export function renderResumenConectado() {
   const fecha = consulta.errorSemana ? hoy : filtros.fecha;
   const citasDia = consulta.citasSemana?.filter((cita) => cita.fechaLocal === fecha) ?? consulta.citasDia;
   const acciones = puedeGestionarAgenda(usuarioActual.rol) ? `<button type="button" class="btn btn-primary" data-resumen-nueva>${renderIcono('plus')}${hayAltaManualPendiente(usuarioActual) ? 'Comprobar envío pendiente' : 'Nueva cita'}</button>` : '';
-  return renderResumen({ ...consulta, hoy, fecha, estado: filtros.estado, citasDia, ahora, acciones,
-    titulo: usuarioActual.rol === 'profesional' ? 'Resumen de mis citas' : 'Resumen' });
+  return renderResumen({ ...consulta, hoy, fecha, estado: filtros.estado, citasDia, ahora, acciones, nombre: usuarioActual.nombre });
 }
 
 export function handleClicResumen(evento) {
