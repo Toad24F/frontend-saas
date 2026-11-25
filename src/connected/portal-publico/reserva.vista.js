@@ -29,7 +29,7 @@ function renderContenido(estado) {
     const resultado = estado.resultado;
     return `<h2 id="portal-titulo-paso" tabindex="-1">Reserva registrada</h2>${aviso}
       <p class="distintivo-estado pendiente portal-resultado-estado">Pendiente</p>
-      <p>Conserva el folio de tu reserva.</p><p class="portal-resultado-folio">${escaparTextoPortal(resultado.folio)}</p>
+      <p>Tu reserva quedó registrada y está pendiente de confirmación.</p>
       <dl class="portal-resultado-detalles"><dt>Negocio</dt><dd>${escaparTextoPortal(resultado.nombreNegocio)}</dd>
       <dt>Servicio</dt><dd>${escaparTextoPortal(resultado.nombreServicio)}</dd><dt>Sucursal</dt><dd>${escaparTextoPortal(resultado.nombreSucursal)}</dd>
       <dt>Profesional</dt><dd>${escaparTextoPortal(resultado.nombreProfesional)}</dd>

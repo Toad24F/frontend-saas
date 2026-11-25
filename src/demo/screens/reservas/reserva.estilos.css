@@ -566,34 +566,6 @@
   margin: 13px auto;
   color: #a0ac91;
 }
-.reserva-demo-confirmacion-folio {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 9px;
-  background: #f7f9f4;
-  border: 1px dashed #dce5d1;
-  padding: 19px 45px;
-  border-radius: 9px;
-  margin: 23px 0;
-}
-.reserva-demo-confirmacion-folio > span {
-  font-size: 9px;
-  letter-spacing: 1.8px;
-  color: #a6b397;
-}
-.reserva-demo-confirmacion-folio > strong {
-  font-size: 19px;
-  font-weight: 600;
-  color: #7d8f68;
-  letter-spacing: 1px;
-}
-.reserva-demo-confirmacion-folio > .boton-icono {
-  position: absolute;
-  right: 10px;
-  top: 28px;
-  color: #a0b18a;
-}
 .reserva-demo-confirmacion-detalles {
   display: flex;
   flex-direction: column;

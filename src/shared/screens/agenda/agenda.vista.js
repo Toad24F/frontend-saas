@@ -42,7 +42,8 @@ export function vistaAgenda() {
   const horarios = listarRegistros('schedules', estado.negocioId), bloqueos = listarRegistros('blocks', estado.negocioId);
   const citasAgenda = citasFiltradas().filter((a) => a.date >= periodo.desde && a.date <= periodo.hasta).map((a) => {
     const info = ampliarDatosCita(a);
-    return { id: a.id, folio: a.folio, fechaLocal: a.date, fechaFinLocal: a.date, horaInicio: a.start, horaFin: a.end,
+    // La demo usa el mismo contrato visual por cita que la agenda conectada.
+    return { id: a.id, fechaLocal: a.date, fechaFinLocal: a.date, horaInicio: a.start, horaFin: a.end,
       estado: a.status, personalId: a.professionalId, sucursalId: a.branchId, nombreContacto: info.client.name,
       nombreSucursal: info.branch.name, nombreProfesional: info.professional.name, nombreServicio: info.service.name, zonaHoraria: 'America/Chihuahua',
       causas: causasCitaDemo(a, horarios, bloqueos) };

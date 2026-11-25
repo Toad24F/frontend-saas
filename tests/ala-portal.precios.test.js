@@ -16,7 +16,7 @@ const catalogo = (consulta, costo) => ({ negocio: { slug, nombre: 'Centro' },
   servicios: [servicio(costo)],
   sucursales: consulta.servicioId ? [{ id: 2, nombre: 'Sucursal', direccion: 'Calle 1', zonaHoraria: zona }] : [],
   profesionales: consulta.sucursalId ? [{ id: 3, nombre: 'Ana' }] : [] });
-const resultado = (costo) => ({ folio: 'P-123456789012345678', estado: 'pendiente',
+const resultado = (costo) => ({ estado: 'pendiente',
   inicioUtc: iniciar, finUtc: '2026-10-20T17:30:00.000Z', zonaHoraria: zona,
   nombreNegocio: 'Centro histórico', nombreServicio: 'Consulta histórica',
   nombreSucursal: 'Sucursal histórica', nombreProfesional: 'Ana histórica',

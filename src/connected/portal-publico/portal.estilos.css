@@ -82,7 +82,6 @@ html[data-theme='dark'] .portal-error-campo { color: #ffafa7; }
 /* Resultado histórico: etiqueta semántica existente y datos legibles en móvil. */
 .portal-resultado-estado { display: inline-flex; margin-block: 10px 20px; font-size: 14px; font-weight: 600; }
 html[data-theme='light'] .portal-resultado-estado { background: #fff1ce; color: #765016; }
-.portal-resultado-folio { font-family: 'Manrope', sans-serif; font-size: clamp(20px, 4vw, 28px); font-weight: 750; overflow-wrap: anywhere; }
 .portal-resultado-detalles { display: grid; grid-template-columns: minmax(110px, .4fr) minmax(0, 1fr); gap: 16px 24px; padding-block: 24px; border-top: 1px solid var(--borde); }
 .portal-resultado-detalles dt { color: var(--texto-secundario); font-weight: 500; }
 .portal-resultado-detalles dd { margin: 0; overflow-wrap: anywhere; }

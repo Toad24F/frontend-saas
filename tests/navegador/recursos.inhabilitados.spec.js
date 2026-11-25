@@ -16,7 +16,7 @@ async function iniciarSesion(pagina, correo) {
 // tocan la oferta pública del negocio 1 ni la base habitual del backend.
 test('FALA-T035–T040: cuatro retiros recuperables y consultas separadas', async ({ page: pagina }) => {
   await iniciarSesion(pagina, 'admin-qa-2@example.test');
-  const [citaAnterior] = await consultarFilas("SELECT id, estado, inicio_utc, fin_utc FROM citas WHERE folio='RET-QA-2'");
+  const [citaAnterior] = await consultarFilas("SELECT c.id, c.estado, c.inicio_utc, c.fin_utc FROM citas c JOIN clientes x ON x.id=c.cliente_id WHERE x.nombre_completo='Cliente Retiro QA'");
   const solicitudes = [];
   pagina.on('request', (solicitud) => {
     if (/\/(profesionales|recepcionistas|servicios|sucursales)\/\d+/.test(solicitud.url())) {
@@ -64,7 +64,7 @@ test('FALA-T035–T040: cuatro retiros recuperables y consultas separadas', asyn
   for (const elementoPrueba of casos) {
     expect(solicitudes.some((entrada) => new RegExp(`^POST /${elementoPrueba.type}/\\d+/inhabilitar$`).test(entrada))).toBe(true);
   }
-  const [citaPosterior] = await consultarFilas("SELECT id, estado, inicio_utc, fin_utc FROM citas WHERE folio='RET-QA-2'");
+  const [citaPosterior] = await consultarFilas("SELECT c.id, c.estado, c.inicio_utc, c.fin_utc FROM citas c JOIN clientes x ON x.id=c.cliente_id WHERE x.nombre_completo='Cliente Retiro QA'");
   expect(citaPosterior).toEqual(citaAnterior);
 });
 

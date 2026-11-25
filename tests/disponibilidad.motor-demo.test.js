@@ -160,7 +160,7 @@ test('confirmar consume el lock, agrega una cita y evita doble envío', () => {
   );
   assert.equal(a.tenantId, 1);
   assert.equal(a.end, '10:30');
-  assert.ok(a.folio.startsWith('CB-'));
+  assert.equal(Object.hasOwn(a, 'folio'), false);
   assert.ok(!datosAplicacion.holds.some((altura) => altura.id === apartado.id));
   assert.throws(() =>
     crearCitaDemo(

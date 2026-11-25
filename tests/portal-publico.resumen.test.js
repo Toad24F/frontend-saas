@@ -25,7 +25,7 @@ test('el resumen conserva las selecciones reales y muestra pago solo con costo c
 
 test('la recuperación muestra el costo aceptado sin inventar duración', () => {
   const html = renderReserva({ fase: 'resultado', seleccion: {}, opciones: { servicios: [], sucursales: [], profesionales: [] },
-    resultado: { folio: 'P-123', estado: 'pendiente', nombreNegocio: 'Unión Salud', nombreServicio: 'Consulta general',
+    resultado: { estado: 'pendiente', nombreNegocio: 'Unión Salud', nombreServicio: 'Consulta general',
       nombreSucursal: 'Centro', nombreProfesional: 'Ana Ruiz', inicioUtc: '2026-10-22T17:00:00Z',
       finUtc: '2026-10-22T17:45:00Z', zonaHoraria: 'America/Chihuahua', costo: '650.00' } });
   assert.match(html, /Costo de la reserva/);

@@ -1992,15 +1992,6 @@ html[data-theme='dark'] .barra-lateral .marca .logo-marca-claro { display: none;
   .reserva-demo-encabezado-fecha > span {
     font-size: 11px;
   }
-  .reserva-demo-confirmacion-folio {
-    padding: 19px 28px;
-  }
-  .reserva-demo-confirmacion-folio > strong {
-    font-size: 17px;
-  }
-  .reserva-demo-confirmacion-folio > .boton-icono {
-    right: 1px;
-  }
   .reserva-demo-confirmacion-detalles > span {
     font-size: 13px;
     line-height: 1.7;

@@ -4,7 +4,7 @@ import { test, expect } from '@playwright/test';
 async function datosPrueba(pagina, rol = 'recepcionista', tema = 'light') {
   const control = { escrituras: [], respuestaPerdida: false, preparacionPerdida: false, errorDisponibilidad: false, errorResolucion: false, conflicto: false, registrada: false, version: 1, estado: 'confirmada' };
   await pagina.addInitScript((tema) => { sessionStorage.setItem('cita-session', 'm4-manual-test'); localStorage.setItem('cita-theme', tema); }, tema);
-  const resultado = () => ({ id: 7, clienteId: 1, folio: 'M-MANUAL-QA', origen: 'manual', estado: control.estado, version: control.version, personalId: 1, sucursalId: 1, servicioId: 1, inicioUtc: '2030-12-20T15:00:00Z', finUtc: '2030-12-20T15:30:00Z', finOcupacionUtc: '2030-12-20T15:35:00Z', zonaHoraria: 'America/Chihuahua', costoAceptado: '200.00', nombreContacto: 'Paciente QA', telefonoContacto: '6145550101', nombreServicio: 'Consulta', nombreProfesional: 'Profesional QA', nombreSucursal: 'Sucursal QA', motivoConsulta: 'Notas QA' });
+  const resultado = () => ({ id: 7, clienteId: 1, origen: 'manual', estado: control.estado, version: control.version, personalId: 1, sucursalId: 1, servicioId: 1, inicioUtc: '2030-12-20T15:00:00Z', finUtc: '2030-12-20T15:30:00Z', finOcupacionUtc: '2030-12-20T15:35:00Z', zonaHoraria: 'America/Chihuahua', costoAceptado: '200.00', nombreContacto: 'Paciente QA', telefonoContacto: '6145550101', nombreServicio: 'Consulta', nombreProfesional: 'Profesional QA', nombreSucursal: 'Sucursal QA', motivoConsulta: 'Notas QA' });
   await pagina.route((url) => url.port === '3000', async (rutaInterceptada) => {
     const peticion = rutaInterceptada.request(), url = new URL(peticion.url()), ruta = url.pathname;
     if (peticion.method() !== 'GET') control.escrituras.push({ ruta, metodo: peticion.method(), cuerpo: peticion.postDataJSON() });
@@ -15,7 +15,7 @@ async function datosPrueba(pagina, rol = 'recepcionista', tema = 'light') {
     else if (ruta === '/citas/7/historial') datos = { pagina: 1, limite: 50, hayMas: false, eventos: [] };
     else if (ruta === '/citas/7/estado') {
       if (control.conflicto || peticion.postDataJSON().version !== control.version) { await rutaInterceptada.fulfill({ status: 409, json: { message: 'Conflicto' } }); return; }
-      control.estado = peticion.postDataJSON().estado; control.version++; datos = { id: 7, folio: 'M-MANUAL-QA', estado: control.estado, version: control.version };
+      control.estado = peticion.postDataJSON().estado; control.version++; datos = { id: 7, estado: control.estado, version: control.version };
     } else if (ruta === '/clientes') datos = { pagina: Number(url.searchParams.get('pagina') || 1), limite: 50, hayMas: false, clientes: [{ id: 1, nombreCompleto: 'Ana QA', telefono: '6145550101' }, { id: 2, nombreCompleto: 'Otra persona QA', telefono: '6145550101' }] };
     else if (ruta === '/disponibilidad') {
       if (control.errorDisponibilidad) { await rutaInterceptada.fulfill({ status: 503, json: { message: 'Fallo de disponibilidad' } }); return; }
@@ -65,10 +65,10 @@ test('T093/T094: existente por ID, teléfono compartido sin fusión, selección 
   await expect(dialogo.getByText('Otra persona QA')).toBeVisible();
   await dialogo.locator('[name="clienteId"][value="2"]').check();
   await dialogo.getByRole('button', { name: 'Confirmar cita', exact: true }).click();
-  await expect(dialogo).toContainText('M-MANUAL-QA');
+  await expect(dialogo).toContainText('Cita registrada');
   const enviado = api.escrituras.find((fila) => fila.ruta.endsWith('/registrar')).cuerpo;
   expect(enviado.clienteId).toBe(2); expect(enviado.clienteNuevo).toBeUndefined();
-  expect(Object.keys(enviado).sort()).toEqual(['clienteId', 'sucursalId', 'personalId', 'servicioId', 'fechaLocal', 'horaInicio', 'notas'].sort());
+  expect(Object.keys(enviado).sort()).toEqual(['clienteId', 'sucursalId', 'personalId', 'servicioId', 'fechaLocal', 'horaInicio', 'notas', 'autorizaWhatsapp'].sort());
 });
 test('T094: fallo de disponibilidad retira horarios anteriores y bloquea registro', async ({ page: pagina }) => {
   const api = await datosPrueba(pagina); await pagina.goto('/admin/agenda');
@@ -80,7 +80,7 @@ test('T094: fallo de disponibilidad retira horarios anteriores y bloquea registr
   await expect(dialogo.getByRole('button', { name: 'Confirmar cita', exact: true })).toBeDisabled();
   expect(api.escrituras).toEqual([]);
 });
-test('T095: doble clic, respuesta perdida, 503 del resolutor y recarga recuperan el mismo folio', async ({ page: pagina }) => {
+test('T095: doble clic, respuesta perdida, 503 del resolutor y recarga recuperan la misma cita', async ({ page: pagina }) => {
   const api = await datosPrueba(pagina); api.respuestaPerdida = true;
   await pagina.goto('/admin/agenda'); const dialogo = await completarManual(pagina);
   await dialogo.getByRole('button', { name: 'Confirmar cita', exact: true }).dblclick();
@@ -92,7 +92,7 @@ test('T095: doble clic, respuesta perdida, 503 del resolutor y recarga recuperan
   await expect(dialogo).toContainText('pendiente de comprobar');
   await pagina.reload(); api.errorResolucion = false;
   await pagina.getByRole('button', { name: 'Comprobar envío pendiente', exact: true }).click();
-  await expect(pagina.getByRole('dialog')).toContainText('M-MANUAL-QA');
+  await expect(pagina.getByRole('dialog')).toContainText('Cita registrada');
   const resuelto = api.escrituras.filter((fila) => fila.ruta.endsWith('/resolver')).at(-1);
   expect(resuelto.cuerpo).toEqual(registrado[0].cuerpo);
   expect(resuelto.ruta.replace('/resolver', '/registrar')).toBe(registrado[0].ruta);
@@ -134,7 +134,7 @@ test('T033: Profesional conserva consulta y recibe acciones de agenda propia', a
   const api = await datosPrueba(pagina, 'profesional'); await pagina.goto('/admin/agenda');
   await expect(pagina.getByRole('button', { name: 'Nueva cita', exact: true })).toBeVisible();
   await pagina.locator('[data-agenda-cita="7"]').click();
-  await expect(pagina.getByRole('dialog')).toContainText('M-MANUAL-QA');
+  await expect(pagina.getByRole('dialog')).toContainText('Paciente QA');
   await expect(pagina.getByLabel('Estado de la cita')).toBeVisible();
   await expect(pagina.getByRole('heading', { name: 'Cambiar horario' })).toBeVisible();
   expect(api.escrituras).toEqual([]);
@@ -165,7 +165,7 @@ for (const ancho of [1366, 390]) for (const tema of ['light', 'dark']) {
     await expect.poll(() => dialogo.evaluate((elemento) => getComputedStyle(elemento).backgroundColor)).toMatch(/^rgb\(/);
     await pagina.screenshot({ path: `test-results/m4/manual-${ancho}-${tema}.png` });
     await dialogo.getByRole('button', { name: 'Confirmar cita', exact: true }).click();
-    await expect(dialogo).toContainText('M-MANUAL-QA');
+    await expect(dialogo).toContainText('Cita registrada');
     await dialogo.getByRole('button', { name: 'Volver a la agenda', exact: true }).click();
     await pagina.locator('[data-agenda-cita="7"]').click();
     await expect(pagina.getByLabel('Estado de la cita')).toBeVisible();

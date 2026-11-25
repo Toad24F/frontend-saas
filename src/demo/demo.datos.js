@@ -108,7 +108,6 @@ export async function cargarDatosDemo() {
       start: inicio,
       end: minutosAHora(horaAMinutos(inicio) + servicio.duration),
       status: estado,
-      folio: `CB-2609-${String(indice + 1).padStart(4, '0')}`,
       reason: '',
       origin: 'portal_publico',
     });
@@ -124,7 +123,6 @@ export async function cargarDatosDemo() {
     start: '09:00',
     end: '10:00',
     status: 'confirmada',
-    folio: 'EM-2609-0001',
     reason: '',
     origin: 'portal_publico',
   });

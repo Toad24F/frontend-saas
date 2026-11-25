@@ -58,7 +58,7 @@ test('FALA-T021–T022: rechazo por cupo conserva marcador hasta resolución y e
 });
 
 // La ausencia terminal ordinaria exige nueva consulta de disponibilidad y
-// no puede fabricar un folio o resultado histórico.
+// no puede fabricar un resultado histórico.
 test('FALA-T020–T021: rechazo operativo terminal reinicia sin resultado inventado', async () => {
   const almacenamiento = crearAlmacenamientoEnMemoria();
   crearIntentoStore('centro', () => almacenamiento).guardar(marcador);

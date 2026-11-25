@@ -20,7 +20,7 @@ export function abrirDetalleDemo(id) {
         .join(''),
       'menta',
       'avatar-grande',
-    )}<div><h3>${esc(e.client.name)}</h3><p>${a.folio}</p></div>${renderEtiquetaEstado(a.status)}</div><div class="lista-detalle"><div>${renderIcono('briefcase')}<span><small>Servicio</small><strong>${esc(e.service.name)}</strong></span><b>${formatearMoneda(e.service.price)}</b></div><div>${renderIcono('stethoscope')}<span><small>Profesional</small><strong>${esc(e.professional.name)}</strong></span></div><div>${renderIcono('calendar')}<span><small>Fecha y hora</small><strong>${formatearFecha(a.date)} · ${a.start} – ${a.end}</strong></span></div><div>${renderIcono('pin')}<span><small>Sucursal</small><strong>${esc(e.branch.name)}</strong></span></div><div>${renderIcono('message')}<span><small>WhatsApp</small><strong>${esc(e.client.phone)}</strong></span></div></div>${a.reason ? `<div class="cita-motivo"><strong>Motivo de consulta</strong><p>${esc(a.reason)}</p></div>` : ''}<section class="nota-informativa nota-compacta" aria-label="Confirmación y comunicación"><p>La comunicación por WhatsApp está inactiva en esta demostración.</p></section><label class="form-label" for="appointment-status">Estado de la cita</label><select id="appointment-status" class="form-select">${Object.entries(
+    )}<div><h3>${esc(e.client.name)}</h3></div>${renderEtiquetaEstado(a.status)}</div><div class="lista-detalle"><div>${renderIcono('briefcase')}<span><small>Servicio</small><strong>${esc(e.service.name)}</strong></span><b>${formatearMoneda(e.service.price)}</b></div><div>${renderIcono('stethoscope')}<span><small>Profesional</small><strong>${esc(e.professional.name)}</strong></span></div><div>${renderIcono('calendar')}<span><small>Fecha y hora</small><strong>${formatearFecha(a.date)} · ${a.start} – ${a.end}</strong></span></div><div>${renderIcono('pin')}<span><small>Sucursal</small><strong>${esc(e.branch.name)}</strong></span></div><div>${renderIcono('message')}<span><small>WhatsApp</small><strong>${esc(e.client.phone)}</strong></span></div></div>${a.reason ? `<div class="cita-motivo"><strong>Motivo de consulta</strong><p>${esc(a.reason)}</p></div>` : ''}<section class="nota-informativa nota-compacta" aria-label="Confirmación y comunicación"><p>La comunicación por WhatsApp está inactiva en esta demostración.</p></section><label class="form-label" for="appointment-status">Estado de la cita</label><select id="appointment-status" class="form-select">${Object.entries(
       etiquetasEstadoCita,
     )
       .map(
@@ -65,7 +65,7 @@ export function abrirDetalleDemo(id) {
   };
   el.querySelector('#cancel-appointment').onclick = () => confirmarCancelar(id);
   // Propuesta de fecha/hora local de la demo; la versión conectada realiza todas las comprobaciones en el servidor.
-  el.querySelector('.dialogo-cuerpo').insertAdjacentHTML('beforeend', `<form data-demo-horario class="agenda-editor-estado"><h3>Cambiar horario</h3><div class="formulario-dos-columnas">${campo('Nueva fecha', 'fechaLocal', a.date, 'date', 'required')}${campo('Nueva hora', 'horaInicio', a.start, 'time', 'required')}</div><p class="ayuda-campo">Simulación local de horario y ocupación; conserva folio y duración. No reproduce las transacciones UTC del servidor.</p><p class="error-formulario" role="alert" data-demo-error-horario hidden></p><button type="submit" class="btn btn-primary" ${a.status === 'cancelada' || a.date < HOY ? 'disabled' : ''}>Guardar horario</button></form>`);
+  el.querySelector('.dialogo-cuerpo').insertAdjacentHTML('beforeend', `<form data-demo-horario class="agenda-editor-estado"><h3>Cambiar horario</h3><div class="formulario-dos-columnas">${campo('Nueva fecha', 'fechaLocal', a.date, 'date', 'required')}${campo('Nueva hora', 'horaInicio', a.start, 'time', 'required')}</div><p class="ayuda-campo">Simulación local de horario y ocupación; conserva la duración. No reproduce las transacciones UTC del servidor.</p><p class="error-formulario" role="alert" data-demo-error-horario hidden></p><button type="submit" class="btn btn-primary" ${a.status === 'cancelada' || a.date < HOY ? 'disabled' : ''}>Guardar horario</button></form>`);
   el.querySelector('[data-demo-horario]').onsubmit = (evento) => {
     evento.preventDefault();
     try {
@@ -185,7 +185,7 @@ export function nuevaCitaManual(dia = estado.fecha, inicio = '') {
       guardado = true;
       el.close();
       navegar('agenda');
-      mostrarAviso(`Cita creada · Folio ${a.folio}`);
+      mostrarAviso('Cita creada');
     } catch (error) {
       errorFormulario(error);
     }

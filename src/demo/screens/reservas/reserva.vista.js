@@ -63,7 +63,7 @@ const descripcionesPasos = [
   'Selecciona la fecha y el horario que mejor te convengan. Los horarios de esta demo son simulados.',
   // La exclusión entre pestañas y el reloj de servidor pertenecen al portal conectado.
   'Solo necesitamos algunos datos para preparar tu visita. Este apartado es simulado y solo funciona en esta pestaña.',
-  'Esta reserva de demostración está pendiente. Guarda tu folio ficticio.',
+  'Esta reserva de demostración está pendiente de confirmación.',
 ];
 function opciones() {
   return {
@@ -178,7 +178,8 @@ function renderContenidoPaso() {
   if (reserva.paso === 5)
     return `<form id="reserva-demo-formulario"><div class="reserva-demo-aviso-apartado">${icono('lock')}<span>Estamos guardando tu horario.<br/><small>Completa tus datos en <strong id="reserva-demo-contador">05:00</strong></small></span><progress class="reserva-demo-progreso-apartado" id="reserva-demo-progreso-apartado" max="300" value="300" aria-label="Tiempo restante del apartado"></progress></div><div class="campo-formulario"><label class="form-label" for="reserva-demo-nombre">Nombre completo <span>*</span></label><input class="form-control" id="reserva-demo-nombre" name="nombre" required maxlength="150" placeholder="Tu nombre y apellidos" value="${escapar(reserva.contacto.nombre)}" autocomplete="off"/></div><div class="campo-formulario"><label class="form-label" for="reserva-demo-telefono">Teléfono de WhatsApp <span>*</span></label><div class="reserva-demo-campo-telefono"><span>MX +52</span><input class="form-control" id="reserva-demo-telefono" name="telefono" type="tel" inputmode="numeric" pattern="[0-9]{10}" minlength="10" maxlength="10" required placeholder="614 000 0000" value="${escapar(reserva.contacto.telefono)}" autocomplete="off"/></div><p class="ayuda-campo">10 dígitos, sin espacios ni código de país.</p></div><div class="campo-formulario"><label class="form-label" for="reserva-demo-motivo">Motivo de consulta <span class="opcional">(opcional)</span></label><textarea class="form-control" id="reserva-demo-motivo" name="motivo" rows="3" maxlength="500" placeholder="¿Hay algo que debamos saber?">${escapar(reserva.contacto.motivo)}</textarea></div><p class="reserva-demo-nota-privacidad">Usa información ficticia. Tus datos solo se conservarán mientras esta demostración esté abierta.</p><p class="error-formulario" id="reserva-demo-error" role="alert" hidden></p><div class="reserva-demo-controles"><button type="button" class="btn btn-discreto" data-reserva-demo-volver>${icono('left')}Atrás</button><button type="submit" class="btn btn-primary">Confirmar mi cita ${icono('check')}</button></div></form>`;
   const a = informacionCita(reserva.citaConfirmada);
-  return `<div class="reserva-demo-confirmacion-contenido"><span class="reserva-demo-confirmacion-marca">${icono('check')}</span><h3>¡Listo, ${escapar(a.client.name.split(' ')[0])}!</h3><p>Guarda tu folio para identificar esta cita de demostración.</p><div class="reserva-demo-confirmacion-folio"><span>FOLIO DE CONTROL</span><strong>${a.folio}</strong><button class="boton-icono" data-copiar-folio aria-label="Copiar folio">${icono('link')}</button></div><div class="reserva-demo-confirmacion-detalles"><span>${icono('briefcase')}<strong>${escapar(a.service.name)}</strong></span><span>${icono('calendar')}${formatearFecha(a.date)} · ${a.start} h</span><span>${icono('stethoscope')}${escapar(a.professional.name)}</span><span>${icono('pin')}${escapar(a.branch.name)}</span></div><div class="nota-informativa nota-compacta">${icono('info')} No se ha realizado ningún cobro. No se enviará WhatsApp en este prototipo.</div><button class="btn btn-primary w-100 mt-4" data-reserva-demo-reiniciar>Reservar otra cita ${icono('arrow')}</button><a href="/admin/agenda" data-nav="agenda" class="boton-texto reserva-demo-confirmacion-panel">Ver cita en el panel ${icono('external')}</a></div>`;
+  // La confirmación de demostración comparte la información visible del portal conectado.
+  return `<div class="reserva-demo-confirmacion-contenido"><span class="reserva-demo-confirmacion-marca">${icono('check')}</span><h3>¡Listo, ${escapar(a.client.name.split(' ')[0])}!</h3><p>Esta cita de demostración está pendiente de confirmación.</p><div class="reserva-demo-confirmacion-detalles"><span>${icono('briefcase')}<strong>${escapar(a.service.name)}</strong></span><span>${icono('calendar')}${formatearFecha(a.date)} · ${a.start} h</span><span>${icono('stethoscope')}${escapar(a.professional.name)}</span><span>${icono('pin')}${escapar(a.branch.name)}</span></div><div class="nota-informativa nota-compacta">${icono('info')} No se ha realizado ningún cobro. No se enviará WhatsApp en este prototipo.</div><button class="btn btn-primary w-100 mt-4" data-reserva-demo-reiniciar>Reservar otra cita ${icono('arrow')}</button><a href="/admin/agenda" data-nav="agenda" class="boton-texto reserva-demo-confirmacion-panel">Ver cita en el panel ${icono('external')}</a></div>`;
 }
 function resumen(t) {
   const s = reserva.servicioId
@@ -293,11 +294,6 @@ document.addEventListener('click', (evento) => {
     }
     return;
   }
-  if (evento.target.closest('[data-copiar-folio]'))
-    navigator.clipboard
-      .writeText(reserva.citaConfirmada.folio)
-      .then(() => mostrarAviso('Folio copiado.'))
-      .catch(() => mostrarAviso(`Tu folio: ${reserva.citaConfirmada.folio}`));
 });
 document.addEventListener('change', (evento) => {
   if (!location.pathname.startsWith('/reservas/') || !reserva.negocioId) return;

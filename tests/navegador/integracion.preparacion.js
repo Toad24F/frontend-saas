@@ -7,12 +7,16 @@ import { resolve } from 'node:path';
 
 const carpetaFrontend = process.cwd();
 // La integración local usa el repositorio hermano real y una base efímera confirmada.
-const carpetaBackend = resolve(carpetaFrontend, '../backend');
+const carpetaBackend = [resolve(carpetaFrontend, '../SaaS-backend'), resolve(carpetaFrontend, '../backend')]
+  .find((ruta) => existsSync(resolve(ruta, 'package.json')));
+if (!carpetaBackend) throw new Error('No se encontró el backend hermano para la prueba de navegador.');
 const requerirBackend = createRequire(resolve(carpetaBackend, 'package.json'));
 const { createConnection } = requerirBackend('mysql2/promise');
 const dotenv = requerirBackend('dotenv');
 const bcrypt = requerirBackend('bcrypt');
-const entornoHabitual = dotenv.parse(readFileSync(resolve(carpetaBackend, '.env')));
+// El .env cotidiano es opcional: la prueba usa solo TEST_DB_* y crea otra base con UUID.
+const entornoHabitual = existsSync(resolve(carpetaBackend, '.env'))
+  ? dotenv.parse(readFileSync(resolve(carpetaBackend, '.env'))) : {};
 const entornoPruebas = dotenv.parse(readFileSync(resolve(carpetaBackend, '.env.test.local')));
 // El runner usa solo las credenciales de test; DB_NAME cotidiano queda como
 // barrera adicional para impedir que la base temporal reutilice ese nombre.
@@ -24,7 +28,8 @@ for (const clave of ['TEST_DB_HOST', 'TEST_DB_PORT', 'TEST_DB_USER', 'TEST_DB_PA
 if (entornoPruebas.TEST_DB_NAME !== entornoPruebas.TEST_DB_CONFIRMED || entornoPruebas.TEST_DB_NAME === entornoHabitual.DB_NAME) {
   throw new Error('La base de pruebas no está confirmada o coincide con la cotidiana.');
 }
-const entornoAislado = { ...entornoHabitual, DB_HOST: entornoPruebas.TEST_DB_HOST, DB_PORT: entornoPruebas.TEST_DB_PORT,
+const entornoAislado = { ...entornoHabitual, DB_NAME: entornoHabitual.DB_NAME ?? entornoPruebas.TEST_DB_NAME,
+  DB_HOST: entornoPruebas.TEST_DB_HOST, DB_PORT: entornoPruebas.TEST_DB_PORT,
   DB_USER: entornoPruebas.TEST_DB_USER, DB_PASS: entornoPruebas.TEST_DB_PASS };
 const nombre = `citas_persistencia_${randomUUID().replaceAll('-', '')}`;
 const esperar = (ms) => new Promise((completar) => setTimeout(completar, ms));
@@ -125,8 +130,8 @@ async function sembrarDatos(baseDatos) {
         VALUES (?,'Cliente Retiro QA','cliente retiro qa','6145550199')`, [negocioId]);
       const inicio = new Date(Date.UTC(ahora.getUTCFullYear(), ahora.getUTCMonth(), ahora.getUTCDate() + 2, 16));
       await baseDatos.query(`INSERT INTO citas (negocio_id,sucursal_id,personal_id,servicio_id,cliente_id,
-        inicio_utc,fin_utc,zona_horaria_reserva,folio,estado,origen)
-        VALUES (?,?,?,?,?,?,?,'America/Chihuahua','RET-QA-2','pendiente','manual')`,
+        inicio_utc,fin_utc,zona_horaria_reserva,estado,origen)
+        VALUES (?,?,?,?,?,?,?,'America/Chihuahua','pendiente','manual')`,
       [negocioId, sucursalId, personalId, servicioId, client.insertId,
         inicio, new Date(inicio.getTime() + 1800000)]);
     }
@@ -158,6 +163,7 @@ export default async function prepararIntegracion() {
     const puertoVite = await buscarPuertoLibre();
     const origen = `http://localhost:${puertoVite}`;
     const entorno = { ...process.env, ...entornoAislado, NODE_ENV: 'test', PORT: String(puertoApi),
+      JWT_SECRET: randomBytes(48).toString('hex'), JWT_EXPIRES_IN: '12h',
       TEST_DB_HOST: entornoAislado.DB_HOST, TEST_DB_PORT: entornoAislado.DB_PORT,
       TEST_DB_USER: entornoAislado.DB_USER, TEST_DB_PASS: entornoAislado.DB_PASS,
       TEST_DB_NAME: nombre, TEST_DB_CONFIRMED: nombre,

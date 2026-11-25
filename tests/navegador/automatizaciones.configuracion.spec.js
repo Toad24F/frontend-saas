@@ -22,7 +22,7 @@ async function abrir(pagina) {
 test('M5-T064 · carga valores, valida rangos y guarda sin recalcular trabajos anteriores', async ({ page: pagina }) => {
   await pagina.setViewportSize({ width: 390, height: 844 });
   await pagina.emulateMedia({ colorScheme: 'dark' });
-  const [{ id: citaId, negocio_id: negocioId }] = await consultarFilas("SELECT id, negocio_id FROM citas WHERE folio='RET-QA-2'");
+  const [{ id: citaId, negocio_id: negocioId }] = await consultarFilas("SELECT c.id, c.negocio_id FROM citas c JOIN clientes x ON x.id=c.cliente_id WHERE x.nombre_completo='Cliente Retiro QA'");
   const ahora = new Date();
   await consultarFilas(`INSERT INTO canales_whatsapp (negocio_id, remitente_externo_id, secreto_ref)
     VALUES (?, 'phone-t064', 'secret://whatsapp/prueba-t064')`, [negocioId]);

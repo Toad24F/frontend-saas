@@ -4,7 +4,7 @@ import { seleccionManual, horariosManuales, crearClientCitaManual, puedeGestiona
 import { crearOperacionManual } from '../src/connected/modules/agenda/agenda.operacion-manual.js';
 
 const seleccion = { sucursalId: 2, personalId: 3, servicioId: 4, fechaLocal: '2026-11-20', horaInicio: '09:17', clienteNuevo: { nombreCompleto: 'Ana', telefono: '6145550101' }, notas: null, autorizaWhatsapp: false };
-const resultado = { id: 7, folio: 'M-7', estado: 'confirmada', origen: 'manual', version: 1, ...seleccion, clienteId: 8, inicioUtc: '2026-11-20T15:17:00Z', finUtc: '2026-11-20T15:47:00Z', finOcupacionUtc: '2026-11-20T15:52:00Z', zonaHoraria: 'America/Chihuahua', costoAceptado: '200.00' };
+const resultado = { id: 7, estado: 'confirmada', origen: 'manual', version: 1, ...seleccion, clienteId: 8, inicioUtc: '2026-11-20T15:17:00Z', finUtc: '2026-11-20T15:47:00Z', finOcupacionUtc: '2026-11-20T15:52:00Z', zonaHoraria: 'America/Chihuahua', costoAceptado: '200.00' };
 const horario = { inicioUtc: resultado.inicioUtc, finUtc: resultado.finUtc };
 const almacenamiento = () => { const valores = new Map(); return { getItem: (clave) => valores.get(clave) ?? null, setItem: (clave, valor) => valores.set(clave, valor), removeItem: (clave) => valores.delete(clave) }; };
 const alcance = { actorId: 5, negocioId: 1 };
@@ -41,7 +41,7 @@ test('T095: doble clic prepara/registra una sola vez y mantiene resultado hasta 
   const operacion = crearOperacionManual({ scope: alcance, storage: almacenamiento(), keyFactory: clave, client: { preparar: async (...argumentos) => { llamadas.push(argumentos); await espera; return { clave: clave(), estado: 'preparado' }; }, registrar: async () => resultado } });
   const primera = operacion.submit(seleccion); await operacion.submit(seleccion);
   desbloquear(); await primera;
-  assert.equal(llamadas.length, 1); assert.equal(operacion.state.status, 'registered'); assert.equal(operacion.state.result.folio, 'M-7');
+  assert.equal(llamadas.length, 1); assert.equal(operacion.state.status, 'registered'); assert.equal(operacion.state.result.id, 7);
   await operacion.submit(seleccion); assert.equal(llamadas.length, 1);
   operacion.acknowledge(); assert.equal(operacion.state.status, 'idle');
 });
@@ -51,7 +51,7 @@ test('T095: respuesta perdida y recarga resuelven misma clave y contenido, sin s
   await operacion.submit(seleccion); assert.equal(operacion.state.status, 'uncertain');
   const recuperado = crearOperacionManual({ scope: alcance, storage: guardado, keyFactory: clave, client: { resolver: async (...argumentos) => { llamadas.push(argumentos); return { estado: 'registrado', resultado: resultado }; } } });
   await recuperado.start();
-  assert.deepEqual(llamadas, [[clave(), seleccion]]); assert.equal(recuperado.state.result.folio, resultado.folio);
+  assert.deepEqual(llamadas, [[clave(), seleccion]]); assert.equal(recuperado.state.result.id, resultado.id);
   await recuperado.submit({ ...seleccion, horaInicio: '10:00' }); assert.equal(llamadas.length, 1);
 });
 test('T095: preparación perdida se resuelve también y solo ausencia terminal permite otro intento', async () => {

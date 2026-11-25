@@ -29,7 +29,6 @@ async function datosPrueba(pagina, tema = 'light') {
       }
       const resumen = {
         id: 7,
-        folio: 'LIVE-7',
         version: control.version,
         estado: 'confirmada',
         origen: 'manual',

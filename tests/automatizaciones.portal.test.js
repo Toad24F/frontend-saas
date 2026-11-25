@@ -5,7 +5,7 @@ import { leerResultadoReserva } from '../src/connected/portal-publico/reserva.en
 import { renderReserva } from '../src/connected/portal-publico/reserva.vista.js';
 import { seleccionManual } from '../src/connected/modules/agenda/agenda.contrato-manual.js';
 
-const resultado = { folio: 'P-123', estado: 'pendiente', inicioUtc: '2026-11-24T18:00:00.000Z',
+const resultado = { estado: 'pendiente', inicioUtc: '2026-11-24T18:00:00.000Z',
   finUtc: '2026-11-24T18:30:00.000Z', zonaHoraria: 'America/Chihuahua',
   nombreNegocio: 'Uno', nombreServicio: 'Corte', nombreSucursal: 'Centro', nombreProfesional: 'Ana',
   vencimientoConfirmacionUtc: '2026-11-24T17:00:00.000Z', seguimientoManual: false };

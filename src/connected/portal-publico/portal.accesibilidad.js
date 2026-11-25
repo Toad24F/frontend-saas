@@ -15,7 +15,7 @@ export function anuncioPortal(estado) {
   } else if (estado.fase === 'formulario') {
     mensajes.push(...Object.values(estado.erroresContacto || {}).filter(Boolean));
     if (estado.contactoValidado) mensajes.push('Los datos tienen un formato válido. Aún no se ha enviado una reserva.');
-  } else if (estado.fase === 'resultado') mensajes.push('Reserva registrada como pendiente. Conserva el folio.');
+  } else if (estado.fase === 'resultado') mensajes.push('Reserva registrada como pendiente de confirmación.');
   else if (estado.fase === 'enviando') mensajes.push('Registrando tu reserva. Espera mientras comprobamos el resultado.');
   return mensajes.filter(Boolean).join(' ');
 }

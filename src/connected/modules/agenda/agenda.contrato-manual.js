@@ -55,7 +55,8 @@ export function horariosManuales(respuesta, seleccion) {
   });
 }
 export function resultadoManualValido(resultado) {
-  return resultado && Number.isInteger(resultado.id) && resultado.id > 0 && typeof resultado.folio === 'string' && resultado.folio.length > 0 &&
+  // El resultado se recupera por la clave opaca del intento; la cita se valida por ID interno.
+  return resultado && Number.isInteger(resultado.id) && resultado.id > 0 &&
     resultado.origen === 'manual' && ['pendiente', 'confirmada', 'completada', 'cancelada', 'no_asistio'].includes(resultado.estado) && Number.isInteger(resultado.version) && resultado.version > 0 &&
     Number.isFinite(Date.parse(resultado.inicioUtc)) && Number.isFinite(Date.parse(resultado.finUtc)) && typeof resultado.zonaHoraria === 'string' && typeof resultado.costoAceptado === 'string';
 }

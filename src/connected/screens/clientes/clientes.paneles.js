@@ -113,7 +113,7 @@ export async function abrirFichaCliente(id, alCambiar) {
           ? `<ol>${resultado.citas
               .map(
                 (cita) =>
-                  `<li><strong>${esc(valorHistorico(cita.folio))}</strong><p>${esc(cita.fechaLocal || cita.inicioUtc)} · ${esc(cita.horaInicio || '')} · ${esc(cita.zonaHoraria)}</p><dl class="agenda-campos-detalle">${[
+                  `<li><p>${esc(cita.fechaLocal || cita.inicioUtc)} · ${esc(cita.horaInicio || '')} · ${esc(cita.zonaHoraria)}</p><dl class="agenda-campos-detalle">${[
                     ['Contacto histórico', cita.nombreContacto],
                     ['Teléfono histórico', cita.telefonoContacto],
                     ['Servicio', cita.nombreServicio],
