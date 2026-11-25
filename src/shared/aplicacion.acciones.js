@@ -22,11 +22,16 @@ import { citaCubiertaPorHorarioDemo } from '../demo/demo.horario.js';
 import { limpiarErroresDisponibilidad, limpiarCampoDisponibilidad, mostrarErroresDisponibilidad, mostrarErrorGeneralDisponibilidad, validarFranjasHorario, interpretarErroresHorario } from './screens/disponibilidad/disponibilidad.errores.js';
 import { validarConfiguracionDemo, validarRangoInclusivo } from './screens/disponibilidad/disponibilidad.contrato-operativo.js';
 import { handleFiltrosResumen } from './screens/resumen/resumen.filtros.js';
+import { handleClicGrupoCanceladas } from './screens/agenda/agenda.canceladas.js';
 let idBorradorFranja = -1;
 
 export async function handleClicAplicacion(evento) {
   try {
     if (estadoAplicacion.pagina === 'resumen' && handleFiltrosResumen(evento, render)) return;
+    if (estadoAplicacion.pagina === 'agenda' && handleClicGrupoCanceladas(evento, async (id) => {
+      if (esDemo) (await import('./screens/agenda/agenda.acciones.js')).abrirDetalleDemo(id);
+      else await (await import('../connected/screens/agenda/agenda.vista.js')).abrirCita(id);
+    })) return;
     // La agenda real usa sus propias lecturas; nunca abre diálogos de escritura de la demo.
     if (!esDemo && estadoAplicacion.pagina === 'agenda' &&
       (await import('../connected/screens/agenda/agenda.vista.js')).handleClicAgenda(evento)) return;

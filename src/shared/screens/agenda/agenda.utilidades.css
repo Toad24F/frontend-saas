@@ -73,6 +73,40 @@
 .agenda-densidad .abrir-tramo { display: flex; align-items: center; color: var(--acento); margin-top: auto; }
 .agenda-densidad .abrir-tramo { position: absolute; right: 6px; top: 7px; margin: 0; font-size: 0; }
 .agenda-densidad:hover { background: color-mix(in srgb, var(--acento) 14%, var(--superficie)); }
+.agenda-grupo-canceladas {
+  --agenda-canceladas-fondo: #fcecef;
+  --agenda-canceladas-borde: #bc737d;
+  --agenda-canceladas-texto: #983a45;
+  inset-inline-end: auto;
+  border-color: var(--agenda-canceladas-borde);
+  background: var(--agenda-canceladas-fondo);
+  color: var(--agenda-canceladas-texto);
+  padding-inline: 7px;
+  container-type: inline-size;
+}
+[data-theme='dark'] .agenda-grupo-canceladas {
+  --agenda-canceladas-fondo: #4b2d32;
+  --agenda-canceladas-borde: #a86770;
+  --agenda-canceladas-texto: #ffced0;
+}
+.agenda-grupo-canceladas:hover { background: color-mix(in srgb, var(--agenda-canceladas-borde) 16%, var(--agenda-canceladas-fondo)); }
+.agenda-grupo-canceladas:focus-visible { outline: 2px solid var(--acento-oscuro); outline-offset: -2px; }
+.agenda-grupo-canceladas strong { font-size: 13px; line-height: 1.2; overflow-wrap: anywhere; }
+.agenda-grupo-canceladas .abrir-tramo { top: auto; bottom: 6px; color: inherit; }
+@container (max-width: 74px) {
+  .agenda-grupo-canceladas > span { display: none; }
+  .agenda-grupo-canceladas strong { font-size: 12px; }
+}
+.agenda-canceladas-cuerpo > p { margin-bottom: 12px; color: var(--texto-secundario); }
+@media (min-width: 768px) {
+  .dialogo-app.formulario-lateral.agenda-panel-canceladas { width: min(420px, 100%); }
+}
+.agenda-canceladas-cuerpo ul { list-style: none; margin: 0; padding: 0; }
+.agenda-canceladas-cuerpo li { border-top: 1px solid var(--borde); }
+.agenda-canceladas-detalle { display: grid; width: 100%; min-height: 56px; grid-template-columns: minmax(0, 1fr) auto auto; gap: 9px; align-items: center; border: 0; padding: 10px 3px; background: transparent; color: var(--texto); text-align: start; }
+.agenda-canceladas-detalle:hover { background: var(--superficie-suave); }
+.agenda-canceladas-detalle > span:first-child { display: grid; gap: 3px; overflow-wrap: anywhere; }
+.agenda-canceladas-detalle small { color: var(--texto-secundario); }
 .agenda-calendario :is(button, input, select):focus-visible { outline: 2px solid var(--acento); outline-offset: 2px; }
 .agenda-calendario .hora-actual { z-index: 6; pointer-events: none; }
 .agenda-calendario .hora-actual[hidden] { display: none; }

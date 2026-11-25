@@ -81,22 +81,24 @@ export function aplicarEfectosAgenda() {
       const grupo = [...raiz.querySelectorAll('[data-agenda-densidad]')].find((x) => x.dataset.grupoDia === guardado.dia && x.dataset.ids === guardado.ids);
       (grupo || raiz.querySelector('[data-agenda-vista="week"], [data-agenda-vista-demo="week"]'))?.focus({ preventScroll: true });
     }
-    const tarjetas = [...raiz.querySelectorAll('.calendario-evento[data-agenda-cita], .calendario-evento[data-cita]')];
-    const id = (tarjeta) => Number(tarjeta.dataset.agendaCita || tarjeta.dataset.cita);
+    const tarjetas = [...raiz.querySelectorAll('.calendario-evento[data-agenda-cita], .calendario-evento[data-cita], [data-agenda-canceladas]')];
+    const ids = (tarjeta) => (tarjeta.dataset.agendaCanceladasIds || tarjeta.dataset.agendaCita || tarjeta.dataset.cita).split(',').map(Number);
+    const contiene = (tarjeta, buscados) => ids(tarjeta).some((id) => buscados.includes(id));
     if (pendiente && tarjetas.length) {
-      const seleccionado = tarjetas.filter((tarjeta) => pendiente.ids.includes(id(tarjeta)));
+      const seleccionado = tarjetas.filter((tarjeta) => contiene(tarjeta, pendiente.ids));
       if (seleccionado.length) {
         const desplazamiento = contenedorDesplazable();
         if (desplazamiento) { const contenedor = seleccionado[0].getBoundingClientRect(); desplazamiento.scrollLeft += contenedor.left - desplazamiento.getBoundingClientRect().left - 70; }
         window.scrollTo({ top: window.scrollY + seleccionado[0].getBoundingClientRect().top - limiteSuperiorAgenda(), behavior: 'instant' });
         seleccionado[0].focus({ preventScroll: true });
         const anuncio = raiz.querySelector('[data-agenda-anuncio]');
-        if (anuncio) anuncio.textContent = `${seleccionado.length} citas en el tramo seleccionado`;
+        const visibles = new Set(seleccionado.flatMap(ids).filter((id) => pendiente.ids.includes(id)));
+        if (anuncio) anuncio.textContent = `${visibles.size} citas en el tramo seleccionado`;
         resaltado = { ids: pendiente.ids, hasta: Date.now() + 2200 }; pendiente = null;
       }
     }
     if (resaltado && resaltado.hasta > Date.now()) {
-      for (const tarjeta of tarjetas.filter((tarjeta) => resaltado.ids.includes(id(tarjeta)))) {
+      for (const tarjeta of tarjetas.filter((tarjeta) => contiene(tarjeta, resaltado.ids))) {
         tarjeta.classList.add('agenda-resaltado');
         setTimeout(() => tarjeta.classList.remove('agenda-resaltado'), resaltado.hasta - Date.now());
       }
