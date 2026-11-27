@@ -69,6 +69,8 @@ fieldset:disabled .portal-opcion, fieldset:disabled .portal-horario { opacity: .
 .portal-campo-contacto { margin-block: 20px; }
 .portal-campo-contacto label { display: block; font-weight: 600; margin-bottom: 8px; }
 .portal-campo-contacto input { min-height: 48px; }
+.portal-campo-contacto .portal-contacto-autorizacion { display: flex; align-items: center; gap: 10px; min-height: 48px; }
+.portal-contacto-autorizacion input[type='checkbox'] { width: 18px; height: 18px; min-height: 18px; margin: 0; flex: none; }
 /* Tamaño de escritura que evita zoom automático en teléfonos; foco explícito
    para teclado en ambos temas sin cambiar los tokens de la marca. */
 .portal-publico .form-control { font-size: 16px; min-width: 0; max-width: 100%; }
