@@ -2,7 +2,8 @@ import { api, usuarioActual } from '../../backend.js';
 import { fechaIso, formatearFecha, listarRegistros } from '../../../shared/aplicacion.datos.js';
 import { escaparHtml, renderEncabezadoPagina, renderEstadoVacio } from '../../../shared/interfaz.componentes.js';
 import { coincideCorteReporte, coincidenFiltrosReporte, LIMITE_REPORTE, reunirFilasParaImpresion, validarPaginaReporte } from './reportes.corte.js';
-import { renderFilasReporte, renderIndicadoresReporte } from './reportes.resultados.js';
+import { renderFilasReporte } from './reportes.resultados.js';
+import { renderIndicadoresReporte } from '../../../shared/screens/reportes/reportes.indicadores.js';
 import './reportes.estilos.css';
 
 const estados = new WeakMap();
@@ -33,7 +34,7 @@ export function renderReportesConectados() {
       <button type="submit" class="btn btn-primary">Generar reporte</button>
     </form>
     <div class="reportes-barra">
-      <div role="status" class="reportes-estado"></div>
+      <div><div role="status" class="reportes-estado"></div><div class="reportes-meta"></div></div>
       <div class="reportes-acciones">
         <button type="button" class="btn btn-light" data-reporte="preparar" disabled>Preparar impresión</button>
         <button type="button" class="btn btn-primary" data-reporte="imprimir" disabled>Imprimir reporte</button>
@@ -71,6 +72,7 @@ function limpiarCorte(vista, estado) {
   estado.corte = estado.resumen = estado.pagina = estado.completas = null;
   estado.ocupado = false;
   vista.querySelector('.reportes-resultado').replaceChildren();
+  vista.querySelector('.reportes-meta').replaceChildren();
   vista.classList.remove('reporte-listo');
 }
 
@@ -118,10 +120,10 @@ function renderPagina(vista, estado, enfocar = false) {
 
 function renderResultado(vista, estado, filtrosAplicados) {
   const { corte, resumen } = estado;
-  vista.querySelector('.reportes-resultado').innerHTML = `${renderCabeceraImpresion(corte, filtrosAplicados)}<div class="reportes-corte">
-    <h2 class="reportes-etiqueta">Reporte de citas</h2>${detalleCorte(corte)}
+  vista.querySelector('.reportes-meta').innerHTML = detalleCorte(corte);
+  vista.querySelector('.reportes-resultado').innerHTML = `${renderCabeceraImpresion(corte, filtrosAplicados)}
     ${resumen.totalCitas === 0 ? '<p>No hay citas para estos filtros.</p>' : ''}
-    </div>${renderIndicadoresReporte(resumen)}<div class="reportes-pagina"></div><div class="reportes-impresion"></div>`;
+    ${renderIndicadoresReporte(resumen)}<div class="reportes-pagina"></div><div class="reportes-impresion"></div>`;
   renderPagina(vista, estado);
 }
 

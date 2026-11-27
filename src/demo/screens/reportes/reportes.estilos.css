@@ -15,19 +15,12 @@
   margin-top: 8px;
   font-size: 13px;
 }
-.reportes-tablas {
-  display: grid;
-  grid-template-columns: 1.2fr 1fr;
-  gap: 22px;
-}
-.reportes-tablas .tabla-app {
-  min-width: 340px;
-}
-.reportes-tablas .tabla-app td,
-.reportes-tablas .tabla-app th {
-  padding-left: 20px;
-  padding-right: 20px;
-}
 .reportes-encabezado-impresion {
   display: none;
+}
+.reportes-periodo-demo { color: var(--texto-secundario); }
+@media print {
+  .reportes-periodo-demo { display: none; }
+  #reportes-imprimible .reportes-evolucion { break-inside: auto; }
+  #reportes-imprimible .reportes-tabla { break-inside: auto; }
 }

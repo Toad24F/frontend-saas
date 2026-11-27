@@ -52,55 +52,16 @@ html[data-theme='dark'] .reportes-conectados .reportes-filtros select {
   margin-block: .75rem;
 }
 
-.reportes-conectados :is(.reportes-corte, .reportes-error, .reportes-tabla) {
+.reportes-conectados :is(.reportes-error, .reportes-pagina, .reportes-impresion) {
   margin-block-end: 1rem;
 }
-
 .reportes-error {
   font-weight: 650;
 }
-
-.reportes-etiqueta {
-  font-size: .95rem;
-  margin: 0;
-}
-
-.reportes-indicadores, .reportes-tabla {
-  font-variant-numeric: tabular-nums;
-}
-
-.reportes-indicadores .tarjeta-indicador {
-  min-width: 0;
-  overflow-wrap: anywhere;
-}
-
-.reportes-indicadores .tarjeta-indicador small {
-  display: block;
-  margin-block-start: .25rem;
-  color: var(--texto-secundario);
-}
-
-.reportes-desgloses {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  column-gap: 1rem;
-}
-
-.reportes-tabla {
-  min-width: 0;
-  overflow: hidden;
-}
-
-.reportes-tabla .tabla-app {
-  width: 100%;
-}
-
-.reportes-tabla :is(th, td) {
+.reportes-meta p { margin: 0; }
+.reportes-estado { color: var(--texto-secundario); font-size: 13px; }
+.reportes-conectados .reportes-tabla :is(th, td) {
   min-width: 6rem;
-}
-
-.reportes-tabla-vacia {
-  padding: 0 1.25rem;
 }
 
 .reportes-cabecera-impresion,
@@ -114,9 +75,10 @@ html[data-theme='dark'] .reportes-conectados .reportes-filtros select {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .reportes-desgloses {
-    grid-template-columns: minmax(0, 1fr);
-  }
+}
+
+@media screen and (min-width: 1280px) {
+  .reportes-conectados .reportes-filtros { grid-template-columns: repeat(6, minmax(0, 1fr)) auto; gap: 12px; }
 }
 
 /* El menú nativo y el botón imprimen la misma vista. Sin colección verificada solo sale el aviso. */
@@ -134,7 +96,7 @@ html[data-theme='dark'] .reportes-conectados .reportes-filtros select {
   }
 
   .reportes-conectados:not(.reporte-listo) .reportes-resultado,
-  .reportes-conectados :is(.reportes-filtros, .reportes-corte, .reportes-barra, .reportes-error, .reportes-pagina) {
+  .reportes-conectados :is(.reportes-filtros, .reportes-barra, .reportes-error, .reportes-pagina) {
     display: none !important;
   }
 
@@ -203,9 +165,7 @@ html[data-theme='dark'] .reportes-conectados .reportes-filtros select {
     font-size: 10pt;
   }
 
-  .reportes-conectados .reportes-desgloses {
-    display: block;
-  }
+  .reportes-conectados .reportes-desgloses .reportes-tabla { margin-block-end: 2mm; }
 
   /* Permitir que la tabla se divida, repetir columnas y mantener cada fila en una hoja. */
   .reportes-conectados :is(.reportes-tabla, .reportes-tabla .table-responsive) {

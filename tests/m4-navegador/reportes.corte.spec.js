@@ -46,24 +46,24 @@ async function prepararReportes(pagina, tema = 'light') {
     return ruta.fulfill({ json: { ...corte, totalCitas: control.total,
       estados: control.total ? estados : Object.fromEntries(Object.keys(estados).map((estado) => [estado, 0])),
       origen: { manual: { cantidad: control.total ? 88 : 0, porcentaje: control.total ? 87.13 : null }, portal_publico: { cantidad: control.total ? 13 : 0, porcentaje: control.total ? 12.87 : null } },
-      evolucion: control.total ? [{ inicioPeriodo: '2026-11-16', totalCitas: 101, estados }] : [],
-      serviciosSolicitados: control.total ? [{ servicioId: 1, nombres: ['Consulta <histórica>'], cantidad: 101 }] : [],
+      evolucion: control.total ? [{ inicioPeriodo: corte.filtros.agrupacion === 'mes' ? '2026-11-01' : '2026-11-16', totalCitas: 101, estados }] : [],
+      serviciosSolicitados: control.total ? control.serviciosSolicitados ?? [{ servicioId: 1, nombres: ['Consulta <histórica>'], cantidad: 101 }] : [],
       tasaInasistencia: control.total ? 9.09 : null, tasaCancelacion: control.total ? 9.9 : null,
       denominadoresTasas: { inasistencia: control.total ? 11 : 0, cancelacion: control.total },
       pasadasSinResultado: control.total ? 2 : 0, cancelacionesAutomaticas: control.total ? 3 : 0,
       ingresosEstimados: control.total ? { ...estimacion,
-        porServicio: [{ ...estimacion, servicioId: 4, nombres: ['Consulta <histórica>'] }],
-        porSucursal: [{ ...estimacion, sucursalId: 3, nombres: ['Centro histórico'] }],
+        porServicio: control.ingresosPorServicio ?? [{ ...estimacion, servicioId: 4, nombres: ['Consulta <histórica>'] }],
+        porSucursal: control.ingresosPorSucursal ?? [{ ...estimacion, sucursalId: 3, nombres: ['Centro histórico'] }],
       } : { subtotalConocido: '0.00', sinCosto: 0, incompleta: false, porServicio: [], porSucursal: [] },
     } });
   });
   return { control, solicitudes };
 }
 
-async function generar(pagina) {
+async function generar(pagina, agrupacion = 'mes') {
   await pagina.getByLabel('Desde').fill('2026-11-01');
   await pagina.getByLabel('Hasta').fill('2026-11-23');
-  await pagina.getByLabel('Agrupación').selectOption('mes');
+  await pagina.getByLabel('Agrupación').selectOption(agrupacion);
   await pagina.getByRole('button', { name: 'Generar reporte' }).click();
 }
 
@@ -78,12 +78,13 @@ test('genera el corte y distingue carga, error y cero citas', async ({ page: pag
   await expect(pagina.getByText('Generando reporte…')).toBeVisible();
   continuar();
   await expect(pagina.getByRole('alert')).toContainText('No se pudo generar el reporte');
-  await expect(pagina.getByText('Atendidas')).toHaveCount(0);
+  await expect(pagina.getByText('Citas atendidas', { exact: true })).toHaveCount(0);
   control.fallo = null;
   control.total = 0;
   await generar(pagina);
   await expect(pagina.getByText('No hay citas para estos filtros.')).toBeVisible();
-  await expect(pagina.locator('.reportes-indicadores').getByText('Sin datos', { exact: true })).toHaveCount(2);
+  await expect(pagina.locator('.reportes-indicadores').getByText('Sin datos', { exact: true })).toHaveCount(1);
+  await expect(pagina.locator('.reportes-barra-origen, .reportes-aviso-pasadas')).toHaveCount(0);
   expect(control.corte.filtros).toEqual({ desde: '2026-11-01', hasta: '2026-11-23',
     agrupacion: 'mes', sucursalId: null, personalId: null, servicioId: null });
   await expect(pagina.getByText('Datos de demostración')).toHaveCount(0);
@@ -94,15 +95,15 @@ test('muestra indicadores y conserva el corte al paginar hasta que caduca', asyn
   await pagina.setViewportSize({ width: 390, height: 844 });
   await pagina.goto('/admin/reportes');
   await generar(pagina);
-  for (const etiqueta of ['Atendidas', 'Canceladas', 'No asistencias', 'Ingresos estimados', 'Tasa de inasistencia',
-    'Tasa de cancelación', 'Pasadas sin resultado', 'Origen de reservas', 'Servicios más solicitados',
-    'Evolución mensual', 'Cancelaciones automáticas']) {
+  for (const etiqueta of ['Citas del periodo', 'Citas atendidas', 'Ingresos estimados', 'Tasa de inasistencia',
+    'Origen de las citas', 'Citas por servicio', 'Evolución mensual']) {
     await expect(pagina.getByText(etiqueta, { exact: true }).first()).toBeVisible();
   }
-  await expect(pagina.getByText('1 de 11')).toBeVisible();
-  await expect(pagina.getByText('10 de 101')).toBeVisible();
+  await expect(pagina.getByText('1 de 11 citas con resultado de asistencia')).toBeVisible();
+  await expect(pagina.getByText('10 canceladas (9.9 %) · 3 automáticas')).toBeVisible();
+  await expect(pagina.getByText('2 citas pasadas sin resultado')).toBeVisible();
   await expect(pagina.getByText(/1 cita sin costo histórico/)).toBeVisible();
-  await expect(pagina.getByRole('region', { name: 'Servicios más solicitados' }).getByText('Consulta <histórica>')).toBeVisible();
+  await expect(pagina.getByRole('region', { name: 'Citas por servicio' }).getByText('Consulta <histórica>')).toBeVisible();
   await pagina.getByRole('button', { name: 'Siguiente' }).click();
   await expect(pagina.getByText('Servicio histórico 101', { exact: true })).toBeVisible();
   expect(solicitudes.at(-1)).toMatchObject({ ruta: '/reportes/cortes/corte-1/filas', numero: 2 });
@@ -115,6 +116,21 @@ test('muestra indicadores y conserva el corte al paginar hasta que caduca', asyn
   await expect(pagina.getByRole('button', { name: 'Preparar impresión' })).toBeDisabled();
   expect(solicitudes.filter(({ metodo }) => metodo === 'POST')).toHaveLength(1);
   expect(await pagina.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+});
+
+test('grafica periodos vacíos y conserva las cifras exactas del corte', async ({ page: pagina }) => {
+  await prepararReportes(pagina);
+  await pagina.goto('/admin/reportes');
+  await generar(pagina, 'semana');
+  const evolucion = pagina.getByRole('region', { name: 'Gráfica de evolución semanal' });
+  await expect(evolucion.locator('.reportes-columna strong')).toHaveText(['0', '0', '0', '101', '0']);
+  const origen = pagina.getByRole('region', { name: 'Origen de las citas' });
+  await expect(origen.getByText('88 · 87.13 %')).toBeVisible();
+  await expect(origen.getByText('13 · 12.87 %')).toBeVisible();
+  const tabla = pagina.getByRole('region', { name: 'Desglose por estado' });
+  await expect(tabla).toBeHidden();
+  await pagina.getByText('Ver desglose por estado', { exact: true }).click();
+  await expect(tabla.getByRole('cell', { name: '101', exact: true })).toBeVisible();
 });
 
 test('habilita imprimir solo después de reunir todas las filas del corte', async ({ page: pagina }) => {
@@ -136,6 +152,10 @@ test('habilita imprimir solo después de reunir todas las filas del corte', asyn
   expect(await pagina.evaluate(() => window.impresiones)).toBe(1);
   expect(solicitudes.filter(({ ruta }) => ruta.endsWith('/filas')).every(({ ruta }) => ruta.includes('/corte-1/'))).toBe(true);
   await pagina.emulateMedia({ media: 'print' });
+  await expect(pagina.getByRole('region', { name: 'Desglose por estado' })).toBeVisible();
+  for (const titulo of ['Citas por servicio', 'Ingresos estimados por sucursal', 'Ingresos estimados por servicio']) {
+    await expect(pagina.getByRole('heading', { name: titulo })).toBeVisible();
+  }
   await expect(pagina.getByText('Servicio histórico 101', { exact: true })).toBeVisible();
   await expect(pagina.locator('.reportes-coleccion-impresion tbody tr')).toHaveCount(101);
 });
@@ -146,6 +166,45 @@ test('Recepción no puede navegar a reportes conectados', async ({ page: pagina 
   await expect(pagina).toHaveURL(/\/admin\/agenda$/);
   await expect(pagina.getByRole('link', { name: 'Reportes', exact: true })).toHaveCount(0);
   expect(solicitudesObservadas.some((solicitud) => solicitud.includes('/reportes'))).toBe(false);
+});
+
+test('los desgloses largos se desplazan en escritorio y aparecen completos en móvil e impresión', async ({ page: pagina }) => {
+  const { control } = await prepararReportes(pagina, 'dark');
+  const registros = Array.from({ length: 10 }, (_, indice) => indice + 1);
+  const importe = (numero) => ({ subtotalConocido: numero === 10 ? '125.50' : '125.00', sinCosto: Number(numero === 10), incompleta: numero === 10 });
+  control.serviciosSolicitados = registros.map((numero) => ({ servicioId: numero, nombres: [`Servicio ${numero}`], cantidad: numero === 1 ? 11 : 10 }));
+  control.ingresosPorServicio = registros.map((numero) => ({ ...importe(numero), servicioId: numero, nombres: [`Servicio ${numero}`] }));
+  control.ingresosPorSucursal = registros.map((numero) => ({ ...importe(numero), sucursalId: numero, nombres: [`Sucursal ${numero}`] }));
+  await pagina.setViewportSize({ width: 1366, height: 900 });
+  await pagina.goto('/admin/reportes');
+  await generar(pagina);
+
+  const desgloses = pagina.locator('.reportes-desgloses');
+  const titulos = ['Citas por servicio', 'Ingresos estimados por sucursal', 'Ingresos estimados por servicio'];
+  for (const titulo of titulos) {
+    const tabla = desgloses.getByRole('region', { name: titulo });
+    await expect(tabla.locator('tbody tr')).toHaveCount(10);
+    expect(await tabla.evaluate((elemento) => elemento.scrollHeight > elemento.clientHeight)).toBe(true);
+    await tabla.focus();
+    await pagina.keyboard.press('End');
+    await expect.poll(() => tabla.evaluate((elemento) => elemento.scrollHeight - elemento.clientHeight - elemento.scrollTop)).toBeLessThanOrEqual(1);
+    const encabezado = tabla.getByRole('columnheader').first();
+    expect(await encabezado.evaluate((celda) => Math.abs(celda.getBoundingClientRect().top - celda.closest('.table-responsive').getBoundingClientRect().top))).toBeLessThanOrEqual(1);
+  }
+
+  await pagina.setViewportSize({ width: 390, height: 844 });
+  for (const titulo of titulos) {
+    const tabla = desgloses.getByRole('region', { name: titulo });
+    expect(await tabla.evaluate((elemento) => elemento.scrollHeight - elemento.clientHeight)).toBe(0);
+  }
+  await pagina.getByRole('button', { name: 'Preparar impresión' }).click();
+  await expect(pagina.getByRole('button', { name: 'Imprimir reporte' })).toBeEnabled();
+  await pagina.emulateMedia({ media: 'print' });
+  for (const titulo of titulos) {
+    const tabla = desgloses.getByRole('region', { name: titulo });
+    await expect(tabla.locator('tbody tr').last()).toBeVisible();
+    await expect(tabla).toHaveCSS('max-height', 'none');
+  }
 });
 
 for (const [ancho, tema] of [[1366, 'light'], [1366, 'dark'], [390, 'light'], [390, 'dark']]) {
@@ -163,6 +222,17 @@ for (const [ancho, tema] of [[1366, 'light'], [1366, 'dark'], [390, 'light'], [3
     expect(await pagina.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(1);
     if (ancho === 390) await expect(pagina.getByRole('navigation', { name: 'Navegación inferior' })).toBeVisible();
     await pagina.screenshot({ path: infoPrueba.outputPath('reportes.png'), animations: 'disabled' });
+    const [citas, porSucursal, porServicio] = await pagina.locator('.reportes-desgloses .reportes-tabla').evaluateAll((tablas) =>
+      tablas.map((tabla) => tabla.getBoundingClientRect().toJSON()));
+    expect(porServicio.x).toBe(porSucursal.x);
+    expect(porServicio.top - porSucursal.bottom).toBe(16);
+    if (ancho === 390) {
+      expect(porSucursal.x).toBe(citas.x);
+      expect(porSucursal.top - citas.bottom).toBe(16);
+    } else {
+      expect(porSucursal.top).toBe(citas.top);
+      expect(porSucursal.left - citas.right).toBe(16);
+    }
   });
 }
 

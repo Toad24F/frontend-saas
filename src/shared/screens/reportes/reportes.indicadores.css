@@ -1,0 +1,77 @@
+.reportes-indicadores { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.reportes-indicadores .tarjeta-indicador { min-width: 0; min-height: 0; padding: 15px 16px; }
+.reportes-indicadores .reportes-etiqueta { margin: 0; font-size: 14px; }
+.reportes-indicadores .indicador-valor { display: block; margin: 8px 0 0; font-size: clamp(21px, 2.5vw, 32px); font-variant-numeric: tabular-nums; }
+.reportes-indicadores .tarjeta-indicador { overflow-wrap: anywhere; }
+.reportes-indicadores small { display: block; margin-top: 3px; color: var(--texto-secundario); }
+.reportes-contexto { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 18px; margin: 12px 0 16px; font-size: 13px; color: var(--texto-secundario); }
+.reportes-contexto p { margin: 0; }
+.reportes-aviso-pasadas { display: inline-flex; align-items: center; gap: 6px; border-radius: 6px; padding: 4px 8px; color: #765108; background: #fff4d9; }
+html[data-theme='dark'] .reportes-aviso-pasadas { color: #f5d68a; background: #493c25; }
+.reportes-aviso-pasadas .icono { width: 15px; height: 15px; }
+
+.reportes-graficas { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 16px; margin-bottom: 16px; }
+.reportes-graficas > section { min-width: 0; }
+.reportes-evolucion { position: relative; --reportes-color-evolucion: #7189bc; }
+.reportes-evolucion > .encabezado-seccion { padding-inline-end: 185px; }
+.reportes-evolucion-desplazamiento { overflow-x: auto; margin: 0 16px 12px; }
+.reportes-grafica-evolucion { display: flex; gap: 12px; min-width: max-content; margin: 0; padding: 24px 8px 5px; list-style: none; }
+.reportes-columna { display: grid; flex: 1 0 45px; justify-items: stretch; text-align: center; gap: 5px; color: var(--texto-secundario); font-size: 12px; }
+.reportes-carril { position: relative; display: flex; justify-content: center; align-items: flex-end; height: 114px; border-bottom: 1px solid var(--borde-fuerte, var(--borde)); }
+.reportes-carril::before { position: absolute; inset: 0 -6px; content: ''; background: repeating-linear-gradient(to top, transparent 0, transparent calc(25% - 1px), var(--borde) calc(25% - 1px), var(--borde) 25%); pointer-events: none; }
+.reportes-barra-evolucion { position: relative; width: min(65%, 54px); border-radius: 5px 5px 0 0; background: var(--reportes-color-evolucion); }
+.reportes-barra-evolucion strong { position: absolute; inset-inline: 0; bottom: calc(100% + 3px); display: grid; justify-content: center; color: var(--texto); font-variant-numeric: tabular-nums; }
+.reportes-evolucion-detalle summary { position: absolute; top: 20px; right: 16px; color: var(--acento-oscuro); font-size: 13px; cursor: pointer; }
+.reportes-evolucion-detalle .reportes-tabla { margin: 0; border: 0; border-top: 1px solid var(--borde); border-radius: 0; box-shadow: none; }
+
+.reportes-origen { --reportes-color-personal: #7189bc; --reportes-color-portal: #a98ec2; }
+html[data-theme='dark'] .reportes-evolucion { --reportes-color-evolucion: #8da6db; }
+html[data-theme='dark'] .reportes-origen { --reportes-color-personal: #8da6db; --reportes-color-portal: #baa2d8; }
+.reportes-barra-origen { display: flex; height: 28px; overflow: hidden; margin: 16px 20px 10px; border-radius: 7px; }
+.reportes-barra-origen span:first-child, .reportes-origen-leyenda > div:first-child dt span { background: var(--reportes-color-personal); }
+.reportes-barra-origen span:last-child, .reportes-origen-leyenda > div:last-child dt span { background: var(--reportes-color-portal); }
+.reportes-origen-leyenda { margin: 0 20px 16px; font-size: 13px; }
+.reportes-origen-leyenda > div { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding-block: 7px; }
+.reportes-origen-leyenda > div + div { border-top: 1px solid var(--borde); }
+.reportes-origen-leyenda dt { display: flex; align-items: center; gap: 6px; font-weight: 600; }
+.reportes-origen-leyenda dt span { width: 9px; height: 9px; border-radius: 50%; }
+.reportes-origen-leyenda dd { margin: 0; font-variant-numeric: tabular-nums; }
+
+.reportes-desgloses { margin-bottom: 16px; }
+.reportes-tabla { min-width: 0; overflow: hidden; }
+.reportes-tabla .tabla-app { width: 100%; }
+.reportes-desgloses .reportes-tabla .tabla-app { min-width: 0; }
+.reportes-desgloses .reportes-tabla .tabla-app :is(th, td) {
+  min-width: 0;
+  padding-inline: clamp(8px, 1.4vw, 22px);
+  overflow-wrap: anywhere;
+}
+.reportes-tabla-vacia { padding: 0 1.25rem; }
+
+@media screen and (max-width: 1050px) { .reportes-indicadores { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media screen {
+  .reportes-desgloses, .reportes-desgloses-ingresos { display: grid; gap: 16px; }
+  .reportes-desgloses { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
+  .reportes-desgloses-ingresos { grid-template-columns: minmax(0, 1fr); }
+}
+@media screen and (min-width: 768px) {
+  .reportes-desgloses .table-responsive { max-height: 27.5rem; overflow-y: auto; }
+  .reportes-desgloses-ingresos .table-responsive { max-height: 12rem; }
+  .reportes-desgloses .tabla-app thead th { position: sticky; top: 0; z-index: 1; }
+}
+@media screen and (max-width: 767px) {
+  .reportes-graficas, .reportes-desgloses { grid-template-columns: minmax(0, 1fr); }
+  .reportes-evolucion > .encabezado-seccion { padding-inline-end: 16px; }
+  .reportes-evolucion-detalle summary { position: static; margin: 0 16px 12px; padding: 8px 0; }
+}
+@media print {
+  .reportes-graficas { display: block; }
+  .reportes-evolucion, .reportes-origen, .reportes-contexto { margin-bottom: 3mm; }
+  .reportes-graficas > .superficie { background: #fff !important; border-color: #aaa; box-shadow: none; }
+  .reportes-graficas :is(h2, dt, dd) { color: #202020 !important; }
+  .reportes-evolucion .encabezado-seccion { padding: 2mm 0; }
+  .reportes-evolucion-visual, .reportes-evolucion-detalle summary, .reportes-barra-origen, .reportes-origen-leyenda dt span { display: none; }
+  .reportes-evolucion-detalle::details-content { content-visibility: visible !important; }
+  .reportes-origen-leyenda { margin-inline: 0; }
+  .reportes-contexto, .reportes-aviso-pasadas { color: #202020 !important; background: transparent !important; }
+}

@@ -70,12 +70,12 @@ test('Reportes valida el rango, filtra por sucursal y conserva la vista de impre
   await expect(desde).toHaveValue('2000-01-01');
   await expect(hasta).toHaveValue('2000-01-02');
   await expect(sucursal).toHaveValue('2');
-  await expect(pagina.locator('#reportes-imprimible .indicador-valor')).toHaveText(['0', '0', '0', /\$\s*0/]);
+  await expect(pagina.locator('#reportes-imprimible .indicador-valor')).toHaveText(['0', '0', 'Sin datos', /\$\s*0/]);
   await pagina.getByRole('button', { name: 'Guardar como PDF' }).click();
   await expect(pagina.locator('body')).toHaveAttribute('data-impresion-solicitada', 'true');
   await pagina.emulateMedia({ media: 'print' });
   await expect(pagina.getByRole('heading', { name: /Reporte de citas/ })).toBeVisible();
-  await expect(pagina.getByText(/Datos de demostración/)).toBeVisible();
+  await expect(pagina.locator('.reportes-encabezado-impresion').getByText(/Datos de demostración/)).toBeVisible();
   await expect(aplicar).toBeHidden();
   expect(actividad).toEqual({ solicitudes: [], errores: [] });
 });
