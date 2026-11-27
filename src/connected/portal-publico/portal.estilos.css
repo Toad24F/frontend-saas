@@ -145,7 +145,7 @@ html[data-theme='light'] .portal-resultado-estado { background: #fff1ce; color: 
 .portal-opciones:disabled .portal-opcion:hover { transform: none; border-color: var(--borde); background: var(--superficie); }
 .portal-opcion:focus-within { outline: 3px solid var(--acento); outline-offset: 2px; }
 .portal-fecha { max-width: 300px; }
-.portal-calendario { width: min(100%, 440px); padding: 16px; margin: 12px 0 18px; border: 1px solid var(--borde); border-radius: 12px; background: var(--superficie); }
+.portal-calendario { width: 100%; padding: 16px; margin: 12px 0 18px; border: 1px solid var(--borde); border-radius: 12px; background: var(--superficie); }
 .portal-calendario-cabecera { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .portal-calendario-cabecera strong { font-size: 13px; line-height: 1.4; }
 .portal-calendario-cabecera > div { display: flex; gap: 5px; flex: none; }
@@ -157,13 +157,6 @@ html[data-theme='light'] .portal-resultado-estado { background: #fff1ce; color: 
 .portal-calendario-dia:hover:not(:disabled) { border-color: var(--acento); background: color-mix(in srgb, var(--acento) 10%, var(--superficie)); }
 .portal-calendario-dia.seleccionado:not(:disabled) { border-color: var(--acento); color: var(--acento); background: color-mix(in srgb, var(--acento) 18%, var(--superficie)); font-weight: 700; }
 .portal-calendario-dia:disabled { color: var(--texto-secundario); background: color-mix(in srgb, var(--texto-secundario) 7%, var(--superficie)); opacity: .48; cursor: not-allowed; }
-.portal-cinta-fechas { display: flex; gap: 9px; width: 100%; min-width: 0; overflow-x: auto; padding: 4px 2px 9px; scrollbar-width: thin; }
-.portal-boton-fecha { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 9px; flex: 0 0 72px; min-height: 105px; padding: 12px 9px; border: 1px solid var(--borde); border-radius: 9px; color: var(--texto-secundario); background: var(--superficie); transition: border-color 180ms ease, background-color 180ms ease, color 180ms ease; }
-.portal-boton-fecha span, .portal-boton-fecha small { color: var(--texto-secundario); font-size: 11px; text-transform: capitalize; }
-.portal-boton-fecha strong { color: var(--texto); font-size: 20px; font-weight: 500; line-height: 1; font-variant-numeric: tabular-nums; }
-.portal-boton-fecha:hover { border-color: var(--acento); background: color-mix(in srgb, var(--acento) 10%, var(--superficie)); }
-.portal-boton-fecha.seleccionado { border-color: var(--acento); background: color-mix(in srgb, var(--acento) 22%, var(--superficie)); }
-.portal-boton-fecha.seleccionado strong { color: var(--acento); }
 .portal-horarios { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
 .portal-horario { position: relative; border-radius: 9px; font-variant-numeric: tabular-nums; }
 .portal-horario input { position: absolute; width: 1px; height: 1px; margin: 0; opacity: 0; }

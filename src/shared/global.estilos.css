@@ -1941,9 +1941,6 @@ html[data-theme='dark'] .barra-lateral .marca .logo-marca-claro { display: none;
   .reserva-demo-cuadricula-horarios {
     grid-template-columns: repeat(4, 1fr);
   }
-  .reserva-demo-fecha {
-    min-width: 59px;
-  }
   .portal-demo-pie {
     padding: 0 20px 25px;
     font-size: 10px;

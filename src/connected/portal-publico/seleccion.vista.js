@@ -9,16 +9,6 @@ const titulos = ['Elige un servicio', 'Elige una sucursal', 'Elige un profesiona
 const claves = ['servicioId', 'sucursalId', 'personalId'];
 const listas = ['servicios', 'sucursales', 'profesionales'];
 const monedaMostrada = (valor) => new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(valor);
-function cintaFechas(seleccionado, fechasDisponibles = []) {
-  if (!fechaValida(seleccionado)) return '';
-  return `<div class="portal-cinta-fechas" aria-label="Días con horarios disponibles">${fechasDisponibles.map((valor) => {
-    const dia = new Date(`${valor}T12:00:00Z`);
-    const diaAbreviado = new Intl.DateTimeFormat('es-MX', { timeZone: 'UTC', weekday: 'short' }).format(dia);
-    const mesAbreviado = new Intl.DateTimeFormat('es-MX', { timeZone: 'UTC', month: 'short' }).format(dia);
-    return `<button class="portal-boton-fecha ${valor === seleccionado ? 'seleccionado' : ''}" type="button" data-seleccion-fecha="${valor}" aria-pressed="${valor === seleccionado}" aria-label="Consultar ${escaparTextoPortal(etiquetaFecha(valor))}"><span>${escaparTextoPortal(diaAbreviado)}</span><strong>${dia.getUTCDate()}</strong><small>${escaparTextoPortal(mesAbreviado)}</small></button>`;
-  }).join('')}</div>`;
-}
-
 function renderCalendarioDisponibilidad(estado) {
   const rango = estado.rangoFechas;
   if (!rango) return '';
@@ -63,7 +53,6 @@ export function renderSeleccion(estado) {
     contenido = `<p class="portal-fecha-etiqueta">Fecha de tu cita${fechaValida(seleccion.fecha) ? `: ${escaparTextoPortal(etiquetaFecha(seleccion.fecha))}` : ''}</p>
       <p id="portal-zona" class="portal-zona">Horarios de la sucursal · ${escaparTextoPortal(zona)}</p>
       ${renderCalendarioDisponibilidad(estado)}
-      ${cintaFechas(seleccion.fecha, estado.fechasDisponibles)}
       <h3 class="portal-dia">Horarios disponibles${fechaValida(seleccion.fecha) ? ` para ${escaparTextoPortal(etiquetaFecha(seleccion.fecha))}` : ''}</h3>
       ${ocupado ? renderEsqueletoPortal(true) : ''}
       ${utilizable ? `<div class="portal-periodos" role="group" aria-label="Filtrar horarios por parte del día">${[['todos', 'Todos'], ['manana', 'Mañana'], ['tarde', 'Tarde']].map(([valor, etiqueta]) => `<button class="btn btn-light" type="button" data-portal-periodo="${valor}" aria-pressed="${(estado.periodo || 'todos') === valor}">${etiqueta} (${horariosDelPeriodo(estado.horarios, valor).length})</button>`).join('')}</div>` : ''}
@@ -121,7 +110,6 @@ export function montarSeleccion(contenedor, controlador, renderVista = renderSel
     else if (evento.target.closest('[data-seleccion-fecha]')) void controlador.seleccionarFecha(evento.target.closest('[data-seleccion-fecha]').dataset.seleccionFecha);
   });
   let ultimoPaso;
-  let ultimaFechaSeleccionada;
   return (estado) => {
     const activo = document.activeElement;
     const dentro = contenedor.contains(activo);
@@ -137,21 +125,9 @@ export function montarSeleccion(contenedor, controlador, renderVista = renderSel
     const clavePaso = `${estado.fase}:${estado.paso}`;
     const cambioPaso = ultimoPaso !== clavePaso;
     const rango = dentro && typeof activo.selectionStart === 'number' ? [activo.selectionStart, activo.selectionEnd] : null;
-    const cintaFechasAnterior = contenido.querySelector('.portal-cinta-fechas');
-    const desplazamientoFechas = cintaFechasAnterior?.scrollLeft || 0;
-    const fechaSeleccionadaPrevia = cintaFechasAnterior?.querySelector('.portal-boton-fecha.seleccionado')?.dataset.seleccionFecha;
     contenido.innerHTML = renderVista(estado);
     const resumen = contenido.querySelector('.portal-resumen-desplegable');
     if (resumen && resumenEstabaAbierto !== undefined) resumen.open = resumenEstabaAbierto;
-    const cintaFechas = contenido.querySelector('.portal-cinta-fechas');
-    if (cintaFechas) {
-      const fechaElegida = cintaFechas.querySelector('.portal-boton-fecha.seleccionado');
-      const primeraFecha = cintaFechas.querySelector('.portal-boton-fecha');
-      if (fechaElegida && primeraFecha && (ultimaFechaSeleccionada !== estado.seleccion?.fecha || fechaSeleccionadaPrevia !== estado.seleccion.fecha)) {
-        const fechaAnterior = fechaElegida.previousElementSibling;
-        cintaFechas.scrollLeft = fechaElegida.offsetLeft - primeraFecha.offsetLeft - (fechaAnterior ? fechaAnterior.offsetWidth + 9 : 0);
-      } else cintaFechas.scrollLeft = desplazamientoFechas;
-    }
     const cinta = contenedor.querySelector('.portal-pasos');
     const pasoActual = cinta?.querySelector('[aria-current="step"]');
     if (pasoActual && cinta.scrollWidth > cinta.clientWidth) {
@@ -173,7 +149,6 @@ export function montarSeleccion(contenedor, controlador, renderVista = renderSel
       else enfocarControlPortal(contenedor.querySelector('#portal-titulo-paso'));
     }
     ultimoPaso = clavePaso;
-    ultimaFechaSeleccionada = estado.seleccion?.fecha;
     const mostrandoOpciones = estado.fase === 'seleccion' && estado.paso < 3 && estado.consulta.estado === 'lista';
     const resultado = mostrandoOpciones ? paginarOpciones(estado.opciones[listas[estado.paso]], estado.paso, estado.filtros?.[estado.paso]) : null;
     anunciar(mostrandoOpciones ? `${resultado.total} opciones encontradas. Página ${resultado.pagina} de ${resultado.paginas}.${estado.pasosAutomaticos?.length ? ' Se seleccionaron automáticamente las etapas con una única opción disponible.' : ''}` : anuncioPortal(estado));

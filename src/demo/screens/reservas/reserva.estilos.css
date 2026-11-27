@@ -428,50 +428,12 @@
   height: 13px;
 }
 .reserva-demo-calendario-ayuda { margin: 0 0 10px; color: var(--texto-secundario); font-size: 12px; }
-.reserva-demo-calendario-cuadricula { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; width: min(100%, 440px); margin-bottom: 20px; padding: 12px; border: 1px solid var(--borde); border-radius: 12px; background: var(--superficie); text-align: center; }
+.reserva-demo-calendario-cuadricula { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; width: 100%; margin-bottom: 20px; padding: 12px; border: 1px solid var(--borde); border-radius: 12px; background: var(--superficie); text-align: center; }
 .reserva-demo-calendario-dia-semana { padding: 7px 0; color: var(--texto-secundario); font-size: 11px; font-weight: 700; }
 .reserva-demo-calendario-dia { min-width: 0; min-height: 42px; padding: 4px; border: 1px solid transparent; border-radius: 8px; color: var(--texto); background: var(--superficie); font-variant-numeric: tabular-nums; }
 .reserva-demo-calendario-dia:hover:not(:disabled) { border-color: var(--acento); background: color-mix(in srgb, var(--acento) 10%, var(--superficie)); }
 .reserva-demo-calendario-dia.seleccionado:not(:disabled) { border-color: var(--acento); color: var(--acento); background: color-mix(in srgb, var(--acento) 18%, var(--superficie)); font-weight: 700; }
 .reserva-demo-calendario-dia:disabled { color: var(--texto-secundario); background: color-mix(in srgb, var(--texto-secundario) 7%, var(--superficie)); opacity: .48; cursor: not-allowed; }
-.reserva-demo-cinta-fechas {
-  display: flex;
-  gap: 9px;
-  overflow-x: auto;
-  padding: 4px 1px 13px;
-}
-.reserva-demo-fecha {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 9px;
-  min-width: 62px;
-  padding: 13px 12px;
-  border: 1px solid #e7ebdf;
-  border-radius: 8px;
-  background: #fff;
-  color: #a0ab93;
-}
-.reserva-demo-fecha > span {
-  text-transform: capitalize;
-  font-size: 11px;
-}
-.reserva-demo-fecha > strong {
-  font-size: 20px;
-  font-weight: 500;
-  color: #818e71;
-}
-.reserva-demo-fecha > small {
-  font-size: 9px;
-}
-.reserva-demo-fecha.seleccionado {
-  border-color: var(--acento);
-  background: #fef5ed;
-  color: #cb9672;
-}
-.reserva-demo-fecha.seleccionado > strong {
-  color: var(--acento);
-}
 .reserva-demo-encabezado-horarios {
   font-size: 14px;
   margin: 24px 0 16px;

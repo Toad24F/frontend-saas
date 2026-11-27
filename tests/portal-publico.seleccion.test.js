@@ -156,7 +156,7 @@ test('T103: fecha real y consulta del mes seleccionado', async () => {
   assert.equal(fechaValida('2026-02-29'), false);
 });
 
-test('la tira muestra los días disponibles del mes sin flechas', async () => {
+test('el calendario mensual muestra los días disponibles sin una tira duplicada', async () => {
   const dias = ['2026-10-20', '2026-10-22', '2026-10-25', '2026-10-28', '2026-10-29',
     '2026-10-30', '2026-10-31', '2026-11-01', '2026-11-02', '2026-11-22'];
   const { controller: controlador, calls: llamadas } = prepararPrueba((ruta, { consulta }) => ruta === 'catalogo' ? catalogo(consulta) : disponibilidad(consulta,
@@ -167,14 +167,14 @@ test('la tira muestra los días disponibles del mes sin flechas', async () => {
   assert.match(html, /data-seleccion-fecha="2026-10-20"/);
   assert.doesNotMatch(html, /data-seleccion-fecha="2026-11-02"/);
   assert.doesNotMatch(html, /data-seleccion-fecha="2026-10-21"/);
-  const tira = html.match(/<div class="portal-cinta-fechas"[\s\S]*?<\/div>/)?.[0];
-  assert.ok(tira);
-  assert.doesNotMatch(tira, /data-rango-fechas/);
+  assert.doesNotMatch(html, /portal-cinta-fechas|portal-boton-fecha/);
+  const calendario = html.match(/<div class="portal-calendario-cuadricula"[\s\S]*?<\/div>/)?.[0];
+  assert.ok(calendario);
   await controlador.seleccionarFecha('2026-10-22');
   html = renderSeleccion(controlador.obtenerEstado());
-  const visible = [...html.matchAll(/class="portal-boton-fecha[^"]*"[^>]*data-seleccion-fecha="([^"]+)"/g)].map((coincidencia) => coincidencia[1]);
-  assert.deepEqual(visible.slice(0, 3), ['2026-10-20', '2026-10-22', '2026-10-25']);
-  assert.equal(visible.length, 7);
+  const calendarioActualizado = html.match(/<div class="portal-calendario-cuadricula"[\s\S]*?<\/div>/)?.[0];
+  const visibles = [...calendarioActualizado.matchAll(/class="portal-calendario-dia[^"]*" type="button" data-seleccion-fecha="([^"]+)"/g)].map((coincidencia) => coincidencia[1]);
+  assert.deepEqual(visibles, ['2026-10-20', '2026-10-22', '2026-10-25', '2026-10-28', '2026-10-29', '2026-10-30', '2026-10-31']);
   await controlador.seleccionarFecha('2026-11-21');
   assert.equal(controlador.obtenerEstado().consulta.estado, 'vacia');
   assert.deepEqual(controlador.obtenerEstado().fechasDisponibles, ['2026-11-01', '2026-11-02', '2026-11-22']);
@@ -215,7 +215,7 @@ test('el calendario conserva el mes al seleccionar y solo cambia al usar las fle
   assert.match(renderSeleccion(controlador.obtenerEstado()), /<strong>octubre de 2026<\/strong>/);
 });
 
-test('al consultar otra fecha la tira sigue visible y el horario se presenta sin radio visible ni aviso duplicado', async () => {
+test('al consultar otra fecha el calendario sigue visible y el horario se presenta sin radio visible ni aviso duplicado', async () => {
   let resolverHorarios;
   let consultasHorarios = 0;
   const { controller: controlador } = prepararPrueba((ruta, { consulta }) => {
@@ -232,7 +232,10 @@ test('al consultar otra fecha la tira sigue visible y el horario se presenta sin
   const pendiente = controlador.seleccionarFecha('2026-10-22');
   assert.equal(controlador.obtenerEstado().consulta.estado, 'cargando');
   assert.deepEqual(controlador.obtenerEstado().fechasDisponibles, ['2026-10-20', '2026-10-22']);
-  assert.match(renderSeleccion(controlador.obtenerEstado()), /data-seleccion-fecha="2026-10-22"/);
+  const htmlPendiente = renderSeleccion(controlador.obtenerEstado());
+  assert.match(htmlPendiente, /class="portal-calendario"/);
+  assert.match(htmlPendiente, /class="portal-calendario-dia seleccionado" type="button" disabled aria-label="jueves, 22 de octubre de 2026, no disponible"/);
+  assert.doesNotMatch(htmlPendiente, /portal-cinta-fechas/);
   resolverHorarios(); await pendiente;
   controlador.elegirHorario('2026-10-22T17:00:00.000Z');
   const html = renderSeleccion(controlador.obtenerEstado());
