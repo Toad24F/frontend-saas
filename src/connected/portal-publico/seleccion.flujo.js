@@ -9,7 +9,12 @@ const campos = ['servicioId', 'sucursalId', 'personalId'];
 const listas = ['servicios', 'sucursales', 'profesionales'];
 const id = (valor) => Number.isSafeInteger(valor) && valor > 0;
 const respuestaInvalida = () => new ErrorPortalPublico('protocol', 'El portal devolvió una respuesta no válida. Reintente la consulta.');
-const sumarDias = (fecha, dias) => new Date(Date.parse(`${fecha}T12:00:00Z`) + dias * 86400000).toISOString().slice(0, 10);
+const inicioMes = (fecha) => `${fecha.slice(0, 7)}-01`;
+const finMes = (fecha) => new Date(Date.UTC(Number(fecha.slice(0, 4)), Number(fecha.slice(5, 7)), 0)).toISOString().slice(0, 10);
+const desplazarMes = (fecha, cantidad) => {
+  const mes = new Date(Date.UTC(Number(fecha.slice(0, 4)), Number(fecha.slice(5, 7)) - 1 + cantidad, 1));
+  return `${mes.toISOString().slice(0, 7)}-01`;
+};
 
 export function crearSeleccionPortal(client, { slug, alCambiar = () => {}, ahora = () => new Date() } = {}) {
   const estado = { fase: 'seleccion', paso: 0,
@@ -111,8 +116,8 @@ export function crearSeleccionPortal(client, { slug, alCambiar = () => {}, ahora
     const disponibilidad = estado.paso === 3;
     const sucursal = estado.opciones.sucursales.find((elemento) => elemento.id === estado.seleccion.sucursalId);
     const hoy = disponibilidad ? fechaLocal(ahora(), sucursal.zonaHoraria) : '';
-    const inicioRango = disponibilidad ? [sumarDias(estado.seleccion.fecha, -10), hoy].sort().at(-1) : '';
-    estado.rangoFechas = disponibilidad ? { desde: inicioRango, hasta: sumarDias(inicioRango, 30), hoy: hoy } : null;
+    const inicioRango = disponibilidad ? [inicioMes(estado.seleccion.fecha), hoy].sort().at(-1) : '';
+    estado.rangoFechas = disponibilidad ? { desde: inicioRango, hasta: finMes(estado.seleccion.fecha), hoy: hoy } : null;
     const consulta = disponibilidad ? { servicioId: estado.seleccion.servicioId, sucursalId: estado.seleccion.sucursalId,
       personalId: estado.seleccion.personalId, desde: inicioRango, hasta: estado.rangoFechas.hasta } : {
       ...(estado.paso >= 1 ? { servicioId: estado.seleccion.servicioId } : {}),
@@ -192,12 +197,10 @@ export function crearSeleccionPortal(client, { slug, alCambiar = () => {}, ahora
     },
     async desplazarRangoFechas(direccion) {
       if (estado.fase !== 'seleccion' || estado.paso !== 3 || !estado.rangoFechas || ![-1, 1].includes(direccion)) return;
-      const { desde, hasta, hoy } = estado.rangoFechas;
-      if (direccion < 0 && desde <= hoy) return;
-      // load() consulta 10 días antes de la fecha elegida; el ancla mantiene
-      // intervalos contiguos de 31 días sin inventar disponibilidad.
-      const ancla = direccion > 0 ? sumarDias(hasta, 11) : sumarDias(desde, -21);
-      estado.seleccion.fecha = ancla;
+      const { desde, hoy } = estado.rangoFechas;
+      const mes = desplazarMes(inicioMes(desde), direccion);
+      if (direccion < 0 && mes < inicioMes(hoy)) return;
+      estado.seleccion.fecha = [mes, hoy].sort().at(-1);
       estado.fechasDisponibles = [];
       estado.periodo = 'todos';
       await cargar();

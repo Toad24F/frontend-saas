@@ -108,7 +108,8 @@ test('T102: pasos consultan únicamente opciones públicas compatibles y permite
   await convertirFecha(controlador);
   assert.deepEqual(llamadas.slice(0, 3).map((llamada) => llamada.consulta), [{}, { servicioId: 1 }, { servicioId: 1, sucursalId: 2 }]);
   assert.equal(llamadas[3].path, 'disponibilidad');
-  assert.equal(llamadas[3].consulta.desde, '2026-10-19'); // Fecha de la sucursal, no la UTC.
+  assert.equal(llamadas[3].consulta.desde, '2026-10-19'); // La fecha local de la sucursal puede diferir de UTC.
+  assert.equal(llamadas[3].consulta.hasta, '2026-10-31');
   await controlador.volver();
   assert.equal(controlador.obtenerEstado().paso, 2);
   assert.equal(controlador.obtenerEstado().seleccion.personalId, 3);
@@ -141,10 +142,10 @@ test('T101: una respuesta antigua de catálogo no sobrescribe el paso vigente', 
   assert.deepEqual(controlador.obtenerEstado().opciones.sucursales, []);
 });
 
-test('T103: fecha real y consulta de hasta 31 fechas inclusivas', async () => {
+test('T103: fecha real y consulta del mes seleccionado', async () => {
   const { controller: controlador, calls: llamadas } = prepararPrueba(); await convertirFecha(controlador);
   await controlador.seleccionarFecha('2026-10-20');
-  assert.deepEqual(llamadas.at(-1).consulta, { servicioId: 1, sucursalId: 2, personalId: 3, desde: '2026-10-19', hasta: '2026-11-18' });
+  assert.deepEqual(llamadas.at(-1).consulta, { servicioId: 1, sucursalId: 2, personalId: 3, desde: '2026-10-19', hasta: '2026-10-31' });
   const cantidad = llamadas.length;
   for (const fecha of ['', '2026-02-30', '20/10/2026']) {
     await controlador.seleccionarFecha(fecha);
@@ -155,7 +156,7 @@ test('T103: fecha real y consulta de hasta 31 fechas inclusivas', async () => {
   assert.equal(fechaValida('2026-02-29'), false);
 });
 
-test('la tira muestra todos los días disponibles de la ventana sin flechas', async () => {
+test('la tira muestra los días disponibles del mes sin flechas', async () => {
   const dias = ['2026-10-20', '2026-10-22', '2026-10-25', '2026-10-28', '2026-10-29',
     '2026-10-30', '2026-10-31', '2026-11-01', '2026-11-02', '2026-11-22'];
   const { controller: controlador, calls: llamadas } = prepararPrueba((ruta, { consulta }) => ruta === 'catalogo' ? catalogo(consulta) : disponibilidad(consulta,
@@ -164,7 +165,7 @@ test('la tira muestra todos los días disponibles de la ventana sin flechas', as
   await convertirFecha(controlador);
   let html = renderSeleccion(controlador.obtenerEstado());
   assert.match(html, /data-seleccion-fecha="2026-10-20"/);
-  assert.match(html, /data-seleccion-fecha="2026-11-02"/);
+  assert.doesNotMatch(html, /data-seleccion-fecha="2026-11-02"/);
   assert.doesNotMatch(html, /data-seleccion-fecha="2026-10-21"/);
   const tira = html.match(/<div class="portal-cinta-fechas"[\s\S]*?<\/div>/)?.[0];
   assert.ok(tira);
@@ -173,24 +174,45 @@ test('la tira muestra todos los días disponibles de la ventana sin flechas', as
   html = renderSeleccion(controlador.obtenerEstado());
   const visible = [...html.matchAll(/class="portal-boton-fecha[^"]*"[^>]*data-seleccion-fecha="([^"]+)"/g)].map((coincidencia) => coincidencia[1]);
   assert.deepEqual(visible.slice(0, 3), ['2026-10-20', '2026-10-22', '2026-10-25']);
-  assert.equal(visible.length, 9);
+  assert.equal(visible.length, 7);
   await controlador.seleccionarFecha('2026-11-21');
   assert.equal(controlador.obtenerEstado().consulta.estado, 'vacia');
-  assert.deepEqual(controlador.obtenerEstado().fechasDisponibles, ['2026-11-22']);
-  assert.equal(llamadas.at(-1).consulta.hasta, '2026-12-11');
+  assert.deepEqual(controlador.obtenerEstado().fechasDisponibles, ['2026-11-01', '2026-11-02', '2026-11-22']);
+  assert.equal(llamadas.at(-1).consulta.hasta, '2026-11-30');
 });
 
-test('el calendario desactiva días sin ranuras públicas y consulta otro intervalo al avanzar', async () => {
+test('el calendario conserva el mes al seleccionar y solo cambia al usar las flechas', async () => {
+  const fechas = ['2026-10-20', '2026-10-22', '2026-10-31', '2026-11-02', '2026-11-30'];
   const { controller: controlador, calls: llamadas } = prepararPrueba((ruta, { consulta }) => ruta === 'catalogo' ? catalogo(consulta) : disponibilidad(consulta,
-    [{ inicioUtc: '2026-10-22T17:00:00.000Z', finUtc: '2026-10-22T17:30:00.000Z' }]
-      .filter((horario) => horario.inicioUtc.slice(0, 10) >= consulta.desde && horario.inicioUtc.slice(0, 10) <= consulta.hasta)));
+    fechas.filter((fecha) => fecha >= consulta.desde && fecha <= consulta.hasta)
+      .map((fecha) => ({ inicioUtc: `${fecha}T17:00:00.000Z`, finUtc: `${fecha}T17:30:00.000Z` }))));
   await convertirFecha(controlador);
-  const html = renderSeleccion(controlador.obtenerEstado());
+  let html = renderSeleccion(controlador.obtenerEstado());
   assert.match(html, /class="portal-calendario-dia [^"]*" type="button" disabled aria-label="miércoles, 21[^\"]*no disponible"/);
   assert.match(html, /class="portal-calendario-dia [^"]*" type="button" data-seleccion-fecha="2026-10-22"/);
+  assert.match(html, /class="portal-calendario-dia [^"]*" type="button" data-seleccion-fecha="2026-10-31"/);
+  assert.doesNotMatch(html, /data-seleccion-fecha="2026-11-01"/);
+  assert.match(html, /<strong>octubre de 2026<\/strong>/);
+  assert.equal(controlador.obtenerEstado().rangoFechas.desde, '2026-10-19');
+  assert.equal(controlador.obtenerEstado().rangoFechas.hasta, '2026-10-31');
+  await controlador.seleccionarFecha('2026-10-22');
+  assert.equal(llamadas.at(-1).consulta.desde, '2026-10-19');
+  assert.equal(llamadas.at(-1).consulta.hasta, '2026-10-31');
+  assert.equal(controlador.obtenerEstado().rangoFechas.desde, '2026-10-19');
+  assert.match(renderSeleccion(controlador.obtenerEstado()), /<strong>octubre de 2026<\/strong>/);
+
   await controlador.desplazarRangoFechas(1);
-  assert.equal(llamadas.at(-1).consulta.desde, '2026-11-19');
-  assert.equal(controlador.obtenerEstado().rangoFechas.desde, '2026-11-19');
+  assert.equal(llamadas.at(-1).consulta.desde, '2026-11-01');
+  assert.equal(llamadas.at(-1).consulta.hasta, '2026-11-30');
+  html = renderSeleccion(controlador.obtenerEstado());
+  assert.match(html, /<strong>noviembre de 2026<\/strong>/);
+  assert.match(html, /data-seleccion-fecha="2026-11-30"/);
+  assert.doesNotMatch(html, /data-seleccion-fecha="2026-10-31"/);
+
+  await controlador.desplazarRangoFechas(-1);
+  assert.equal(llamadas.at(-1).consulta.desde, '2026-10-19');
+  assert.equal(llamadas.at(-1).consulta.hasta, '2026-10-31');
+  assert.match(renderSeleccion(controlador.obtenerEstado()), /<strong>octubre de 2026<\/strong>/);
 });
 
 test('al consultar otra fecha la tira sigue visible y el horario se presenta sin radio visible ni aviso duplicado', async () => {

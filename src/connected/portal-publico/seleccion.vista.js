@@ -23,17 +23,18 @@ function renderCalendarioDisponibilidad(estado) {
   const rango = estado.rangoFechas;
   if (!rango) return '';
   const disponibles = new Set(estado.fechasDisponibles);
-  const iniciar = Date.parse(`${rango.desde}T12:00:00Z`);
-  const cantidad = Math.round((Date.parse(`${rango.hasta}T12:00:00Z`) - iniciar) / 86400000) + 1;
+  const primerDiaMes = `${rango.desde.slice(0, 7)}-01`;
+  const iniciar = Date.parse(`${primerDiaMes}T12:00:00Z`);
+  const cantidad = new Date(Date.UTC(Number(primerDiaMes.slice(0, 4)), Number(primerDiaMes.slice(5, 7)), 0)).getUTCDate();
   const desplazamiento = new Date(iniciar).getUTCDay();
+  const mesEtiqueta = new Intl.DateTimeFormat('es-MX', { timeZone: 'UTC', month: 'long', year: 'numeric' }).format(new Date(iniciar));
   const dias = Array.from({ length: cantidad }, (_, indice) => {
     const valor = new Date(iniciar + indice * 86400000).toISOString().slice(0, 10);
-    const habilitado = disponibles.has(valor) && estado.consulta.estado !== 'cargando';
+    const habilitado = disponibles.has(valor) && valor >= rango.desde && estado.consulta.estado !== 'cargando';
     const seleccionado = valor === estado.seleccion.fecha;
     return `<button class="portal-calendario-dia ${seleccionado ? 'seleccionado' : ''}" type="button" ${habilitado ? `data-seleccion-fecha="${valor}"` : 'disabled'} aria-label="${escaparTextoPortal(etiquetaFecha(valor))}${habilitado ? ', disponible' : ', no disponible'}" ${habilitado && seleccionado ? 'aria-current="date"' : ''}>${Number(valor.slice(-2))}</button>`;
   }).join('');
-  const etiqueta = `${etiquetaFecha(rango.desde)} al ${etiquetaFecha(rango.hasta)}`;
-  return `<div class="portal-calendario" aria-label="Calendario de disponibilidad"><div class="portal-calendario-cabecera"><strong>Fechas del ${escaparTextoPortal(etiqueta)}</strong><div><button class="btn btn-light" type="button" data-rango-fechas="-1" aria-label="Consultar fechas anteriores" ${rango.desde <= rango.hoy || estado.consulta.estado === 'cargando' ? 'disabled' : ''}>‹</button><button class="btn btn-light" type="button" data-rango-fechas="1" aria-label="Consultar fechas siguientes" ${estado.consulta.estado === 'cargando' ? 'disabled' : ''}>›</button></div></div><p class="portal-calendario-ayuda">Solo se pueden elegir los días con horarios disponibles.</p><div class="portal-calendario-cuadricula" role="group" aria-label="Días consultados">${['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sá'].map((dia) => `<span class="portal-calendario-dia-semana">${dia}</span>`).join('')}${Array.from({ length: desplazamiento }, () => '<span aria-hidden="true"></span>').join('')}${dias}</div></div>`;
+  return `<div class="portal-calendario" aria-label="Calendario de disponibilidad"><div class="portal-calendario-cabecera"><strong>${escaparTextoPortal(mesEtiqueta)}</strong><div><button class="btn btn-light" type="button" data-rango-fechas="-1" aria-label="Consultar fechas anteriores" ${primerDiaMes <= `${rango.hoy.slice(0, 7)}-01` || estado.consulta.estado === 'cargando' ? 'disabled' : ''}>‹</button><button class="btn btn-light" type="button" data-rango-fechas="1" aria-label="Consultar fechas siguientes" ${estado.consulta.estado === 'cargando' ? 'disabled' : ''}>›</button></div></div><p class="portal-calendario-ayuda">Solo se pueden elegir los días con horarios disponibles.</p><div class="portal-calendario-cuadricula" role="group" aria-label="Días de ${escaparTextoPortal(mesEtiqueta)}">${['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sá'].map((dia) => `<span class="portal-calendario-dia-semana">${dia}</span>`).join('')}${Array.from({ length: desplazamiento }, () => '<span aria-hidden="true"></span>').join('')}${dias}</div></div>`;
 }
 
 // Radios nativos permiten selección con flechas y Tab. El controlador solo recibe

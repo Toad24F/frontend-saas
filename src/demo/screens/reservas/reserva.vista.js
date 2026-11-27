@@ -9,6 +9,7 @@ import {
   HOY,
   formatearFecha,
   crearFecha,
+  sumarDias,
   formatearMoneda,
   ampliarDatosCita as informacionCita,
 } from '../../../shared/aplicacion.datos.js';
@@ -34,10 +35,17 @@ let reserva = {
   contacto: { nombre: '', telefono: '', motivo: '' },
   citaConfirmada: null,
 };
+let mesCalendario = `${HOY.slice(0, 7)}-01`;
 let ultimaClavePaso = '';
 let filtros = Array.from({ length: 3 }, crearFiltrosIniciales);
 let pasosAutomaticos = [];
 let periodo = 'todos';
+const inicioMes = (fecha) => `${fecha.slice(0, 7)}-01`;
+const finMes = (fecha) => new Date(Date.UTC(Number(fecha.slice(0, 4)), Number(fecha.slice(5, 7)), 0)).toISOString().slice(0, 10);
+const desplazarMes = (fecha, cantidad) => {
+  const mes = new Date(Date.UTC(Number(fecha.slice(0, 4)), Number(fecha.slice(5, 7)) - 1 + cantidad, 1));
+  return `${mes.toISOString().slice(0, 7)}-01`;
+};
 const nombresPasos = [
   'Servicio',
   'Sucursal',
@@ -76,6 +84,7 @@ function opciones() {
 }
 function reiniciar(id) {
   filtros = Array.from({ length: 3 }, crearFiltrosIniciales); pasosAutomaticos = []; periodo = 'todos';
+  mesCalendario = inicioMes(HOY);
   if (reserva.apartado) liberarApartadoDemo(reserva.apartado.id);
   reserva = {
     negocioId: id,
@@ -154,18 +163,23 @@ function renderContenidoPaso() {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(reserva.fecha)) return '<p id="reserva-demo-error-fecha" role="alert">Elige una fecha válida para consultar horarios.</p>';
     let fechas = buscarFechasDemo({ ...opciones(), from: HOY }, 45);
     if (t.mode === 'compact') fechas = fechas.slice(0, 1);
-
+    const fechasMes = fechas.filter((fecha) => fecha.day.slice(0, 7) === mesCalendario.slice(0, 7));
     const disponibles = fechas.find((d) => d.day === reserva.fecha)?.slots || [];
     const mostrados = horariosDelPeriodo(disponibles.map((horaInicio) => ({ horaInicio })), periodo).map((horario) => horario.horaInicio);
-    const siguienteDia = fechas.find((d) => d.day > reserva.fecha)?.day;
-    const diasDisponibles = new Set(fechas.map((elemento) => elemento.day));
-    const marcaInicio = Date.parse(`${HOY}T12:00:00Z`);
-    const calendario = Array.from({ length: 45 }, (_, indice) => {
+    const siguienteDia = fechasMes.find((fecha) => fecha.day > reserva.fecha)?.day;
+    const diasDisponibles = new Set(fechasMes.map((fecha) => fecha.day));
+    const marcaInicio = Date.parse(`${mesCalendario}T12:00:00Z`);
+    const cantidadDias = Number(finMes(mesCalendario).slice(-2));
+    const calendario = Array.from({ length: cantidadDias }, (_, indice) => {
       const dia = new Date(marcaInicio + indice * 86400000).toISOString().slice(0, 10);
-      const habilitado = diasDisponibles.has(dia);
+      const habilitado = dia >= HOY && diasDisponibles.has(dia);
       return `<button class="reserva-demo-calendario-dia ${reserva.fecha === dia ? 'seleccionado' : ''}" type="button" ${habilitado ? `data-reserva-demo-fecha="${dia}"` : 'disabled'} aria-label="${formatearFecha(dia)}${habilitado ? ', disponible en esta demostración' : ', no disponible en esta demostración'}">${crearFecha(dia).getDate()}</button>`;
     }).join('');
-    return `<p class="form-label">Fecha de tu cita: ${formatearFecha(reserva.fecha)}</p><div class="reserva-demo-encabezado-fecha"><h3>Próximos 45 días</h3><span>${icono('clock')} Hora de Chihuahua · Demo</span></div><p class="reserva-demo-calendario-ayuda">Los días grises no tienen horarios en esta simulación.</p><div class="reserva-demo-calendario-cuadricula" role="group" aria-label="Días de demostración">${['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sá'].map((dia) => `<span class="reserva-demo-calendario-dia-semana">${dia}</span>`).join('')}${Array.from({ length: new Date(marcaInicio).getUTCDay() }, () => '<span aria-hidden="true"></span>').join('')}${calendario}</div><div class="reserva-demo-cinta-fechas">${fechas
+    const desplazamiento = new Date(marcaInicio).getUTCDay();
+    const mesEtiqueta = new Intl.DateTimeFormat('es-MX', { timeZone: 'UTC', month: 'long', year: 'numeric' }).format(new Date(marcaInicio));
+    const mesMinimo = inicioMes(HOY);
+    const mesMaximo = inicioMes(sumarDias(HOY, 44));
+    return `<p class="form-label">Fecha de tu cita: ${formatearFecha(reserva.fecha)}</p><div class="reserva-demo-encabezado-fecha"><div class="reserva-demo-navegacion-mes"><button class="btn btn-light" type="button" data-reserva-demo-mes="-1" aria-label="Consultar fechas anteriores" ${mesCalendario <= mesMinimo ? 'disabled' : ''}>‹</button><h3>${escapar(mesEtiqueta)}</h3><button class="btn btn-light" type="button" data-reserva-demo-mes="1" aria-label="Consultar fechas siguientes" ${mesCalendario >= mesMaximo ? 'disabled' : ''}>›</button></div><span>${icono('clock')} Hora de Chihuahua · Demo</span></div><p class="reserva-demo-calendario-ayuda">Los días grises no tienen horarios en esta simulación.</p><div class="reserva-demo-calendario-cuadricula" role="group" aria-label="Días de ${escapar(mesEtiqueta)}">${['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sá'].map((dia) => `<span class="reserva-demo-calendario-dia-semana">${dia}</span>`).join('')}${Array.from({ length: desplazamiento }, () => '<span aria-hidden="true"></span>').join('')}${calendario}</div><div class="reserva-demo-cinta-fechas">${fechasMes
       .slice(0, 14)
       .map(
         (d) =>
@@ -225,6 +239,17 @@ document.addEventListener('click', (evento) => {
   }
   const controlPeriodo = evento.target.closest('[data-portal-periodo]');
   if (controlPeriodo) { periodo = controlPeriodo.dataset.portalPeriodo; redibujar(); return; }
+  const controlMes = evento.target.closest('[data-reserva-demo-mes]');
+  if (controlMes) {
+    const mes = desplazarMes(mesCalendario, Number(controlMes.dataset.reservaDemoMes));
+    if (mes < inicioMes(HOY) || mes > inicioMes(sumarDias(HOY, 44))) return;
+    mesCalendario = mes;
+    reserva.fecha = [mes, HOY].sort().at(-1);
+    periodo = 'todos';
+    reserva.horaElegida = null;
+    redibujar();
+    return;
+  }
   const controlReinicio = evento.target.closest('[data-reserva-demo-reiniciar]');
   if (controlReinicio) {
     evento.preventDefault();
