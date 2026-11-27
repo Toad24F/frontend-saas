@@ -5,7 +5,7 @@ import { ErrorPortalPublico } from './portal.http.js';
 import { fechaLocal } from './portal.fechas.js';
 import { crearEnvio } from './reserva.envio.js';
 
-const contactoVacio = () => ({ nombre: '', telefono: '', notas: '', autorizaWhatsapp: false });
+const contactoVacio = () => ({ nombre: '', pais: 'MX', telefono: '', notas: '', autorizaWhatsapp: false });
 const generacionValida = (valor) => typeof valor === 'string' && /^[1-9]\d*$/.test(valor);
 const errorProtocolo = () => new ErrorPortalPublico('protocol', 'No se pudo comprobar el apartado. Reintenta antes de continuar.');
 

@@ -143,10 +143,11 @@ try {
   await pagina.locator('[data-reserva-demo-continuar]').click();
   await expect(pagina.getByRole('heading', { name: 'Completa tus datos' })).toBeVisible();
   await pagina.getByLabel('Nombre completo').fill('Cliente ficticio');
-  await pagina.getByLabel('Teléfono de WhatsApp').fill('6140000001');
+  await pagina.locator('#reserva-demo-pais').selectOption('US');
+  await pagina.locator('#reserva-demo-telefono').fill('2025550123');
   await pagina.getByRole('button', { name: 'Confirmar mi cita' }).click();
   await expect(pagina.getByRole('heading', { name: 'Tu cita está pendiente' })).toBeVisible();
-  await expect(pagina.locator('.reserva-demo-confirmacion-folio')).toBeVisible();
+  await expect(pagina.getByText('Esta cita de demostración está pendiente de confirmación.')).toBeVisible();
   assert.deepEqual(errores, []); assert.ok(escrituras.every((ruta) => ruta === 'sesion'));
   console.log('OK: portal público, API interceptada, búsquedas sin consultas, 6/7/13, selección conservada, saltos, vuelta, filtros de hora, vacíos/error/skeleton y 48 capturas claro/oscuro a cuatro anchos; demo incluida.');
 } finally { await navegador.close(); }

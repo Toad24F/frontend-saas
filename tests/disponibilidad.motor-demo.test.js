@@ -185,9 +185,11 @@ test('no permite usar el lock de otro profesional o servicio', () => {
 test('el nombre y el teléfono se validan antes de insertar', () => {
   const inicial = datosAplicacion.appointments.length;
   assert.throws(() => validarContactoDemo('Ana', '6140000000'));
-  assert.throws(() => validarContactoDemo('Ana Pérez', '+526140000000'));
+  assert.doesNotThrow(() => validarContactoDemo('Ana Pérez', '+526140000000'));
   assert.throws(() => validarContactoDemo('Ana Pérez', '614 000000'));
   assert.doesNotThrow(() => validarContactoDemo('Ana Pérez', '6140000000'));
+  assert.doesNotThrow(() => validarContactoDemo('Ana Pérez', '+12025550123'));
+  assert.throws(() => validarContactoDemo('Ana Pérez', '+442012345678'));
   assert.equal(datosAplicacion.appointments.length, inicial);
 });
 test('compacta prioriza horas contiguas y busca otro día al saturarse', () => {

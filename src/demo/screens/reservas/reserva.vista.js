@@ -15,6 +15,8 @@ import {
 } from '../../../shared/aplicacion.datos.js';
 import { estadoAplicacion as estado, montarSelectorTema } from '../../../shared/aplicacion.nucleo.js';
 import { renderIcono as icono } from '../../../shared/iconos.catalogo.js';
+import { PAISES_TELEFONO, ayudaTelefono } from '../../../shared/paises.telefono.js';
+import { parsePhoneNumberFromString } from 'libphonenumber-js/max';
 import { escaparHtml as escapar, avatar, renderEstadoVacio as renderVacio, mostrarAviso } from '../../../shared/interfaz.componentes.js';
 import {
   buscarFechasDemo,
@@ -32,7 +34,7 @@ let reserva = {
   fecha: HOY,
   horaElegida: null,
   apartado: null,
-  contacto: { nombre: '', telefono: '', motivo: '' },
+  contacto: { nombre: '', pais: 'MX', telefono: '', motivo: '' },
   citaConfirmada: null,
 };
 let mesCalendario = `${HOY.slice(0, 7)}-01`;
@@ -95,7 +97,7 @@ function reiniciar(id) {
     fecha: HOY,
     horaElegida: null,
     apartado: null,
-    contacto: { nombre: '', telefono: '', motivo: '' },
+    contacto: { nombre: '', pais: 'MX', telefono: '', motivo: '' },
     citaConfirmada: null,
   };
 }
@@ -182,7 +184,7 @@ function renderContenidoPaso() {
     return `<p class="form-label">Fecha de tu cita: ${formatearFecha(reserva.fecha)}</p><div class="reserva-demo-encabezado-fecha"><div class="reserva-demo-navegacion-mes"><button class="btn btn-light" type="button" data-reserva-demo-mes="-1" aria-label="Consultar fechas anteriores" ${mesCalendario <= mesMinimo ? 'disabled' : ''}>‹</button><h3>${escapar(mesEtiqueta)}</h3><button class="btn btn-light" type="button" data-reserva-demo-mes="1" aria-label="Consultar fechas siguientes" ${mesCalendario >= mesMaximo ? 'disabled' : ''}>›</button></div><span>${icono('clock')} Hora de Chihuahua · Demo</span></div><p class="reserva-demo-calendario-ayuda">Los días grises no tienen horarios en esta simulación.</p><div class="reserva-demo-calendario-cuadricula" role="group" aria-label="Días de ${escapar(mesEtiqueta)}">${['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sá'].map((dia) => `<span class="reserva-demo-calendario-dia-semana">${dia}</span>`).join('')}${Array.from({ length: desplazamiento }, () => '<span aria-hidden="true"></span>').join('')}${calendario}</div>${t.mode === 'compact' ? '<div class="nota-informativa nota-compacta">Mostramos el primer día disponible y horarios contiguos para aprovechar mejor la jornada.</div>' : ''}<h3 class="reserva-demo-encabezado-horarios">Horarios disponibles</h3><div class="portal-periodos" role="group" aria-label="Filtrar horarios por parte del día">${[['todos', 'Todos'], ['manana', 'Mañana'], ['tarde', 'Tarde']].map(([valor, etiqueta]) => `<button class="btn btn-light" type="button" data-portal-periodo="${valor}" aria-pressed="${periodo === valor}">${etiqueta} (${horariosDelPeriodo(disponibles.map((horaInicio) => ({ horaInicio })), valor).length})</button>`).join('')}</div><div class="reserva-demo-cuadricula-horarios">${mostrados.map((soloHora) => `<button class="reserva-demo-horario ${reserva.horaElegida === soloHora ? 'seleccionado' : ''}" data-reserva-demo-horario="${soloHora}" aria-pressed="${reserva.horaElegida === soloHora}">${soloHora}</button>`).join('')}</div>${reserva.horaElegida ? `<p class="portal-horario-elegido">Horario seleccionado: ${reserva.horaElegida} · Hora de Chihuahua</p>` : ''}${disponibles.length && !mostrados.length ? renderVacio('No hay horarios en esta parte del día', 'Consulta todos los horarios o elige otra fecha.') : ''}${disponibles.length ? '' : renderVacio('No hay horarios disponibles para esta fecha', 'Elige otro día para consultar horarios. La búsqueda simulada cubre los próximos 45 días.', siguienteDia ? `<button type="button" class="btn btn-light" data-reserva-demo-fecha="${siguienteDia}">Ver siguiente día disponible</button>` : '')}<p class="ayuda-campo mt-4">${icono('info')} Tu horario se apartará durante 5 minutos en el siguiente paso.</p>`;
   }
   if (reserva.paso === 5)
-    return `<form id="reserva-demo-formulario"><div class="reserva-demo-aviso-apartado">${icono('lock')}<span>Estamos guardando tu horario.<br/><small>Completa tus datos en <strong id="reserva-demo-contador">05:00</strong></small></span><progress class="reserva-demo-progreso-apartado" id="reserva-demo-progreso-apartado" max="300" value="300" aria-label="Tiempo restante del apartado"></progress></div><div class="campo-formulario"><label class="form-label" for="reserva-demo-nombre">Nombre completo <span>*</span></label><input class="form-control" id="reserva-demo-nombre" name="nombre" required maxlength="150" placeholder="Tu nombre y apellidos" value="${escapar(reserva.contacto.nombre)}" autocomplete="off"/></div><div class="campo-formulario"><label class="form-label" for="reserva-demo-telefono">Teléfono de WhatsApp <span>*</span></label><div class="reserva-demo-campo-telefono"><span>MX +52</span><input class="form-control" id="reserva-demo-telefono" name="telefono" type="tel" inputmode="numeric" pattern="[0-9]{10}" minlength="10" maxlength="10" required placeholder="614 000 0000" value="${escapar(reserva.contacto.telefono)}" autocomplete="off"/></div><p class="ayuda-campo">10 dígitos, sin espacios ni código de país.</p></div><div class="campo-formulario"><label class="form-label" for="reserva-demo-motivo">Motivo de consulta <span class="opcional">(opcional)</span></label><textarea class="form-control" id="reserva-demo-motivo" name="motivo" rows="3" maxlength="500" placeholder="¿Hay algo que debamos saber?">${escapar(reserva.contacto.motivo)}</textarea></div><p class="reserva-demo-nota-privacidad">Usa información ficticia. Tus datos solo se conservarán mientras esta demostración esté abierta.</p><p class="error-formulario" id="reserva-demo-error" role="alert" hidden></p><div class="reserva-demo-controles"><button type="button" class="btn btn-discreto" data-reserva-demo-volver>${icono('left')}Atrás</button><button type="submit" class="btn btn-primary">Confirmar mi cita ${icono('check')}</button></div></form>`;
+    return `<form id="reserva-demo-formulario"><div class="reserva-demo-aviso-apartado">${icono('lock')}<span>Estamos guardando tu horario.<br/><small>Completa tus datos en <strong id="reserva-demo-contador">05:00</strong></small></span><progress class="reserva-demo-progreso-apartado" id="reserva-demo-progreso-apartado" max="300" value="300" aria-label="Tiempo restante del apartado"></progress></div><div class="campo-formulario"><label class="form-label" for="reserva-demo-nombre">Nombre completo <span>*</span></label><input class="form-control" id="reserva-demo-nombre" name="nombre" required maxlength="150" placeholder="Tu nombre y apellidos" value="${escapar(reserva.contacto.nombre)}" autocomplete="off"/></div><div class="campo-formulario"><label class="form-label" for="reserva-demo-pais">País o región <span>*</span></label><select class="form-select" id="reserva-demo-pais" name="pais" required>${PAISES_TELEFONO.map((pais) => `<option value="${pais.codigo}" ${reserva.contacto.pais === pais.codigo ? 'selected' : ''}>${pais.nombre} (${pais.prefijo})</option>`).join('')}</select><p class="ayuda-campo">Elige el país de tu número.</p></div><div class="campo-formulario"><label class="form-label" for="reserva-demo-telefono">Teléfono <span>*</span></label><input class="form-control" id="reserva-demo-telefono" name="telefono" type="tel" inputmode="tel" required value="${escapar(reserva.contacto.telefono)}" autocomplete="off"/><p class="ayuda-campo" id="reserva-demo-telefono-ayuda">${ayudaTelefono(reserva.contacto.pais)}</p></div><div class="campo-formulario"><label class="form-label" for="reserva-demo-motivo">Motivo de consulta <span class="opcional">(opcional)</span></label><textarea class="form-control" id="reserva-demo-motivo" name="motivo" rows="3" maxlength="500" placeholder="¿Hay algo que debamos saber?">${escapar(reserva.contacto.motivo)}</textarea></div><p class="reserva-demo-nota-privacidad">Usa información ficticia. Tus datos solo se conservarán mientras esta demostración esté abierta.</p><p class="error-formulario" id="reserva-demo-error" role="alert" hidden></p><div class="reserva-demo-controles"><button type="button" class="btn btn-discreto" data-reserva-demo-volver>${icono('left')}Atrás</button><button type="submit" class="btn btn-primary">Confirmar mi cita ${icono('check')}</button></div></form>`;
   const a = informacionCita(reserva.citaConfirmada);
   // La confirmación de demostración comparte la información visible del portal conectado.
   return `<div class="reserva-demo-confirmacion-contenido"><span class="reserva-demo-confirmacion-marca">${icono('check')}</span><h3>¡Listo, ${escapar(a.client.name.split(' ')[0])}!</h3><p>Esta cita de demostración está pendiente de confirmación.</p><div class="reserva-demo-confirmacion-detalles"><span>${icono('briefcase')}<strong>${escapar(a.service.name)}</strong></span><span>${icono('calendar')}${formatearFecha(a.date)} · ${a.start} h</span><span>${icono('stethoscope')}${escapar(a.professional.name)}</span><span>${icono('pin')}${escapar(a.branch.name)}</span></div><div class="nota-informativa nota-compacta">${icono('info')} No se ha realizado ningún cobro. No se enviará WhatsApp en este prototipo.</div><button class="btn btn-primary w-100 mt-4" data-reserva-demo-reiniciar>Reservar otra cita ${icono('arrow')}</button><a href="/admin/agenda" data-nav="agenda" class="boton-texto reserva-demo-confirmacion-panel">Ver cita en el panel ${icono('external')}</a></div>`;
@@ -323,9 +325,15 @@ document.addEventListener('input', (evento) => {
   }
   if (
     evento.target.closest('#reserva-demo-formulario') &&
-    ['nombre', 'telefono', 'motivo'].includes(evento.target.name)
+    ['nombre', 'pais', 'telefono', 'motivo'].includes(evento.target.name)
   )
-    reserva.contacto[evento.target.name] = evento.target.value;
+    {
+      reserva.contacto[evento.target.name] = evento.target.value;
+      if (evento.target.name === 'pais') {
+        const ayuda = document.querySelector('#reserva-demo-telefono-ayuda');
+        if (ayuda) ayuda.textContent = ayudaTelefono(evento.target.value);
+      }
+    }
 });
 document.addEventListener('compositionend', (evento) => {
   if (evento.target.id !== 'portal-busqueda' || reserva.paso > 3) return;
@@ -336,9 +344,17 @@ document.addEventListener('submit', (evento) => {
   if (evento.target.id !== 'reserva-demo-formulario') return;
   evento.preventDefault();
   try {
+    const pais = reserva.contacto.pais;
+    const entrada = reserva.contacto.telefono.trim();
+    const numero = /^\+?[\d\s().-]+$/.test(entrada)
+      ? parsePhoneNumberFromString(entrada, { defaultCountry: pais, extract: false }) : null;
+    if (!PAISES_TELEFONO.some((opcion) => opcion.codigo === pais) || !numero?.isValid() || numero.country !== pais) {
+      throw new Error('Revisa el país y los dígitos del teléfono.');
+    }
     reserva.citaConfirmada = crearCitaDemo(
       { ...opciones(), start: reserva.horaElegida },
-      { name: reserva.contacto.nombre, phone: reserva.contacto.telefono, reason: reserva.contacto.motivo },
+      { name: reserva.contacto.nombre, phone: numero.country === 'MX' ? numero.nationalNumber : numero.number,
+        reason: reserva.contacto.motivo },
       reserva.apartado?.id,
     );
     reserva.apartado = null;

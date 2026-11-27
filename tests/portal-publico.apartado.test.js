@@ -92,11 +92,27 @@ test('T105: normaliza como el servidor sin buscar teléfono ni truncar Unicode',
   assert.deepEqual(validarContacto(contacto).valor, { nombre: 'María José', telefono: '6141234567', notas: 'Consulta', autorizaWhatsapp: false });
   assert.equal(validarContacto({ nombre: '😀'.repeat(150), telefono: '614 123 4567', notas: 'x'.repeat(2000) }).valido, true);
   assert.equal(validarContacto({ nombre: ' Ana ', telefono: '6141234567', notas: ' ' }).valor.notas, null);
-  for (const [campo, valor] of [['nombre', ' '], ['nombre', '😀'.repeat(151)], ['telefono', '+1 6141234567'],
+  for (const [campo, valor] of [['nombre', ' '], ['nombre', '😀'.repeat(151)], ['telefono', '+44 2012345678'],
     ['telefono', '614abc4567'], ['telefono', '614123456'], ['notas', 'x'.repeat(2001)]]) {
     assert.ok(validarContacto({ ...contacto, [campo]: valor }).errores[campo]);
   }
   assert.equal(validarContacto({ ...contacto, notas: ' '.repeat(33000) }).valido, false);
+});
+
+test('el país elegido determina la longitud y el destino internacional', () => {
+  for (const [pais, telefono, esperado] of [
+    ['US', '202 555 0123', '+12025550123'],
+    ['CA', '416 555 0123', '+14165550123'],
+    ['BR', '11 98765-4321', '+5511987654321'],
+    ['CO', '300 123 4567', '+573001234567'],
+  ]) {
+    const resultado = validarContacto({ nombre: 'Ana', pais, telefono });
+    assert.equal(resultado.valido, true, pais);
+    assert.equal(resultado.valor.telefono, esperado);
+  }
+  assert.ok(validarContacto({ nombre: 'Ana', pais: 'US', telefono: '202555012' }).errores.telefono);
+  assert.ok(validarContacto({ nombre: 'Ana', pais: 'CA', telefono: '+12025550123' }).errores.telefono);
+  assert.ok(validarContacto({ nombre: 'Ana', pais: 'GB', telefono: '+442012345678' }).errores.telefono);
 });
 
 test('T105–T106: errores por campo y contacto solo en memoria, conservado al volver', async () => {
@@ -105,7 +121,7 @@ test('T105–T106: errores por campo y contacto solo en memoria, conservado al v
   assert.equal(flujo.validarContacto().valido, false); assert.ok(flujo.obtenerEstado().erroresContacto.telefono);
   flujo.actualizarContacto('telefono', '+52 614-123-4567'); assert.equal(flujo.validarContacto().valido, true);
   await flujo.volverADisponibilidad();
-  assert.deepEqual(flujo.obtenerEstado().contacto, { nombre: '<b>Ana</b>', telefono: '+52 614-123-4567', notas: 'Privado', autorizaWhatsapp: false });
+  assert.deepEqual(flujo.obtenerEstado().contacto, { nombre: '<b>Ana</b>', pais: 'MX', telefono: '+52 614-123-4567', notas: 'Privado', autorizaWhatsapp: false });
   assert.ok(llamadas.every((llamada) => !JSON.stringify(llamada).includes('Privado')));
   assert.equal(prepararPrueba().flow.obtenerEstado().contacto.nombre, '');
 });

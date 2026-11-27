@@ -58,7 +58,13 @@ try {
   await reservar(primera).click();
   await expect(primera.getByLabel('Nombre completo')).toBeFocused();
   await primera.getByLabel('Nombre completo').fill('Cliente ficticio');
-  await primera.getByLabel('Teléfono mexicano').fill('6140000010');
+  await primera.getByLabel('País o región').selectOption('US');
+  await expect(primera.locator('#portal-contacto-telefono-ayuda')).toContainText('Ejemplo:');
+  await primera.getByLabel('Teléfono', { exact: true }).fill('2025550123');
+  await primera.getByRole('button', { name: 'Revisar datos' }).click();
+  await expect(primera.getByText(/Los datos tienen un formato válido/).first()).toBeVisible();
+  await primera.getByLabel('País o región').selectOption('MX');
+  await primera.getByLabel('Teléfono', { exact: true }).fill('6140000010');
   await primera.getByRole('button', { name: 'Revisar datos' }).click();
   await expect(
     primera.getByText(/Los datos tienen un formato válido/).first(),
@@ -83,7 +89,7 @@ try {
 
   await elegirHorario(primera);
   await primera.getByLabel('Nombre completo').fill('Cliente ficticio');
-  await primera.getByLabel('Teléfono mexicano').fill('6140000010');
+  await primera.getByLabel('Teléfono', { exact: true }).fill('6140000010');
   await primera.request.get(origen + '/__qa/mode?value=lost_after');
   const escrituras = [],
     preparaciones = [];
@@ -109,7 +115,7 @@ try {
   primera.off('request', registrar);
   await elegirHorario(primera);
   await primera.getByLabel('Nombre completo').fill('Cliente ficticio');
-  await primera.getByLabel('Teléfono mexicano').fill('6140000011');
+  await primera.getByLabel('Teléfono', { exact: true }).fill('6140000011');
   await primera.request.get(origen + '/__qa/mode?value=lost_after');
   await reservar(primera).click();
   await expect(
@@ -128,7 +134,7 @@ try {
   await expect(
     primera.getByRole('heading', { name: 'Reserva registrada' }),
   ).toBeVisible();
-  await expect(primera.locator('.portal-resultado-folio')).toBeVisible();
+  await expect(primera.getByText('Tu reserva quedó registrada y está pendiente de confirmación.')).toBeVisible();
   assert.equal(
     await primera.evaluate(() =>
       sessionStorage.getItem('citalendar:public:attempt:qa-portal'),

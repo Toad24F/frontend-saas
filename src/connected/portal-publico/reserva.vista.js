@@ -2,6 +2,7 @@ import { renderSeleccion, montarSeleccion } from './seleccion.vista.js';
 import { etiquetaFecha, horaLocal, fechaLocal } from './portal.fechas.js';
 import { enfocarControlPortal } from './portal.accesibilidad.js';
 import { renderIcono } from '../../shared/iconos.catalogo.js';
+import { PAISES_TELEFONO, ayudaTelefono } from '../../shared/paises.telefono.js';
 import { escaparTextoPortal, renderEsqueletoPortal } from '../../shared/portal-publico/portal.opciones.js';
 
 // Todo dato personal se escapa antes de generar HTML; no se consulta por teléfono.
@@ -52,7 +53,15 @@ function renderContenido(estado) {
     ${aviso}
     <form id="portal-formulario-contacto" data-formulario-contacto autocomplete="off" novalidate>
       ${entrada('nombre', 'Nombre completo', 'text', 'Hasta 150 caracteres.')}
-      ${entrada('telefono', 'Teléfono mexicano', 'tel', 'Diez dígitos; puedes usar +52, espacios y guiones.')}
+      <div class="portal-campo-contacto"><label for="portal-contacto-pais">País o región</label>
+        <select class="form-select" id="portal-contacto-pais" name="pais" data-campo-contacto="pais" aria-describedby="portal-contacto-pais-ayuda">
+          ${PAISES_TELEFONO.map((pais) => `<option value="${pais.codigo}" ${contacto.pais === pais.codigo ? 'selected' : ''}>${pais.nombre} (${pais.prefijo})</option>`).join('')}
+        </select><small id="portal-contacto-pais-ayuda">Selecciona el país del número que usarás para esta reserva.</small></div>
+      <div class="portal-campo-contacto"><label for="portal-contacto-telefono">Teléfono</label>
+        <input class="form-control" id="portal-contacto-telefono" name="telefono" type="tel" inputmode="tel" data-campo-contacto="telefono" autocomplete="off" required
+          value="${escaparTextoPortal(contacto.telefono)}" aria-invalid="${Boolean(errores.telefono)}" aria-describedby="portal-contacto-telefono-ayuda portal-contacto-telefono-error">
+        <small id="portal-contacto-telefono-ayuda">${ayudaTelefono(contacto.pais || 'MX')}</small>
+        <p class="portal-error-campo" id="portal-contacto-telefono-error">${escaparTextoPortal(errores.telefono || '')}</p></div>
       <div class="portal-campo-contacto"><label for="portal-contacto-notas">Notas o motivo de consulta (opcional)</label>
         <textarea class="form-control" id="portal-contacto-notas" name="notas" rows="4" data-campo-contacto="notas" autocomplete="off" aria-invalid="${Boolean(errores.notas)}" aria-describedby="portal-contacto-notas-ayuda portal-contacto-notas-error">${escaparTextoPortal(contacto.notas)}</textarea>
         <small id="portal-contacto-notas-ayuda">Hasta 2000 caracteres. Se conservan solo mientras permanezcas en este flujo.</small><p class="portal-error-campo" id="portal-contacto-notas-error">${escaparTextoPortal(errores.notas || '')}</p></div>
@@ -109,6 +118,14 @@ export function montarReserva(contenedor, flujo) {
     const campo = evento.target.dataset.campoContacto;
     if (campo) {
       flujo.actualizarContacto(campo, campo === 'autorizaWhatsapp' ? evento.target.checked : evento.target.value);
+      if (campo === 'pais') {
+        const ayuda = contenedor.querySelector('#portal-contacto-telefono-ayuda');
+        if (ayuda) ayuda.textContent = ayudaTelefono(evento.target.value);
+        const telefono = contenedor.querySelector('#portal-contacto-telefono');
+        if (telefono) telefono.setAttribute('aria-invalid', 'false');
+        const errorTelefono = contenedor.querySelector('#portal-contacto-telefono-error');
+        if (errorTelefono) errorTelefono.textContent = '';
+      }
       // Edición sin render: no interrumpe el cursor, IME o un click en otro campo.
       evento.target.setAttribute('aria-invalid', 'false');
       const error = contenedor.querySelector(`#portal-contacto-${campo}-error`);

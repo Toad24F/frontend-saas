@@ -69,6 +69,7 @@ fieldset:disabled .portal-opcion, fieldset:disabled .portal-horario { opacity: .
 .portal-campo-contacto { margin-block: 20px; }
 .portal-campo-contacto label { display: block; font-weight: 600; margin-bottom: 8px; }
 .portal-campo-contacto input { min-height: 48px; }
+.portal-campo-contacto select { min-height: 48px; }
 .portal-campo-contacto .portal-contacto-autorizacion { display: flex; align-items: center; gap: 10px; min-height: 48px; }
 .portal-contacto-autorizacion input[type='checkbox'] { width: 18px; height: 18px; min-height: 18px; margin: 0; flex: none; }
 /* Tamaño de escritura que evita zoom automático en teléfonos; foco explícito
@@ -227,6 +228,3 @@ html[data-theme='dark'] .portal-opcion:has(:checked) { border-color: var(--acent
 }
 .portal-resumen-desplegable > summary:focus-visible { outline: 3px solid var(--acento); }
 @media (min-width: 901px) { .portal-reserva-lateral { position: sticky; top: 24px; } .portal-resumen-desplegable > summary { display: none; } }
-@media (max-width: 575px) {
-  .portal-reserva-superficie:has(.portal-acciones-seleccion) .portal-acciones-seleccion { position: sticky; bottom: 0; z-index: 2; padding: 14px 0 max(14px, env(safe-area-inset-bottom)); background: var(--superficie); box-shadow: 0 -8px 12px var(--superficie); }
-}

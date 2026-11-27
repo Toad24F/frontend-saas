@@ -46,7 +46,7 @@ async function completarContacto(pagina, notas = '') {
   await pagina.getByLabel('Nombre completo').fill('Cliente de prueba');
   // Cada caso usa otro contacto para no agotar el cupo real de casos anteriores.
   const telefono = '614' + String(test.info().testId.split('').reduce((n, c) => (n * 31 + c.charCodeAt(0)) % 10000000, 0)).padStart(7, '0');
-  await pagina.getByLabel('Teléfono mexicano').fill(telefono);
+  await pagina.getByLabel('Teléfono', { exact: true }).fill(telefono);
   await pagina.getByLabel(/Notas o motivo/).fill(notas);
 }
 
@@ -106,7 +106,7 @@ test('FALA-T012: precio oculto no aparece en catálogo, apartado ni resultado', 
   await elegirHorario(pagina, 11);
   await expect(pagina.locator('#portal-seleccion')).not.toContainText(/MXN|NaN|Pago directamente/);
   await pagina.getByLabel('Nombre completo').fill('Cliente precio oculto');
-  await pagina.getByLabel('Teléfono mexicano').fill('6141234577');
+  await pagina.getByLabel('Teléfono', { exact: true }).fill('6141234577');
   await pagina.getByRole('button', { name: 'Reservar' }).click();
   await expect(pagina.getByRole('heading', { name: 'Reserva registrada' })).toBeVisible();
   await expect(pagina.locator('#portal-seleccion')).not.toContainText(/MXN|NaN|Pago directamente|Costo/);
@@ -198,7 +198,7 @@ test('T119: teclado, foco y notas HTML se mantienen como texto seguro', async ({
   await pagina.getByLabel('Nombre completo').focus();
   await pagina.keyboard.type('Cliente de teclado');
   await pagina.keyboard.press('Tab');
-  await expect(pagina.getByLabel('Teléfono mexicano')).toBeFocused();
+  await expect(pagina.getByLabel('Teléfono', { exact: true })).toBeFocused();
   await pagina.keyboard.type('6141234567');
   await pagina.keyboard.press('Tab');
   await expect(pagina.getByLabel(/Notas o motivo/)).toBeFocused();

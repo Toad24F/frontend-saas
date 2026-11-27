@@ -9,6 +9,8 @@ import {
   HOY,
   obtenerNegocio,
 } from '../shared/aplicacion.datos.js';
+import { parsePhoneNumberFromString } from 'libphonenumber-js/max';
+import { PAISES_TELEFONO } from '../shared/paises.telefono.js';
 export const seEmpalman = (inicio, fin, otroInicio, otroFin) =>
   inicio < otroFin && fin > otroInicio;
 /** Motor de demostración en memoria. No implementa una exclusión distribuida. */
@@ -134,8 +136,12 @@ export function apartarHorarioDemo(opciones, inicio) {
 export function validarContactoDemo(nombre, telefono) {
   if (nombre.trim().split(/\s+/).length < 2 || nombre.trim().length < 5)
     throw new Error('Escribe tu nombre y al menos un apellido.');
-  if (!/^\d{10}$/.test(telefono))
-    throw new Error('El teléfono debe contener exactamente 10 dígitos.');
+  const numero = typeof telefono === 'string' && /^\+?[\d\s().-]+$/.test(telefono)
+    ? parsePhoneNumberFromString(telefono, { defaultCountry: 'MX', extract: false }) : null;
+  if (!numero?.country || !numero.isValid() ||
+    !PAISES_TELEFONO.some((pais) => pais.codigo === numero.country)) {
+    throw new Error('Revisa el país y los dígitos del teléfono.');
+  }
 }
 export function crearCitaDemo(opciones, contacto, apartadoId = null) {
   validarContactoDemo(contacto.name, contacto.phone);

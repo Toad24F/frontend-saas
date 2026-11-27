@@ -42,7 +42,7 @@ test('T116: contacto sobrevive vencimiento y navegación interna sin persistirse
   assert.equal(rutaBase.store.leer().estado, 'ausente');
   await rutaBase.flow.volver(); await rutaBase.flow.continuar();
   assert.deepEqual(rutaBase.flow.obtenerEstado().contacto, contacto);
-  rutaBase.flow.salir(); assert.deepEqual(rutaBase.flow.obtenerEstado().contacto, { nombre: '', telefono: '', notas: '', autorizaWhatsapp: false });
+  rutaBase.flow.salir(); assert.deepEqual(rutaBase.flow.obtenerEstado().contacto, { nombre: '', pais: 'MX', telefono: '', notas: '', autorizaWhatsapp: false });
 });
 const resultado = { folio: 'P-123456789012345678', estado: 'pendiente', inicioUtc: '2026-10-20T17:00:00.000Z',
   finUtc: '2026-10-20T17:30:00.000Z', zonaHoraria: 'America/Mazatlan', costo: '450.00',
